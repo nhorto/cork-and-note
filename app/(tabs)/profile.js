@@ -1,5 +1,5 @@
-// app/(tabs)/profile.js (updated)
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+// app/(tabs)/profile.js
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useContext } from 'react';
 import { AuthContext } from '../_layout';
@@ -9,11 +9,26 @@ export default function ProfileScreen() {
   const { signOut, user } = useContext(AuthContext);
   const router = useRouter();
 
-  const handleLogout = () => {
-    // Here you would integrate with Supabase
-    // await supabase.auth.signOut();
-    signOut();
-    router.replace('/login');
+  const handleLogout = async () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Sign Out', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              // Navigation will be handled by the AuthContext listener and index.js
+            } catch (error) {
+              Alert.alert('Error', 'Failed to sign out: ' + error.message);
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -24,8 +39,8 @@ export default function ProfileScreen() {
             <Ionicons name="person" size={40} color="#fff" />
           </View>
         </View>
-        <Text style={styles.name}>User Name</Text>
-        <Text style={styles.email}>user@example.com</Text>
+        <Text style={styles.name}>{user?.user_metadata?.name || 'User'}</Text>
+        <Text style={styles.email}>{user?.email || 'user@example.com'}</Text>
       </View>
 
       <View style={styles.menuContainer}>

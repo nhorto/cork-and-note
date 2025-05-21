@@ -1,4 +1,4 @@
-// app/_layout.js (simplified version)
+// app/_layout.js
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -8,16 +8,20 @@ import { useEffect, useState, createContext } from 'react';
 import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useColorScheme } from 'react-native';
+import { supabase } from '../lib/supabase';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
-// Simple auth context
+// Auth context
 export const AuthContext = createContext({
   signIn: () => {},
   signOut: () => {},
+  signUp: () => {},
+  resetPassword: () => {},
   user: null,
   isLoading: true,
+  session: null,
 });
 
 export default function RootLayout() {
@@ -28,36 +32,91 @@ export default function RootLayout() {
   
   // Authentication state
   const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check auth state on mount
   useEffect(() => {
-    async function prepare() {
-      try {
-        // This is where you would check Supabase auth status
-        // For now, simulate a check with a slight delay
-        setTimeout(() => {
-          setUser(null); // Initially logged out
-          setIsLoading(false);
-        }, 500);
-      } catch (e) {
-        console.warn(e);
-      }
-    }
+    // Check for active session on component mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
 
-    prepare();
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Auth functions
-  const authContext = {
-    signIn: (userData) => {
-      setUser(userData);
-    },
-    signOut: () => {
-      setUser(null);
-    },
+  // Sign in with email and password
+  const signIn = async (email, password) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  // Sign up with email and password
+  const signUp = async (email, password, name) => {
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name },
+        },
+      });
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  // Sign out
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error signing out:', error.message);
+    }
+  };
+
+  // Reset password
+  const resetPassword = async (email) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'yourapp://reset-password',
+      });
+      if (error) throw error;
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
+  // Auth context value
+  const authContextValue = {
+    signIn,
+    signOut,
+    signUp,
+    resetPassword,
     user,
     isLoading,
+    session,
   };
 
   // Show splash screen until everything is loaded
@@ -72,7 +131,7 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthContext.Provider value={authContext}>
+    <AuthContext.Provider value={authContextValue}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack screenOptions={{ headerShown: false }}>
@@ -81,6 +140,7 @@ export default function RootLayout() {
             <Stack.Screen name="+not-found" />
             <Stack.Screen name="login" />
             <Stack.Screen name="register" />
+            <Stack.Screen name="forgot-password" />
           </Stack>
         </ThemeProvider>
         <StatusBar style="auto" />

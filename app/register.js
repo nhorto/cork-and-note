@@ -1,21 +1,24 @@
 // app/register.js
-import React, { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { Link, useRouter } from 'expo-router';
+import { useContext, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter, Link } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from './_layout';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const { signUp } = useContext(AuthContext);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,50 +26,35 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // This is a placeholder function until Supabase is integrated
   const handleRegister = async () => {
     // Basic validation
     if (!name || !email || !password || !confirmPassword) {
-      alert('Please fill in all fields');
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
     setIsLoading(true);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      setIsLoading(false);
-      // For now, just redirect to the main app
-      router.replace('/(tabs)/map');
-    }, 1500);
-
-    // When you integrate Supabase, you'll replace this with:
-    /*
     try {
-      const { user, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-          }
-        }
-      });
-
-      if (error) throw error;
-      alert('Registration successful! Please check your email for confirmation.');
-      router.replace('/login');
+      const { error } = await signUp(email, password, name);
+      
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        Alert.alert('Success', 'Registration successful! Please check your email for confirmation.', [
+          { text: 'OK', onPress: () => router.replace('/login') }
+        ]);
+      }
     } catch (error) {
-      alert(error.message);
+      Alert.alert('Error', error.message);
     } finally {
       setIsLoading(false);
     }
-    */
   };
 
   return (
@@ -80,7 +68,7 @@ export default function RegisterScreen() {
         </TouchableOpacity>
 
         <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Join WineApp to track your wine adventures</Text>
+        <Text style={styles.subtitle}>Join Cork & Note to track your wine adventures</Text>
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>

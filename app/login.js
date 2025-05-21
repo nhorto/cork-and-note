@@ -1,5 +1,5 @@
 // app/login.js
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -11,50 +11,43 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { AuthContext } from './_layout';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { signIn } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // This is a placeholder function until Supabase is integrated
   const handleLogin = async () => {
-    // Validate inputs
+    // Basic validation
     if (!email || !password) {
-      alert('Please enter both email and password');
+      Alert.alert('Error', 'Please enter both email and password');
       return;
     }
 
     setIsLoading(true);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      setIsLoading(false);
-      // For now, just redirect to the main app
-      router.replace('/(tabs)/map');
-    }, 1500);
-
-    // When you integrate Supabase, you'll replace this with actual auth code:
-    /*
     try {
-      const { user, error } = await supabase.auth.signIn({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-      router.replace('/(tabs)/map');
+      const { error } = await signIn(email, password);
+      
+      if (error) {
+        Alert.alert('Error', error.message);
+      } else {
+        // Success - navigation will be handled by the index.js that monitors auth state
+        console.log('Login successful');
+      }
     } catch (error) {
-      alert(error.message);
+      Alert.alert('Error', error.message);
     } finally {
       setIsLoading(false);
     }
-    */
   };
 
   return (
@@ -64,13 +57,13 @@ export default function LoginScreen() {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.logoContainer}>
-        <View style={styles.logoImageWrapper}>
+          <View style={styles.logoImageWrapper}>
             <Image
-                source={require('../assets/images/cork_and_note_logo.png')}
-                style={styles.logoImage}
-                resizeMode="contain"
+              source={require('../assets/images/cork_and_note_logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
             />
-            </View>
+          </View>
           <Text style={styles.appName}>Welcome to Cork & Note!</Text>
           <Text style={styles.tagline}>Discover Virginia's finest vineyards</Text>
         </View>
@@ -109,9 +102,11 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+          <Link href="/forgot-password" asChild>
+            <TouchableOpacity style={styles.forgotPassword}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+            </TouchableOpacity>
+          </Link>
 
           <TouchableOpacity 
             style={styles.loginButton} 
