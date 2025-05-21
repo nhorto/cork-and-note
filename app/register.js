@@ -1,19 +1,19 @@
 // app/register.js
-import { Ionicons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
-import { useContext, useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
+import { useRouter, Link } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from './_layout';
 
 export default function RegisterScreen() {
@@ -25,6 +25,46 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Password validation function
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    
+    const errors = [];
+    
+    if (password.length < minLength) {
+      errors.push(`at least ${minLength} characters`);
+    }
+    if (!hasUpperCase) {
+      errors.push('one uppercase letter');
+    }
+    if (!hasLowerCase) {
+      errors.push('one lowercase letter');
+    }
+    if (!hasNumbers) {
+      errors.push('one number');
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  };
+
+  // Get password requirements status for display
+  const getPasswordRequirements = () => {
+    const requirements = [
+      { text: 'At least 8 characters', met: password.length >= 8 },
+      { text: 'One uppercase letter', met: /[A-Z]/.test(password) },
+      { text: 'One lowercase letter', met: /[a-z]/.test(password) },
+      { text: 'One number', met: /\d/.test(password) },
+    ];
+    
+    return requirements;
+  };
 
   const handleRegister = async () => {
     // Basic validation
@@ -38,17 +78,55 @@ export default function RegisterScreen() {
       return;
     }
 
+    // Password validation
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      Alert.alert(
+        'Password Requirements Not Met', 
+        `Your password must have:\n• ${passwordValidation.errors.join('\n• ')}`
+      );
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { error } = await signUp(email, password, name);
+      const { error, data } = await signUp(email, password, name);
       
       if (error) {
-        Alert.alert('Error', error.message);
+        if (error.message.includes('User already registered')) {
+          Alert.alert(
+            'Account Already Exists', 
+            'An account with this email already exists. Would you like to sign in instead?',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Sign In', onPress: () => router.replace('/login') }
+            ]
+          );
+        } else {
+          Alert.alert('Error', error.message);
+        }
       } else {
-        Alert.alert('Success', 'Registration successful! Please check your email for confirmation.', [
-          { text: 'OK', onPress: () => router.replace('/login') }
-        ]);
+        console.log('Registration successful, data:', data);
+        
+        // Check if user is immediately signed in (no email confirmation)
+        if (data.session && data.user) {
+          console.log('User automatically signed in after registration');
+          // Navigation will be handled by the AuthContext and index.js
+          // But we can also force navigation here as a backup
+          setTimeout(() => {
+            router.replace('/(tabs)/map');
+          }, 100);
+        } else {
+          // If for some reason they need to confirm email or sign in manually
+          Alert.alert(
+            'Account Created!', 
+            'Your account has been successfully created. You can now sign in.',
+            [
+              { text: 'OK', onPress: () => router.replace('/login') }
+            ]
+          );
+        }
       }
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -56,6 +134,9 @@ export default function RegisterScreen() {
       setIsLoading(false);
     }
   };
+
+  const passwordRequirements = getPasswordRequirements();
+  const showRequirements = password.length > 0;
 
   return (
     <KeyboardAvoidingView
@@ -114,6 +195,28 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Password Requirements Display */}
+          {showRequirements && (
+            <View style={styles.passwordRequirements}>
+              <Text style={styles.requirementsTitle}>Password Requirements:</Text>
+              {passwordRequirements.map((req, index) => (
+                <View key={index} style={styles.requirementRow}>
+                  <Ionicons 
+                    name={req.met ? "checkmark-circle" : "ellipse-outline"} 
+                    size={16} 
+                    color={req.met ? "#4CAF50" : "#ccc"} 
+                  />
+                  <Text style={[
+                    styles.requirementText, 
+                    req.met ? styles.requirementMet : styles.requirementNotMet
+                  ]}>
+                    {req.text}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+
           <View style={styles.inputContainer}>
             <Ionicons name="lock-closed" size={20} color="#8E2DE2" style={styles.inputIcon} />
             <TextInput
@@ -160,7 +263,7 @@ export default function RegisterScreen() {
           <Text style={styles.loginText}>Already have an account? </Text>
           <Link href="/login" asChild>
             <TouchableOpacity>
-              <Text style={styles.loginLink}>Log In</Text>
+              <Text style={styles.loginLink}>Sign In</Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -224,6 +327,35 @@ const styles = StyleSheet.create({
   },
   visibilityIcon: {
     padding: 4,
+  },
+  passwordRequirements: {
+    backgroundColor: '#f8f9fa',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#e9ecef',
+  },
+  requirementsTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  requirementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  requirementText: {
+    fontSize: 13,
+    marginLeft: 8,
+  },
+  requirementMet: {
+    color: '#4CAF50',
+  },
+  requirementNotMet: {
+    color: '#666',
   },
   registerButton: {
     backgroundColor: '#8E2DE2',

@@ -1,13 +1,11 @@
 // app/(tabs)/profile.js
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useContext } from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AuthContext } from '../_layout';
-import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { signOut, user } = useContext(AuthContext);
-  const router = useRouter();
 
   const handleLogout = async () => {
     Alert.alert(
@@ -21,9 +19,11 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await signOut();
-              // Navigation will be handled by the AuthContext listener and index.js
+              // Navigation will be handled automatically by the AuthContext listener and index.js
+              console.log('Logout initiated');
             } catch (error) {
-              Alert.alert('Error', 'Failed to sign out: ' + error.message);
+              console.error('Logout error:', error);
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
             }
           }
         }
@@ -79,6 +79,11 @@ export default function ProfileScreen() {
         <Ionicons name="log-out" size={20} color="#FF3B30" style={styles.logoutIcon} />
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
+
+      {/* Debug info - you can remove this later */}
+      <View style={styles.debugInfo}>
+        <Text style={styles.debugText}>Debug: User logged in as {user?.email}</Text>
+      </View>
     </View>
   );
 }
@@ -146,5 +151,19 @@ const styles = StyleSheet.create({
     color: '#FF3B30',
     fontSize: 16,
     fontWeight: '500',
+  },
+  debugInfo: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+  },
+  debugText: {
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
   },
 });

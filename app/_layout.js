@@ -37,50 +37,98 @@ export default function RootLayout() {
 
   // Check auth state on mount
   useEffect(() => {
+    let mounted = true;
+
     // Check for active session on component mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (mounted) {
+        console.log('Initial session check:', session?.user?.email || 'No session');
+        if (error) {
+          console.error('Session check error:', error);
+        }
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      }
     });
 
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (mounted) {
+        console.log('Auth state changed:', event, session?.user?.email || 'No session');
+        setSession(session);
+        setUser(session?.user ?? null);
+        setIsLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Sign in with email and password
   const signIn = async (email, password) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      setIsLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (error) throw error;
-      return { error: null };
+      
+      if (error) {
+        // Check for specific error types
+        if (error.message.includes('Invalid login credentials')) {
+          return { error: { message: 'Invalid email or password. Please check your credentials or sign up for a new account.' } };
+        } else if (error.message.includes('Email not confirmed')) {
+          return { error: { message: 'Please check your email and click the confirmation link before signing in.' } };
+        } else if (error.message.includes('User not found')) {
+          return { error: { message: 'No account found with this email. Please sign up first.' } };
+        }
+        throw error;
+      }
+      
+      console.log('Sign in successful:', data.user.email);
+      
+      // Manually update state to ensure immediate UI update
+      setSession(data.session);
+      setUser(data.user);
+      setIsLoading(false);
+      
+      return { error: null, data };
     } catch (error) {
+      setIsLoading(false);
       return { error };
     }
   };
 
-  // Sign up with email and password
+  // Sign up with email and password (no email confirmation required)
   const signUp = async (email, password, name) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      setIsLoading(true);
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: { name },
         },
       });
+      
       if (error) throw error;
-      return { error: null };
+      
+      console.log('Sign up successful:', data.user?.email);
+      
+      // For immediate signup without email confirmation
+      if (data.session) {
+        setSession(data.session);
+        setUser(data.user);
+      }
+      setIsLoading(false);
+      
+      return { error: null, data };
     } catch (error) {
+      setIsLoading(false);
       return { error };
     }
   };
@@ -88,10 +136,24 @@ export default function RootLayout() {
   // Sign out
   const signOut = async () => {
     try {
+      console.log('Attempting to sign out...');
+      setIsLoading(true);
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      if (error) {
+        console.error('Sign out error:', error);
+        throw error;
+      }
+      console.log('Sign out successful');
+      
+      // Force clear the state immediately
+      setSession(null);
+      setUser(null);
+      setIsLoading(false);
+      
     } catch (error) {
       console.error('Error signing out:', error.message);
+      setIsLoading(false);
+      throw error;
     }
   };
 
@@ -99,7 +161,7 @@ export default function RootLayout() {
   const resetPassword = async (email) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'yourapp://reset-password',
+        redirectTo: 'corkandnote://reset-password',
       });
       if (error) throw error;
       return { error: null };
@@ -126,7 +188,7 @@ export default function RootLayout() {
     }
   }, [loaded, isLoading]);
 
-  if (!loaded || isLoading) {
+  if (!loaded) {
     return null;
   }
 

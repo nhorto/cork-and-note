@@ -35,13 +35,17 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error, data } = await signIn(email, password);
       
       if (error) {
         Alert.alert('Error', error.message);
       } else {
-        // Success - navigation will be handled by the index.js that monitors auth state
-        console.log('Login successful');
+        console.log('Login successful, navigating...');
+        // Navigation will be handled by the AuthContext and index.js
+        // But we can also force navigation here as a backup
+        setTimeout(() => {
+          router.replace('/(tabs)/map');
+        }, 100);
       }
     } catch (error) {
       Alert.alert('Error', error.message);
