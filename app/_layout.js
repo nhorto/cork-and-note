@@ -42,7 +42,6 @@ export default function RootLayout() {
     // Check for active session on component mount
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (mounted) {
-        console.log('Initial session check:', session?.user?.email || 'No session');
         if (error) {
           console.error('Session check error:', error);
         }
@@ -55,7 +54,6 @@ export default function RootLayout() {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (mounted) {
-        console.log('Auth state changed:', event, session?.user?.email || 'No session');
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
@@ -89,13 +87,8 @@ export default function RootLayout() {
         throw error;
       }
       
-      console.log('Sign in successful:', data.user.email);
-      
-      // Manually update state to ensure immediate UI update
-      setSession(data.session);
-      setUser(data.user);
+      // Don't manually update state here - let the onAuthStateChange listener handle it
       setIsLoading(false);
-      
       return { error: null, data };
     } catch (error) {
       setIsLoading(false);
@@ -103,7 +96,7 @@ export default function RootLayout() {
     }
   };
 
-  // Sign up with email and password (no email confirmation required)
+  // Sign up with email and password
   const signUp = async (email, password, name) => {
     try {
       setIsLoading(true);
@@ -117,15 +110,8 @@ export default function RootLayout() {
       
       if (error) throw error;
       
-      console.log('Sign up successful:', data.user?.email);
-      
-      // For immediate signup without email confirmation
-      if (data.session) {
-        setSession(data.session);
-        setUser(data.user);
-      }
+      // Don't manually update state here - let the onAuthStateChange listener handle it
       setIsLoading(false);
-      
       return { error: null, data };
     } catch (error) {
       setIsLoading(false);
@@ -136,20 +122,20 @@ export default function RootLayout() {
   // Sign out
   const signOut = async () => {
     try {
-      console.log('Attempting to sign out...');
       setIsLoading(true);
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Sign out error:', error);
-        throw error;
-      }
-      console.log('Sign out successful');
       
-      // Force clear the state immediately
+      // Clear state immediately before calling signOut
       setSession(null);
       setUser(null);
-      setIsLoading(false);
       
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        // If signOut fails, we still want to clear local state
+        console.error('Sign out error:', error);
+      }
+      
+      setIsLoading(false);
+      return { error: null };
     } catch (error) {
       console.error('Error signing out:', error.message);
       setIsLoading(false);

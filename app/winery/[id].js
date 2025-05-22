@@ -1,4 +1,5 @@
 // app/winery/[id].js
+import { visitsService } from '../../lib/visits';
 import React, { useState, useRef } from 'react';
 import {
   View,
@@ -26,6 +27,7 @@ import { Linking } from 'react-native';
 import RatingSlider from '../../components/RatingSlider';
 import FlavorTagSelector from '../../components/FlavorTagSelector';
 import WineCard from '../../components/WineCard';
+import VarietalSelector from '../../components/VarietalSelector';
 
 const { width } = Dimensions.get('window');
 const WINE_TYPES = [
@@ -44,23 +46,25 @@ export default function WineryDetail() {
 
   const [formStep, setFormStep] = useState(1); // 1: Visit Info, 2: Wine Details, 3: Summary
   const [showLogForm, setShowLogForm] = useState(log === 'true');
-  const [winesTried, setWinesTried] = useState([
-    {
-      wineName: '',
-      wineType: 'Red',
-      wineYear: '',
-      flavorNotes: [],
-      wineRatings: {
-        sweetness: '0',
-        tannin: '0',
-        acidity: '0',
-        body: '0',
-        alcohol: '0',
-      },
-      overallRating: 0,
-      additionalNotes: '',
+const [winesTried, setWinesTried] = useState([
+  {
+    wineName: '',
+    wineType: 'Red',
+    wineVarietal: '', // Add this line
+    wineYear: '',
+    flavorNotes: [],
+    wineRatings: {
+      sweetness: '0',
+      tannin: '0',
+      acidity: '0',
+      body: '0',
+      alcohol: '0',
     },
-  ]);
+    overallRating: 0,
+    additionalNotes: '',
+  },
+]);
+
   const [currentWineIndex, setCurrentWineIndex] = useState(0);
   const [visitDate, setVisitDate] = useState(new Date().toISOString().split('T')[0]);
   const [visitNotes, setVisitNotes] = useState('');
@@ -147,7 +151,7 @@ export default function WineryDetail() {
     setIsEditingWine(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const visitData = {
       wineryId: winery.id,
       wineryName: winery.name,
@@ -159,9 +163,45 @@ export default function WineryDetail() {
 
     console.log('Saving visit:', visitData);
 
-    Alert.alert('Visit Logged', `Your visit to ${winery.name} has been saved!`, [
-      { text: 'OK', onPress: () => setShowLogForm(false) },
-    ]);
+    try {
+      // Show loading state
+      Alert.alert('Saving...', 'Please wait while we save your visit.', [], { cancelable: false });
+
+      // Save to database
+      const result = await visitsService.createVisit(visitData);
+
+      if (result.success) {
+        Alert.alert(
+          'Visit Saved!', 
+          `Your visit to ${winery.name} has been successfully saved to your wine journal!`, 
+          [
+            { 
+              text: 'OK', 
+              onPress: () => {
+                setShowLogForm(false);
+                // Optionally navigate back or refresh
+                router.back();
+              }
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Save Failed', 
+          `Sorry, we couldn't save your visit: ${result.error}. Please try again.`,
+          [
+            { text: 'OK' }
+          ]
+        );
+      }
+    } catch (error) {
+      console.error('Error saving visit:', error);
+      Alert.alert(
+        'Error', 
+        'An unexpected error occurred while saving your visit. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   if (!winery) {
@@ -305,6 +345,35 @@ export default function WineryDetail() {
                   ))}
                 </Picker>
               </View>
+
+              <Text style={styles.label}>Wine Type:</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={wine.wineType}
+                  onValueChange={(itemValue) => {
+                    const updatedWines = [...winesTried];
+                    updatedWines[currentWineIndex].wineType = itemValue;
+                    // Reset varietal when wine type changes
+                    updatedWines[currentWineIndex].wineVarietal = '';
+                    setWinesTried(updatedWines);
+                  }}
+                >
+                  {WINE_TYPES.map((type) => (
+                    <Picker.Item label={type} value={type} key={type} />
+                  ))}
+                </Picker>
+              </View>
+
+              {/* Add the varietal selector right after wine type */}
+              <VarietalSelector
+                wineType={wine.wineType}
+                selectedVarietal={wine.wineVarietal}
+                onVarietalChange={(varietal) => {
+                  const updatedWines = [...winesTried];
+                  updatedWines[currentWineIndex].wineVarietal = varietal;
+                  setWinesTried(updatedWines);
+                }}
+              />
 
               <Text style={styles.label}>Wine Year:</Text>
               <TextInput

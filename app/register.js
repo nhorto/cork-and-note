@@ -107,13 +107,9 @@ export default function RegisterScreen() {
           Alert.alert('Error', error.message);
         }
       } else {
-        console.log('Registration successful, data:', data);
-        
         // Check if user is immediately signed in (no email confirmation)
         if (data.session && data.user) {
-          console.log('User automatically signed in after registration');
           // Navigation will be handled by the AuthContext and index.js
-          // But we can also force navigation here as a backup
           setTimeout(() => {
             router.replace('/(tabs)/map');
           }, 100);

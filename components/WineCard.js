@@ -1,7 +1,6 @@
 // components/WineCard.js
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const WineCard = ({ wine, expanded = false, onPress }) => {
   if (!wine) return null;
@@ -62,7 +61,8 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
 
   // Render flavor notes in a nice layout
   const renderFlavorNotes = () => {
-    if (!wine.flavorNotes || wine.flavorNotes.length === 0) {
+    const flavorNotes = wine.flavorNotes || wine.flavor_notes || [];
+    if (!flavorNotes || flavorNotes.length === 0) {
       return null;
     }
     
@@ -70,9 +70,11 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
       <View style={styles.flavorContainer}>
         <Text style={styles.sectionTitle}>Flavor Notes:</Text>
         <View style={styles.tagsContainer}>
-          {wine.flavorNotes.map((note, index) => (
+          {flavorNotes.map((note, index) => (
             <View key={index} style={styles.flavorTag}>
-              <Text style={styles.flavorTagText}>{note}</Text>
+              <Text style={styles.flavorTagText}>
+                {typeof note === 'string' ? note : note.name}
+              </Text>
             </View>
           ))}
         </View>
@@ -82,14 +84,15 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
 
   // Helper to display wine attributes as a radar/spider chart visual representation
   const renderWineAttributes = () => {
-    if (!wine.wineRatings) return null;
+    const ratings = wine.wineRatings || wine.ratings || {};
+    if (!ratings || Object.keys(ratings).length === 0) return null;
     
     const attributes = [
-      { name: 'Sweetness', value: parseFloat(wine.wineRatings.sweetness) || 0 },
-      { name: 'Tannin', value: parseFloat(wine.wineRatings.tannin) || 0 },
-      { name: 'Acidity', value: parseFloat(wine.wineRatings.acidity) || 0 },
-      { name: 'Body', value: parseFloat(wine.wineRatings.body) || 0 },
-      { name: 'Alcohol', value: parseFloat(wine.wineRatings.alcohol) || 0 }
+      { name: 'Sweetness', value: parseFloat(ratings.sweetness || wine.sweetness) || 0 },
+      { name: 'Tannin', value: parseFloat(ratings.tannin || ratings.tannins || wine.tannin) || 0 },
+      { name: 'Acidity', value: parseFloat(ratings.acidity || wine.acidity) || 0 },
+      { name: 'Body', value: parseFloat(ratings.body || wine.body) || 0 },
+      { name: 'Alcohol', value: parseFloat(ratings.alcohol || wine.alcohol) || 0 }
     ];
     
     return (
@@ -110,11 +113,29 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
     );
   };
 
+  // Get wine name with fallback
+  const wineName = wine.wineName || wine.wine_name || 'Unnamed Wine';
+  
+  // Get wine varietal with fallback
+  const wineVarietal = wine.wineVarietal || wine.wine_varietal;
+  
+  // Get wine year with fallback
+  const wineYear = wine.wineYear || wine.wine_year;
+  
+  // Get wine type with fallback
+  const wineType = wine.wineType || wine.wine_type || 'Unknown';
+  
+  // Get overall rating with fallback
+  const overallRating = wine.overallRating || wine.overall_rating || 0;
+  
+  // Get additional notes with fallback
+  const additionalNotes = wine.additionalNotes || wine.additional_notes;
+
   return (
     <TouchableOpacity
       style={[
         styles.container,
-        { borderLeftColor: getWineTypeColor(wine.wineType) }
+        { borderLeftColor: getWineTypeColor(wineType) }
       ]}
       onPress={onPress}
       activeOpacity={0.9}
@@ -122,28 +143,38 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
       <View style={styles.headerContainer}>
         <View style={styles.titleContainer}>
           <Text style={styles.name} numberOfLines={1}>
-            {wine.wineName || 'Unnamed Wine'}
+            {wineName}
           </Text>
-          {wine.wineYear && (
-            <Text style={styles.year}>{wine.wineYear}</Text>
-          )}
+          <View style={styles.wineDetails}>
+            {wineVarietal && (
+              <Text style={styles.varietal}>
+                {wineVarietal}
+              </Text>
+            )}
+            {wineYear && (
+              <Text style={styles.year}>
+                {wineVarietal ? ' • ' : ''}
+                {wineYear}
+              </Text>
+            )}
+          </View>
         </View>
         
         <View style={styles.typeContainer}>
           <View 
             style={[
               styles.typeIndicator,
-              { backgroundColor: getWineTypeColor(wine.wineType) }
+              { backgroundColor: getWineTypeColor(wineType) }
             ]}
           />
-          <Text style={styles.type}>{wine.wineType}</Text>
+          <Text style={styles.type}>{wineType}</Text>
         </View>
       </View>
 
       <View style={styles.ratingContainer}>
         <Text style={styles.ratingLabel}>Rating:</Text>
-        {renderStars(wine.overallRating)}
-        <Text style={styles.ratingValue}>{wine.overallRating.toFixed(1)}/5</Text>
+        {renderStars(overallRating)}
+        <Text style={styles.ratingValue}>{overallRating.toFixed(1)}/5</Text>
       </View>
 
       {expanded && (
@@ -151,10 +182,10 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
           {renderFlavorNotes()}
           {renderWineAttributes()}
           
-          {wine.additionalNotes && (
+          {additionalNotes && (
             <View style={styles.notesContainer}>
               <Text style={styles.sectionTitle}>Notes:</Text>
-              <Text style={styles.notes}>{wine.additionalNotes}</Text>
+              <Text style={styles.notes}>{additionalNotes}</Text>
             </View>
           )}
         </View>
@@ -192,10 +223,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
+  wineDetails: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    flexWrap: 'wrap',
+  },
+  varietal: {
+    fontSize: 14,
+    color: '#8E2DE2',
+    fontWeight: '500',
+  },
   year: {
     fontSize: 14,
     color: '#666',
-    marginTop: 2,
   },
   typeContainer: {
     flexDirection: 'row',

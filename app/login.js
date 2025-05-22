@@ -40,9 +40,7 @@ export default function LoginScreen() {
       if (error) {
         Alert.alert('Error', error.message);
       } else {
-        console.log('Login successful, navigating...');
         // Navigation will be handled by the AuthContext and index.js
-        // But we can also force navigation here as a backup
         setTimeout(() => {
           router.replace('/(tabs)/map');
         }, 100);
