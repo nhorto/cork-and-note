@@ -24,10 +24,28 @@ const WINE_TYPES = [
   'Red Blend', 'White Blend', 'Orange'
 ];
 
+// Common wine varietals
+const WINE_VARIETALS = [
+  '', // Empty option
+  'Cabernet Sauvignon',
+  'Merlot',
+  'Pinot Noir',
+  'Syrah/Shiraz',
+  'Malbec',
+  'Chardonnay',
+  'Sauvignon Blanc',
+  'Pinot Grigio',
+  'Riesling',
+  'Moscato',
+  'Other'
+];
+
 export default function WineEntryForm({ onSave, onCancel, initialData }) {
   // Form state
   const [wineName, setWineName] = useState('');
   const [wineType, setWineType] = useState('Red');
+  const [wineVarietal, setWineVarietal] = useState('');
+  const [customVarietal, setCustomVarietal] = useState('');
   const [wineYear, setWineYear] = useState('');
   const [overallRating, setOverallRating] = useState(0);
   const [ratings, setRatings] = useState({
@@ -46,6 +64,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     if (initialData) {
       setWineName(initialData.name || '');
       setWineType(initialData.type || 'Red');
+      setWineVarietal(initialData.varietal || '');
+      setCustomVarietal(initialData.customVarietal || '');
       setWineYear(initialData.year || '');
       setOverallRating(initialData.overallRating || 0);
       setRatings(initialData.ratings || {
@@ -88,6 +108,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
+        mediaTypes: ImagePicker.MediaType.Images, // Updated to use MediaType
       });
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -109,7 +130,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaType.Images, // Updated to use MediaType
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -133,16 +154,21 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   
   // Handle form submission
   const handleSave = () => {
-    // Validate required fields
-    if (!wineName.trim()) {
-      Alert.alert('Missing Information', 'Please enter a wine name.');
+    // Wine type is required
+    if (!wineType) {
+      Alert.alert('Missing Information', 'Please select a wine type.');
       return;
     }
     
+    // Determine final varietal
+    const finalVarietal = wineVarietal === 'Other' ? customVarietal : wineVarietal;
+    
     // Create wine object
     const wineData = {
-      name: wineName,
+      name: wineName, // Can be empty
       type: wineType,
+      varietal: finalVarietal, // Can be empty
+      customVarietal: wineVarietal === 'Other' ? customVarietal : '',
       year: wineYear,
       overallRating,
       ratings,
@@ -156,132 +182,21 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     onSave(wineData);
   };
   
-  // Styles for the component
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 16,
-    },
-    formGroup: {
-      marginBottom: 20,
-    },
-    formRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 20,
-    },
-    formGroupHalf: {
-      width: '48%',
-    },
-    label: {
-      fontSize: 16,
-      fontWeight: '500',
-      marginBottom: 8,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      marginBottom: 15,
-      color: '#8E2DE2',
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 8,
-      padding: 12,
-      fontSize: 15,
-      backgroundColor: '#f9f9f9',
-    },
-    textArea: {
-      height: 120,
-      textAlignVertical: 'top',
-    },
-    pickerContainer: {
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 8,
-      backgroundColor: '#f9f9f9',
-      overflow: 'hidden',
-    },
-    picker: {
-      height: 50,
-    },
-    photoActions: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 15,
-    },
-    photoButton: {
-      flexDirection: 'row',
-      backgroundColor: '#8E2DE2',
-      borderRadius: 8,
-      paddingVertical: 10,
-      paddingHorizontal: 15,
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: '48%',
-    },
-    photoButtonText: {
-      color: '#fff',
-      fontWeight: '500',
-      marginLeft: 8,
-    },
-    photoPreviewContainer: {
-      position: 'relative',
-      marginTop: 10,
-    },
-    photoPreview: {
-      width: '100%',
-      height: 200,
-      borderRadius: 8,
-    },
-    removePhotoButton: {
-      position: 'absolute',
-      top: 10,
-      right: 10,
-      backgroundColor: 'rgba(255, 255, 255, 0.7)',
-      borderRadius: 15,
-    },
-    buttonsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 10,
-      marginBottom: 30,
-    },
-    button: {
-      width: '48%',
-      padding: 15,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    saveButton: {
-      backgroundColor: '#8E2DE2',
-    },
-    cancelButton: {
-      backgroundColor: '#FF3B30',
-    },
-    buttonText: {
-      color: '#fff',
-      fontSize: 16,
-      fontWeight: '600',
-    },
-  });
-  
   return (
     <ScrollView style={styles.container}>
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Wine Name *</Text>
+        <Text style={styles.label}>Wine Name</Text>
         <TextInput
           style={styles.input}
           value={wineName}
           onChangeText={setWineName}
-          placeholder="Enter wine name"
+          placeholder="Optional"
         />
       </View>
       
       <View style={styles.formRow}>
         <View style={styles.formGroupHalf}>
-          <Text style={styles.label}>Wine Type</Text>
+          <Text style={styles.label}>Wine Type *</Text>
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={wineType}
@@ -308,6 +223,31 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         </View>
       </View>
       
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Wine Varietal</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={wineVarietal}
+            onValueChange={(itemValue) => setWineVarietal(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Select varietal (optional)" value="" />
+            {WINE_VARIETALS.slice(1).map((varietal) => (
+              <Picker.Item key={varietal} label={varietal} value={varietal} />
+            ))}
+          </Picker>
+        </View>
+        
+        {wineVarietal === 'Other' && (
+          <TextInput
+            style={[styles.input, { marginTop: 10 }]}
+            value={customVarietal}
+            onChangeText={setCustomVarietal}
+            placeholder="Enter custom varietal"
+          />
+        )}
+      </View>
+      
       {/* Overall Rating */}
       <View style={styles.formGroup}>
         <Text style={styles.label}>Overall Rating</Text>
@@ -315,6 +255,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
           label="Your Rating"
           value={overallRating}
           onValueChange={setOverallRating}
+          showStars={true}
         />
       </View>
       
@@ -428,3 +369,113 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  formRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  formGroupHalf: {
+    width: '48%',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 15,
+    color: '#8E2DE2',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+    backgroundColor: '#f9f9f9',
+  },
+  textArea: {
+    height: 120,
+    textAlignVertical: 'top',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
+    overflow: 'hidden',
+  },
+  picker: {
+    height: 50,
+  },
+  photoActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  photoButton: {
+    flexDirection: 'row',
+    backgroundColor: '#8E2DE2',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '48%',
+  },
+  photoButtonText: {
+    color: '#fff',
+    fontWeight: '500',
+    marginLeft: 8,
+  },
+  photoPreviewContainer: {
+    position: 'relative',
+    marginTop: 10,
+  },
+  photoPreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+  },
+  removePhotoButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 15,
+  },
+  buttonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    marginBottom: 30,
+  },
+  button: {
+    width: '48%',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#8E2DE2',
+  },
+  cancelButton: {
+    backgroundColor: '#FF3B30',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
