@@ -1,20 +1,20 @@
 // app/login.js
-import React, { useState, useContext } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { Link, useRouter } from 'expo-router';
+import { useContext, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter, Link } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from './_layout';
 
 export default function LoginScreen() {
@@ -61,7 +61,7 @@ export default function LoginScreen() {
         <View style={styles.logoContainer}>
           <View style={styles.logoImageWrapper}>
             <Image
-              source={require('../assets/images/cork_and_note_logo.png')}
+              source={require('../assets/images/VCN_red.jpg')}
               style={styles.logoImage}
               resizeMode="contain"
             />
@@ -72,7 +72,7 @@ export default function LoginScreen() {
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color="#8E2DE2" style={styles.inputIcon} />
+            <Ionicons name="mail" size={20} color="#8C1C13" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email Address"
@@ -84,7 +84,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color="#8E2DE2" style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color="#8C1C13" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -99,7 +99,7 @@ export default function LoginScreen() {
               <Ionicons 
                 name={showPassword ? "eye-off" : "eye"} 
                 size={20} 
-                color="#8E2DE2" 
+                color="#8C1C13" 
               />
             </TouchableOpacity>
           </View>
@@ -130,13 +130,13 @@ export default function LoginScreen() {
 
           <View style={styles.socialButtonsContainer}>
             <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
-              <Ionicons name="logo-google" size={20} color="#fff" />
-              <Text style={styles.socialButtonText}>Google</Text>
+              <Ionicons name="logo-google" size={20} color="#00000" />
+              <Text style={styles.socialButtonTextGoogle}>Google</Text>
             </TouchableOpacity>
             
             <TouchableOpacity style={[styles.socialButton, styles.appleButton]}>
               <Ionicons name="logo-apple" size={20} color="#fff" />
-              <Text style={styles.socialButtonText}>Apple</Text>
+              <Text style={styles.socialButtonTextApple}>Apple</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -157,7 +157,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E7E3E2',
   },
   scrollContent: {
     flexGrow: 1,
@@ -175,18 +175,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logoImage: {
-    width: 620,
-    height: 220,
+    width: 680,
+    height: 250,
+    borderRadius:900,
   },
   appName: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#3E3E3E',
     marginBottom: 8,
   },
   tagline: {
     fontSize: 16,
-    color: '#666',
+    color: '#3E3E3E',
     textAlign: 'center',
   },
   formContainer: {
@@ -219,11 +220,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   forgotPasswordText: {
-    color: '#8E2DE2',
+    color: '#3E3E3E',
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13',
     borderRadius: 8,
     height: 50,
     justifyContent: 'center',
@@ -231,7 +232,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   loginButtonText: {
-    color: '#fff',
+    color: '#b08442',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loginButtonTextApple: {
+    color: '#ffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  loginButtonTextGoogle: {
+    color: '#0000',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -243,11 +254,11 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: '#3E3E3E',
   },
   dividerText: {
     paddingHorizontal: 10,
-    color: '#666',
+    color: '#000',
   },
   socialButtonsContainer: {
     flexDirection: 'row',
@@ -262,12 +273,12 @@ const styles = StyleSheet.create({
     width: '48%',
   },
   googleButton: {
-    backgroundColor: '#DB4437',
+    backgroundColor: '#ffff',
   },
   appleButton: {
     backgroundColor: '#000',
   },
-  socialButtonText: {
+  socialButtonTextApple: {
     color: '#fff',
     marginLeft: 8,
     fontWeight: '500',
@@ -279,11 +290,11 @@ const styles = StyleSheet.create({
   },
   registerText: {
     fontSize: 14,
-    color: '#666',
+    color: '#3E3E3E',
   },
   registerLink: {
     fontSize: 14,
-    color: '#8E2DE2',
+    color: '#8C1C13',
     fontWeight: 'bold',
   },
 });

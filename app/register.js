@@ -1,19 +1,19 @@
 // app/register.js
-import React, { useState, useContext } from 'react';
+import { Ionicons } from '@expo/vector-icons';
+import { Link, useRouter } from 'expo-router';
+import { useContext, useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter, Link } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from './_layout';
 
 export default function RegisterScreen() {
@@ -149,7 +149,7 @@ export default function RegisterScreen() {
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <Ionicons name="person" size={20} color="#8E2DE2" style={styles.inputIcon} />
+            <Ionicons name="person" size={20} color="#8C1C13" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Full Name"
@@ -159,7 +159,7 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color="#8E2DE2" style={styles.inputIcon} />
+            <Ionicons name="mail" size={20} color="#8C1C13" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email Address"
@@ -171,7 +171,7 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color="#8E2DE2" style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color="#8C1C13" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -186,7 +186,7 @@ export default function RegisterScreen() {
               <Ionicons 
                 name={showPassword ? "eye-off" : "eye"} 
                 size={20} 
-                color="#8E2DE2" 
+                color="#8C1C13" 
               />
             </TouchableOpacity>
           </View>
@@ -214,7 +214,7 @@ export default function RegisterScreen() {
           )}
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color="#8E2DE2" style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color="#8C1C13" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Confirm Password"
@@ -244,7 +244,7 @@ export default function RegisterScreen() {
 
           <View style={styles.socialButtonsContainer}>
             <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
-              <Ionicons name="logo-google" size={20} color="#fff" />
+              <Ionicons name="logo-google" size={20} color="#000" />
               <Text style={styles.socialButtonText}>Google</Text>
             </TouchableOpacity>
             
@@ -271,7 +271,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E7E3E2', // same as login screen
   },
   scrollContent: {
     flexGrow: 1,
@@ -288,14 +288,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#3E3E3E',
     marginBottom: 8,
     marginTop: 40,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#3E3E3E',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   requirementsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: '#3E3E3E',
     marginBottom: 8,
   },
   requirementRow: {
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   registerButton: {
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13', // deep red
     borderRadius: 8,
     height: 50,
     justifyContent: 'center',
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   registerButtonText: {
-    color: '#fff',
+    color: '#b08442', // gold text
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -374,11 +374,11 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: '#3E3E3E',
   },
   dividerText: {
     paddingHorizontal: 10,
-    color: '#666',
+    color: '#3E3E3E',
   },
   socialButtonsContainer: {
     flexDirection: 'row',
@@ -393,13 +393,13 @@ const styles = StyleSheet.create({
     width: '48%',
   },
   googleButton: {
-    backgroundColor: '#DB4437',
+    backgroundColor: '#ffff',
   },
   appleButton: {
     backgroundColor: '#000',
   },
   socialButtonText: {
-    color: '#fff',
+    color: '#3E3E3E',
     marginLeft: 8,
     fontWeight: '500',
   },
@@ -410,11 +410,11 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 14,
-    color: '#666',
+    color: '#3E3E3E',
   },
   loginLink: {
     fontSize: 14,
-    color: '#8E2DE2',
+    color: '#8C1C13',
     fontWeight: 'bold',
   },
 });

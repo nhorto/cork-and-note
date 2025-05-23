@@ -14,6 +14,11 @@ const RatingSlider = ({
   const [sliderWidth, setSliderWidth] = useState(0);
   const [localValue, setLocalValue] = useState(value);
   
+  // Update local value when prop changes
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+  
   // Handle the touch/click on the slider
   const handleSliderPress = (event) => {
     if (sliderWidth === 0) return;
@@ -70,9 +75,9 @@ const RatingSlider = ({
         <Ionicons
           key={i}
           name={iconName}
-          size={20}
+          size={24} // Increased size for better visibility
           color="#FFD700"
-          style={{ marginHorizontal: 2 }}
+          style={{ marginHorizontal: 3 }}
         />
       );
     }
@@ -133,7 +138,6 @@ const RatingSlider = ({
   );
 };
 
-// Your styles unchanged
 const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
@@ -204,7 +208,7 @@ const styles = StyleSheet.create({
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 12,
+    marginTop: 15,
   },
 });
 

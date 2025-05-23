@@ -179,7 +179,7 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
           <Ionicons 
             name={tab.icon} 
             size={20} 
-            color={activeTab === tab.id ? '#8E2DE2' : '#999'} 
+            color={activeTab === tab.id ? '#8C1C13' : '#999'} 
           />
           <Text style={[styles.tabText, activeTab === tab.id && styles.activeTabText]}>
             {tab.label}
@@ -320,7 +320,7 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
     <ScrollView style={styles.tabContent}>
       {wines.length === 0 ? (
         <View style={styles.emptyState}>
-          <Ionicons name="wine-outline" size={60} color="#ddd" />
+          <Ionicons name="wine-outline" size={60} color="#B08442" />
           <Text style={styles.emptyStateTitle}>No wines added yet</Text>
           <Text style={styles.emptyStateText}>Start by adding the wines you tried</Text>
         </View>
@@ -372,12 +372,12 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
         
         <View style={styles.photoButtons}>
           <TouchableOpacity style={styles.photoButton} onPress={takeWineryPhoto}>
-            <Ionicons name="camera" size={20} color="#8E2DE2" />
+            <Ionicons name="camera" size={20} color="#8C1C13" />
             <Text style={styles.photoButtonText}>Take Photo</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.photoButton} onPress={pickWineryImage}>
-            <Ionicons name="image" size={20} color="#8E2DE2" />
+            <Ionicons name="image" size={20} color="#8C1C13" />
             <Text style={styles.photoButtonText}>Choose Photo</Text>
           </TouchableOpacity>
         </View>
@@ -518,14 +518,14 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E7E3E2',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#ccc',
   },
   closeButton: {
     padding: 8,
@@ -535,12 +535,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     flex: 1,
+    color: '#3E3E3E',
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f4f1ef',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#ccc',
   },
   tab: {
     flex: 1,
@@ -552,14 +553,14 @@ const styles = StyleSheet.create({
   },
   activeTab: {
     borderBottomWidth: 2,
-    borderBottomColor: '#8E2DE2',
+    borderBottomColor: '#8C1C13',
   },
   tabText: {
     fontSize: 14,
-    color: '#999',
+    color: '#888',
   },
   activeTabText: {
-    color: '#8E2DE2',
+    color: '#8C1C13',
     fontWeight: '500',
   },
   tabContentContainer: {
@@ -569,8 +570,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  
-  // Wines tab styles
   emptyState: {
     alignItems: 'center',
     paddingVertical: 60,
@@ -580,6 +579,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 16,
     marginBottom: 8,
+    color: '#3E3E3E',
   },
   emptyStateText: {
     color: '#666',
@@ -590,7 +590,7 @@ const styles = StyleSheet.create({
   wineCard: {
     flexDirection: 'row',
     padding: 12,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f1ef',
     borderRadius: 8,
     marginBottom: 12,
     shadowColor: '#000',
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: '#ccc',
   },
   wineImageContainer: {
     marginRight: 15,
@@ -617,12 +617,12 @@ const styles = StyleSheet.create({
   wineVarietal: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#3E3E3E',
     marginBottom: 2,
   },
   wineName: {
     fontSize: 14,
-    color: '#666',
+    color: '#3E3E3E',
     marginBottom: 5,
   },
   ratingContainer: {
@@ -654,14 +654,14 @@ const styles = StyleSheet.create({
   ratingBar: {
     flex: 1,
     height: 4,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#ccc',
     borderRadius: 2,
     marginHorizontal: 8,
     overflow: 'hidden',
   },
   ratingBarFill: {
     height: '100%',
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13',
   },
   ratingValue: {
     fontSize: 11,
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
   },
   addWineButton: {
     flexDirection: 'row',
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
@@ -687,8 +687,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  
-  // Winery details tab styles
   detailsSection: {
     marginBottom: 24,
   },
@@ -696,14 +694,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     marginBottom: 8,
+    color: '#3E3E3E',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f4f1ef',
+    color: '#3E3E3E',
   },
   textArea: {
     height: 120,
@@ -727,11 +727,11 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#8E2DE2',
+    borderColor: '#8C1C13',
     borderRadius: 8,
   },
   photoButtonText: {
-    color: '#8E2DE2',
+    color: '#8C1C13',
     fontWeight: '500',
   },
   photoPreviewContainer: {
@@ -750,10 +750,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 12,
   },
-  
-  // Review tab styles
   reviewSection: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f4f1ef',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -767,9 +765,10 @@ const styles = StyleSheet.create({
   reviewTitle: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#3E3E3E',
   },
   editLink: {
-    color: '#8E2DE2',
+    color: '#8C1C13',
     fontWeight: '500',
   },
   reviewItem: {
@@ -782,7 +781,7 @@ const styles = StyleSheet.create({
   },
   reviewValue: {
     fontSize: 15,
-    color: '#333',
+    color: '#3E3E3E',
   },
   reviewPhoto: {
     width: '100%',
@@ -793,25 +792,21 @@ const styles = StyleSheet.create({
   reviewWine: {
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: '#ccc',
   },
   reviewWineType: {
     fontSize: 15,
     fontWeight: '500',
+    color: '#3E3E3E',
   },
   reviewWineVarietal: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#3E3E3E',
   },
   reviewWineName: {
     fontSize: 14,
-    color: '#666',
-  },
-  reviewRating: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
+    color: '#3E3E3E',
   },
   reviewRatingText: {
     fontSize: 14,
@@ -819,7 +814,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   saveButton: {
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
@@ -831,11 +826,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  
-  // Modal styles
   modalContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E7E3E2',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -843,7 +836,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#ccc',
+    backgroundColor: '#E7E3E2',
   },
   modalCloseButton: {
     padding: 5,
@@ -852,5 +846,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginLeft: 15,
+    color: '#3E3E3E',
   },
 });

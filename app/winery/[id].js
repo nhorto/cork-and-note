@@ -75,7 +75,7 @@ export default function WineryDetail() {
               style={styles.actionButton} 
               onPress={() => setShowLogForm(true)}
             >
-              <Ionicons name="wine" size={24} color="#8E2DE2" />
+              <Ionicons name="wine" size={24} color="#8C1C13" />
               <Text style={styles.actionButtonText}>Log Your Visit</Text>
             </TouchableOpacity>
 
@@ -101,7 +101,7 @@ export default function WineryDetail() {
                 }
               }}
             >
-              <Ionicons name="navigate" size={24} color="#8E2DE2" />
+              <Ionicons name="navigate" size={24} color="#8C1C13" />
               <Text style={styles.actionButtonText}>Directions</Text>
             </TouchableOpacity>
 
@@ -111,7 +111,7 @@ export default function WineryDetail() {
                 Alert.alert('Website', `Opening ${winery.name} website...`);
               }}
             >
-              <Ionicons name="globe" size={24} color="#8E2DE2" />
+              <Ionicons name="globe" size={24} color="#8C1C13" />
               <Text style={styles.actionButtonText}>Website</Text>
             </TouchableOpacity>
           </View>
@@ -145,14 +145,15 @@ export default function WineryDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E7E3E2', // Matches login background
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#ccc', // Slightly darker for contrast
+    backgroundColor: '#E7E3E2',
   },
   backButton: {
     padding: 8,
@@ -161,6 +162,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#3E3E3E',
     flex: 1,
   },
   scrollContent: {
@@ -173,16 +175,19 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     padding: 20,
+    backgroundColor: '#f9f9f9', // Matches input background from login
+    borderRadius: 8,
+    margin: 16,
   },
   address: {
     fontSize: 16,
-    color: '#555',
+    color: '#3E3E3E',
     marginBottom: 15,
     textAlign: 'center',
   },
   divider: {
     height: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: '#ccc',
     marginVertical: 15,
   },
   actionButtons: {
@@ -197,7 +202,8 @@ const styles = StyleSheet.create({
   actionButtonText: {
     marginTop: 8,
     fontSize: 12,
-    color: '#8E2DE2',
+    color: '#8C1C13', // Matches primary button color
+    fontWeight: '500',
   },
   infoSection: {
     marginTop: 20,
@@ -205,11 +211,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#3E3E3E',
     marginBottom: 10,
   },
   infoText: {
     fontSize: 15,
-    color: '#666',
+    color: '#3E3E3E',
     lineHeight: 22,
   },
 });

@@ -1,23 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  Alert,
-  Platform
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
-import { Camera } from 'expo-camera';
+import { useEffect, useState } from 'react';
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
-import RatingSlider from './RatingSlider';
-import FlavorTagSelector from './FlavorTagSelector';
 import { Picker } from '@react-native-picker/picker';
+import FlavorTagSelector from './FlavorTagSelector';
+import RatingSlider from './RatingSlider';
 
 const WINE_TYPES = [
   'Red', 'White', 'Rosé', 'Sparkling', 'Dessert',
@@ -374,6 +373,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    backgroundColor: '#E7E3E2', // Match login background
   },
   formGroup: {
     marginBottom: 20,
@@ -389,13 +389,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '500',
+    color: '#3E3E3E', // Consistent text color
     marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 15,
-    color: '#8E2DE2',
+    color: '#8C1C13', // Primary color from login
   },
   input: {
     borderWidth: 1,
@@ -404,6 +405,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 15,
     backgroundColor: '#f9f9f9',
+    color: '#3E3E3E',
   },
   textArea: {
     height: 120,
@@ -426,7 +428,7 @@ const styles = StyleSheet.create({
   },
   photoButton: {
     flexDirection: 'row',
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 15,
@@ -468,10 +470,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButton: {
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13', // Match primary button
   },
   cancelButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#FF3B30', // Keep red for cancel
   },
   buttonText: {
     color: '#fff',

@@ -1,24 +1,44 @@
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+
+const headerStyle = {
+  backgroundColor: '#E7E3E2',
+};
+
+const headerTitleStyle = {
+  fontWeight: 'bold',
+  fontSize: 18,
+  color: '#3E3E3E',
+};
+
+const tabBarStyle = {
+  backgroundColor: '#E7E3E2',
+  borderTopColor: '#ccc',
+};
+
+const tabBarActiveTintColor = '#8C1C13';
+const tabBarInactiveTintColor = '#3E3E3E';
 
 export default function Layout() {
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        headerStyle,
+        headerTitleStyle,
+        tabBarStyle,
+        tabBarActiveTintColor,
+        tabBarInactiveTintColor,
+        tabBarLabelStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
       <Tabs.Screen
         name="map"
         options={{
           tabBarIcon: ({ color }) => <Ionicons name="map" color={color} size={24} />,
           title: 'Map',
-          headerTitle: 'Explore Wineries', // ✅ This sets the header title
-          headerShown: true,              // ✅ Ensure it's visible
-          tabBarIcon: ({ color }) => <Ionicons name="map" color={color} size={24} />,
-          headerStyle: {
-            backgroundColor: '#fff',
-          },
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            fontSize: 18,
-          },
+          headerTitle: 'Explore Wineries',
         }}
       />
       <Tabs.Screen
@@ -27,7 +47,6 @@ export default function Layout() {
           tabBarIcon: ({ color }) => <Ionicons name="wine" color={color} size={24} />,
           title: 'Wines',
           headerTitle: 'Wines',
-          headerShown: true,
         }}
       />
       <Tabs.Screen
@@ -36,7 +55,6 @@ export default function Layout() {
           tabBarIcon: ({ color }) => <Ionicons name="business" color={color} size={24} />,
           title: 'Wineries',
           headerTitle: 'Wineries',
-          headerShown: true,
         }}
       />
       <Tabs.Screen
@@ -45,7 +63,6 @@ export default function Layout() {
           tabBarIcon: ({ color }) => <Ionicons name="person" color={color} size={24} />,
           title: 'Profile',
           headerTitle: 'Your Profile',
-          headerShown: true,
         }}
       />
     </Tabs>

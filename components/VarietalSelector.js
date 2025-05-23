@@ -16,14 +16,12 @@ const WINE_VARIETALS = {
   'Red': [
     'Cabernet Sauvignon', 'Merlot', 'Pinot Noir', 'Syrah/Shiraz', 'Cabernet Franc',
     'Sangiovese', 'Tempranillo', 'Grenache', 'Malbec', 'Petit Verdot',
-    'Zinfandel', 'Barbera', 'Nebbiolo', 'Petite Sirah', 'Mourvedre',
-    'Tannat', 'Aglianico', 'Montepulciano', 'Dolcetto', 'Gamay'
+    'Zinfandel', 'Barbera', 'Nebbiolo', 'Petite Sirah', 'Mourvedre'
   ],
   'White': [
     'Chardonnay', 'Sauvignon Blanc', 'Pinot Grigio/Pinot Gris', 'Riesling', 'Gewürztraminer',
     'Viognier', 'Albariño', 'Chenin Blanc', 'Sémillon', 'Marsanne',
-    'Roussanne', 'Vermentino', 'Grüner Veltliner', 'Muscadet', 'Vinho Verde',
-    'Pinot Blanc', 'Trebbiano', 'Verdejo', 'Torrontés', 'Assyrtiko'
+    'Roussanne', 'Vermentino', 'Grüner Veltliner', 'Muscadet', 'Vinho Verde'
   ],
   'Rosé': [
     'Provence Rosé', 'Pinot Noir Rosé', 'Sangiovese Rosé', 'Grenache Rosé',
@@ -99,77 +97,96 @@ const VarietalSelector = ({ wineType, selectedVarietal, onVarietalChange }) => {
       <Modal
         visible={showModal}
         animationType="slide"
-        transparent={false}
+        transparent={true}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => {
-                setShowModal(false);
-                setSearchQuery('');
-                setCustomVarietal('');
-              }}
-            >
-              <Ionicons name="close" size={28} color="#333" />
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Select Varietal</Text>
-          </View>
-
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="#8E2DE2" style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search varietals..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-
-          <ScrollView style={styles.varietalsList}>
-            {filteredVarietals.map((varietal, index) => (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Varietal</Text>
               <TouchableOpacity
-                key={index}
-                style={[
-                  styles.varietalItem,
-                  selectedVarietal === varietal && styles.selectedVarietalItem
-                ]}
-                onPress={() => handleVarietalSelect(varietal)}
+                style={styles.closeButton}
+                onPress={() => {
+                  setShowModal(false);
+                  setSearchQuery('');
+                  setCustomVarietal('');
+                }}
               >
-                <Text style={[
-                  styles.varietalText,
-                  selectedVarietal === varietal && styles.selectedVarietalText
-                ]}>
-                  {varietal}
-                </Text>
-                {selectedVarietal === varietal && (
-                  <Ionicons name="checkmark" size={20} color="#8E2DE2" />
-                )}
+                <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            </View>
 
-          <View style={styles.customSection}>
-            <Text style={styles.customLabel}>Don't see your varietal?</Text>
-            <View style={styles.customInputContainer}>
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={20} color="#8E2DE2" style={styles.searchIcon} />
               <TextInput
-                style={styles.customInput}
-                placeholder="Enter custom varietal..."
-                value={customVarietal}
-                onChangeText={setCustomVarietal}
+                style={styles.searchInput}
+                placeholder="Search varietals..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
               />
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={handleCustomVarietal}
-                disabled={!customVarietal.trim()}
-              >
-                <Text style={[
-                  styles.addButtonText,
-                  !customVarietal.trim() && styles.addButtonTextDisabled
-                ]}>
-                  Add
-                </Text>
-              </TouchableOpacity>
+              {searchQuery.length > 0 && (
+                <TouchableOpacity 
+                  onPress={() => setSearchQuery('')}
+                  style={styles.clearButton}
+                >
+                  <Ionicons name="close-circle" size={18} color="#8E2DE2" />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <ScrollView style={styles.varietalsList}>
+              {filteredVarietals.map((varietal, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.varietalItem,
+                    selectedVarietal === varietal && styles.selectedVarietalItem
+                  ]}
+                  onPress={() => handleVarietalSelect(varietal)}
+                >
+                  <Text style={[
+                    styles.varietalText,
+                    selectedVarietal === varietal && styles.selectedVarietalText
+                  ]}>
+                    {varietal}
+                  </Text>
+                  {selectedVarietal === varietal && (
+                    <Ionicons name="checkmark" size={20} color="#8E2DE2" />
+                  )}
+                </TouchableOpacity>
+              ))}
+              
+              {filteredVarietals.length === 0 && searchQuery && (
+                <View style={styles.noResultsContainer}>
+                  <Text style={styles.noResultsText}>No matching varietals found</Text>
+                </View>
+              )}
+            </ScrollView>
+
+            <View style={styles.customSection}>
+              <Text style={styles.customLabel}>Don't see your varietal?</Text>
+              <View style={styles.customInputContainer}>
+                <TextInput
+                  style={styles.customInput}
+                  placeholder="Enter custom varietal..."
+                  value={customVarietal}
+                  onChangeText={setCustomVarietal}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.addButton,
+                    !customVarietal.trim() && styles.addButtonDisabled
+                  ]}
+                  onPress={handleCustomVarietal}
+                  disabled={!customVarietal.trim()}
+                >
+                  <Text style={[
+                    styles.addButtonText,
+                    !customVarietal.trim() && styles.addButtonTextDisabled
+                  ]}>
+                    Add
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
@@ -197,7 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     backgroundColor: '#f9f9f9',
-    minHeight: 50,
+    minHeight: 50, // Ensure enough height for text
   },
   selectorText: {
     fontSize: 15,
@@ -207,27 +224,32 @@ const styles = StyleSheet.create({
   placeholder: {
     color: '#999',
   },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
     backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    paddingTop: 50,
-  },
-  closeButton: {
-    padding: 5,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginLeft: 15,
-    flex: 1,
+  },
+  closeButton: {
+    padding: 5,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -244,9 +266,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     padding: 8,
+    height: 40,
+  },
+  clearButton: {
+    padding: 5,
   },
   varietalsList: {
-    flex: 1,
+    maxHeight: 300,
   },
   varietalItem: {
     flexDirection: 'row',
@@ -263,11 +289,19 @@ const styles = StyleSheet.create({
   varietalText: {
     fontSize: 16,
     color: '#333',
-    flex: 1,
   },
   selectedVarietalText: {
     color: '#8E2DE2',
     fontWeight: '500',
+  },
+  noResultsContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  noResultsText: {
+    fontSize: 16,
+    color: '#666',
+    fontStyle: 'italic',
   },
   customSection: {
     padding: 16,
@@ -293,19 +327,25 @@ const styles = StyleSheet.create({
     fontSize: 15,
     backgroundColor: '#fff',
     marginRight: 10,
+    height: 45, // Ensure enough height
   },
   addButton: {
     backgroundColor: '#8E2DE2',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 6,
+    height: 45,
+    justifyContent: 'center',
+  },
+  addButtonDisabled: {
+    backgroundColor: '#ccc',
   },
   addButtonText: {
     color: '#fff',
     fontWeight: '500',
   },
   addButtonTextDisabled: {
-    opacity: 0.5,
+    opacity: 0.7,
   },
 });
 

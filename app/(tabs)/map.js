@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import MapView, { Marker } from 'react-native-maps';
 import { useRouter } from 'expo-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Text, View } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import Supercluster from 'supercluster';
-import { Text, View, Dimensions } from 'react-native';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
 
 export default function MapScreen() {
@@ -102,19 +102,19 @@ export default function MapScreen() {
           }}
         >
           <View style={{
-            width: 40,
-            height: 40,
+            width: 35,
+            height: 35,
             borderRadius: 20, // Make sure this is half the width/height for a perfect circle
-            backgroundColor: '#8E2DE2',
+            backgroundColor: '#8C1C13',
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 2,
-            borderColor: '#fff', // Add a border to make it more visible
+            borderColor: '#3E3E3E', // Add a border to make it more visible
             // Add a shadow for better visibility
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.3,
-            shadowRadius: 2,
+            shadowRadius: 1,
             elevation: 5 // For Android
           }}>
             <Text style={{ 
