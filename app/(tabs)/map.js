@@ -167,3 +167,14 @@
 //     </MapView>
 //   );
 // }
+
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+export default function map() {
+  return (
+    <View style={{ flex: 1 }}>
+      <Text>This is a placeholder until i can get the map to work</Text>
+    </View>
+  );
+}
