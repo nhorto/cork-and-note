@@ -1,7 +1,7 @@
 // app/(tabs)/wineries.js (FlatList & Search with navigation)
-import { useState } from 'react';
-import { View, TextInput, FlatList, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
 
 export default function Wineries() {
@@ -15,7 +15,7 @@ export default function Wineries() {
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
+    <View style={{ flex: 1, padding: 20, backgroundColor: '#E7E3E2' }}>
       <TextInput 
         placeholder="Search Wineries..." 
         value={search} 
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    backgroundColor: '#fff',
+    backgroundColor: '#F0F0F0',
   },
   wineryName: {
     fontSize: 16,

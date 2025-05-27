@@ -42,38 +42,38 @@ export default function ProfileScreen() {
 
       <View style={styles.menuContainer}>
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="person-circle" size={24} color="#8E2DE2" style={styles.menuIcon} />
+          <Ionicons name="person-circle" size={24} color="#8C1C13" style={styles.menuIcon} />
           <Text style={styles.menuText}>Edit Profile</Text>
           <Ionicons name="chevron-forward" size={20} color="#ccc" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="book" size={24} color="#8E2DE2" style={styles.menuIcon} />
+          <Ionicons name="book" size={24} color="#8C1C13" style={styles.menuIcon} />
           <Text style={styles.menuText}>My Wine Journal</Text>
           <Ionicons name="chevron-forward" size={20} color="#ccc" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="heart" size={24} color="#8E2DE2" style={styles.menuIcon} />
+          <Ionicons name="heart" size={24} color="#8C1C13" style={styles.menuIcon} />
           <Text style={styles.menuText}>Favorite Wineries</Text>
           <Ionicons name="chevron-forward" size={20} color="#ccc" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="settings" size={24} color="#8E2DE2" style={styles.menuIcon} />
+          <Ionicons name="settings" size={24} color="#8C1C13" style={styles.menuIcon} />
           <Text style={styles.menuText}>Settings</Text>
           <Ionicons name="chevron-forward" size={20} color="#ccc" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="help-circle" size={24} color="#8E2DE2" style={styles.menuIcon} />
+          <Ionicons name="help-circle" size={24} color="#8C1C13" style={styles.menuIcon} />
           <Text style={styles.menuText}>Help & Support</Text>
           <Ionicons name="chevron-forward" size={20} color="#ccc" />
         </TouchableOpacity>
       </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Ionicons name="log-out" size={20} color="#FF3B30" style={styles.logoutIcon} />
+        <Ionicons name="log-out" size={20} color="#8C1C13" style={styles.logoutIcon} />
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
     </View>
@@ -83,7 +83,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#E7E3E2',
   },
   profileHeader: {
     alignItems: 'center',
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   logoutText: {
-    color: '#FF3B30',
+    color: '#8C1C13',
     fontSize: 16,
     fontWeight: '500',
   },

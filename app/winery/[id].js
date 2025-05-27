@@ -1,4 +1,4 @@
-// app/winery/[id].js
+// app/winery/[id].js - Updated to properly save visit data
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -15,6 +15,7 @@ import {
   View
 } from 'react-native';
 import VisitLogForm from '../../components/VisitLogForm';
+import { visitsService } from '../../lib/visits';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
 
 export default function WineryDetail() {
@@ -25,21 +26,43 @@ export default function WineryDetail() {
   const winery = wineries.find((w) => w.id.toString() === id.toString());
   const [showLogForm, setShowLogForm] = useState(false);
 
-  const handleSaveVisit = (visitData) => {
+  const handleSaveVisit = async (visitData) => {
     console.log('Saving visit:', visitData);
     
-    // Here you would typically save to your database
-    // For now, we'll just show a success message
-    Alert.alert(
-      'Visit Logged!', 
-      `Your visit to ${winery.name} has been saved successfully.`,
-      [
-        { 
-          text: 'OK', 
-          onPress: () => setShowLogForm(false)
-        }
-      ]
-    );
+    try {
+      // Save to database using the visits service
+      const result = await visitsService.createVisit(visitData);
+      
+      if (result.success) {
+        Alert.alert(
+          'Visit Logged!', 
+          `Your visit to ${winery.name} has been saved successfully.`,
+          [
+            { 
+              text: 'OK', 
+              onPress: () => {
+                setShowLogForm(false);
+                // Optionally navigate to wines tab to see the logged wines
+                router.push('/(tabs)/wines');
+              }
+            }
+          ]
+        );
+      } else {
+        Alert.alert(
+          'Error',
+          `Failed to save your visit: ${result.error}`,
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Error saving visit:', error);
+      Alert.alert(
+        'Error',
+        'An unexpected error occurred while saving your visit.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   if (!winery) {
@@ -59,7 +82,7 @@ export default function WineryDetail() {
           style={styles.backButton} 
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="chevron-back" size={24} color="#333" />
+          <Ionicons name="chevron-back" size={24} color="#3E3E3E" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{winery.name}</Text>
       </View>
@@ -145,14 +168,14 @@ export default function WineryDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E7E3E2', // Matches login background
+    backgroundColor: '#E7E3E2',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc', // Slightly darker for contrast
+    borderBottomColor: '#ccc',
     backgroundColor: '#E7E3E2',
   },
   backButton: {
@@ -175,9 +198,11 @@ const styles = StyleSheet.create({
   },
   detailsContainer: {
     padding: 20,
-    backgroundColor: '#f9f9f9', // Matches input background from login
+    backgroundColor: '#f9f9f9',
     borderRadius: 8,
     margin: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   address: {
     fontSize: 16,
@@ -202,7 +227,7 @@ const styles = StyleSheet.create({
   actionButtonText: {
     marginTop: 8,
     fontSize: 12,
-    color: '#8C1C13', // Matches primary button color
+    color: '#8C1C13',
     fontWeight: '500',
   },
   infoSection: {
