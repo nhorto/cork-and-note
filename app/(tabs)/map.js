@@ -183,7 +183,7 @@
 // app/(tabs)/map.js
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { View, Text, Platform, StyleSheet } from 'react-native';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
 
 export default function MapScreen() {

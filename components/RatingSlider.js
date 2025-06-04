@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Slider } from '@miblanchard/react-native-slider';
+import { useEffect, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 const RatingSlider = ({ 
   label, 
   value = 0, 
   min = 0, 
   max = 5, 
-  step = 0.5,
+  step = 0.1,
   onValueChange,
   showStars = false 
 }) => {
-  const [sliderWidth, setSliderWidth] = useState(0);
   const [localValue, setLocalValue] = useState(value);
   
   // Update local value when prop changes
@@ -19,41 +19,15 @@ const RatingSlider = ({
     setLocalValue(value);
   }, [value]);
   
-  // Handle the touch/click on the slider
-  const handleSliderPress = (event) => {
-    if (sliderWidth === 0) return;
+  // Handle slider value change
+  const handleValueChange = (newValue) => {
+    // newValue comes as an array from this slider library
+    const actualValue = Array.isArray(newValue) ? newValue[0] : newValue;
+    setLocalValue(actualValue);
     
-    // Get the touch position relative to the slider
-    const touchX = event.nativeEvent.locationX;
-    
-    // Calculate the percentage and the new value
-    const percentage = Math.max(0, Math.min(touchX / sliderWidth, 1));
-    const newValue = min + percentage * (max - min);
-    
-    // Round to the nearest step
-    const roundedValue = Math.round(newValue / step) * step;
-    
-    // Update local state
-    setLocalValue(roundedValue);
-    
-    // Call the callback if provided
     if (onValueChange) {
-      onValueChange(roundedValue);
+      onValueChange(actualValue);
     }
-  };
-  
-  // Calculate the thumb position
-  const getThumbPosition = () => {
-    if (sliderWidth === 0) return 0;
-    const percentage = (localValue - min) / (max - min);
-    return percentage * sliderWidth - 15; // 15 is half the thumb width
-  };
-  
-  // Calculate the active track width
-  const getActiveTrackWidth = () => {
-    if (sliderWidth === 0) return 0;
-    const percentage = (localValue - min) / (max - min);
-    return percentage * sliderWidth;
   };
 
   // Render stars if enabled
@@ -75,7 +49,7 @@ const RatingSlider = ({
         <Ionicons
           key={i}
           name={iconName}
-          size={24} // Increased size for better visibility
+          size={24}
           color="#FFD700"
           style={{ marginHorizontal: 3 }}
         />
@@ -92,46 +66,20 @@ const RatingSlider = ({
         <Text style={styles.valueText}>{localValue.toFixed(1)}</Text>
       </View>
 
-      <TouchableWithoutFeedback onPress={handleSliderPress}>
-        <View
-          style={styles.sliderContainer}
-          onLayout={(event) => {
-            const { width } = event.nativeEvent.layout;
-            setSliderWidth(width);
-          }}
-        >
-          <View style={[styles.track, { backgroundColor: '#f0f0f0' }]}>
-            <View
-              style={[
-                styles.activeTrack,
-                {
-                  backgroundColor: '#8E2DE2',
-                  width: getActiveTrackWidth(),
-                },
-              ]}
-            />
-          </View>
-
-          <View
-            style={[
-              styles.thumb,
-              {
-                backgroundColor: '#8E2DE2',
-                transform: [{ translateX: getThumbPosition() }],
-              },
-            ]}
-          />
-
-          <View style={styles.tickContainer}>
-            {Array.from({ length: Math.floor((max - min) / step) + 1 }).map((_, i) => (
-              <View
-                key={i}
-                style={[styles.tick, i % 2 === 0 && styles.majorTick]}
-              />
-            ))}
-          </View>
-        </View>
-      </TouchableWithoutFeedback>
+      <View style={styles.sliderContainer}>
+        <Slider
+          value={localValue}
+          minimumValue={min}
+          maximumValue={max}
+          step={step}
+          onValueChange={handleValueChange}
+          thumbStyle={styles.thumb}
+          trackStyle={styles.track}
+          minimumTrackTintColor="#8C1C13"
+          maximumTrackTintColor="#f0f0f0"
+          containerStyle={styles.sliderWrapper}
+        />
+      </View>
 
       {showStars && renderStars()}
     </View>
@@ -160,50 +108,26 @@ const styles = StyleSheet.create({
   },
   sliderContainer: {
     height: 40,
-    position: 'relative',
     justifyContent: 'center',
+  },
+  sliderWrapper: {
+    height: 40,
+    width: '100%',
   },
   track: {
     height: 6,
     borderRadius: 3,
-    width: '100%',
-    position: 'absolute',
-  },
-  activeTrack: {
-    height: '100%',
-    borderRadius: 3,
-    position: 'absolute',
-    left: 0,
   },
   thumb: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    position: 'absolute',
-    elevation: 3,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#8C1C13',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    zIndex: 2,
-  },
-  tickContainer: {
-    position: 'absolute',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 2,
-  },
-  tick: {
-    width: 1,
-    height: 5,
-    backgroundColor: '#ccc',
-    marginTop: 8,
-  },
-  majorTick: {
-    height: 8,
-    width: 2,
-    backgroundColor: '#aaa',
+    elevation: 3,
   },
   starsContainer: {
     flexDirection: 'row',
