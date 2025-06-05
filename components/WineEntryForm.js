@@ -16,7 +16,7 @@ import {
 
 import { Picker } from '@react-native-picker/picker';
 import FlavorTagSelector from './FlavorTagSelector';
-import RatingSlider from './RatingSlider';
+import RatingSlider from './RatingSlider'
 
 const WINE_TYPES = [
   'Red', 'White', 'Rosé', 'Sparkling', 'Dessert',

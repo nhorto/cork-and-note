@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import WineEntryForm from './WineEntryForm';
 
 export default function VisitLogForm({ winery, onSave, onCancel }) {
@@ -466,33 +467,33 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   );
   
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.header}>
-        <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
-          <Ionicons name="close" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Log Visit to {winery.name}</Text>
-      </View>
-      
-      {renderTabHeader()}
-      
-      <View style={styles.tabContentContainer}>
-        {activeTab === 0 && renderWinesTab()}
-        {activeTab === 1 && renderWineryDetailsTab()}
-        {activeTab === 2 && renderReviewTab()}
-      </View>
-      
-      {/* Wine Form Modal */}
-      <Modal
-        visible={showWineForm}
-        animationType="slide"
-        transparent={false}
+    <SafeAreaView style= {{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
+            <Ionicons name="close" size={24} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Log Visit to {winery.name}</Text>
+        </View>
+        
+        {renderTabHeader()}
+        
+        <View style={styles.tabContentContainer}>
+          {activeTab === 0 && renderWinesTab()}
+          {activeTab === 1 && renderWineryDetailsTab()}
+          {activeTab === 2 && renderReviewTab()}
+        </View>
+        
+        {/* Wine Form Modal */}
+        <Modal
+          visible={showWineForm}
+          animationType="slide"
+          transparent={false}
+        >
+          <SafeAreaView style={{ flex: 1 }}>
             <TouchableOpacity
               style={styles.modalCloseButton}
               onPress={() => setShowWineForm(false)}
@@ -502,16 +503,15 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
             <Text style={styles.modalTitle}>
               {currentWineIndex !== null ? 'Edit Wine' : 'Add Wine'}
             </Text>
-          </View>
-          
-          <WineEntryForm
-            onSave={handleSaveWine}
-            onCancel={() => setShowWineForm(false)}
-            initialData={currentWineIndex !== null ? wines[currentWineIndex] : null}
-          />
-        </View>
-      </Modal>
-    </KeyboardAvoidingView>
+            <WineEntryForm
+              onSave={handleSaveWine}
+              onCancel={() => setShowWineForm(false)}
+              initialData={currentWineIndex !== null ? wines[currentWineIndex] : null}
+            />
+          </SafeAreaView>
+        </Modal>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
