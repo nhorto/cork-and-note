@@ -111,7 +111,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
               onPress={() => toggleTag(tag)}
             >
               <Text style={styles.selectedTagText}>{tag}</Text>
-              <Ionicons name="close-circle" size={16} color="#8E2DE2" style={styles.removeIcon} />
+              <Ionicons name="close-circle" size={16} color="#8C1C13" style={styles.removeIcon} />
             </TouchableOpacity>
           ))
         )}

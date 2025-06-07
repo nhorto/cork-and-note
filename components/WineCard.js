@@ -143,17 +143,22 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
       <View style={styles.headerContainer}>
         <View style={styles.titleContainer}>
           <Text style={styles.name} numberOfLines={1}>
-            {wineName}
+            {wineName || wineVarietal || wineType || 'Unnamed Wine'}
           </Text>
           <View style={styles.wineDetails}>
-            {wineVarietal && (
+            {!wineName && !wineVarietal && wineType && (
+              <Text style={styles.type}>
+                {wineType}
+              </Text>
+            )}
+            {wineName && wineVarietal && (
               <Text style={styles.varietal}>
                 {wineVarietal}
               </Text>
             )}
             {wineYear && (
               <Text style={styles.year}>
-                {wineVarietal ? ' • ' : ''}
+                {(wineName && wineVarietal) ? ' • ' : ''}
                 {wineYear}
               </Text>
             )}

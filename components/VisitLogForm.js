@@ -23,7 +23,14 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   const [activeTab, setActiveTab] = useState(0);
   
   // Form state
-  const [visitDate, setVisitDate] = useState(new Date().toISOString().split('T')[0]);
+  const [visitDate, setVisitDate] = useState(() => {
+    // Get current date in local timezone and format as YYYY-MM-DD
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
   const [wineryNotes, setWineryNotes] = useState('');
   const [wineryPhoto, setWineryPhoto] = useState(null);
   const [wines, setWines] = useState([]);
@@ -52,14 +59,15 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
     );
   };
 
-  // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return '';
+    // Create date object from string and adjust for local timezone
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC' // Use UTC to prevent timezone shifting
     });
   };
   
@@ -483,24 +491,22 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   
   return (
     <SafeAreaView style= {{ flex: 1 }}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Log Visit to {winery.name}</Text>
-        </View>
-        
-        {renderTabHeader()}
-        
-        <View style={styles.tabContentContainer}>
-          {activeTab === 0 && renderWinesTab()}
-          {activeTab === 1 && renderWineryDetailsTab()}
-          {activeTab === 2 && renderReviewTab()}
-        </View>
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#E7E3E2' }}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Log Visit to {winery.name}</Text>
+          </View>
+          
+          {renderTabHeader()}
+          
+          <View style={styles.tabContentContainer}>
+            {activeTab === 0 && renderWinesTab()}
+            {activeTab === 1 && renderWineryDetailsTab()}
+            {activeTab === 2 && renderReviewTab()}
+          </View>
+        </SafeAreaView>
         
         {/* Wine Form Modal */}
         <Modal
@@ -528,7 +534,6 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
             />
           </SafeAreaView>
         </Modal>
-      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -541,9 +546,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#E7E3E2',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
+    marginTop: Platform.OS === 'android' ? 30 : 0, // Add top margin for Android
   },
   closeButton: {
     padding: 8,
