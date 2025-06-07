@@ -26,3 +26,10 @@ Here are the changes that i still need to make to the app:
     10. if you have been to a winery, the visits need to be shown when you go to the wineries "home page"
         a. then i would need a way to click on them and see what i had and how the user rating things for that visit.
     11. need to be able to use this offline but still sync up with the backend. 
+    12. add in a feature to where a user can add a winery to their itenterary and add favorites. 
+        a. there could be a lot of things to do here. like i think i would have to add some tables to the backend for this to work right. 
+            and i would also have to do alot of things on the front end for this to work right. 
+        b. i would like to also be able to filter by this on the map. i want the user to be able to filter the map by wineries that they have been too, and 
+            ones that is on their "wishlist". i think this would make a lot of sense but like i said this would be a little bit more involved. 
+    13. add in filter for on the wine tab  
+        a. i need to add in so that the user can filter the wines they have

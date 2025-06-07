@@ -1,14 +1,14 @@
 // components/FlavorTagSelector.js
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  TextInput 
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 
 // Predefined flavor categories and notes
 const FLAVOR_CATEGORIES = {
@@ -120,7 +120,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
       {/* Search and Custom Tag Input */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={18} color="#8E2DE2" style={styles.searchIcon} />
+          <Ionicons name="search" size={18} color="#8C1C13" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search flavor notes..."
@@ -129,7 +129,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
           />
           {searchQuery !== '' && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={18} color="#8E2DE2" />
+              <Ionicons name="close-circle" size={18} color="#8C1C13" />
             </TouchableOpacity>
           )}
         </View>
@@ -150,7 +150,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             <Ionicons 
               name="add-circle" 
               size={24} 
-              color={customTag.trim() === '' ? '#ccc' : '#8E2DE2'} 
+              color={customTag.trim() === '' ? '#ccc' : '#8C1C13'} 
             />
           </TouchableOpacity>
         </View>
@@ -268,14 +268,14 @@ const styles = StyleSheet.create({
   selectedTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(142, 45, 226, 0.1)',
+    backgroundColor: 'rgba(227, 58, 58, 0.1)',
     borderRadius: 15,
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginRight: 8,
   },
   selectedTagText: {
-    color: '#8E2DE2',
+    color: '#8C1C13',
     fontWeight: '500',
     fontSize: 14,
   },
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f0f0',
   },
   activeCategoryTab: {
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13',
   },
   categoryTabText: {
     fontSize: 14,
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedTagButton: {
-    backgroundColor: '#8E2DE2',
+    backgroundColor: '#8C1C13',
   },
   tagText: {
     color: '#555',

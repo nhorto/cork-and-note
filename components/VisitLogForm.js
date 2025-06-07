@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import WineEntryForm from './WineEntryForm';
 
 export default function VisitLogForm({ winery, onSave, onCancel }) {
@@ -29,6 +29,9 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   const [wines, setWines] = useState([]);
   const [showWineForm, setShowWineForm] = useState(false);
   const [currentWineIndex, setCurrentWineIndex] = useState(null);
+
+  // Fix header
+  const insets = useSafeAreaInsets();
   
   // Tab configuration
   const tabs = [
@@ -36,7 +39,19 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
     { id: 1, label: 'Winery Details', icon: 'business' },
     { id: 2, label: 'Review & Save', icon: 'checkmark-circle' }
   ];
-  
+
+  // Alert for exiting wine form
+  const handleExitWineForm = () => {
+    Alert.alert(
+      'Discard Changes?',
+      'Are you sure you want to exit? Any unsaved changes will be lost.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Exit', style: 'destructive', onPress: () => setShowWineForm(false) }
+      ]
+    );
+  };
+
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -493,19 +508,22 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
           animationType="slide"
           transparent={false}
         >
-          <SafeAreaView style={{ flex: 1 }}>
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setShowWineForm(false)}
-            >
-              <Ionicons name="close" size={28} color="#333" />
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>
-              {currentWineIndex !== null ? 'Edit Wine' : 'Add Wine'}
-            </Text>
+          <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top || 10 }]}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={handleExitWineForm}
+              >
+                <Ionicons name="close" size={28} color="#333" />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>
+                {currentWineIndex !== null ? 'Edit Wine' : 'Add Wine'}
+              </Text>
+            </View>
+
             <WineEntryForm
               onSave={handleSaveWine}
-              onCancel={() => setShowWineForm(false)}
+              onCancel={handleExitWineForm}
               initialData={currentWineIndex !== null ? wines[currentWineIndex] : null}
             />
           </SafeAreaView>
@@ -808,6 +826,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#3E3E3E',
   },
+  reviewRating: {
+    flexDirection: 'row',
+  },
+
   reviewRatingText: {
     fontSize: 14,
     color: '#666',

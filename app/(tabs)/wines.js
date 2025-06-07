@@ -629,13 +629,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#E7E3E2',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '80%',
+    maxHeight: '85%', // Increased from 80%
+    minHeight: '60%', // Added minimum height
+    paddingBottom: 20, // Added bottom padding for safe area
   },
   filterHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
+    paddingBottom: 15, // Reduced bottom padding
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
@@ -647,9 +650,10 @@ const styles = StyleSheet.create({
   filterContent: {
     flex: 1,
     padding: 20,
+    paddingTop: 15, // Reduced top padding
   },
   filterSection: {
-    marginBottom: 25,
+    marginBottom: 20, // Reduced from 25
   },
   filterSectionTitle: {
     fontSize: 16,
@@ -685,9 +689,12 @@ const styles = StyleSheet.create({
   filterActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 15, // Changed from padding: 20
+    paddingBottom: 20,
     borderTopWidth: 1,
     borderTopColor: '#ccc',
+    backgroundColor: '#E7E3E2', // Ensure background color
   },
   clearFiltersButton: {
     flex: 1,

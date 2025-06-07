@@ -1,7 +1,7 @@
-// app/winery/[id].js - Updated to properly save visit data
+// app/winery/[id].js - Updated with Past Visits section
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -14,14 +14,18 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import PastVisitsSection from '../../components/PastVisitsSection';
 import VisitLogForm from '../../components/VisitLogForm';
-import { visitsService } from '../../lib/visits';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
+import { visitsService } from '../../lib/visits';
+import { AuthContext } from '../_layout';
 
 export default function WineryDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const navigation = useNavigation();
+  const { user } = useContext(AuthContext);
   
   const winery = wineries.find((w) => w.id.toString() === id.toString());
   const [showLogForm, setShowLogForm] = useState(false);
@@ -42,8 +46,8 @@ export default function WineryDetail() {
               text: 'OK', 
               onPress: () => {
                 setShowLogForm(false);
-                // Optionally navigate to wines tab to see the logged wines
-                router.push('/(tabs)/wines');
+                // Reload the page to show the new visit
+                navigation.setParams({ refresh: Date.now() });
               }
             }
           ]
@@ -63,6 +67,18 @@ export default function WineryDetail() {
         [{ text: 'OK' }]
       );
     }
+  };
+
+  // Handle exit from log form with confirmation
+  const handleExitLogForm = () => {
+    Alert.alert(
+      'Discard Changes?',
+      'Are you sure you want to exit? Any unsaved changes will be lost.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Exit', style: 'destructive', onPress: () => setShowLogForm(false) }
+      ]
+    );
   };
 
   if (!winery) {
@@ -147,6 +163,13 @@ export default function WineryDetail() {
             </Text>
           </View>
         </View>
+        
+        {/* Past visits section - only show if user is logged in */}
+        {user && (
+          <View style={styles.pastVisitsContainer}>
+            <PastVisitsSection wineryId={id} />
+          </View>
+        )}
       </ScrollView>
       
       {/* Visit Log Form Modal */}
@@ -154,12 +177,15 @@ export default function WineryDetail() {
         visible={showLogForm}
         animationType="slide"
         presentationStyle="fullScreen"
+        onRequestClose={handleExitLogForm}
       >
-        <VisitLogForm
-          winery={winery}
-          onSave={handleSaveVisit}
-          onCancel={() => setShowLogForm(false)}
-        />
+        <SafeAreaProvider>
+          <VisitLogForm
+            winery={winery}
+            onSave={handleSaveVisit}
+            onCancel={handleExitLogForm}
+          />
+        </SafeAreaProvider>
       </Modal>
     </SafeAreaView>
   );
@@ -190,6 +216,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: 24,
   },
   centerContainer: {
     flex: 1,
@@ -243,5 +270,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#3E3E3E',
     lineHeight: 22,
+  },
+  pastVisitsContainer: {
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
 });

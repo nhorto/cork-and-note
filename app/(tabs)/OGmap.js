@@ -1,177 +1,119 @@
-// import { useRouter } from 'expo-router';
-// import { useEffect, useMemo, useRef, useState } from 'react';
-// import { Text, View } from 'react-native';
-// import MapView, { Marker } from 'react-native-maps';
-// import Supercluster from 'supercluster';
-// import wineries from '../../data/wineries_with_coordinates_and_id.json';
-
-// export default function MapScreen() {
-//   const router = useRouter();
-//   const mapRef = useRef(null);
-//   const [clusters, setClusters] = useState([]);
-//   const [region, setRegion] = useState({
-//     latitude: 37.4316, // Approximate center of Virginia
-//     longitude: -78.6569,
-//     latitudeDelta: 5,  // Wider delta to show the whole state
-//     longitudeDelta: 5,
-//   });
-//    // Convert wineries to GeoJSON format for Supercluster - memoized to prevent recalculation
-//   const points = useMemo(() => {
-//     return wineries.map(winery => ({
-//       type: 'Feature',
-//       properties: { cluster: false, wineryId: winery.id, name: winery.name },
-//       geometry: {
-//         type: 'Point',
-//         coordinates: [winery.longitude, winery.latitude]
-//       }
-//     }));
-//   }, [wineries]);
-
-//   // Create supercluster instance - memoized to prevent recreation
-//   const supercluster = useMemo(() => {
-//     const instance = new Supercluster({
-//       radius: 40,
-//       maxZoom: 16
-//     });
-//     instance.load(points);
-//     return instance;
-//   }, [points]);
-
-//   // Update clusters when region changes, using a memoized function
-//   const updateClusters = useMemo(() => {
-//     return (newRegion) => {
-//       // Get map bounds
-//       const northEast = {
-//         latitude: newRegion.latitude + newRegion.latitudeDelta/2,
-//         longitude: newRegion.longitude + newRegion.longitudeDelta/2
-//       };
-//       const southWest = {
-//         latitude: newRegion.latitude - newRegion.latitudeDelta/2,
-//         longitude: newRegion.longitude - newRegion.longitudeDelta/2
-//       };
-//       const bounds = [
-//         southWest.longitude, southWest.latitude, 
-//         northEast.longitude, northEast.latitude
-//       ];
-
-//       const zoom = Math.log2(360 / newRegion.longitudeDelta) - 1;
-//       const newClusters = supercluster.getClusters(bounds, Math.floor(zoom));
-//       setClusters(newClusters);
-//     };
-//   }, [supercluster]);
-
-//   // Update clusters when region changes
-//   useEffect(() => {
-//     updateClusters(region);
-//   }, [region, updateClusters]);
-
-//   // Use useLayoutEffect to measure and update before painting to prevent flickering
-//   useEffect(() => {
-//     // Only run once on mount to set initial clusters
-//     updateClusters(region);
-//   }, []);
-
-//   const onRegionChangeComplete = (newRegion) => {
-//     setRegion(newRegion);
-//   };
-
-//   // Memoize cluster rendering to prevent flickering
-//   const renderCluster = useMemo(() => {
-//     return (cluster) => {
-//       const { cluster_id, point_count } = cluster.properties;
-      
-//       return (
-//         <Marker
-//           key={`cluster-${cluster_id}`}
-//           coordinate={{
-//             latitude: cluster.geometry.coordinates[1],
-//             longitude: cluster.geometry.coordinates[0]
-//           }}
-//           onPress={() => {
-//             // Zoom in on cluster when pressed
-//             const children = supercluster.getLeaves(cluster_id, 100);
-//             const childrenCoordinates = children.map(child => ({
-//               latitude: child.geometry.coordinates[1],
-//               longitude: child.geometry.coordinates[0]
-//             }));
-            
-//             mapRef.current.fitToCoordinates(childrenCoordinates, {
-//               edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-//               animated: true
-//             });
-//           }}
-//         >
-//           <View style={{
-//             width: 35,
-//             height: 35,
-//             borderRadius: 20, // Make sure this is half the width/height for a perfect circle
-//             backgroundColor: '#8C1C13',
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//             borderWidth: 2,
-//             borderColor: '#3E3E3E', // Add a border to make it more visible
-//             // Add a shadow for better visibility
-//             shadowColor: '#000',
-//             shadowOffset: { width: 0, height: 1 },
-//             shadowOpacity: 0.3,
-//             shadowRadius: 1,
-//             elevation: 5 // For Android
-//           }}>
-//             <Text style={{ 
-//               color: '#fff', 
-//               fontWeight: 'bold',
-//               fontSize: 14,
-//               textAlign: 'center'
-//             }}>
-//               {point_count}
-//             </Text>
-//           </View>
-//         </Marker>
-//       );
-//     };
-//   }, [supercluster]);
-
-//   // Memoize marker rendering to prevent flickering
-//   const renderMarker = useMemo(() => {
-//     return (cluster) => {
-//       return (
-//         <Marker
-//           key={cluster.properties.wineryId}
-//           coordinate={{
-//             latitude: cluster.geometry.coordinates[1],
-//             longitude: cluster.geometry.coordinates[0]
-//           }}
-//           title={cluster.properties.name}
-//           onPress={() => router.push(`/winery/${cluster.properties.wineryId}`)}
-//         />
-//       );
-//     };
-//   }, [router]);
-
-//   return (
-//     <MapView
-//       ref={mapRef}
-//       style={{ flex: 1 }}
-//       region={region}
-//       onRegionChangeComplete={onRegionChangeComplete}
-//     >
-//       {clusters.map(cluster => {
-//         // Render a cluster marker if a cluster
-//         if (cluster.properties.cluster) {
-//           return renderCluster(cluster);
-//         }
-        
-//         // Render a single marker if not
-//         return renderMarker(cluster);
-//       })}
-//     </MapView>
-//   );
-// }
+// app/(tabs)/OGmap.js - Performance optimized version
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import MapView, { Callout, Marker } from 'react-native-maps';
+import wineries from '../../data/wineries_with_coordinates_and_id.json';
 
 export default function OGMap() {
+  const router = useRouter();
+  const [showLabels, setShowLabels] = useState(false);
+  
+  // Initial region centered on Virginia
+  const initialRegion = {
+    latitude: 37.4316,
+    longitude: -78.6569,
+    latitudeDelta: 5,
+    longitudeDelta: 5,
+  };
+
+  // Handle region change to determine when to show labels
+  const handleRegionChange = (region) => {
+    // Show labels when zoomed in (longitude delta less than 0.5 degrees)
+    setShowLabels(region.longitudeDelta < 0.15);
+  };
+
+  // Render a single winery marker
+  const renderWineryMarker = (winery, index) => {
+    return (
+      <Marker
+        key={`winery-${winery.id}`}
+        identifier={`winery-${winery.id}`}
+        coordinate={{
+          latitude: winery.latitude,
+          longitude: winery.longitude
+        }}
+        tracksViewChanges={false} // Important for performance
+        onPress={() => router.push(`/winery/${winery.id}`)}
+      >
+        <View style={styles.wineryMarker}>
+          <Ionicons name="wine" size={16} color="#FFFFFF" />
+        </View>
+        
+        {showLabels && (
+          <Callout tooltip>
+            <View style={styles.calloutContainer}>
+              <Text style={styles.calloutTitle}>{winery.name}</Text>
+              <Text style={styles.calloutAddress}>{winery.address}</Text>
+              <Text style={styles.calloutAction}>Tap to view details</Text>
+            </View>
+          </Callout>
+        )}
+      </Marker>
+    );
+  };
+
   return (
-    <View style={{ flex: 1 }}>
-      <Text>OG Map</Text>
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        initialRegion={initialRegion}
+        onRegionChangeComplete={handleRegionChange}
+        showsUserLocation
+        maxZoomLevel={19}
+        minZoomLevel={5}
+        rotateEnabled={false}
+        loadingEnabled={true}
+        moveOnMarkerPress={false}
+      >
+        {wineries.map(renderWineryMarker)}
+      </MapView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  map: {
+    flex: 1,
+  },
+  wineryMarker: {
+    backgroundColor: '#8C1C13',
+    padding: 6,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  calloutContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 10,
+    width: 180,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  calloutTitle: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginBottom: 3,
+    color: '#3E3E3E',
+  },
+  calloutAddress: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 5,
+  },
+  calloutAction: {
+    fontSize: 11,
+    color: '#8C1C13',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginTop: 3,
+  },
+});
