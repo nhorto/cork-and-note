@@ -366,59 +366,72 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   
   // Render winery details tab
   const renderWineryDetailsTab = () => (
-    <ScrollView style={styles.tabContent}>
-      <View style={styles.detailsSection}>
-        <Text style={styles.label}>Visit Date</Text>
-        <TextInput
-          style={styles.input}
-          value={visitDate}
-          onChangeText={setVisitDate}
-          placeholder="YYYY-MM-DD"
-        />
-        <Text style={styles.dateDisplay}>{formatDate(visitDate)}</Text>
-      </View>
-      
-      <View style={styles.detailsSection}>
-        <Text style={styles.label}>Winery Notes</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          value={wineryNotes}
-          onChangeText={setWineryNotes}
-          placeholder="How was the atmosphere, service, overall experience?"
-          multiline
-          numberOfLines={6}
-          textAlignVertical="top"
-        />
-      </View>
-      
-      <View style={styles.detailsSection}>
-        <Text style={styles.label}>Winery Photo</Text>
-        
-        <View style={styles.photoButtons}>
-          <TouchableOpacity style={styles.photoButton} onPress={takeWineryPhoto}>
-            <Ionicons name="camera" size={20} color="#8C1C13" />
-            <Text style={styles.photoButtonText}>Take Photo</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.photoButton} onPress={pickWineryImage}>
-            <Ionicons name="image" size={20} color="#8C1C13" />
-            <Text style={styles.photoButtonText}>Choose Photo</Text>
-          </TouchableOpacity>
+    <KeyboardAvoidingView 
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+    >
+      <ScrollView 
+        style={styles.tabContent}
+        contentContainerStyle={styles.scrollContentContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.detailsSection}>
+          <Text style={styles.label}>Visit Date</Text>
+          <TextInput
+            style={styles.input}
+            value={visitDate}
+            onChangeText={setVisitDate}
+            placeholder="YYYY-MM-DD"
+          />
+          <Text style={styles.dateDisplay}>{formatDate(visitDate)}</Text>
         </View>
         
-        {wineryPhoto && (
-          <View style={styles.photoPreviewContainer}>
-            <Image source={{ uri: wineryPhoto }} style={styles.photoPreview} />
-            <TouchableOpacity
-              style={styles.removePhotoButton}
-              onPress={() => setWineryPhoto(null)}
-            >
-              <Ionicons name="close-circle" size={24} color="#FF3B30" />
+        <View style={styles.detailsSection}>
+          <Text style={styles.label}>Winery Notes</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            value={wineryNotes}
+            onChangeText={setWineryNotes}
+            placeholder="How was the atmosphere, service, overall experience?"
+            multiline
+            numberOfLines={6}
+            textAlignVertical="top"
+          />
+        </View>
+        
+        <View style={styles.detailsSection}>
+          <Text style={styles.label}>Winery Photo</Text>
+          
+          <View style={styles.photoButtons}>
+            <TouchableOpacity style={styles.photoButton} onPress={takeWineryPhoto}>
+              <Ionicons name="camera" size={20} color="#8C1C13" />
+              <Text style={styles.photoButtonText}>Take Photo</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.photoButton} onPress={pickWineryImage}>
+              <Ionicons name="image" size={20} color="#8C1C13" />
+              <Text style={styles.photoButtonText}>Choose Photo</Text>
             </TouchableOpacity>
           </View>
-        )}
-      </View>
-    </ScrollView>
+          
+          {wineryPhoto && (
+            <View style={styles.photoPreviewContainer}>
+              <Image source={{ uri: wineryPhoto }} style={styles.photoPreview} />
+              <TouchableOpacity
+                style={styles.removePhotoButton}
+                onPress={() => setWineryPhoto(null)}
+              >
+                <Ionicons name="close-circle" size={24} color="#FF3B30" />
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+        
+        {/* Add extra padding at bottom to ensure content is accessible above keyboard */}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
   
   // Render review tab
@@ -490,50 +503,48 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   );
   
   return (
-    <SafeAreaView style= {{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#E7E3E2' }}>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#333" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#E7E3E2' }}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
+          <Ionicons name="close" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Log Visit to {winery.name}</Text>
+      </View>
+      
+      {renderTabHeader()}
+      
+      <View style={styles.tabContentContainer}>
+        {activeTab === 0 && renderWinesTab()}
+        {activeTab === 1 && renderWineryDetailsTab()}
+        {activeTab === 2 && renderReviewTab()}
+      </View>
+      
+      {/* Wine Form Modal */}
+      <Modal
+        visible={showWineForm}
+        animationType="slide"
+        transparent={false}
+      >
+        <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top || 10 }]}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={handleExitWineForm}
+            >
+              <Ionicons name="close" size={28} color="#333" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Log Visit to {winery.name}</Text>
+            <Text style={styles.modalTitle}>
+              {currentWineIndex !== null ? 'Edit Wine' : 'Add Wine'}
+            </Text>
           </View>
-          
-          {renderTabHeader()}
-          
-          <View style={styles.tabContentContainer}>
-            {activeTab === 0 && renderWinesTab()}
-            {activeTab === 1 && renderWineryDetailsTab()}
-            {activeTab === 2 && renderReviewTab()}
-          </View>
-        </SafeAreaView>
-        
-        {/* Wine Form Modal */}
-        <Modal
-          visible={showWineForm}
-          animationType="slide"
-          transparent={false}
-        >
-          <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top || 10 }]}>
-            <View style={styles.modalHeader}>
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={handleExitWineForm}
-              >
-                <Ionicons name="close" size={28} color="#333" />
-              </TouchableOpacity>
-              <Text style={styles.modalTitle}>
-                {currentWineIndex !== null ? 'Edit Wine' : 'Add Wine'}
-              </Text>
-            </View>
 
-            <WineEntryForm
-              onSave={handleSaveWine}
-              onCancel={handleExitWineForm}
-              initialData={currentWineIndex !== null ? wines[currentWineIndex] : null}
-            />
-          </SafeAreaView>
-        </Modal>
+          <WineEntryForm
+            onSave={handleSaveWine}
+            onCancel={handleExitWineForm}
+            initialData={currentWineIndex !== null ? wines[currentWineIndex] : null}
+          />
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -551,7 +562,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E7E3E2',
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    marginTop: Platform.OS === 'android' ? 30 : 0, // Add top margin for Android
+    paddingTop: 8, // Reduced top padding for better positioning
   },
   closeButton: {
     padding: 8,
@@ -595,6 +606,12 @@ const styles = StyleSheet.create({
   tabContent: {
     flex: 1,
     padding: 16,
+  },
+  scrollContentContainer: {
+    paddingBottom: 50, // Extra space for keyboard
+  },
+  bottomPadding: {
+    height: 150, // Extra space to ensure content is accessible above keyboard
   },
   emptyState: {
     alignItems: 'center',
@@ -837,7 +854,6 @@ const styles = StyleSheet.create({
   reviewRating: {
     flexDirection: 'row',
   },
-
   reviewRatingText: {
     fontSize: 14,
     color: '#666',

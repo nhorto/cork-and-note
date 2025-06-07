@@ -1,12 +1,12 @@
 // app/(tabs)/OGmap.js - Performance optimized version
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Callout, Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
-import wineries from '../../data/wineries_with_coordinates_and_id.json';
 import WinerySearchModal from '../../components/WinerySearchModal';
+import wineries from '../../data/wineries_with_coordinates_and_id.json';
 
 export default function OGMap() {
   const router = useRouter();

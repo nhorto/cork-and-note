@@ -40,19 +40,25 @@ const RatingSlider = ({
 
     for (let i = 0; i < 5; i++) {
       let iconName = 'star-outline';
+      let iconColor = '#B0B0B0'; // Light gray for empty stars
+      
       if (i < fullStars) {
         iconName = 'star';
+        iconColor = '#FF8C00'; // Bright orange for filled stars
       } else if (i === fullStars && hasHalfStar) {
         iconName = 'star-half';
+        iconColor = '#FF8C00'; // Bright orange for half stars
       }
+      
       stars.push(
-        <Ionicons
-          key={i}
-          name={iconName}
-          size={24}
-          color="#FFD700"
-          style={{ marginHorizontal: 3 }}
-        />
+        <View key={i} style={styles.starWrapper}>
+          <Ionicons
+            name={iconName}
+            size={28}
+            color={iconColor}
+            style={styles.starIcon}
+          />
+        </View>
       );
     }
 
@@ -125,14 +131,33 @@ const styles = StyleSheet.create({
     backgroundColor: '#8C1C13',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 25,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  starWrapper: {
+    marginHorizontal: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  starIcon: {
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 });
 

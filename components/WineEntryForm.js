@@ -11,10 +11,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  Modal
 } from 'react-native';
 
-import { Picker } from '@react-native-picker/picker';
 import FlavorTagSelector from './FlavorTagSelector';
 import RatingSlider from './RatingSlider'
 
@@ -57,6 +57,10 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   const [flavorNotes, setFlavorNotes] = useState([]);
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [photo, setPhoto] = useState(null);
+  
+  // Modal states for mobile-friendly selectors
+  const [showTypeModal, setShowTypeModal] = useState(false);
+  const [showVarietalModal, setShowVarietalModal] = useState(false);
   
   // Load initial data if editing an existing wine
   useEffect(() => {
@@ -107,7 +111,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
-        mediaTypes: ImagePicker.MediaType.Images, // Updated to use MediaType
+        mediaTypes: ImagePicker.MediaType.Images,
       });
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -129,7 +133,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images, // Updated to use MediaType
+        mediaTypes: ImagePicker.MediaType.Images,
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -151,6 +155,18 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     }));
   };
   
+  // Handle wine type selection
+  const handleWineTypeSelect = (type) => {
+    setWineType(type);
+    setShowTypeModal(false);
+  };
+  
+  // Handle wine varietal selection
+  const handleVarietalSelect = (varietal) => {
+    setWineVarietal(varietal);
+    setShowVarietalModal(false);
+  };
+  
   // Handle form submission
   const handleSave = () => {
     // Wine type is required
@@ -164,9 +180,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     
     // Create wine object
     const wineData = {
-      name: wineName, // Can be empty
+      name: wineName,
       type: wineType,
-      varietal: finalVarietal, // Can be empty
+      varietal: finalVarietal,
       customVarietal: wineVarietal === 'Other' ? customVarietal : '',
       year: wineYear,
       overallRating,
@@ -181,8 +197,91 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     onSave(wineData);
   };
   
+  // Render the mobile-friendly selectors
+  const renderTypeModal = () => (
+    <Modal
+      visible={showTypeModal}
+      animationType="slide"
+      transparent={true}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Wine Type</Text>
+            <TouchableOpacity onPress={() => setShowTypeModal(false)}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.optionsList}>
+            {WINE_TYPES.map((type) => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.optionItem,
+                  wineType === type && styles.selectedOption
+                ]}
+                onPress={() => handleWineTypeSelect(type)}
+              >
+                <Text style={[
+                  styles.optionText,
+                  wineType === type && styles.selectedOptionText
+                ]}>
+                  {type}
+                </Text>
+                {wineType === type && (
+                  <Ionicons name="checkmark" size={20} color="#8C1C13" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+  
+  const renderVarietalModal = () => (
+    <Modal
+      visible={showVarietalModal}
+      animationType="slide"
+      transparent={true}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Wine Varietal</Text>
+            <TouchableOpacity onPress={() => setShowVarietalModal(false)}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          <ScrollView style={styles.optionsList}>
+            {WINE_VARIETALS.map((varietal) => (
+              <TouchableOpacity
+                key={varietal}
+                style={[
+                  styles.optionItem,
+                  wineVarietal === varietal && styles.selectedOption
+                ]}
+                onPress={() => handleVarietalSelect(varietal)}
+              >
+                <Text style={[
+                  styles.optionText,
+                  wineVarietal === varietal && styles.selectedOptionText
+                ]}>
+                  {varietal || 'None selected'}
+                </Text>
+                {wineVarietal === varietal && (
+                  <Ionicons name="checkmark" size={20} color="#8C1C13" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+  
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <View style={styles.formGroup}>
         <Text style={styles.label}>Wine Name</Text>
         <TextInput
@@ -196,17 +295,13 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
       <View style={styles.formRow}>
         <View style={styles.formGroupHalf}>
           <Text style={styles.label}>Wine Type *</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={wineType}
-              onValueChange={(itemValue) => setWineType(itemValue)}
-              style={styles.picker}
-            >
-              {WINE_TYPES.map((type) => (
-                <Picker.Item key={type} label={type} value={type} />
-              ))}
-            </Picker>
-          </View>
+          <TouchableOpacity
+            style={styles.selectorButton}
+            onPress={() => setShowTypeModal(true)}
+          >
+            <Text style={styles.selectorText}>{wineType}</Text>
+            <Ionicons name="chevron-down" size={20} color="#8C1C13" />
+          </TouchableOpacity>
         </View>
         
         <View style={styles.formGroupHalf}>
@@ -224,18 +319,18 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
       
       <View style={styles.formGroup}>
         <Text style={styles.label}>Wine Varietal</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={wineVarietal}
-            onValueChange={(itemValue) => setWineVarietal(itemValue)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Select varietal (optional)" value="" />
-            {WINE_VARIETALS.slice(1).map((varietal) => (
-              <Picker.Item key={varietal} label={varietal} value={varietal} />
-            ))}
-          </Picker>
-        </View>
+        <TouchableOpacity
+          style={styles.selectorButton}
+          onPress={() => setShowVarietalModal(true)}
+        >
+          <Text style={[
+            styles.selectorText,
+            !wineVarietal && styles.placeholderText
+          ]}>
+            {wineVarietal || 'Select varietal (optional)'}
+          </Text>
+          <Ionicons name="chevron-down" size={20} color="#8C1C13" />
+        </TouchableOpacity>
         
         {wineVarietal === 'Other' && (
           <TextInput
@@ -365,6 +460,10 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
           <Text style={styles.buttonText}>Save Wine</Text>
         </TouchableOpacity>
       </View>
+      
+      {/* Render modals */}
+      {renderTypeModal()}
+      {renderVarietalModal()}
     </ScrollView>
   );
 }
@@ -372,8 +471,11 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#E7E3E2',
+  },
+  contentContainer: {
     padding: 16,
-    backgroundColor: '#E7E3E2', // Match login background
+    paddingBottom: 50, // Extra space at bottom
   },
   formGroup: {
     marginBottom: 20,
@@ -389,14 +491,14 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#3E3E3E', // Consistent text color
+    color: '#3E3E3E',
     marginBottom: 8,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 15,
-    color: '#8C1C13', // Primary color from login
+    color: '#8C1C13',
   },
   input: {
     borderWidth: 1,
@@ -411,15 +513,23 @@ const styles = StyleSheet.create({
     height: 120,
     textAlignVertical: 'top',
   },
-  pickerContainer: {
+  selectorButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
+    padding: 12,
     backgroundColor: '#f9f9f9',
-    overflow: 'hidden',
+    minHeight: 50,
   },
-  picker: {
-    height: 50,
+  selectorText: {
+    fontSize: 15,
+    color: '#3E3E3E',
+  },
+  placeholderText: {
+    color: '#999',
   },
   photoActions: {
     flexDirection: 'row',
@@ -470,14 +580,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   saveButton: {
-    backgroundColor: '#8C1C13', // Match primary button
+    backgroundColor: '#8C1C13',
   },
   cancelButton: {
-    backgroundColor: '#FF3B30', // Keep red for cancel
+    backgroundColor: '#FF3B30',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: '#E7E3E2',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#3E3E3E',
+  },
+  optionsList: {
+    maxHeight: 400,
+  },
+  optionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  selectedOption: {
+    backgroundColor: 'rgba(140, 28, 19, 0.1)',
+  },
+  optionText: {
+    fontSize: 16,
+    color: '#3E3E3E',
+  },
+  selectedOptionText: {
+    color: '#8C1C13',
+    fontWeight: '500',
   },
 });
