@@ -30,6 +30,7 @@ export default function Layout() {
         tabBarInactiveTintColor,
         tabBarLabelStyle: {
           fontWeight: 'bold',
+          fontSize: 12, // Slightly larger font since we have fewer tabs
         },
       }}
     >
@@ -42,19 +43,19 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
+        name="wishlist"
+        options={{
+          tabBarIcon: ({ color }) => <Ionicons name="bookmark" color={color} size={24} />,
+          title: 'Want to Visit',
+          headerTitle: 'Want to Visit',
+        }}
+      />
+      <Tabs.Screen
         name="wines"
         options={{
           tabBarIcon: ({ color }) => <Ionicons name="wine" color={color} size={24} />,
           title: 'Wines',
-          headerTitle: 'Wines',
-        }}
-      />
-      <Tabs.Screen
-        name="wineries"
-        options={{
-          tabBarIcon: ({ color }) => <Ionicons name="business" color={color} size={24} />,
-          title: 'Wineries',
-          headerTitle: 'Wineries',
+          headerTitle: 'My Wines',
         }}
       />
       <Tabs.Screen

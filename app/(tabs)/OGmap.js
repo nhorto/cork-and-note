@@ -1,20 +1,64 @@
-// app/(tabs)/OGmap.js - Performance optimized version
+// app/(tabs)/OGmap.js
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Callout, Marker } from 'react-native-maps';
+
+import { AuthContext } from '../_layout';
 import WinerySearchModal from '../../components/WinerySearchModal';
+import WineryStatusBadges from '../../components/WineryStatusBadges';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
+import { wineryStatusService } from '../../lib/wineryStatus';
 
 export default function OGMap() {
   const router = useRouter();
+  const { user } = useContext(AuthContext);
+
   const mapRef = useRef(null);
   const [showLabels, setShowLabels] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
-  
+
+  // —— STATUS LOADING ——
+  const [wineriesWithStatus, setWineriesWithStatus] = useState([]);
+  const [statusLoaded, setStatusLoaded] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      loadWineriesWithStatus();
+    } else {
+      // no user: default all statuses false
+      setWineriesWithStatus(
+        wineries.map(w => ({ 
+          ...w, 
+          status: { visited: false, isFavorite: false, isWantToVisit: false } 
+        }))
+      );
+      setStatusLoaded(true);
+    }
+  }, [user]);
+
+  const loadWineriesWithStatus = async () => {
+    try {
+      const { success, wineries: data } = await wineryStatusService.getAllWineriesWithStatus(wineries);
+      setWineriesWithStatus(
+        success 
+          ? data 
+          : wineries.map(w => ({ ...w, status: { visited: false, isFavorite: false, isWantToVisit: false } }))
+      );
+    } catch (err) {
+      console.error(err);
+      setWineriesWithStatus(
+        wineries.map(w => ({ ...w, status: { visited: false, isFavorite: false, isWantToVisit: false } }))
+      );
+    } finally {
+      setStatusLoaded(true);
+    }
+  };
+  // ————————————
+
   // Initial region centered on Virginia
   const initialRegion = {
     latitude: 37.4316,
@@ -23,7 +67,7 @@ export default function OGMap() {
     longitudeDelta: 5,
   };
 
-  // Request location permissions when component mounts
+  // Request and set user location
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -31,64 +75,33 @@ export default function OGMap() {
         Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
         return;
       }
-      
-      try {
-        const location = await Location.getCurrentPositionAsync({});
-        setUserLocation({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        });
-      } catch (error) {
-        console.error('Error getting location:', error);
-      }
+      const loc = await Location.getCurrentPositionAsync({});
+      setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
     })();
   }, []);
 
-  // Handle region change to determine when to show labels
-  const handleRegionChange = (region) => {
-    // Show labels when zoomed in (longitude delta less than 0.5 degrees)
+  const handleRegionChange = region => {
     setShowLabels(region.longitudeDelta < 0.15);
   };
 
-  // Function to zoom to user's location
   const zoomToUserLocation = async () => {
     if (!userLocation) {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
-          return;
-        }
-
-        const location = await Location.getCurrentPositionAsync({});
-        const userCoords = {
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-        };
-        setUserLocation(userCoords);
-        
-        // Animate to user location
-        mapRef.current?.animateToRegion({
-          ...userCoords,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }, 1000);
-      } catch (error) {
-        Alert.alert('Error', 'Could not determine your location. Please ensure location services are enabled.');
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
+        return;
       }
-    } else {
-      // Animate to user location
-      mapRef.current?.animateToRegion({
-        ...userLocation,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }, 1000);
+      const loc = await Location.getCurrentPositionAsync({});
+      setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
     }
+    mapRef.current?.animateToRegion({
+      ...userLocation,
+      latitudeDelta: 0.05,
+      longitudeDelta: 0.05,
+    }, 1000);
   };
 
-  // Function to handle winery selection from search
-  const handleWinerySelect = (winery) => {
-    // Animate to winery location
+  const handleWinerySelect = winery => {
     mapRef.current?.animateToRegion({
       latitude: winery.latitude,
       longitude: winery.longitude,
@@ -97,35 +110,47 @@ export default function OGMap() {
     }, 1000);
   };
 
-  // Render a single winery marker
-  const renderWineryMarker = (winery, index) => {
-    return (
-      <Marker
-        key={`winery-${winery.id}`}
-        identifier={`winery-${winery.id}`}
-        coordinate={{
-          latitude: winery.latitude,
-          longitude: winery.longitude
-        }}
-        tracksViewChanges={false} // Important for performance
-        onPress={() => router.push(`/winery/${winery.id}`)}
-      >
+  const renderWineryMarker = winery => (
+    <Marker
+      key={winery.id}
+      coordinate={{ latitude: winery.latitude, longitude: winery.longitude }}
+      tracksViewChanges={false}
+      onPress={() => router.push(`/winery/${winery.id}`)}
+    >
+      <View style={styles.markerWrapper}>
         <View style={styles.wineryMarker}>
           <Ionicons name="wine" size={16} color="#FFFFFF" />
         </View>
-        
-        {showLabels && (
-          <Callout tooltip>
-            <View style={styles.calloutContainer}>
-              <Text style={styles.calloutTitle}>{winery.name}</Text>
-              <Text style={styles.calloutAddress}>{winery.address}</Text>
-              <Text style={styles.calloutAction}>Tap to view details</Text>
-            </View>
-          </Callout>
+        {/* status badges around the marker */}
+        {winery.status && (
+          <View style={styles.statusContainer}>
+            {winery.status.visited && <View style={[styles.statusBadge, styles.visited]} />}
+            {winery.status.isFavorite && <View style={[styles.statusBadge, styles.favorite]} />}
+            {winery.status.isWantToVisit && <View style={[styles.statusBadge, styles.wantToVisit]} />}
+          </View>
         )}
-      </Marker>
-    );
-  };
+      </View>
+
+      {showLabels && (
+        <Callout tooltip>
+          <View style={styles.calloutContainer}>
+            {/* also show badges in the callout, more legible */}
+            {winery.status && (
+              <View style={styles.calloutBadges}>
+                <WineryStatusBadges status={winery.status} />
+              </View>
+            )}
+            <Text style={styles.calloutTitle}>{winery.name}</Text>
+            <Text style={styles.calloutAddress}>{winery.address}</Text>
+            <Text style={styles.calloutAction}>Tap to view details</Text>
+          </View>
+        </Callout>
+      )}
+    </Marker>
+  );
+
+  // choose data based on statusLoaded
+  const dataToRender = statusLoaded ? wineriesWithStatus : wineries;
 
   return (
     <View style={styles.container}>
@@ -138,12 +163,12 @@ export default function OGMap() {
         maxZoomLevel={19}
         minZoomLevel={5}
         rotateEnabled={false}
-        loadingEnabled={true}
+        loadingEnabled
         moveOnMarkerPress={false}
       >
-        {wineries.map(renderWineryMarker)}
+        {dataToRender.map(renderWineryMarker)}
       </MapView>
-      
+
       {/* Search Button */}
       <TouchableOpacity 
         style={styles.searchButton}
@@ -151,7 +176,7 @@ export default function OGMap() {
       >
         <Ionicons name="search" size={22} color="#8C1C13" />
       </TouchableOpacity>
-      
+
       {/* Location Button */}
       <TouchableOpacity 
         style={styles.locationButton}
@@ -164,7 +189,7 @@ export default function OGMap() {
       <WinerySearchModal
         visible={showSearchModal}
         onClose={() => setShowSearchModal(false)}
-        wineries={wineries}
+        wineries={dataToRender}
         onWinerySelect={handleWinerySelect}
       />
     </View>
@@ -172,11 +197,12 @@ export default function OGMap() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
+  container: { flex: 1 },
+  map: { flex: 1 },
+
+  markerWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   wineryMarker: {
     backgroundColor: '#8C1C13',
@@ -185,6 +211,26 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },
+
+  // small circles around the marker
+  statusContainer: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    flexDirection: 'row',
+  },
+  statusBadge: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#fff',
+    marginHorizontal: 1,
+  },
+  visited: { backgroundColor: '#4CAF50' },
+  favorite: { backgroundColor: '#E91E63' },
+  wantToVisit: { backgroundColor: '#2196F3' },
+
   calloutContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
@@ -195,6 +241,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  calloutBadges: {
+    marginBottom: 6,
+    alignItems: 'flex-start',
   },
   calloutTitle: {
     fontWeight: 'bold',
@@ -214,6 +264,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 3,
   },
+
+  searchButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    backgroundColor: '#fff',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
   locationButton: {
     position: 'absolute',
     bottom: 20,
@@ -230,20 +297,4 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  searchButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    backgroundColor: '#fff',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-  }
 });
