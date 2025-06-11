@@ -1,35 +1,12 @@
-Here are the changes that i still need to make to the app:
-    1. Change loading circle to the red color. 
-        this is the first loading circle that happens when you first open the app
-    2. invert the colors of the headers and things
-        a. what i think would look better is to invert the colors from red to the silverish color
-    3. change the color of the flavor notes to the red color instead of the original purple color
-    4. figure out why i cant take a picture in the app
-        a. so what i figured out is that in Expo Go you cant ask for permission to take a picture so when you try to upload or take a 
-            picture it will give you a error because you cant get the thing to come up to ask for permission. 
-        b. this should be the same for all of the pictures in the app.
-        c. also one thing i am not sure about is if taking a picture will actually work for the backend.  
-    5. need to figure out why the header for the visit wine log doesnt wokr the first time you use it   
-        a. for some reason the header for the log wine form doenst work the first time you open it. it goes all the way to the top of 
-            the screen and you cant close it or read the header. but when you save this wine then go back to edit or log another one, 
-            it works then. i have no idea why it does this but at least it kinda works. but it will still need to be fixed. 
-    6. here are some things that i need to fix when going from web app to mobel: 
-        a. the text input for the wine log form does not currently work on model.
-        b. i think i need to make the map of the web app to be for the mobel app. i like how it is set up but i dont want to use mapbox
-            i want to use the native map from the phone so i dont have to use the MapBox i think this would be better. 
-        c. i also need to add in a pop up that asks are you sure you want to exit from the wine and visit log form? this does not work
-            on the web version but it will work on the mobile version. so i need to add this in to change it. 
-        d. 
-    7. i need to add in a user location on the map so that it will zoom to their locaiton and show wineries aroudn their location
-    8. need to add labeling to the points that arent in a cluster. this would label the wineries that show up outside a cluster
-    9. need to fix the stars on the review tab of the log visit from. they are stacked vertical for some reason. 
-    10. if you have been to a winery, the visits need to be shown when you go to the wineries "home page"
-        a. then i would need a way to click on them and see what i had and how the user rating things for that visit.
-    11. need to be able to use this offline but still sync up with the backend. 
-    12. add in a feature to where a user can add a winery to their itenterary and add favorites. 
-        a. there could be a lot of things to do here. like i think i would have to add some tables to the backend for this to work right. 
-            and i would also have to do alot of things on the front end for this to work right. 
-        b. i would like to also be able to filter by this on the map. i want the user to be able to filter the map by wineries that they have been too, and 
-            ones that is on their "wishlist". i think this would make a lot of sense but like i said this would be a little bit more involved. 
-    13. add in filter for on the wine tab  
-        a. i need to add in so that the user can filter the wines they have
+what to add to the profile screen:
+1. do something for settings. like update name, email. change password, delete account. 
+2. help and support
+    a. how to lo g your first visit. 
+    b. understanding wine ratings.
+    c. using floavor tags effectively. 
+    d. understanding wine statistics
+3. contact and feedback
+    a. send feedbackb
+    b. report bug
+    c. contact support
+    e. rate app
