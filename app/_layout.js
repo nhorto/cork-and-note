@@ -4,10 +4,10 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState, createContext } from 'react';
-import 'react-native-reanimated';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { createContext, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import 'react-native-reanimated';
 import { supabase } from '../lib/supabase';
 
 // Prevent the splash screen from auto-hiding

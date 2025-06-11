@@ -3,8 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useContext } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { AuthContext } from '../_layout';
 import VisitStatsCard from '../../components/VisitStatsCard';
+import { AuthContext } from '../_layout';
 
 export default function ProfileScreen() {
   const { signOut, user } = useContext(AuthContext);
