@@ -21,6 +21,7 @@ export default function Wines() {
   const [wines, setWines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);  
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -51,28 +52,30 @@ export default function Wines() {
     }
   }, [wines]);
 
-  const loadUserWines = async () => {
+  const loadUserWines = async (isRefresh = false) => {         
     if (!user) {
-      setLoading(false);
+      isRefresh ? setRefreshing(false) : setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
+      isRefresh ? setRefreshing(true) : setLoading(true);
+
       const { success, visits } = await visitsService.getUserVisits();
-      
       if (success && visits) {
         const allWines = [];
-        visits.forEach(visit => {
+        visits.forEach((visit) => {
           if (visit.wines) {
-            visit.wines.forEach(wine => {
+            visit.wines.forEach((wine) => {
               allWines.push({
                 ...wine,
                 wineryName: visit.wineries?.name,
                 wineryId: visit.winery_id,
                 visitDate: visit.visit_date,
                 visitId: visit.id,
-                flavorNotes: wine.wine_flavor_notes?.map(fn => fn.flavor_notes?.name) || []
+                flavorNotes:
+                  wine.wine_flavor_notes?.map((fn) => fn.flavor_notes?.name) ||
+                  [],
               });
             });
           }
@@ -82,46 +85,48 @@ export default function Wines() {
     } catch (error) {
       console.error('Error loading wines:', error);
     } finally {
-      setLoading(false);
+      isRefresh ? setRefreshing(false) : setLoading(false);
     }
   };
 
+  const handleRefresh = () => loadUserWines(true); 
+
   const generateFilterOptions = () => {
-    const types = ['All', ...new Set(wines.map(wine => wine.wine_type).filter(Boolean))];
-    const wineries = ['All', ...new Set(wines.map(wine => wine.wineryName).filter(Boolean))];
-    const varietals = ['All', ...new Set(wines.map(wine => wine.wine_varietal).filter(Boolean))];
-    
+    const types = ['All', ...new Set(wines.map((w) => w.wine_type).filter(Boolean))];
+    const wineries = [
+      'All',
+      ...new Set(wines.map((w) => w.wineryName).filter(Boolean)),
+    ];
+    const varietals = [
+      'All',
+      ...new Set(wines.map((w) => w.wine_varietal).filter(Boolean)),
+    ];
+
     setFilterOptions({
       types,
       wineries,
       varietals,
-      ratings: ['All', 'Highest to Lowest', 'Lowest to Highest']
+      ratings: ['All', 'Highest to Lowest', 'Lowest to Highest'],
     });
   };
 
-  // Apply all filters
   const getFilteredWines = () => {
-    let filtered = wines.filter(wine => {
-      // Search filter
-      const matchesSearch = 
+    let filtered = wines.filter((wine) => {
+      const matchesSearch =
         (wine.wine_name?.toLowerCase().includes(search.toLowerCase()) || '') ||
         (wine.wineryName?.toLowerCase().includes(search.toLowerCase()) || '') ||
         (wine.wine_type?.toLowerCase().includes(search.toLowerCase()) || '') ||
         (wine.wine_varietal?.toLowerCase().includes(search.toLowerCase()) || '');
-      
-      // Type filter
+
       const matchesType = filters.type === 'All' || wine.wine_type === filters.type;
-      
-      // Winery filter
-      const matchesWinery = filters.winery === 'All' || wine.wineryName === filters.winery;
-      
-      // Varietal filter
-      const matchesVarietal = filters.varietal === 'All' || wine.wine_varietal === filters.varietal;
-      
+      const matchesWinery =
+        filters.winery === 'All' || wine.wineryName === filters.winery;
+      const matchesVarietal =
+        filters.varietal === 'All' || wine.wine_varietal === filters.varietal;
+
       return matchesSearch && matchesType && matchesWinery && matchesVarietal;
     });
 
-    // Apply rating sort
     if (filters.rating === 'Highest to Lowest') {
       filtered.sort((a, b) => (b.overall_rating || 0) - (a.overall_rating || 0));
     } else if (filters.rating === 'Lowest to Highest') {
@@ -150,79 +155,92 @@ export default function Wines() {
   };
 
   const renderWineItem = ({ item }) => {
-    // THIS IS THE NEW LOGIC - determining what to show in bold
-    const primaryName = item.wine_name || item.wine_varietal || item.wine_type || 'Unnamed Wine';
-    const showVarietal = item.wine_varietal && item.wine_name; // Only show varietal separately if we have both
-    
+    const primaryName =
+      item.wine_name || item.wine_varietal || item.wine_type || 'Unnamed Wine';
+    const showVarietal = item.wine_varietal && item.wine_name;
+
     return (
-      <TouchableOpacity 
-        style={styles.wineCard}
-        onPress={() => navigateToWineDetail(item)}
-      >
+      <TouchableOpacity style={styles.wineCard} onPress={() => navigateToWineDetail(item)}>
         <View style={styles.wineImageContainer}>
-          <View style={[styles.wineImagePlaceholder, 
-            { backgroundColor: 
-              item.wine_type === 'Red' ? '#8C1C13' : 
-              item.wine_type === 'White' ? '#f9f9f9' : 
-              item.wine_type === 'Rosé' ? '#FFB6C1' : 
-              item.wine_type === 'Sparkling' ? '#FFD700' : '#E0E0E0'
-            }
-          ]}>
-            <Ionicons 
-              name="wine" 
-              size={24} 
-              color={item.wine_type === 'White' ? '#3E3E3E' : '#fff'} 
+          <View
+            style={[
+              styles.wineImagePlaceholder,
+              {
+                backgroundColor:
+                  item.wine_type === 'Red'
+                    ? '#8C1C13'
+                    : item.wine_type === 'White'
+                    ? '#f9f9f9'
+                    : item.wine_type === 'Rosé'
+                    ? '#FFB6C1'
+                    : item.wine_type === 'Sparkling'
+                    ? '#FFD700'
+                    : '#E0E0E0',
+              },
+            ]}
+          >
+            <Ionicons
+              name="wine"
+              size={24}
+              color={item.wine_type === 'White' ? '#3E3E3E' : '#fff'}
             />
           </View>
         </View>
-        
+
         <View style={styles.wineInfo}>
-          {/* NEW WAY - Smart primary name display */}
           <Text style={styles.wineName}>
             {primaryName}
             {item.wine_year && ` (${item.wine_year})`}
           </Text>
-          
-          {/* NEW - Show varietal separately if we have both name and varietal */}
+
           {showVarietal && (
             <Text style={styles.wineVarietal}>{item.wine_varietal}</Text>
           )}
-          
-          {/* NEW - Show "Varietal" label if varietal is the primary name */}
-          {!item.wine_name && item.wine_varietal && (
-            <Text style={styles.wineVarietalSecondary}>Varietal</Text>
-          )}
-          
+
           <Text style={styles.wineryName}>{item.wineryName}</Text>
           <Text style={styles.visitDate}>
             Visited: {new Date(item.visitDate).toLocaleDateString()}
           </Text>
-          
+
           <View style={styles.ratingContainer}>
             <View style={styles.ratingStars}>
-              {[1, 2, 3, 4, 5].map(star => (
-                <Ionicons 
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Ionicons
                   key={star}
-                  name={star <= Math.floor(item.overall_rating) ? "star" : star <= item.overall_rating ? "star-half" : "star-outline"} 
-                  size={14} 
-                  color="#FFD700" 
+                  name={
+                    star <= Math.floor(item.overall_rating)
+                      ? 'star'
+                      : star <= item.overall_rating
+                      ? 'star-half'
+                      : 'star-outline'
+                  }
+                  size={14}
+                  color="#FFD700"
                 />
               ))}
             </View>
-            <Text style={styles.ratingText}>{item.overall_rating?.toFixed(1) || 'N/A'}</Text>
+            <Text style={styles.ratingText}>
+              {item.overall_rating?.toFixed(1) || 'N/A'}
+            </Text>
           </View>
         </View>
-        
+
         <View style={styles.wineTypeContainer}>
-          <Text style={[
-            styles.wineTypeText, 
-            {
-              color: 
-                item.wine_type === 'Red' ? '#8C1C13' : 
-                item.wine_type === 'White' ? '#3E3E3E' : 
-                item.wine_type === 'Rosé' ? '#D23669' : '#3E3E3E'
-            }
-          ]}>
+          <Text
+            style={[
+              styles.wineTypeText,
+              {
+                color:
+                  item.wine_type === 'Red'
+                    ? '#8C1C13'
+                    : item.wine_type === 'White'
+                    ? '#3E3E3E'
+                    : item.wine_type === 'Rosé'
+                    ? '#D23669'
+                    : '#3E3E3E',
+              },
+            ]}
+          >
             {item.wine_type}
           </Text>
         </View>
@@ -423,23 +441,24 @@ export default function Wines() {
       {/* Wine List */}
       <FlatList
         data={filteredWines}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={renderWineItem}
         contentContainerStyle={styles.wineList}
+        onRefresh={handleRefresh}                // NEW
+        refreshing={refreshing}                  // NEW
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="wine-outline" size={48} color="#8C1C13" />
             <Text style={styles.emptyTitle}>No wines found</Text>
             <Text style={styles.emptyText}>
-              {wines.length === 0 
-                ? "Start logging your winery visits to see your wines here!"
-                : "Try adjusting your search or filters"
-              }
+              {wines.length === 0
+                ? 'Start logging your winery visits to see your wines here!'
+                : 'Try adjusting your search or filters'}
             </Text>
           </View>
         }
       />
-      
+
       {renderFilterModal()}
     </View>
   );

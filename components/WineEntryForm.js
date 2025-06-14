@@ -6,17 +6,17 @@ import { useEffect, useState } from 'react';
 import {
   Alert,
   Image,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  Modal
+  View
 } from 'react-native';
 
 import FlavorTagSelector from './FlavorTagSelector';
-import RatingSlider from './RatingSlider'
+import RatingSlider from './RatingSlider';
 
 const WINE_TYPES = [
   'Red', 'White', 'Rosé', 'Sparkling', 'Dessert',
@@ -342,17 +342,6 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         )}
       </View>
       
-      {/* Overall Rating */}
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Overall Rating</Text>
-        <RatingSlider
-          label="Your Rating"
-          value={overallRating}
-          onValueChange={setOverallRating}
-          showStars={true}
-        />
-      </View>
-      
       {/* Wine Characteristics */}
       <View style={styles.formGroup}>
         <Text style={styles.sectionTitle}>Wine Characteristics</Text>
@@ -393,6 +382,17 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         <FlavorTagSelector
           selectedTags={flavorNotes}
           onTagsChange={setFlavorNotes}
+        />
+      </View>
+
+      {/* Overall Rating */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Overall Rating</Text>
+        <RatingSlider
+          label="Your Rating"
+          value={overallRating}
+          onValueChange={setOverallRating}
+          showStars={true}
         />
       </View>
       

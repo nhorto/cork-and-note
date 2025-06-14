@@ -1,51 +1,36 @@
-// app/(tabs)/map.js
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Callout, Marker } from 'react-native-maps';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Platform, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import Supercluster from 'supercluster';
-
 import WinerySearchModal from '../../components/WinerySearchModal';
-import WineryStatusBadges from '../../components/WineryStatusBadges';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
 import { wineryStatusService } from '../../lib/wineryStatus';
-import { AuthContext } from '../_layout';
 
-export default function OGMap() {
+export default function MapScreen() {
   const router = useRouter();
-  const { user } = useContext(AuthContext);
-
   const mapRef = useRef(null);
-  const [userLocation, setUserLocation] = useState(null);
-  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [clusters, setClusters] = useState([]);
   const [region, setRegion] = useState({
     latitude: 37.4316, // Approximate center of Virginia
     longitude: -78.6569,
     latitudeDelta: 5,  // Wider delta to show the whole state
     longitudeDelta: 5,
   });
-  const [clusters, setClusters] = useState([]);
 
-  // —— STATUS LOADING ——
+  //insert hooks for user location and search modal
+  const [userLocation, setUserLocation] = useState(null);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+
+  // status loading
   const [wineriesWithStatus, setWineriesWithStatus] = useState([]);
   const [statusLoaded, setStatusLoaded] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      loadWineriesWithStatus();
-    } else {
-      // no user: default all statuses false
-      setWineriesWithStatus(
-        wineries.map(w => ({ 
-          ...w, 
-          status: { visited: false, isFavorite: false, isWantToVisit: false } 
-        }))
-      );
-      setStatusLoaded(true);
-    }
-  }, [user]);
+    loadWineriesWithStatus();
+  }, []);
 
   const loadWineriesWithStatus = async () => {
     try {
@@ -64,97 +49,73 @@ export default function OGMap() {
       setStatusLoaded(true);
     }
   };
-  // ————————————
 
   // Request and set user location
   useEffect(() => {
     (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
-        return;
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
+          return;
+        }
+        
+        const loc = await Location.getCurrentPositionAsync({});
+        const userLoc = { 
+          latitude: loc.coords.latitude, 
+          longitude: loc.coords.longitude 
+        };
+        setUserLocation(userLoc);
+        
+        // Optionally zoom to user location on initial load
+        // mapRef.current?.animateToRegion({
+        //   ...userLoc,
+        //   latitudeDelta: 0.5,
+        //   longitudeDelta: 0.5,
+        // }, 1000);
+      } catch (error) {
+        console.error("Error getting location:", error);
+        Alert.alert('Location Error', 'Unable to get your current location.');
       }
-      const loc = await Location.getCurrentPositionAsync({});
-      setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
     })();
   }, []);
 
-  // Convert wineries to GeoJSON format for Supercluster
-  const points = useMemo(() => {
-    const dataToUse = statusLoaded ? wineriesWithStatus : wineries;
-    return dataToUse.map(winery => ({
-      type: 'Feature',
-      properties: { 
-        cluster: false, 
-        wineryId: winery.id, 
-        name: winery.name,
-        address: winery.address,
-        status: winery.status,
-      },
-      geometry: {
-        type: 'Point',
-        coordinates: [winery.longitude, winery.latitude]
-      }
-    }));
-  }, [wineriesWithStatus, statusLoaded]);
-
-  // Create supercluster instance
-  const supercluster = useMemo(() => {
-    const instance = new Supercluster({
-      radius: 40,
-      maxZoom: 16
-    });
-    instance.load(points);
-    return instance;
-  }, [points]);
-
-  // Update clusters when region changes
-  useEffect(() => {
-    if (!supercluster) return;
-    
-    // Calculate bounds from the current region
-    const northEast = {
-      latitude: region.latitude + region.latitudeDelta/2,
-      longitude: region.longitude + region.longitudeDelta/2
-    };
-    const southWest = {
-      latitude: region.latitude - region.latitudeDelta/2,
-      longitude: region.longitude - region.longitudeDelta/2
-    };
-    const bounds = [
-      southWest.longitude, southWest.latitude, 
-      northEast.longitude, northEast.latitude
-    ];
-
-    // Calculate appropriate zoom level
-    const zoom = Math.log2(360 / region.longitudeDelta) - 1;
-    
-    // Get clusters
-    const newClusters = supercluster.getClusters(bounds, Math.floor(zoom));
-    setClusters(newClusters);
-  }, [region, supercluster]);
-
-  const onRegionChangeComplete = (newRegion) => {
-    setRegion(newRegion);
-  };
-
+  // zoom to users location
   const zoomToUserLocation = async () => {
     if (!userLocation) {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
-        return;
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
+          return;
+        }
+        
+        const loc = await Location.getCurrentPositionAsync({});
+        const userLoc = { 
+          latitude: loc.coords.latitude, 
+          longitude: loc.coords.longitude 
+        };
+        setUserLocation(userLoc);
+        
+        mapRef.current?.animateToRegion({
+          ...userLoc,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }, 1000);
+      } catch (error) {
+        console.error("Error getting location:", error);
+        Alert.alert('Location Error', 'Unable to get your current location.');
       }
-      const loc = await Location.getCurrentPositionAsync({});
-      setUserLocation({ latitude: loc.coords.latitude, longitude: loc.coords.longitude });
+    } else {
+      mapRef.current?.animateToRegion({
+        ...userLocation,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      }, 1000);
     }
-    mapRef.current?.animateToRegion({
-      ...userLocation,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
-    }, 1000);
   };
-
+  
+  // handle winery select
   const handleWinerySelect = winery => {
     mapRef.current?.animateToRegion({
       latitude: winery.latitude,
@@ -164,130 +125,195 @@ export default function OGMap() {
     }, 1000);
   };
 
-  // Render a cluster
-  const renderCluster = (cluster) => {
-    const { cluster_id, point_count } = cluster.properties;
+  // Convert wineries to GeoJSON format for Supercluster - memoized to prevent recalculation
+  const points = useMemo(() => {
+    // Use wineriesWithStatus if available and loaded, otherwise use the original wineries
+    const wineryData = statusLoaded && wineriesWithStatus.length > 0 ? wineriesWithStatus : wineries;
     
-    return (
-      <Marker
-        key={`cluster-${cluster_id}`}
-        coordinate={{
-          latitude: cluster.geometry.coordinates[1],
-          longitude: cluster.geometry.coordinates[0]
-        }}
-        onPress={() => {
-          // Zoom in on cluster when pressed
-          const children = supercluster.getLeaves(cluster_id, 100);
-          const childrenCoordinates = children.map(child => ({
-            latitude: child.geometry.coordinates[1],
-            longitude: child.geometry.coordinates[0]
-          }));
-          
-          mapRef.current.fitToCoordinates(childrenCoordinates, {
-            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-            animated: true
-          });
-        }}
-      >
-        <View style={styles.clusterMarker}>
-          <Text style={styles.clusterText}>{point_count}</Text>
-        </View>
-      </Marker>
-    );
+    return wineryData.map(winery => ({
+      type: 'Feature',
+      properties: { 
+        cluster: false, 
+        wineryId: winery.id, 
+        name: winery.name, 
+        status: winery.status || { visited: false, isFavorite: false, isWantToVisit: false },
+      },
+      geometry: {
+        type: 'Point',
+        coordinates: [winery.longitude, winery.latitude]
+      }
+    }));
+  }, [wineriesWithStatus, wineries, statusLoaded]);
+
+  // Create supercluster instance - memoized to prevent recreation
+  const supercluster = useMemo(() => {
+    const instance = new Supercluster({
+      radius: 40,
+      maxZoom: 16
+    });
+    instance.load(points);
+    return instance;
+  }, [points]);
+
+  // Update clusters when region changes, using a memoized function
+  const updateClusters = useMemo(() => {
+    return (newRegion) => {
+      // Get map bounds
+      const northEast = {
+        latitude: newRegion.latitude + newRegion.latitudeDelta/2,
+        longitude: newRegion.longitude + newRegion.longitudeDelta/2
+      };
+      const southWest = {
+        latitude: newRegion.latitude - newRegion.latitudeDelta/2,
+        longitude: newRegion.longitude - newRegion.longitudeDelta/2
+      };
+      const bounds = [
+        southWest.longitude, southWest.latitude, 
+        northEast.longitude, northEast.latitude
+      ];
+
+      const zoom = Math.log2(360 / newRegion.longitudeDelta) - 1;
+      const newClusters = supercluster.getClusters(bounds, Math.floor(zoom));
+      setClusters(newClusters);
+    };
+  }, [supercluster]);
+
+  // Update clusters when region changes
+  useEffect(() => {
+    updateClusters(region);
+  }, [region, updateClusters]);
+
+  // Use useEffect to measure and update before painting to prevent flickering
+  useEffect(() => {
+    // Only run once on mount to set initial clusters
+    updateClusters(region);
+  }, []);
+
+  const onRegionChangeComplete = (newRegion) => {
+    setRegion(newRegion);
   };
 
-  // Render an individual winery marker
-  const renderWineryMarker = (feature) => {
-    const winery = feature.properties;
-    
-    return (
-      <Marker
-        key={winery.wineryId}
-        coordinate={{
-          latitude: feature.geometry.coordinates[1],
-          longitude: feature.geometry.coordinates[0]
-        }}
-        tracksViewChanges={false}
-        onPress={() => router.push(`/winery/${winery.wineryId}`)}
-      >
-        <View style={styles.markerContainer}>
-          {/* Winery name label above marker */}
-          <View style={styles.markerLabelContainer}>
-            <Text style={styles.markerLabel} numberOfLines={1}>
-              {winery.name}
+  // Memoize cluster rendering to prevent flickering
+  const renderCluster = useMemo(() => {
+    return (cluster) => {
+      const { cluster_id, point_count } = cluster.properties;
+      
+      return (
+        <Marker
+          key={`cluster-${cluster_id}`}
+          coordinate={{
+            latitude: cluster.geometry.coordinates[1],
+            longitude: cluster.geometry.coordinates[0]
+          }}
+          onPress={() => {
+            // Zoom in on cluster when pressed
+            const children = supercluster.getLeaves(cluster_id, 100);
+            const childrenCoordinates = children.map(child => ({
+              latitude: child.geometry.coordinates[1],
+              longitude: child.geometry.coordinates[0]
+            }));
+            
+            mapRef.current.fitToCoordinates(childrenCoordinates, {
+              edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+              animated: true
+            });
+          }}
+        >
+          <View style={{
+            width: 35,
+            height: 35,
+            borderRadius: 20,
+            backgroundColor: '#8C1C13',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: '#3E3E3E',
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.3,
+            shadowRadius: 1,
+            elevation: 5
+          }}>
+            <Text style={{ 
+              color: '#fff', 
+              fontWeight: 'bold',
+              fontSize: 14,
+              textAlign: 'center'
+            }}>
+              {point_count}
             </Text>
           </View>
-          
-          <View style={styles.markerWrapper}>
-            <View style={styles.wineryMarker}>
-              <Ionicons 
-                name="wine" 
-                size={Platform.OS === 'android' ? 22 : 16} 
-                color="#FFFFFF" 
-              />
-            </View>
-            {/* status badges around the marker */}
-            {winery.status && (
-              <View style={styles.statusContainer}>
-                {winery.status.visited && <View style={[styles.statusBadge, styles.visited]} />}
-                {winery.status.isFavorite && <View style={[styles.statusBadge, styles.favorite]} />}
-                {winery.status.isWantToVisit && <View style={[styles.statusBadge, styles.wantToVisit]} />}
-              </View>
-            )}
-          </View>
-        </View>
+        </Marker>
+      );
+    };
+  }, [supercluster]);
 
-        {/* This callout will only show when marker is tapped */}
-        <Callout tooltip>
-          <View style={styles.calloutContainer}>
-            {/* also show badges in the callout, more legible */}
-            {winery.status && (
-              <View style={styles.calloutBadges}>
-                <WineryStatusBadges status={winery.status} />
+  // Memoize marker rendering to prevent flickering
+  const renderMarker = useMemo(() => {
+    return (cluster) => {
+      const winery = cluster.properties;
+      // Ensure status exists with default values if not present
+      const status = winery.status || { visited: false, isFavorite: false, isWantToVisit: false };
+
+      return (
+        <Marker
+          key={winery.wineryId}
+          coordinate={{
+            latitude: cluster.geometry.coordinates[1],
+            longitude: cluster.geometry.coordinates[0]
+          }}
+          tracksViewChanges={false}
+          onPress={() => router.push(`/winery/${winery.wineryId}`)}
+        >
+          <View style={styles.markerContainer}>
+            {/* Winery name label */}
+            <View style={styles.markerLabelContainer}>
+              <Text style={styles.markerLabel} numberOfLines={1}>
+                {winery.name}
+              </Text>
+            </View>
+
+            {/* Icon + status badges */}
+            <View style={styles.markerWrapper}>
+              <View style={styles.wineryMarker}>
+                <Ionicons 
+                  name="wine" 
+                  size={Platform.OS === 'android' ? 22 : 16} 
+                  color="#FFFFFF" 
+                />
               </View>
-            )}
-            <Text style={styles.calloutTitle}>{winery.name}</Text>
-            <Text style={styles.calloutAddress}>{winery.address}</Text>
-            <Text style={styles.calloutAction}>Tap to view details</Text>
+
+              {/* status badges */}
+              <View style={styles.statusContainer}>
+                {status.visited && <View style={[styles.statusBadge, styles.visited]} />}
+                {status.isFavorite && <View style={[styles.statusBadge, styles.favorite]} />}
+                {status.isWantToVisit && <View style={[styles.statusBadge, styles.wantToVisit]} />}
+              </View>
+            </View>
           </View>
-        </Callout>
-      </Marker>
-    );
-  };
+        </Marker>
+      );
+    };
+  }, [router]);
 
   return (
     <View style={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Explore Wineries</Text>
-        <TouchableOpacity 
-          style={styles.searchButtonHeader}
-          onPress={() => setShowSearchModal(true)}
-        >
-          <Ionicons name="search" size={22} color="#8C1C13" />
-        </TouchableOpacity>
-      </View>
-      
       <MapView
         ref={mapRef}
-        style={styles.map}
-        initialRegion={region}
+        style={{ flex: 1 }}
+        region={region}
         onRegionChangeComplete={onRegionChangeComplete}
-        showsUserLocation
-        maxZoomLevel={19}
-        minZoomLevel={5}
-        rotateEnabled={false}
-        loadingEnabled
-        moveOnMarkerPress={false}
+        showsUserLocation={true}
+        showsMyLocationButton={false}
       >
         {clusters.map(cluster => {
-          // Render a cluster marker if it's a cluster
+          // Render a cluster marker if a cluster
           if (cluster.properties.cluster) {
             return renderCluster(cluster);
           }
           
-          // Render a single marker if not a cluster
-          return renderWineryMarker(cluster);
+          // Render a single marker if not
+          return renderMarker(cluster);
         })}
       </MapView>
 
@@ -297,6 +323,13 @@ export default function OGMap() {
         onPress={zoomToUserLocation}
       >
         <Ionicons name="locate" size={24} color="#8C1C13" />
+      </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={styles.searchButton}
+        onPress={() => setShowSearchModal(true)}
+      >
+        <Ionicons name="search" size={24} color="#8C1C13" />
       </TouchableOpacity>
 
       {/* Search Modal */}
@@ -311,43 +344,10 @@ export default function OGMap() {
 }
 
 const styles = StyleSheet.create({
+  // Marker container includes both the label and the actual marker
   container: { 
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#E7E3E2',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingTop: Platform.OS === 'ios' ? 45 : 15, // Adjusted down a bit
-    zIndex: 1,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#3E3E3E',
-  },
-  searchButtonHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
-    elevation: 2,
-  },
-  map: { 
-    flex: 1,
-  },
-  // Marker container includes both the label and the actual marker
   markerContainer: {
     alignItems: 'center',
   },
@@ -384,27 +384,37 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // Cluster marker styling to match winery markers
-  clusterMarker: {
-    backgroundColor: '#8C1C13',
-    width: Platform.OS === 'android' ? 48 : 40,
-    height: Platform.OS === 'android' ? 48 : 40,
-    borderRadius: Platform.OS === 'android' ? 24 : 20,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+  locationButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 15,
+    backgroundColor: '#fff',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
-  clusterText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: Platform.OS === 'android' ? 18 : 16,
-    textAlign: 'center',
+  searchButton: {
+    position: 'absolute',
+    bottom: 80,
+    right: 15,
+    backgroundColor: '#fff',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
   // small circles around the marker
   statusContainer: {
@@ -424,55 +434,4 @@ const styles = StyleSheet.create({
   visited: { backgroundColor: '#4CAF50' },
   favorite: { backgroundColor: '#E91E63' },
   wantToVisit: { backgroundColor: '#2196F3' },
-
-  calloutContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    padding: 10,
-    width: 200, // Slightly wider for Android
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  calloutBadges: {
-    marginBottom: 6,
-    alignItems: 'flex-start',
-  },
-  calloutTitle: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 3,
-    color: '#3E3E3E',
-  },
-  calloutAddress: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 5,
-  },
-  calloutAction: {
-    fontSize: 11,
-    color: '#8C1C13',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginTop: 3,
-  },
-
-  locationButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#fff',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
-  },
-});
+})

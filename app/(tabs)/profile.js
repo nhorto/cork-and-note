@@ -1,7 +1,7 @@
 // app/(tabs)/profile.js
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import {
   Alert,
   ScrollView,
@@ -13,60 +13,9 @@ import {
 import VisitStatsCard from '../../components/VisitStatsCard';
 import { AuthContext } from '../_layout';
 
-// First, we'll add simple placeholder components for the modals
-// These will be replaced with the full implementations once the basic screen works
-
-const AccountSettingsModal = ({ visible, onClose, user }) => {
-  if (!visible) return null;
-  
-  return (
-    <View style={styles.modalPlaceholder}>
-      <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-        <Ionicons name="close" size={24} color="#333" />
-      </TouchableOpacity>
-      <Text style={styles.modalPlaceholderText}>Account Settings Modal</Text>
-      <Text>This will be replaced with the full modal component</Text>
-    </View>
-  );
-};
-
-const HelpSupportModal = ({ visible, onClose }) => {
-  if (!visible) return null;
-  
-  return (
-    <View style={styles.modalPlaceholder}>
-      <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-        <Ionicons name="close" size={24} color="#333" />
-      </TouchableOpacity>
-      <Text style={styles.modalPlaceholderText}>Help & Support Modal</Text>
-      <Text>This will be replaced with the full modal component</Text>
-    </View>
-  );
-};
-
-const FeedbackModal = ({ visible, onClose, user }) => {
-  if (!visible) return null;
-  
-  return (
-    <View style={styles.modalPlaceholder}>
-      <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-        <Ionicons name="close" size={24} color="#333" />
-      </TouchableOpacity>
-      <Text style={styles.modalPlaceholderText}>Feedback & Contact Modal</Text>
-      <Text>This will be replaced with the full modal component</Text>
-    </View>
-  );
-};
-
 export default function ProfileScreen() {
-  // Make sure to destructure the AuthContext properly
   const { signOut, user } = useContext(AuthContext);
   const router = useRouter();
-  
-  // Modal states
-  const [showAccountSettings, setShowAccountSettings] = useState(false);
-  const [showHelpSupport, setShowHelpSupport] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -92,55 +41,31 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <ScrollView>
+        {/* User Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
-              <Ionicons name="person" size={40} color="#fff" />
+              <Ionicons name="person" size={50} color="white" />
             </View>
           </View>
-          <Text style={styles.name}>{user?.user_metadata?.name || 'User'}</Text>
+          <Text style={styles.name}>{user?.name || 'Wine Enthusiast'}</Text>
           <Text style={styles.email}>{user?.email || 'user@example.com'}</Text>
         </View>
 
-        {/* Visit Stats Card - only show if user is logged in */}
-        {user && (
-          <View style={styles.statsContainer}>
-            <VisitStatsCard />
-          </View>
-        )}
+        {/* Visit Stats */}
+        <View style={styles.statsContainer}>
+          <VisitStatsCard />
+        </View>
 
+        {/* Settings Section */}
         <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>My Wine Journal</Text>
+          <Text style={styles.sectionTitleText}>Settings</Text>
         </View>
 
         <View style={styles.menuContainer}>
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => router.push('/wishlist')}
-          >
-            <Ionicons name="bookmark" size={24} color="#8C1C13" style={styles.menuIcon} />
-            <Text style={styles.menuText}>Want to Visit</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => router.push('/wines')}  
-          >
-            <Ionicons name="wine" size={24} color="#8C1C13" style={styles.menuIcon} />
-            <Text style={styles.menuText}>My Wines</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>Account</Text>
-        </View>
-
-        <View style={styles.menuContainer}>
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => setShowAccountSettings(true)}
+            onPress={() => router.push('/profile/account-settings')}
           >
             <Ionicons name="settings" size={24} color="#8C1C13" style={styles.menuIcon} />
             <Text style={styles.menuText}>Account Settings</Text>
@@ -149,7 +74,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => setShowHelpSupport(true)}
+            onPress={() => router.push('/profile/help-support')}
           >
             <Ionicons name="help-circle" size={24} color="#8C1C13" style={styles.menuIcon} />
             <Text style={styles.menuText}>Help & Support</Text>
@@ -158,7 +83,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity 
             style={styles.menuItem}
-            onPress={() => setShowFeedback(true)}
+            onPress={() => router.push('/profile/feedback')}
           >
             <Ionicons name="chatbubble-ellipses" size={24} color="#8C1C13" style={styles.menuIcon} />
             <Text style={styles.menuText}>Feedback & Contact</Text>
@@ -171,24 +96,6 @@ export default function ProfileScreen() {
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </ScrollView>
-
-      {/* Placeholder Modals - These will be replaced with the full components later */}
-      <AccountSettingsModal 
-        visible={showAccountSettings}
-        onClose={() => setShowAccountSettings(false)}
-        user={user}
-      />
-
-      <HelpSupportModal
-        visible={showHelpSupport}
-        onClose={() => setShowHelpSupport(false)}
-      />
-
-      <FeedbackModal
-        visible={showFeedback}
-        onClose={() => setShowFeedback(false)}
-        user={user}
-      />
     </View>
   );
 }
@@ -272,28 +179,5 @@ const styles = StyleSheet.create({
     color: '#8C1C13',
     fontSize: 16,
     fontWeight: '500',
-  },
-  // Modal placeholder styles
-  modalPlaceholder: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#E7E3E2',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  modalPlaceholderText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 40,
-    right: 20,
-    padding: 10,
   },
 });

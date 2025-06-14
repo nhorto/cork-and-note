@@ -1,17 +1,18 @@
 // components/HelpSupportModal.js
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-const HelpSupportModal = ({ visible, onClose }) => {
+
+const HelpSupportModal = () => {
+  const router = useRouter();
   const [activeGuide, setActiveGuide] = useState(null);
 
   // Help guides data
@@ -266,73 +267,57 @@ const HelpSupportModal = ({ visible, onClose }) => {
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          {activeGuide ? (
-            <>
-              <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-                <Ionicons name="chevron-back" size={24} color="#333" />
-              </TouchableOpacity>
-              <Text style={styles.headerTitle}>{guides.find(g => g.id === activeGuide)?.title}</Text>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
-              <Text style={styles.headerTitle}>Help & Support</Text>
-            </>
-          )}
-        </View>
+    <View style={styles.container}>
+      {/* Custom Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#8C1C13" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Help & Support</Text>
+      </View>
 
-        <ScrollView style={styles.content}>
-          {activeGuide ? (
-            // Display selected guide content
-            <View style={styles.guideContent}>
-              {guides.find(g => g.id === activeGuide)?.content.map((item, index) => (
-                <View key={index} style={styles.contentItem}>
-                  {renderGuideContent(item)}
-                </View>
-              ))}
-            </View>
-          ) : (
-            // Display guide menu
-            <View style={styles.guidesMenu}>
-              {guides.map((guide) => (
-                <TouchableOpacity
-                  key={guide.id}
-                  style={styles.guideItem}
-                  onPress={() => setActiveGuide(guide.id)}
-                >
-                  <View style={styles.guideIcon}>
-                    <Ionicons name={guide.icon} size={24} color="#8C1C13" />
-                  </View>
-                  <View style={styles.guideInfo}>
-                    <Text style={styles.guideTitle}>{guide.title}</Text>
-                    <Text style={styles.guideSubtitle}>Learn more</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color="#ccc" />
-                </TouchableOpacity>
-              ))}
-
-              {/* App version info */}
-              <View style={styles.versionInfo}>
-                <Text style={styles.versionText}>Cork & Note v1.0.0</Text>
-                <Text style={styles.copyrightText}>© 2025 Cork & Note. All rights reserved.</Text>
+      <ScrollView style={styles.content}>
+        {activeGuide ? (
+          // Display selected guide content
+          <View style={styles.guideContent}>
+            {guides.find(g => g.id === activeGuide)?.content.map((item, index) => (
+              <View key={index} style={styles.contentItem}>
+                {renderGuideContent(item)}
               </View>
+            ))}
+          </View>
+        ) : (
+          // Display guide menu
+          <View style={styles.guidesMenu}>
+            {guides.map((guide) => (
+              <TouchableOpacity
+                key={guide.id}
+                style={styles.guideItem}
+                onPress={() => setActiveGuide(guide.id)}
+              >
+                <View style={styles.guideIcon}>
+                  <Ionicons name={guide.icon} size={24} color="#8C1C13" />
+                </View>
+                <View style={styles.guideInfo}>
+                  <Text style={styles.guideTitle}>{guide.title}</Text>
+                  <Text style={styles.guideSubtitle}>Learn more</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#ccc" />
+              </TouchableOpacity>
+            ))}
+
+            {/* App version info */}
+            <View style={styles.versionInfo}>
+              <Text style={styles.versionText}>Cork & Note v1.0.0</Text>
+              <Text style={styles.copyrightText}>© 2025 Cork & Note. All rights reserved.</Text>
             </View>
-          )}
-        </ScrollView>
-      </SafeAreaView>
-    </Modal>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
@@ -344,10 +329,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingTop: 50,
+    paddingBottom: 16,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#eee',
   },
   backButton: {
     padding: 8,
