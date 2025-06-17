@@ -10,7 +10,6 @@ import {
   View
 } from 'react-native';
 
-
 const HelpSupportModal = () => {
   const router = useRouter();
   const [activeGuide, setActiveGuide] = useState(null);
@@ -204,9 +203,15 @@ const HelpSupportModal = () => {
     }
   ];
 
-  // Back to main menu
+  // Back to main menu - FIXED: Now properly handles navigation
   const handleBack = () => {
-    setActiveGuide(null);
+    if (activeGuide) {
+      // If viewing a guide, go back to the help menu
+      setActiveGuide(null);
+    } else {
+      // If on main help menu, go back to profile
+      router.back();
+    }
   };
 
   // Render guide content based on type
@@ -268,15 +273,17 @@ const HelpSupportModal = () => {
 
   return (
     <View style={styles.container}>
-      {/* Custom Header */}
+      {/* Custom Header - FIXED: Proper centering without save button */}
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton} 
-          onPress={() => router.back()}
+          onPress={handleBack}
         >
           <Ionicons name="arrow-back" size={24} color="#8C1C13" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Help & Support</Text>
+        {/* Empty view to balance the layout and center the title */}
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView style={styles.content}>
@@ -329,7 +336,6 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
@@ -339,11 +345,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 8,
-    marginRight: 8,
-  },
-  closeButton: {
-    padding: 8,
-    marginLeft: 'auto',
   },
   headerTitle: {
     fontSize: 18,
@@ -351,6 +352,10 @@ const styles = StyleSheet.create({
     color: '#3E3E3E',
     flex: 1,
     textAlign: 'center',
+  },
+  // FIXED: Added spacer to balance the layout and center the title
+  headerSpacer: {
+    width: 40, // Same width as back button to maintain balance
   },
   content: {
     flex: 1,

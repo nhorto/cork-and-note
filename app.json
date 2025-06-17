@@ -10,15 +10,28 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.corkandnote"
+      "bundleIdentifier": "com.yourdomain.corkandnote",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Cork & Note uses the camera to take photos of wines and wineries.",
+        "NSLocationWhenInUseUsageDescription": "Cork & Note uses your location to find nearby wineries and log visit locations.",
+        "NSPhotoLibraryUsageDescription": "Cork & Note accesses your photo library to save and select wine photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yourcompany.corkandnote",
-      "edgeToEdgeEnabled": true
+      "package": "com.yourdomain.corkandnote",
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -39,6 +52,18 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3338eff4-c93e-49be-b32c-e802c16d122c"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3338eff4-c93e-49be-b32c-e802c16d122c"
+      }
     }
   }
 }

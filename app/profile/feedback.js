@@ -217,6 +217,7 @@ export default function FeedbackScreen() {
           <Ionicons name="arrow-back" size={24} color="#8C1C13" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Feedback</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       <KeyboardAvoidingView
@@ -524,6 +525,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  headerSpacer: {
+    width: 40, // Same width as back button to maintain balance
   },
   backButton: {
     padding: 8,
