@@ -1,7 +1,7 @@
 // components/WineryActionButtons.js
-import { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { favoritesService } from '../lib/favorites';
 import { wishlistService } from '../lib/wishlist';
 
@@ -16,6 +16,10 @@ const WineryActionButtons = ({
     isFavorite: false,
     isWantToVisit: false
   });
+
+  const { width } = Dimensions.get('window');
+  const isNarrowScreen = width < 375;
+  const isVeryNarrowScreen = width < 320;
 
   // Load initial status
   useEffect(() => {
@@ -107,6 +111,34 @@ const WineryActionButtons = ({
     }
   };
 
+  // Responsive button styles
+  const getButtonStyle = () => {
+    if (isVeryNarrowScreen) {
+      return {
+        ...styles.actionButton,
+        paddingHorizontal: width * 0.02, // 2% of screen width
+        paddingVertical: width * 0.025,  // 2.5% of screen width
+        flex: 1,
+        marginHorizontal: width * 0.01,  // 1% margin
+      };
+    } else if (isNarrowScreen) {
+      return {
+        ...styles.actionButton,
+        paddingHorizontal: width * 0.03,
+        paddingVertical: width * 0.03,
+        flex: 1,
+        marginHorizontal: width * 0.015,
+      };
+    } else {
+      return styles.actionButton;
+    }
+  };
+
+  const getTextStyle = () => ({
+    ...styles.actionButtonText,
+    fontSize: isVeryNarrowScreen ? 12 : isNarrowScreen ? 13 : 14,
+  });
+
   if (compact) {
     return (
       <View style={styles.compactContainer}>
@@ -144,10 +176,13 @@ const WineryActionButtons = ({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[
+      styles.container,
+      isNarrowScreen && styles.narrowContainer
+    ]}>
       <TouchableOpacity
         style={[
-          styles.actionButton,
+          getButtonStyle(),
           status.isFavorite && styles.activeFavoriteButton
         ]}
         onPress={toggleFavorite}
@@ -155,12 +190,12 @@ const WineryActionButtons = ({
       >
         <Ionicons
           name={status.isFavorite ? "heart" : "heart-outline"}
-          size={24}
+          size={isVeryNarrowScreen ? 20 : 24}
           color={status.isFavorite ? "#fff" : "#8C1C13"}
         />
         <Text
           style={[
-            styles.actionButtonText,
+            getTextStyle(),
             status.isFavorite && styles.activeButtonText
           ]}
         >
@@ -170,7 +205,7 @@ const WineryActionButtons = ({
       
       <TouchableOpacity
         style={[
-          styles.actionButton,
+          getButtonStyle(),
           status.isWantToVisit && styles.activeWishlistButton
         ]}
         onPress={toggleWishlist}
@@ -178,12 +213,12 @@ const WineryActionButtons = ({
       >
         <Ionicons
           name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}
-          size={24}
+          size={isVeryNarrowScreen ? 20 : 24}
           color={status.isWantToVisit ? "#fff" : "#8C1C13"}
         />
         <Text
           style={[
-            styles.actionButtonText,
+            getTextStyle(),
             status.isWantToVisit && styles.activeButtonText
           ]}
         >
@@ -197,9 +232,14 @@ const WineryActionButtons = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between', // Changed from space-around
+    alignItems: 'center',
     marginTop: 10,
     marginBottom: 20,
+    paddingHorizontal: 8, // Add horizontal padding
+  },
+  narrowContainer: {
+    paddingHorizontal: 4, // Less padding on narrow screens
   },
   compactContainer: {
     flexDirection: 'row',
@@ -212,11 +252,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#f9f9f9',
     borderRadius: 8,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: '#8C1C13',
-    minWidth: 150,
+    flex: 1, // Make buttons flexible
+    marginHorizontal: 4, // Space between buttons
+    maxWidth: 180, // Prevent buttons from getting too wide
   },
   compactButton: {
     alignItems: 'center',
@@ -243,6 +285,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#8C1C13',
+    textAlign: 'center',
+    flexShrink: 1, // Allow text to shrink if needed
   },
   activeButtonText: {
     color: '#fff',

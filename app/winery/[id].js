@@ -4,15 +4,17 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
   Alert,
+  Dimensions,
   Linking,
   Modal,
+  PixelRatio,
   Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import PastVisitsSection from '../../components/PastVisitsSection';
@@ -245,6 +247,14 @@ export default function WineryDetail() {
   );
 }
 
+const { width, height } = Dimensions.get('window');
+const isNarrowScreen = width < 375;
+const isVeryNarrowScreen = width < 320;
+const isWideScreen = width > 400;
+
+const responsive = (size) =>
+  Math.round(PixelRatio.roundToNearestPixel(size * (width / 375)));
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -253,24 +263,25 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: responsive(16),
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     backgroundColor: '#E7E3E2',
   },
   backButton: {
-    padding: 8,
-    marginRight: 16,
+    padding: responsive(8),
+    marginRight: responsive(16),
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: responsive(20),
     fontWeight: 'bold',
     color: '#3E3E3E',
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 24,
+    paddingBottom: responsive(24),
+    paddingHorizontal: isNarrowScreen ? responsive(8) : 0,
   },
   centerContainer: {
     flex: 1,
@@ -278,55 +289,59 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   detailsContainer: {
-    padding: 20,
+    padding: isVeryNarrowScreen ? responsive(12) : isNarrowScreen ? responsive(16) : responsive(20),
     backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    margin: 16,
+    borderRadius: responsive(8),
+    margin: isVeryNarrowScreen ? responsive(8) : isNarrowScreen ? responsive(12) : responsive(16),
     borderWidth: 1,
     borderColor: '#ddd',
   },
   address: {
-    fontSize: 16,
+    fontSize: isNarrowScreen ? responsive(14) : responsive(16),
     color: '#3E3E3E',
-    marginBottom: 15,
+    marginBottom: responsive(15),
     textAlign: 'center',
+    lineHeight: responsive(20),
   },
   divider: {
     height: 1,
     backgroundColor: '#ccc',
-    marginVertical: 15,
+    marginVertical: responsive(15),
   },
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginVertical: 20,
+    marginVertical: responsive(20),
+    paddingHorizontal: isNarrowScreen ? responsive(8) : 0,
   },
   actionButton: {
     alignItems: 'center',
-    padding: 10,
+    padding: responsive(10),
+    minWidth: isNarrowScreen ? responsive(80) : responsive(100),
   },
   actionButtonText: {
-    marginTop: 8,
-    fontSize: 12,
+    marginTop: responsive(8),
+    fontSize: isNarrowScreen ? responsive(11) : responsive(12),
     color: '#8C1C13',
     fontWeight: '500',
+    textAlign: 'center',
   },
   infoSection: {
-    marginTop: 20,
+    marginTop: responsive(20),
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: isNarrowScreen ? responsive(16) : responsive(18),
     fontWeight: '600',
     color: '#3E3E3E',
-    marginBottom: 10,
+    marginBottom: responsive(10),
   },
   infoText: {
-    fontSize: 15,
+    fontSize: isNarrowScreen ? responsive(14) : responsive(15),
     color: '#3E3E3E',
-    lineHeight: 22,
+    lineHeight: isNarrowScreen ? responsive(20) : responsive(22),
   },
   pastVisitsContainer: {
-    marginHorizontal: 16,
-    marginBottom: 16,
+    marginHorizontal: isVeryNarrowScreen ? responsive(8) : isNarrowScreen ? responsive(12) : responsive(16),
+    marginBottom: responsive(16),
   },
 });

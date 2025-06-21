@@ -405,12 +405,12 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
           
           <View style={styles.photoButtons}>
             <TouchableOpacity style={styles.photoButton} onPress={takeWineryPhoto}>
-              <Ionicons name="camera" size={20} color="#8C1C13" />
+              <Ionicons name="camera" size={20} color="#E7E3E2" />
               <Text style={styles.photoButtonText}>Take Photo</Text>
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.photoButton} onPress={pickWineryImage}>
-              <Ionicons name="image" size={20} color="#8C1C13" />
+              <Ionicons name="image" size={20} color="#E7E3E2" />
               <Text style={styles.photoButtonText}>Choose Photo</Text>
             </TouchableOpacity>
           </View>
@@ -769,12 +769,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     padding: 12,
-    borderWidth: 1,
-    borderColor: '#8C1C13',
     borderRadius: 8,
+    backgroundColor: '#8C1C13',
   },
   photoButtonText: {
-    color: '#8C1C13',
+    color: '#E7E3E2',
     fontWeight: '500',
   },
   photoPreviewContainer: {

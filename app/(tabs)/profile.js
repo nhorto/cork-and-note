@@ -48,7 +48,8 @@ export default function ProfileScreen() {
               <Ionicons name="person" size={50} color="white" />
             </View>
           </View>
-          <Text style={styles.name}>{user?.name || 'Wine Enthusiast'}</Text>
+          {/* Name is now read-only and shows the original signup name */}
+          <Text style={styles.name}>{user?.user_metadata?.name || user?.email?.split('@')[0] || 'Wine Enthusiast'}</Text>
           <Text style={styles.email}>{user?.email || 'user@example.com'}</Text>
         </View>
 
@@ -85,16 +86,26 @@ export default function ProfileScreen() {
             style={styles.menuItem}
             onPress={() => router.push('/profile/feedback')}
           >
-            <Ionicons name="chatbubble-ellipses" size={24} color="#8C1C13" style={styles.menuIcon} />
-            <Text style={styles.menuText}>Feedback & Contact</Text>
+            <Ionicons name="chatbubble" size={24} color="#8C1C13" style={styles.menuIcon} />
+            <Text style={styles.menuText}>Feedback</Text>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out" size={20} color="#8C1C13" style={styles.logoutIcon} />
-          <Text style={styles.logoutText}>Log Out</Text>
-        </TouchableOpacity>
+        {/* Account Actions */}
+        <View style={styles.sectionTitle}>
+          <Text style={styles.sectionTitleText}>Account</Text>
+        </View>
+
+        <View style={styles.menuContainer}>
+          <TouchableOpacity 
+            style={[styles.menuItem, styles.logoutItem]}
+            onPress={handleLogout}
+          >
+            <Ionicons name="log-out" size={24} color="#d32f2f" style={styles.menuIcon} />
+            <Text style={[styles.menuText, styles.logoutText]}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -108,11 +119,11 @@ const styles = StyleSheet.create({
   profileHeader: {
     alignItems: 'center',
     paddingVertical: 30,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    backgroundColor: '#E7E3E2',
+    marginBottom: 20,
   },
   avatarContainer: {
-    marginBottom: 16,
+    marginBottom: 15,
   },
   avatar: {
     width: 100,
@@ -123,39 +134,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   name: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
     marginBottom: 5,
   },
   email: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#666',
   },
   statsContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   sectionTitle: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    marginTop: 10,
+    paddingVertical: 10,
   },
   sectionTitleText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#3E3E3E',
+    fontWeight: '600',
+    color: '#333',
   },
   menuContainer: {
-    marginBottom: 10,
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    borderRadius: 10,
+    marginBottom: 20,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#f9f9f9',
+    borderBottomColor: '#f0f0f0',
   },
   menuIcon: {
     marginRight: 15,
@@ -163,21 +175,12 @@ const styles = StyleSheet.create({
   menuText: {
     flex: 1,
     fontSize: 16,
+    color: '#333',
   },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 30,
-    marginBottom: 50,
-    paddingVertical: 15,
-  },
-  logoutIcon: {
-    marginRight: 8,
+  logoutItem: {
+    borderBottomWidth: 0,
   },
   logoutText: {
-    color: '#8C1C13',
-    fontSize: 16,
-    fontWeight: '500',
+    color: '#d32f2f',
   },
 });

@@ -1,19 +1,14 @@
-// File structure you'll need to create:
 // app/profile/account-settings.js
-// app/profile/help-support.js  
-// app/profile/feedback.js
-
-// Example: app/profile/account-settings.js
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
   Alert,
   ScrollView,
   StyleSheet,
   Switch,
   Text,
-  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
@@ -23,61 +18,91 @@ export default function AccountSettingsScreen() {
   const router = useRouter();
   const { user } = useContext(AuthContext);
   
-  // Local state for form fields
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
+  // Local state for settings
   const [notifications, setNotifications] = useState(true);
-  const [location, setLocation] = useState(true);
+  const [locationEnabled, setLocationEnabled] = useState(false);
+  const [locationPermissionStatus, setLocationPermissionStatus] = useState(null);
 
-  const handleSave = () => {
-    // Implement save logic here
-    Alert.alert('Success', 'Settings saved successfully!');
+  // Check current location permission status on component mount
+  useEffect(() => {
+    checkLocationPermission();
+  }, []);
+
+  const checkLocationPermission = async () => {
+    try {
+      const { status } = await Location.getForegroundPermissionsAsync();
+      setLocationPermissionStatus(status);
+      setLocationEnabled(status === 'granted');
+    } catch (error) {
+      console.error('Error checking location permission:', error);
+    }
+  };
+
+  const handleLocationToggle = async (value) => {
+    if (value) {
+      // User wants to enable location - request permission
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          setLocationEnabled(true);
+          setLocationPermissionStatus('granted');
+          Alert.alert(
+            'Location Enabled', 
+            'Location services are now enabled. The app can now find nearby wineries and show your location on the map.'
+          );
+        } else {
+          setLocationEnabled(false);
+          setLocationPermissionStatus(status);
+            Alert.alert(
+              'Disable Location Services',
+              'To completely disable location access, please go to your device Settings > Privacy & Security > Location Services and turn off location access for this app.',
+              [
+                { text: 'OK', style: 'default' }
+              ]
+            );
+        }
+      } catch (error) {
+        console.error('Error requesting location permission:', error);
+        Alert.alert('Error', 'Unable to request location permission.');
+      }
+    } else {
+      // User wants to disable location - show info about how to disable in settings
+      setLocationEnabled(false);
+      Alert.alert(
+        'Disable Location Services',
+        'To completely disable location access, please go to your device Settings > Privacy & Security > Location Services and turn off location access for this app.',
+        [
+          { text: 'OK', style: 'default' }
+        ]
+      );
+    }
+  };
+
+  const handleNotificationsToggle = (value) => {
+    setNotifications(value);
+    // You can add actual notification preference saving logic here
+    if (value) {
+      Alert.alert('Notifications Enabled', 'You will receive notifications about new features and updates.');
+    } else {
+      Alert.alert('Notifications Disabled', 'You will not receive notifications from the app.');
+    }
   };
 
   return (
-      <View style={styles.container}>
-        {/* Custom Header */}
-        <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#8C1C13" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Account Settings</Text>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <Text style={styles.saveButtonText}>Save</Text>
-          </TouchableOpacity>
+    <View style={styles.container}>
+      {/* Custom Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#8C1C13" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Account Settings</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Profile Information Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Profile Information</Text>
-          
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Name</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter your name"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-        </View>
-
         {/* Privacy & Permissions Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Privacy & Permissions</Text>
@@ -91,7 +116,7 @@ export default function AccountSettingsScreen() {
             </View>
             <Switch
               value={notifications}
-              onValueChange={setNotifications}
+              onValueChange={handleNotificationsToggle}
               trackColor={{ false: '#ccc', true: '#8C1C13' }}
               thumbColor="#fff"
             />
@@ -101,12 +126,20 @@ export default function AccountSettingsScreen() {
             <View style={styles.settingInfo}>
               <Text style={styles.settingTitle}>Location Services</Text>
               <Text style={styles.settingDescription}>
-                Allow location access to find nearby wineries
+                Allow location access to find nearby wineries and show your location on the map
               </Text>
+              {locationPermissionStatus && (
+                <Text style={[
+                  styles.permissionStatus, 
+                  { color: locationPermissionStatus === 'granted' ? '#4CAF50' : '#FF5722' }
+                ]}>
+                  Status: {locationPermissionStatus === 'granted' ? 'Enabled' : 'Disabled'}
+                </Text>
+              )}
             </View>
             <Switch
-              value={location}
-              onValueChange={setLocation}
+              value={locationEnabled}
+              onValueChange={handleLocationToggle}
               trackColor={{ false: '#ccc', true: '#8C1C13' }}
               thumbColor="#fff"
             />
@@ -127,33 +160,45 @@ export default function AccountSettingsScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => router.push('/profile/export-data')}
-          >
-            <Ionicons name="download" size={20} color="#8C1C13" />
-            <Text style={styles.actionButtonText}>Export My Data</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
             style={[styles.actionButton, styles.dangerButton]}
             onPress={() => {
               Alert.alert(
                 'Delete Account',
-                'This action cannot be undone. Are you sure?',
+                'This action cannot be undone. Are you sure you want to delete your account and all associated data?',
                 [
                   { text: 'Cancel', style: 'cancel' },
-                  { text: 'Delete', style: 'destructive' }
+                  { 
+                    text: 'Delete', 
+                    style: 'destructive',
+                    onPress: () => {
+                      // Implement account deletion logic here
+                      Alert.alert('Feature Coming Soon', 'Account deletion will be available in a future update.');
+                    }
+                  }
                 ]
               );
             }}
           >
             <Ionicons name="trash" size={20} color="#d32f2f" />
-            <Text style={[styles.actionButtonText, styles.dangerText]}>
-              Delete Account
-            </Text>
+            <Text style={[styles.actionButtonText, styles.dangerText]}>Delete Account</Text>
             <Ionicons name="chevron-forward" size={20} color="#ccc" />
           </TouchableOpacity>
+        </View>
+
+        {/* Info Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account Information</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Email:</Text>
+            <Text style={styles.infoValue}>{user?.email}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Name:</Text>
+            <Text style={styles.infoValue}>{user?.user_metadata?.name || 'Not provided'}</Text>
+          </View>
+          <Text style={styles.infoNote}>
+            Your name cannot be changed after account creation. Contact support if you need assistance.
+          </Text>
         </View>
       </ScrollView>
     </View>
@@ -169,94 +214,69 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: 'white',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#e0e0e0',
+    paddingTop: 50,
   },
   backButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  closeButton: {
-    padding: 8,
-    marginLeft: 'auto',
+    padding: 5,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#3E3E3E',
-    flex: 1,
-    textAlign: 'center',
+    color: '#333',
   },
-  saveButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  saveButtonText: {
-    color: '#8C1C13',
-    fontSize: 16,
-    fontWeight: '600',
+  headerSpacer: {
+    width: 34,
   },
   content: {
     flex: 1,
   },
   section: {
-    backgroundColor: '#fff',
-    marginTop: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    backgroundColor: 'white',
+    marginHorizontal: 20,
+    marginVertical: 10,
+    borderRadius: 10,
+    padding: 20,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#333',
-    marginBottom: 16,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
+    marginBottom: 15,
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginBottom: 15,
   },
   settingInfo: {
     flex: 1,
-    marginRight: 16,
+    marginRight: 15,
   },
   settingTitle: {
     fontSize: 16,
+    fontWeight: '500',
     color: '#333',
-    marginBottom: 4,
+    marginBottom: 5,
   },
   settingDescription: {
     fontSize: 14,
     color: '#666',
+    lineHeight: 20,
+  },
+  permissionStatus: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 5,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
@@ -264,12 +284,35 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: '#333',
-    marginLeft: 12,
+    marginLeft: 15,
   },
   dangerButton: {
     borderBottomWidth: 0,
   },
   dangerText: {
     color: '#d32f2f',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  infoLabel: {
+    fontSize: 14,
+    color: '#666',
+    width: 60,
+    fontWeight: '500',
+  },
+  infoValue: {
+    fontSize: 14,
+    color: '#333',
+    flex: 1,
+  },
+  infoNote: {
+    fontSize: 12,
+    color: '#999',
+    fontStyle: 'italic',
+    marginTop: 10,
+    lineHeight: 16,
   },
 });

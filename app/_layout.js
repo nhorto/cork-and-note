@@ -8,8 +8,8 @@ import { createContext, useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
-import { supabase } from '../lib/supabase';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { supabase } from '../lib/supabase';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -20,9 +20,11 @@ export const AuthContext = createContext({
   signOut: () => {},
   signUp: () => {},
   resetPassword: () => {},
+  changePassword: () => {},
   user: null,
   isLoading: true,
   session: null,
+  isAuthenticated: false,
 });
 
 export default function RootLayout() {
@@ -35,29 +37,57 @@ export default function RootLayout() {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialized, setIsInitialized] = useState(false); // Track if auth is initialized
 
-  // Check auth state on mount
+// Derived state for cleaner checks
+  const isAuthenticated = !!(user && session);
+
   useEffect(() => {
     let mounted = true;
 
-    // Check for active session on component mount
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (mounted) {
-        if (error) {
-          console.error('Session check error:', error);
+    const initializeAuth = async () => {
+      try {
+        //console.log('🔐 Initializing authentication...');
+        
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (mounted) {
+          if (error) {
+            //console.error('❌ Session check error:', error);
+            // Even with error, we should consider auth initialized
+            setSession(null);
+            setUser(null);
+          } else {
+            //console.log('✅ Session check result:', session ? 'Found session' : 'No session');
+            setSession(session);
+            setUser(session?.user ?? null);
+          }
+          
+          setIsInitialized(true);
+          setIsLoading(false);
         }
-        setSession(session);
-        setUser(session?.user ?? null);
-        setIsLoading(false);
+      } catch (error) {
+        //console.error('❌ Auth initialization error:', error);
+        if (mounted) {
+          setSession(null);
+          setUser(null);
+          setIsInitialized(true);
+          setIsLoading(false);
+        }
       }
-    });
+    };
+
+    // Initialize auth
+    initializeAuth();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (mounted) {
+      if (mounted && isInitialized) {
+        //console.log('🔄 Auth state changed:', event, session ? 'has session' : 'no session');
         setSession(session);
         setUser(session?.user ?? null);
-        setIsLoading(false);
+        // Don't change loading state here - it's already initialized
       }
     });
 
@@ -157,15 +187,45 @@ export default function RootLayout() {
     }
   };
 
+  // Change password
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      // First verify current password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        return { error: { message: 'Current password is incorrect' } };
+      }
+
+      // Update password using Supabase Auth
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+
+      if (updateError) {
+        return { error: updateError };
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   // Auth context value
   const authContextValue = {
     signIn,
     signOut,
     signUp,
     resetPassword,
+    changePassword,
     user,
     isLoading,
     session,
+    isAuthenticated,
   };
 
   // Show splash screen until everything is loaded
@@ -185,16 +245,18 @@ export default function RootLayout() {
         <SafeAreaProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="+not-found" />
               <Stack.Screen name="login" />
               <Stack.Screen name="register" />
               <Stack.Screen name="forgot-password" />
+              <Stack.Screen name="profile/account-settings" />
+              <Stack.Screen name="profile/change-password" />
+              <Stack.Screen name="profile/help-support" />
+              <Stack.Screen name="profile/feedback" />
+              <Stack.Screen name="+not-found" />
             </Stack>
+            <StatusBar style="auto" />
           </ThemeProvider>
-          {/* Put StatusBar *inside* SafeAreaProvider for consistency */}
-          <StatusBar style="auto" />
         </SafeAreaProvider>
       </GestureHandlerRootView>
     </AuthContext.Provider>
