@@ -408,6 +408,7 @@ export default function Wines() {
           value={search}
           onChangeText={setSearch}
           style={styles.searchInput}
+          placeholderTextColor='#8a8484'
         />
         {search.length > 0 && (
           <TouchableOpacity onPress={() => setSearch('')} style={styles.clearButton}>

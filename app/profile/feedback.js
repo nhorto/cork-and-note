@@ -358,6 +358,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={4}
                   textAlignVertical="top"
+                  placeholderTextColor='#8a8484'
                 />
                 
                 <Text style={styles.label}>Steps to Reproduce</Text>
@@ -369,6 +370,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={4}
                   textAlignVertical="top"
+                  placeholderTextColor='#8a8484'
                 />
                 
                 <Text style={styles.label}>Device</Text>
@@ -377,6 +379,7 @@ export default function FeedbackScreen() {
                   value={bugDevice}
                   onChangeText={setBugDevice}
                   placeholder="What device are you using? (e.g., iPhone 13, Samsung Galaxy S21)"
+                  placeholderTextColor='#8a8484'
                 />
                 
                 <TouchableOpacity
@@ -421,6 +424,7 @@ export default function FeedbackScreen() {
                   placeholder="Enter your email address"
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  placeholderTextColor='#8a8484'
                 />
                 
                 <Text style={styles.label}>Subject</Text>
@@ -429,6 +433,7 @@ export default function FeedbackScreen() {
                   value={contactSubject}
                   onChangeText={setContactSubject}
                   placeholder="What is your message about?"
+                  placeholderTextColor='#8a8484'
                 />
                 
                 <Text style={styles.label}>Message</Text>
@@ -440,6 +445,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={6}
                   textAlignVertical="top"
+                  placeholderTextColor='#8a8484'
                 />
                 
                 <TouchableOpacity

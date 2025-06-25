@@ -383,6 +383,7 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
             value={visitDate}
             onChangeText={setVisitDate}
             placeholder="YYYY-MM-DD"
+            placeholderTextColor='#8a8484'
           />
           <Text style={styles.dateDisplay}>{formatDate(visitDate)}</Text>
         </View>
@@ -397,6 +398,7 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
             multiline
             numberOfLines={6}
             textAlignVertical="top"
+            placeholderTextColor='#8a8484'
           />
         </View>
         

@@ -1,3 +1,4 @@
+// Updated WineEntryForm.js with autocomplete varietal
 import { Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,6 +16,7 @@ import {
   View
 } from 'react-native';
 
+import AutocompleteVarietal from './AutocompleteVarietal'; // Import the new component
 import FlavorTagSelector from './FlavorTagSelector';
 import RatingSlider from './RatingSlider';
 
@@ -23,28 +25,11 @@ const WINE_TYPES = [
   'Red Blend', 'White Blend', 'Orange'
 ];
 
-// Common wine varietals
-const WINE_VARIETALS = [
-  '', // Empty option
-  'Cabernet Sauvignon',
-  'Merlot',
-  'Pinot Noir',
-  'Syrah/Shiraz',
-  'Malbec',
-  'Chardonnay',
-  'Sauvignon Blanc',
-  'Pinot Grigio',
-  'Riesling',
-  'Moscato',
-  'Other'
-];
-
 export default function WineEntryForm({ onSave, onCancel, initialData }) {
   // Form state
   const [wineName, setWineName] = useState('');
   const [wineType, setWineType] = useState('Red');
-  const [wineVarietal, setWineVarietal] = useState('');
-  const [customVarietal, setCustomVarietal] = useState('');
+  const [wineVarietal, setWineVarietal] = useState(''); // Now handles free text input
   const [wineYear, setWineYear] = useState('');
   const [overallRating, setOverallRating] = useState(0);
   const [ratings, setRatings] = useState({
@@ -58,9 +43,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   const [additionalNotes, setAdditionalNotes] = useState('');
   const [photo, setPhoto] = useState(null);
   
-  // Modal states for mobile-friendly selectors
+  // Modal state for wine type selector only (varietal now uses autocomplete)
   const [showTypeModal, setShowTypeModal] = useState(false);
-  const [showVarietalModal, setShowVarietalModal] = useState(false);
   
   // Load initial data if editing an existing wine
   useEffect(() => {
@@ -68,7 +52,6 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
       setWineName(initialData.name || '');
       setWineType(initialData.type || 'Red');
       setWineVarietal(initialData.varietal || '');
-      setCustomVarietal(initialData.customVarietal || '');
       setWineYear(initialData.year || '');
       setOverallRating(initialData.overallRating || 0);
       setRatings(initialData.ratings || {
@@ -161,12 +144,6 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     setShowTypeModal(false);
   };
   
-  // Handle wine varietal selection
-  const handleVarietalSelect = (varietal) => {
-    setWineVarietal(varietal);
-    setShowVarietalModal(false);
-  };
-  
   // Handle form submission
   const handleSave = () => {
     // Wine type is required
@@ -175,15 +152,11 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
       return;
     }
     
-    // Determine final varietal
-    const finalVarietal = wineVarietal === 'Other' ? customVarietal : wineVarietal;
-    
-    // Create wine object
+    // Create wine object - varietal is now just the text input value
     const wineData = {
       name: wineName,
       type: wineType,
-      varietal: finalVarietal,
-      customVarietal: wineVarietal === 'Other' ? customVarietal : '',
+      varietal: wineVarietal.trim(), // Use the autocomplete input value directly
       year: wineYear,
       overallRating,
       ratings,
@@ -197,7 +170,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     onSave(wineData);
   };
   
-  // Render the mobile-friendly selectors
+  // Render the wine type modal (keeping this unchanged)
   const renderTypeModal = () => (
     <Modal
       visible={showTypeModal}
@@ -229,47 +202,6 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
                   {type}
                 </Text>
                 {wineType === type && (
-                  <Ionicons name="checkmark" size={20} color="#8C1C13" />
-                )}
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      </View>
-    </Modal>
-  );
-  
-  const renderVarietalModal = () => (
-    <Modal
-      visible={showVarietalModal}
-      animationType="slide"
-      transparent={true}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Select Wine Varietal</Text>
-            <TouchableOpacity onPress={() => setShowVarietalModal(false)}>
-              <Ionicons name="close" size={24} color="#333" />
-            </TouchableOpacity>
-          </View>
-          <ScrollView style={styles.optionsList}>
-            {WINE_VARIETALS.map((varietal) => (
-              <TouchableOpacity
-                key={varietal}
-                style={[
-                  styles.optionItem,
-                  wineVarietal === varietal && styles.selectedOption
-                ]}
-                onPress={() => handleVarietalSelect(varietal)}
-              >
-                <Text style={[
-                  styles.optionText,
-                  wineVarietal === varietal && styles.selectedOptionText
-                ]}>
-                  {varietal || 'None selected'}
-                </Text>
-                {wineVarietal === varietal && (
                   <Ionicons name="checkmark" size={20} color="#8C1C13" />
                 )}
               </TouchableOpacity>
@@ -317,29 +249,14 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         </View>
       </View>
       
+      {/* Updated Varietal Section with Autocomplete */}
       <View style={styles.formGroup}>
         <Text style={styles.label}>Wine Varietal</Text>
-        <TouchableOpacity
-          style={styles.selectorButton}
-          onPress={() => setShowVarietalModal(true)}
-        >
-          <Text style={[
-            styles.selectorText,
-            !wineVarietal && styles.placeholderText
-          ]}>
-            {wineVarietal || 'Select varietal (optional)'}
-          </Text>
-          <Ionicons name="chevron-down" size={20} color="#8C1C13" />
-        </TouchableOpacity>
-        
-        {wineVarietal === 'Other' && (
-          <TextInput
-            style={[styles.input, { marginTop: 10 }]}
-            value={customVarietal}
-            onChangeText={setCustomVarietal}
-            placeholder="Enter custom varietal"
-          />
-        )}
+        <AutocompleteVarietal
+          value={wineVarietal}
+          onChangeText={setWineVarietal}
+          placeholder="Enter varietal (optional)"
+        />
       </View>
       
       {/* Wine Characteristics */}
@@ -376,94 +293,79 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
           onValueChange={(value) => updateRating('alcohol', value)}
         />
       </View>
-      
+
       {/* Flavor Notes */}
       <View style={styles.formGroup}>
+        <Text style={styles.sectionTitle}>Flavor Notes</Text>
         <FlavorTagSelector
           selectedTags={flavorNotes}
           onTagsChange={setFlavorNotes}
         />
       </View>
-
-      {/* Overall Rating */}
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Overall Rating</Text>
-        <RatingSlider
-          label="Your Rating"
-          value={overallRating}
-          onValueChange={setOverallRating}
-          showStars={true}
-        />
-      </View>
       
       {/* Additional Notes */}
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Tasting Notes</Text>
+        <Text style={styles.label}>Additional Notes</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           value={additionalNotes}
           onChangeText={setAdditionalNotes}
-          placeholder="Enter any additional notes about this wine"
-          multiline
+          placeholder="Optional notes about this wine..."
+          multiline={true}
           numberOfLines={4}
           textAlignVertical="top"
         />
       </View>
       
-      {/* Photo Selection */}
+      {/* Overall Rating */}
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Wine Photo</Text>
-        <View style={styles.photoActions}>
-          <TouchableOpacity 
-            style={styles.photoButton} 
-            onPress={takePhoto}
-          >
-            <Ionicons name="camera" size={20} color="#fff" />
-            <Text style={styles.photoButtonText}>Take Photo</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.photoButton} 
-            onPress={pickImage}
-          >
-            <Ionicons name="image" size={20} color="#fff" />
-            <Text style={styles.photoButtonText}>Choose Photo</Text>
-          </TouchableOpacity>
-        </View>
-        
-        {photo && (
-          <View style={styles.photoPreviewContainer}>
+        <Text style={styles.sectionTitle}>Overall Rating</Text>
+        <RatingSlider
+          label=""
+          value={overallRating}
+          onValueChange={setOverallRating}
+        />
+      </View>
+      
+      {/* Photo Section */}
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>Photo</Text>
+        {photo ? (
+          <View style={styles.photoContainer}>
             <Image source={{ uri: photo }} style={styles.photoPreview} />
             <TouchableOpacity
               style={styles.removePhotoButton}
               onPress={() => setPhoto(null)}
             >
-              <Ionicons name="close-circle" size={26} color="#FF3B30" />
+              <Ionicons name="close-circle" size={24} color="#FF4444" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.photoButtons}>
+            <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
+              <Ionicons name="camera" size={24} color="#E7E3E2" />
+              <Text style={styles.photoButtonText}>Take Photo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
+              <Ionicons name="image" size={24} color="#E7E3E2" />
+              <Text style={styles.photoButtonText}>Choose Photo</Text>
             </TouchableOpacity>
           </View>
         )}
       </View>
       
       {/* Action Buttons */}
-      <View style={styles.buttonsContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.cancelButton]}
-          onPress={onCancel}
-        >
-          <Text style={styles.buttonText}>Cancel</Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+          <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[styles.button, styles.saveButton]}
-          onPress={handleSave}
-        >
-          <Text style={styles.buttonText}>Save Wine</Text>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Save Wine</Text>
         </TouchableOpacity>
       </View>
       
-      {/* Render modals */}
+      {/* Wine Type Modal */}
       {renderTypeModal()}
-      {renderVarietalModal()}
     </ScrollView>
   );
 }
@@ -475,7 +377,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 16,
-    paddingBottom: 50, // Extra space at bottom
+    paddingBottom: 50,
   },
   formGroup: {
     marginBottom: 20,
@@ -531,34 +433,15 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: '#999',
   },
-  photoActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-  photoButton: {
-    flexDirection: 'row',
-    backgroundColor: '#8C1C13',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '48%',
-  },
-  photoButtonText: {
-    color: '#fff',
-    fontWeight: '500',
-    marginLeft: 8,
-  },
-  photoPreviewContainer: {
+  photoContainer: {
     position: 'relative',
-    marginTop: 10,
+    alignItems: 'center',
   },
   photoPreview: {
     width: '100%',
     height: 200,
     borderRadius: 8,
+    resizeMode: 'cover',
   },
   removePhotoButton: {
     position: 'absolute',
@@ -567,30 +450,54 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     borderRadius: 15,
   },
-  buttonsContainer: {
+  photoButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  photoButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#8C1C13', // solid red background
+  },
+  photoButtonText: {
+    color: '#E7E3E2', // soft beige text color
+    fontWeight: '500',
+  },
+  buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-    marginBottom: 30,
+    marginTop: 30,
   },
-  button: {
+  cancelButton: {
     width: '48%',
     padding: 15,
     borderRadius: 8,
+    backgroundColor: '#FF3B30',
     alignItems: 'center',
   },
-  saveButton: {
-    backgroundColor: '#8C1C13',
-  },
-  cancelButton: {
-    backgroundColor: '#FF3B30',
-  },
-  buttonText: {
+  cancelButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
-  // Modal styles
+  saveButton: {
+    width: '48%',
+    padding: 15,
+    borderRadius: 8,
+    backgroundColor: '#8C1C13',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Modal styles (restored to original)
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

@@ -178,6 +178,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Enter your current password"
                 secureTextEntry={!showCurrentPassword}
                 autoCapitalize="none"
+                placeholderTextColor='#8a8484'
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -203,6 +204,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Enter your new password"
                 secureTextEntry={!showNewPassword}
                 autoCapitalize="none"
+                placeholderTextColor='#8a8484'
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -250,6 +252,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Confirm your new password"
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
+                placeholderTextColor="#8a8484"
               />
               <TouchableOpacity
                 style={styles.eyeButton}

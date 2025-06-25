@@ -155,6 +155,7 @@ export default function RegisterScreen() {
               placeholder="Full Name"
               value={name}
               onChangeText={setName}
+              placeholderTextColor='#8a8484'
             />
           </View>
 
@@ -167,6 +168,7 @@ export default function RegisterScreen() {
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
+              placeholderTextColor='#8a8484'
             />
           </View>
 
@@ -221,6 +223,7 @@ export default function RegisterScreen() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPassword}
+              placeholderTextColor='#8a8484'
             />
           </View>
 
@@ -320,6 +323,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+    color:'#333'
   },
   visibilityIcon: {
     padding: 4,

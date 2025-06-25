@@ -126,6 +126,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             placeholder="Search flavor notes..."
             value={searchQuery}
             onChangeText={setSearchQuery}
+            placeholderTextColor='#8a8484'
           />
           {searchQuery !== '' && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
@@ -141,6 +142,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             value={customTag}
             onChangeText={setCustomTag}
             onSubmitEditing={addCustomTag}
+            placeholderTextColor='#8a8484'
           />
           <TouchableOpacity 
             style={styles.addButton}
