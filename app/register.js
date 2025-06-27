@@ -107,23 +107,24 @@ export default function RegisterScreen() {
           Alert.alert('Error', error.message);
         }
       } else {
-        // Check if user is immediately signed in (no email confirmation)
-        if (data.session && data.user) {
-          // Navigation will be handled by the AuthContext and index.js
-          setTimeout(() => {
-            router.replace('/(tabs)/map');
-          }, 100);
-        } else {
-          // If for some reason they need to confirm email or sign in manually
-          Alert.alert(
-            'Account Created!', 
-            'Your account has been successfully created. You can now sign in.',
-            [
-              { text: 'OK', onPress: () => router.replace('/login') }
-            ]
-          );
+          // Check if user is immediately signed in (no email confirmation)
+          if (data.session && data.user) {
+            // ← REMOVE THIS MANUAL NAVIGATION
+            // setTimeout(() => {
+            //   router.replace('/(tabs)/map');
+            // }, 100);
+            console.log('✅ Registration successful, auth context will handle navigation');
+          } else {
+            // If for some reason they need to confirm email or sign in manually
+            Alert.alert(
+              'Account Created!', 
+              'Your account has been successfully created. You can now sign in.',
+              [
+                { text: 'OK', onPress: () => router.replace('/login') }
+              ]
+            );
+          }
         }
-      }
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {

@@ -86,37 +86,52 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   
   // Take a photo with the camera
   const takePhoto = async () => {
-    const hasPermissions = await requestPermissions();
-    if (!hasPermissions) return;
-    
     try {
+      // Request camera permission
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Denied',
+          'Camera permission is needed to take photos.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
-        mediaTypes: ImagePicker.MediaType.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
       });
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
         setPhoto(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to take photo: ' + error.message);
+      console.log('Camera error:', error);
+      Alert.alert('Error', 'Failed to take photo. Please try again.');
     }
   };
-  
+
   // Pick an image from the media library
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'We need camera roll permission to upload photos.');
-      return;
-    }
-    
     try {
+      // Request media library permission
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Denied',
+          'Photo library permission is needed to select photos.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaType.Images,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -126,7 +141,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         setPhoto(result.assets[0].uri);
       }
     } catch (error) {
-      Alert.alert('Error', 'Failed to select image: ' + error.message);
+      console.log('Image picker error:', error);
+      Alert.alert('Error', 'Failed to select image. Please try again.');
     }
   };
   

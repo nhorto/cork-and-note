@@ -305,6 +305,7 @@ export default function MapScreen() {
         onRegionChangeComplete={onRegionChangeComplete}
         showsUserLocation={true}
         showsMyLocationButton={false}
+        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
       >
         {clusters.map(cluster => {
           // Render a cluster marker if a cluster
@@ -331,6 +332,23 @@ export default function MapScreen() {
       >
         <Ionicons name="search" size={24} color="#8C1C13" />
       </TouchableOpacity>
+
+      {/* Legend */}
+      <View style={styles.legendContainer}>
+        <Text style={styles.legendTitle}>Status</Text>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.visited]} />
+          <Text style={styles.legendText}>Visited</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.favorite]} />
+          <Text style={styles.legendText}>Favorite</Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendDot, styles.wantToVisit]} />
+          <Text style={styles.legendText}>Want to Visit</Text>
+        </View>
+      </View>
 
       {/* Search Modal */}
       <WinerySearchModal
@@ -434,4 +452,44 @@ const styles = StyleSheet.create({
   visited: { backgroundColor: '#4CAF50' },
   favorite: { backgroundColor: '#E91E63' },
   wantToVisit: { backgroundColor: '#2196F3' },
+
+  // Legend styles
+legendContainer: {
+  position: 'absolute',
+  top: 50,
+  left: 15,
+  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+  borderRadius: 8,
+  padding: 12,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.15,
+  shadowRadius: 3,
+  elevation: 3,
+  minWidth: 120,
+},
+legendTitle: {
+  fontSize: 12,
+  fontWeight: 'bold',
+  color: '#333',
+  marginBottom: 8,
+  textAlign: 'center',
+},
+legendItem: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 2,
+},
+legendDot: {
+  width: 10,
+  height: 10,
+  borderRadius: 5,
+  marginRight: 8,
+  borderWidth: 1,
+  borderColor: '#fff',
+},
+legendText: {
+  fontSize: 11,
+  color: '#333',
+},
 })

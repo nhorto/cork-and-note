@@ -40,10 +40,10 @@ export default function LoginScreen() {
       if (error) {
         Alert.alert('Error', error.message);
       } else {
-        // Navigation will be handled by the AuthContext and index.js
-        setTimeout(() => {
-          router.replace('/(tabs)/map');
-        }, 100);
+        // ← REMOVE MANUAL NAVIGATION - Let index.js handle it
+        console.log('✅ Login successful, auth context will handle navigation');
+        // Navigation will be handled automatically by the AuthContext and index.js
+        // No manual navigation needed here!
       }
     } catch (error) {
       Alert.alert('Error', error.message);

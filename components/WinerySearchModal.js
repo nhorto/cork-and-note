@@ -2,14 +2,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
-    FlatList,
-    Modal,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  FlatList,
+  Modal,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const WinerySearchModal = ({ visible, onClose, wineries, onWinerySelect }) => {
@@ -82,6 +82,7 @@ const WinerySearchModal = ({ visible, onClose, wineries, onWinerySelect }) => {
             onChangeText={setSearchQuery}
             autoFocus={true}
             clearButtonMode="while-editing"
+            placeholderTextColor='#8a8484'
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
