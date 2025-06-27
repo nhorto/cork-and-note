@@ -1,7 +1,7 @@
-// app/_layout.js
+// app/_layout.js - WITH NAVIGATION LOGIC
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { createContext, useEffect, useState } from 'react';
@@ -37,29 +37,41 @@ export default function RootLayout() {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false); // Track if auth is initialized
+  const [isInitialized, setIsInitialized] = useState(false);
 
-// Derived state for cleaner checks
+  // Navigation hooks - ADD THESE
+  const router = useRouter();
+  const segments = useSegments();
+
+  // Derived state for cleaner checks
   const isAuthenticated = !!(user && session);
 
+  // AUTH INITIALIZATION - Same as before
   useEffect(() => {
     let mounted = true;
 
     const initializeAuth = async () => {
       try {
-        //console.log('🔐 Initializing authentication...');
+        console.log('🔐 Initializing authentication...');
         
         // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
         
+        console.log('📊 Session result:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email,
+          error: error?.message
+        });
+        
         if (mounted) {
           if (error) {
-            //console.error('❌ Session check error:', error);
-            // Even with error, we should consider auth initialized
+            console.error('❌ Session check error:', error);
             setSession(null);
             setUser(null);
           } else {
-            //console.log('✅ Session check result:', session ? 'Found session' : 'No session');
+            console.log('✅ Session check result:', session ? 'Found session' : 'No session');
             setSession(session);
             setUser(session?.user ?? null);
           }
@@ -68,7 +80,7 @@ export default function RootLayout() {
           setIsLoading(false);
         }
       } catch (error) {
-        //console.error('❌ Auth initialization error:', error);
+        console.error('❌ Auth initialization error:', error);
         if (mounted) {
           setSession(null);
           setUser(null);
@@ -83,11 +95,22 @@ export default function RootLayout() {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (mounted && isInitialized) {
-        //console.log('🔄 Auth state changed:', event, session ? 'has session' : 'no session');
+      if (mounted) {  // ← REMOVE isInitialized condition
+        console.log('🔄 Auth state changed:', {
+          event,
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          userId: session?.user?.id,
+          userEmail: session?.user?.email,
+          isInitialized
+        });
         setSession(session);
         setUser(session?.user ?? null);
-        // Don't change loading state here - it's already initialized
+        
+        // If this is a sign-in event, make sure loading is false
+        if (event === 'SIGNED_IN' && session) {
+          setIsLoading(false);
+        }
       }
     });
 
@@ -97,7 +120,42 @@ export default function RootLayout() {
     };
   }, []);
 
-  // Sign in with email and password
+  // NAVIGATION LOGIC - ADD THIS NEW EFFECT
+  useEffect(() => {
+    if (!isInitialized || isLoading) {
+      console.log('⏳ Auth not ready yet, skipping navigation');
+      return;
+    }
+
+    console.log('🚀 Auth ready, checking navigation...', {
+      isAuthenticated,
+      currentSegments: segments,
+      user: user?.email
+    });
+
+    const inAuthGroup = segments[0] === '(tabs)';
+    const inAuthFlow = ['login', 'register', 'forgot-password'].includes(segments[0]);
+    const inProtectedRoute = ['winery', 'wine', 'profile'].includes(segments[0]) || inAuthGroup;
+    const onIndexPage = segments.length === 0; // ← ADD THIS CHECK
+
+    if (isAuthenticated && (inAuthFlow || onIndexPage)) {
+      // User is authenticated but on login/register page OR index page
+      console.log('✅ User authenticated, navigating from auth flow/index to main app');
+      router.replace('/(tabs)/map');
+    } else if (!isAuthenticated && !inAuthFlow && !onIndexPage) {
+      // User is not authenticated but trying to access protected content (not index)
+      console.log('❌ User not authenticated, navigating to login');
+      router.replace('/login');
+    } else if (!isAuthenticated && onIndexPage) {
+      // User is not authenticated and on index page
+      console.log('❌ User not authenticated on index, navigating to login');
+      router.replace('/login');
+    } else {
+      console.log('📍 User is in correct section, no navigation needed');
+    }
+  }, [isAuthenticated, isInitialized, isLoading, segments]);
+
+  // YOUR EXISTING AUTH FUNCTIONS - Keep these the same
   const signIn = async (email, password) => {
     try {
       setIsLoading(true);
@@ -107,7 +165,7 @@ export default function RootLayout() {
       });
       
       if (error) {
-        // Check for specific error types
+        setIsLoading(false); // Only set to false on error
         if (error.message.includes('Invalid login credentials')) {
           return { error: { message: 'Invalid email or password. Please check your credentials or sign up for a new account.' } };
         } else if (error.message.includes('Email not confirmed')) {
@@ -118,8 +176,7 @@ export default function RootLayout() {
         throw error;
       }
       
-      // Don't manually update state here - let the onAuthStateChange listener handle it
-      setIsLoading(false);
+      // Don't set isLoading to false here - let the auth state change handle it
       return { error: null, data };
     } catch (error) {
       setIsLoading(false);
@@ -127,7 +184,6 @@ export default function RootLayout() {
     }
   };
 
-  // Sign up with email and password
   const signUp = async (email, password, name) => {
     try {
       setIsLoading(true);
@@ -139,10 +195,12 @@ export default function RootLayout() {
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        setIsLoading(false);
+        throw error;
+      }
       
-      // Don't manually update state here - let the onAuthStateChange listener handle it
-      setIsLoading(false);
+      // Don't set isLoading to false here - let the auth state change handle it
       return { error: null, data };
     } catch (error) {
       setIsLoading(false);
@@ -150,18 +208,15 @@ export default function RootLayout() {
     }
   };
 
-  // Sign out
   const signOut = async () => {
     try {
       setIsLoading(true);
       
-      // Clear state immediately before calling signOut
       setSession(null);
       setUser(null);
       
       const { error } = await supabase.auth.signOut();
       if (error) {
-        // If signOut fails, we still want to clear local state
         console.error('Sign out error:', error);
       }
       
@@ -174,7 +229,6 @@ export default function RootLayout() {
     }
   };
 
-  // Reset password
   const resetPassword = async (email) => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -187,10 +241,8 @@ export default function RootLayout() {
     }
   };
 
-  // Change password
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      // First verify current password by attempting to sign in
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
@@ -200,7 +252,6 @@ export default function RootLayout() {
         return { error: { message: 'Current password is incorrect' } };
       }
 
-      // Update password using Supabase Auth
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword
       });
@@ -226,6 +277,7 @@ export default function RootLayout() {
     isLoading,
     session,
     isAuthenticated,
+    isInitialized,
   };
 
   // Show splash screen until everything is loaded
