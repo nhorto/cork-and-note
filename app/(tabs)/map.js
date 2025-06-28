@@ -362,7 +362,6 @@ export default function MapScreen() {
 }
 
 const styles = StyleSheet.create({
-  // Marker container includes both the label and the actual marker
   container: { 
     flex: 1,
   },
