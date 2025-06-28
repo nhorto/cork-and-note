@@ -1,0 +1,697 @@
+- Users table
+create table public.users (
+  id uuid references auth.users not null primary key,
+  email text not null,
+  name text,
+  created_at timestamp with time zone default now() not null
+);
+
+-- Wineries table
+create table public.wineries (
+  id bigint primary key,
+  name text not null,
+  website text,
+  address text,
+  latitude decimal(10, 6),
+  longitude decimal(10, 6),
+  created_at timestamp with time zone default now() not null
+);
+
+-- Visits table
+create table public.visits (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.users not null,
+  winery_id bigint references public.wineries not null,
+  visit_date date not null,
+  notes text,
+  photo_url text,
+  created_at timestamp with time zone default now() not null
+);
+
+-- Wines table 
+create table public.wines (
+  id uuid default uuid_generate_v4() primary key,
+  visit_id uuid references public.visits,
+  wine_name text not null,
+  wine_type text not null,
+  wine_year text,
+  overall_rating decimal(3, 1) not null,
+  sweetness decimal(3, 1),
+  tannin decimal(3, 1),
+  acidity decimal(3, 1),
+  body decimal(3, 1),
+  alcohol decimal(3, 1),
+  additional_notes text,
+  photo_url text,
+  created_at timestamp with time zone default now() not null
+);
+
+-- Flavor notes table (many-to-many)
+create table public.flavor_notes (
+  id uuid default uuid_generate_v4() primary key,
+  name text not null unique,
+  category text not null
+);
+
+-- Wine flavor notes (junction table)
+create table public.wine_flavor_notes (
+  id uuid default uuid_generate_v4() primary key,
+  wine_id uuid references public.wines not null,
+  flavor_note_id uuid references public.flavor_notes not null,
+  unique(wine_id, flavor_note_id)
+);
+
+-- Enable RLS on all tables
+alter table public.users enable row level security;
+alter table public.wineries enable row level security;
+alter table public.visits enable row level security;
+alter table public.wines enable row level security;
+alter table public.flavor_notes enable row level security;
+alter table public.wine_flavor_notes enable row level security;
+
+-- Create policies
+-- Users can read all wineries
+create policy "Anyone can read wineries" on public.wineries for select using (true);
+
+-- Users can only read their own profile
+create policy "Users can read their own profile" on public.users for select using (auth.uid() = id);
+
+-- Users can create their own profile
+create policy "Users can create their own profile" on public.users for insert with check (auth.uid() = id);
+
+-- Users can update their own profile
+create policy "Users can update their own profile" on public.users for update using (auth.uid() = id);
+
+-- Users can read only their own visits
+create policy "Users can read their own visits" on public.visits for select using (auth.uid() = user_id);
+
+-- Users can insert only their own visits
+create policy "Users can insert their own visits" on public.visits for insert with check (auth.uid() = user_id);
+
+-- Users can update only their own visits
+create policy "Users can update their own visits" on public.visits for update using (auth.uid() = user_id);
+
+-- Users can delete only their own visits
+create policy "Users can delete their own visits" on public.visits for delete using (auth.uid() = user_id);
+
+-- Users can read wines associated with their visits
+create policy "Users can read their own wines" on public.wines for select 
+using (
+  visit_id in (select id from public.visits where user_id = auth.uid())
+);
+
+-- Users can insert wines to their own visits
+create policy "Users can insert wines to their own visits" on public.wines for insert 
+with check (
+  visit_id in (select id from public.visits where user_id = auth.uid())
+);
+
+-- Users can update wines from their own visits
+create policy "Users can update their own wines" on public.wines for update 
+using (
+  visit_id in (select id from public.visits where user_id = auth.uid())
+);
+
+-- Users can delete wines from their own visits
+create policy "Users can delete their own wines" on public.wines for delete 
+using (
+  visit_id in (select id from public.visits where user_id = auth.uid())
+);
+
+-- Anyone can read flavor notes
+create policy "Anyone can read flavor notes" on public.flavor_notes for select using (true);
+
+-- Users can read their own wine-flavor connections
+create policy "Users can read their own wine flavor notes" on public.wine_flavor_notes for select 
+using (
+  wine_id in (
+    select w.id from public.wines w
+    join public.visits v on w.visit_id = v.id
+    where v.user_id = auth.uid()
+  )
+);
+
+-- Users can create wine-flavor connections for their own wines
+create policy "Users can insert their own wine flavor notes" on public.wine_flavor_notes for insert 
+with check (
+  wine_id in (
+    select w.id from public.wines w
+    join public.visits v on w.visit_id = v.id
+    where v.user_id = auth.uid()
+  )
+);
+
+-- Users can delete wine-flavor connections for their own wines
+create policy "Users can delete their own wine flavor notes" on public.wine_flavor_notes for delete 
+using (
+  wine_id in (
+    select w.id from public.wines w
+    join public.visits v on w.visit_id = v.id
+    where v.user_id = auth.uid()
+  )
+);
+
+-- Insert flavor categories and notes
+INSERT INTO public.flavor_notes (name, category) VALUES
+-- Fruit flavors
+('Apple', 'Fruit'), ('Pear', 'Fruit'), ('Peach', 'Fruit'), ('Apricot', 'Fruit'),
+('Cherry', 'Fruit'), ('Plum', 'Fruit'), ('Strawberry', 'Fruit'), ('Raspberry', 'Fruit'),
+('Blackberry', 'Fruit'), ('Blueberry', 'Fruit'), ('Lemon', 'Fruit'), ('Orange', 'Fruit'),
+('Grapefruit', 'Fruit'), ('Pineapple', 'Fruit'), ('Mango', 'Fruit'), ('Fig', 'Fruit'),
+('Date', 'Fruit'), ('Raisin', 'Fruit'),
+
+-- Floral & Herbal
+('Rose', 'Floral & Herbal'), ('Violet', 'Floral & Herbal'), ('Lavender', 'Floral & Herbal'),
+('Honeysuckle', 'Floral & Herbal'), ('Jasmine', 'Floral & Herbal'), ('Thyme', 'Floral & Herbal'),
+('Rosemary', 'Floral & Herbal'), ('Mint', 'Floral & Herbal'), ('Eucalyptus', 'Floral & Herbal'),
+('Sage', 'Floral & Herbal'), ('Basil', 'Floral & Herbal'), ('Oregano', 'Floral & Herbal'),
+
+-- Spice & Wood
+('Cinnamon', 'Spice & Wood'), ('Vanilla', 'Spice & Wood'), ('Clove', 'Spice & Wood'),
+('Nutmeg', 'Spice & Wood'), ('Black Pepper', 'Spice & Wood'), ('White Pepper', 'Spice & Wood'),
+('Licorice', 'Spice & Wood'), ('Cedar', 'Spice & Wood'), ('Oak', 'Spice & Wood'),
+('Sandalwood', 'Spice & Wood'), ('Tobacco', 'Spice & Wood'), ('Leather', 'Spice & Wood'),
+
+-- Earth & Mineral
+('Forest Floor', 'Earth & Mineral'), ('Mushroom', 'Earth & Mineral'), ('Truffle', 'Earth & Mineral'),
+('Wet Stone', 'Earth & Mineral'), ('Chalk', 'Earth & Mineral'), ('Slate', 'Earth & Mineral'),
+('Graphite', 'Earth & Mineral'), ('Flint', 'Earth & Mineral'), ('Clay', 'Earth & Mineral'),
+('Petrol', 'Earth & Mineral'),
+
+-- Other
+('Honey', 'Other'), ('Caramel', 'Other'), ('Butterscotch', 'Other'), ('Toffee', 'Other'),
+('Chocolate', 'Other'), ('Coffee', 'Other'), ('Smoke', 'Other'), ('Toast', 'Other'),
+('Butter', 'Other'), ('Cream', 'Other'), ('Bread', 'Other'), ('Yeast', 'Other'), ('Biscuit', 'Other');
+
+INSERT INTO public.wineries (id, name, website, address, latitude, longitude) VALUES
+(0, '12 Ridges Vineyard', '/wineries/12-ridges-vineyard', '24981 Blue Ridge Pkwy, Vesuvius , VA 24483', 37.896189, -79.121184),
+(1, '2 Witches Winery and Brewing Co', '/wineries/2-witches-winery-and-brewing-co', '209 Trade Street, Danville, Virginia 24541', 36.585645, -79.421034),
+(2, '50 West Vineyards', '/wineries/50-west-vineyards', '39060 John Mosby Highway, Middleburg, Virginia 20117', 38.98121, -77.658044),
+(3, '7 Lady Vineyards', '/wineries/7-lady-vineyards', '1500 Manakin Road, Manakin-Sabot, VA  23103, VA 23103', 37.657959, -77.721262),
+(4, '868 Estate Vineyards', '/wineries/868-estate-vineyards', '14001 Harpers Ferry Rd., Hillsboro, Virginia 20132', 39.231256, -77.739474),
+(5, '8 Chains North Winery', '/wineries/8-chains-north-winery', '38593 Daymont Lane, Waterford, Virginia 20197-1038', 39.17808, -77.66877),
+(6, 'Abingdon Vineyards', '/wineries/abingdon-vineyards', '20530 Alvarado Rd, Abingdon, Virginia 24211', 36.658206, -81.888948),
+(7, 'Above Ground Winery', '/wineries/above-ground-winery', '975 McKinley Road, Middlebrook, Virginia 24459', 38.043424, -79.298705),
+(8, 'Afton Mountain Vineyards', '/wineries/afton-mountain-vineyards', '234 Vineyard Lane, Afton, Virginia 22920', 38.00824, -78.85166),
+(9, 'Albemarle CiderWorks', '/wineries/albemarle-ciderworks', '2545 Rural Ridge Lane, North Garden, Virginia 22959', 37.966563, -78.649885),
+(10, 'Altillo Vineyards', '/wineries/altillo-vineyards', '620 Level Run Rd., Hurt, VA 24536', 37.064792, -79.244161),
+(11, 'American Way Country Wines', '/wineries/american-way-country-wines', '13750 VA-47, Chase City, VA 23924', 36.794649, -78.351886),
+(12, 'Ankida Ridge Vineyards', '/wineries/ankida-ridge-vineyards', '1304 Franklin Creek Rd., Amherst, VA 24521', 37.70885, -79.171761),
+(13, 'Arterra Wines', '/wineries/arterra-wines', '1808 Leeds Manor Road, Delaplane, VA 20144', 38.968336, -77.973375),
+(14, 'Ashton Creek Vineyard', '/wineries/ashton-creek-vineyard', '14501 Jefferson Davis Hwy, Chester, VA 23831', 37.326998, -77.404983),
+(15, 'Aspen Dale Winery at The Barn', '/wineries/aspen-dale-winery-at-the-barn', '3180 Aspen Dale Lane (GPS:  11083 John Marshall Hwy), Delaplane, Virginia 20144', 38.914986, -77.921982),
+(16, 'Bacchus Winery', '/wineries/bacchus-winery', '6320 Five Mile Centre Park, FREDERICKSBURG, VA 22407', 38.2883, -77.554093),
+(17, 'Backporch Vineyard', '/wineries/backporch-vineyard', '16595 Wilmont Rd, King George, VA 22485', 38.18137, -77.06172),
+(18, 'Barboursville Vineyards', '/wineries/barboursville-vineyards', '17655 Winery Road, Barboursville, Virginia 22923', 38.1599, -78.277008),
+(19, 'Barn at 678', '/wineries/barn-at-678', '6045 Governor Barbour St, Barboursville, VA 22923', 38.166415, -78.271991),
+(20, 'Barrel Oak Winery', '/wineries/barrel-oak-winery', '3623 Grove Ln, Delaplane, VIRGINIA 20144', 38.88534, -77.89611),
+(21, 'Barren Ridge Vineyards', '/wineries/barren-ridge-vineyards', '984 Barren Ridge Road, Fishersville, VA 22939', 38.162678, -78.95051),
+(22, 'Beliveau Farm Winery', '/wineries/beliveau-farm-winery', '3899 Eakin Farm Rd, Blacksburg, VA 24060', 37.312068, -80.278978),
+(23, 'Big Fish Cider Co.', '/wineries/big-fish-cider-co', '59 Spruce Street, Monterey, VA 24465', 38.412296, -79.582808),
+(24, 'Black Heath Meadery', '/wineries/black-heath-meadery', '1313 Altamont Ave, Richmond, VA 23230', 37.565338, -77.471168),
+(25, 'Blenheim Vineyards', '/wineries/blenheim-vineyards', '31 Blenheim Farm, Charlottesville, Virginia 22902', 37.931655, -78.498935),
+(26, 'Blue Bee Cider', '/wineries/blue-bee-cider', '4811 Bethlehem Rd, STE A, Richmond, VA 23230', 37.591668, -77.488846),
+(27, 'Bluemont Vineyard', '/wineries/bluemont-vineyard', '18755 Foggy Bottom Road, Bluemont, Virginia 20135', 39.09737, -77.83623),
+(28, 'Blue Quartz Winery', '/wineries/blue-quartz-winery', '2585 S F T Valley Road, Etlan, VA 22719', 38.493006, -78.283051),
+(29, 'Blue Ridge Vineyard', '/wineries/blue-ridge-vineyard', '1027 Shiloh Dr., Eagle Rock, VA 24085', 37.62866, -79.75007),
+(30, 'Bluestone Vineyard', '/wineries/bluestone-vineyard', '4828 Spring Creek Road, Bridgewater, VA 22812', 38.387519, -79.009507),
+(31, 'Blue Valley Vineyard and Winery', '/wineries/blue-valley-vineyard-and-winery', '5535 Blue Valley Way, Delaplane, VA 20144', 38.892104, -77.901457),
+(32, 'Bogati Winery', '/wineries/bogati-winery', '35246 Harry Byrd Highway, Round Hill, VA 20142', 39.132508, -77.768861),
+(33, 'Bold Rock Cider', '/wineries/bold-rock-cider', '1020 Rockfish Valley Hwy, Nellysford, Virginia 22958', 37.88097, -78.90565),
+(34, 'Boxwood Estate Winery', '/wineries/boxwood-estate-winery', '2042 Burrland Rd, Middleburg, VA 20117', 38.959726, -77.746501),
+(35, 'Bozzo Family Vineyards', '/wineries/bozzo-family-vineyards', '35226 Charles Town Pike, Purcellville, VA 20132', 39.238478, -77.754065),
+(36, 'Breaux Vineyards', '/wineries/breaux-vineyards', '36888 Breaux Vineyards Lane, Purcellville, Virginia 20132', 39.231784, -77.726493),
+(37, 'Breezy Hill Meadworks', '/wineries/breezy-hill-meadworks', '15981 Breezy Hill Lane, Smithfield, VA 23430', 36.92921, -76.6032),
+(38, 'Brent Manor Vineyards', '/wineries/brent-manor-vineyards', '100 Brent Manor Lane, Faber, Virginia 22938', 37.8544, -78.74574),
+(39, 'Bright Meadows Farm', '/wineries/bright-meadows-farm', '1181 Nathalie Road, Nathalie, VA 24577', 36.932638, -78.948811),
+(40, 'Brix & Columns Vineyards', '/wineries/brix-columns-vineyards', '1501 Dave Berry Road, McGaheysville, VA 22840', 38.369489, -78.696816),
+(41, 'Brooks Mill Winery', '/wineries/brooks-mill-winery', '6221 Brooks Mill Rd., Wirtz, VA 24184', 37.065366, -79.755071),
+(42, 'Bryant''s Cider', '/wineries/bryant-s-cider', '3224 E Branch Loop, Roseland, VA  22967', 37.79535, -78.94279),
+(43, 'Bryant''s Cider RVA', '/wineries/bryant-s-cider-rva', '2114 E. Main St., Richmond, VA 23223', 37.531129, -77.424264),
+(44, 'Burnbrae Vineyards', '/wineries/burnbrae-vineyards', '3524 Cottontown Road, Forest, Virginia 24551', 37.397111, -79.274933),
+(45, 'Burnley Vineyards', '/wineries/burnley-vineyards', '4500 Winery Lane, Barboursville, Virginia 22923', 38.15847, -78.31707),
+(46, 'Buskey Cider', '/wineries/buskey-cider', '2910 W. Leigh Street, Richmond, VA 23230', 37.566064, -77.469179),
+(47, 'Byrd Cellars', '/wineries/byrd-cellars', '2442 Davis Mill Road, Goochland, VA 23063', 37.74132, -78.067232),
+(48, 'Caihailian Vineyard', '/wineries/caihailian-vineyard', '872 Beech Grove Road, Roseland, VA 22967', 37.87432, -78.92849),
+(49, 'Cana Vineyards and Winery of Middleburg', '/wineries/cana-vineyards-and-winery-of-middleburg', '38600 John Mosby Highway, Middleburg, VA 20117', 38.977467, -77.669853),
+(50, 'Capstone Vineyards', '/wineries/capstone-vineyards', '13400 Crimson Ln, Linden, VA 22642', 38.91865, -78.06914),
+(51, 'Cardinal Point Vineyard & Winery', '/wineries/cardinal-point-vineyard-winery', '9423 Batesville Road, Afton, Virginia 22920', 37.988529, -78.813861),
+(52, 'Caret Cellars', '/wineries/caret-cellars', '495 Meadow Landing Lane, Caret, VA 22436', 37.973422, -76.963823),
+(53, 'Carriage House Wineworks', '/wineries/carriage-house-wineworks', '40817 Browns Ln., Waterford, VA 20197', 39.188671, -77.589325),
+(54, 'Casanel Vineyards & Winery', '/wineries/casanel-vineyards-winery', '17952 Canby Road, 17952 Canby Road , Leesburg, Virginia 20175', 39.118775, -77.62845),
+(55, 'Castle Glen Winery', '/wineries/castle-glen-winery', '18185 Narrow Path Trail, Doswell, VA 23047', 37.905475, -77.53357),
+(56, 'Castle Gruen Vineyards and Winery', '/wineries/castle-gruen-vineyards-and-winery', '1272 Meander Run Road, Locust Dale, Virginia 22948', 38.36652, -78.12273),
+(57, 'Castle Hill Cider', '/wineries/castle-hill-cider', '6065 Turkey Sag Rd, Keswick, VA 22947', 38.088857, -78.290919),
+(58, 'Cave Ridge Vineyard', '/wineries/cave-ridge-vineyard', '1476 Conicville Rd, Mt. Jackson, VA 22842', 38.814533, -78.669097),
+(59, 'Chapelle Charlemagne Vineyards', '/wineries/chapelle-charlemagne-vineyards', '13453 Crest Hill Rd, Flint Hill, VA 22627', 38.76358, -78.0609),
+(60, 'Chateau MerrillAnne', '/wineries/chateau-merrillanne-0', '16234 Marquis Rd., Orange, Virginia 22960', 38.185569, -77.983243),
+(61, 'Chateau Morrisette', '/wineries/chateau-morrisette', '291 Winery Road SW, (MP 171.5 Blue Ridge Pkwy), Floyd, VA 24091', 36.911192, -80.320216),
+(62, 'Chateau OBrien at Northpoint', '/wineries/chateau-obrien-at-northpoint', '3238 Railstop Road, Markham, Virginia 22643', 38.903583, -77.996955),
+(63, 'Chatham Vineyards on Church Creek', '/wineries/chatham-vineyards-on-church-creek', '9232 Chatham Road, Machipongo, VA 23405', 37.45395, -75.932063),
+(64, 'Chester Gap Cellars', '/wineries/chester-gap-cellars', '4615 Remount Rd, Front Royal, Virginia 22630', 38.86017, -78.12697),
+(65, 'Chestnut Oak Vineyard', '/wineries/chestnut-oak-vineyard', '5050 Stony Point Road, Barboursville , VA 22923', 38.141711, -78.328162),
+(66, 'Chisholm Vineyards at Adventure Farm', '/wineries/chisholm-vineyards-at-adventure-farm', '1135 Clan Chisholm Lane, Earlysville, VA 22936', 38.134903, -78.460726),
+(67, 'Chiswell Farm and Winery', '/wineries/chiswell-farm-and-winery', '7618 Pony Express Lane, Greenwood, VA 22943', 38.04466, -78.77267),
+(68, 'Chrysalis Vineyards at The Ag District', '/wineries/chrysalis-vineyards-at-the-ag-district', '39025 Little River Tpke, Middleburg, Virginia 20117', 38.971077, -77.657284),
+(69, 'Ciders from Mars, LLC', '/wineries/ciders-from-mars-llc', '121 South Lewis Street, Staunton, VA 24401', 38.14745, -79.074241),
+(70, 'Cobbler Mountain Cellars', '/wineries/cobbler-mountain-cellars', '5909 Long Fall Lane (see notes) , via 10363 Moreland Road, Delaplane, VA 20144', 38.8471, -77.945564),
+(71, 'Common Wealth Crush Co.', '/wineries/common-wealth-crush-co', '1010 E. Main St. Suite 110, Waynesboro, VA 22980', 38.064164, -78.874283),
+(72, 'Corcoran Vineyards & Cider', '/wineries/corcoran-vineyards-cider', '14635 Corkys Farm Lane, Waterford, VA 20197', 39.211223, -77.653755),
+(73, 'Courthouse Creek Cider', '/wineries/courthouse-creek-cider', '1581 Maidens Road, Maidens, VA 23102', 37.672862, -77.875779),
+(74, 'Coyote Hole Ciderworks', '/wineries/coyote-hole-ciderworks', '225 Oak Grove Dr, Mineral, VA 23117', 38.085619, -77.854046),
+(75, 'Creek''s Edge Winery', '/wineries/creek-s-edge-winery', '41255 Annas Lane, (The Historic Village of Taylorstown), Lovettsville, VA 20180', 39.255855, -77.572572),
+(76, 'CrossKeys Vineyards', '/wineries/crosskeys-vineyards', '6011 East Timber Ridge Road, Mt. Crawford, VA 22841', 38.322798, -78.850758),
+(77, 'Crushed Cellars', '/wineries/crushed-cellars', '37938 Charles Town Pike, Purcellville, VA 20132', 39.188365, -77.690529),
+(78, 'Cunningham Creek Winery', '/wineries/cunningham-creek-winery', '3304 Ruritan Lake Road, Palmyra, VA 22963', 37.875084, -78.35616),
+(79, 'Daring Wine & Cider Company', '/wineries/daring-wine-cider-company', '621 Kelly Mill Rd, Stuart, VA 24171', 36.5786, -80.11983),
+(80, 'Davis Valley Winery', '/wineries/davis-valley-winery', '1167 Davis Valley Road, Rural Retreat, VA 24368', 36.90274, -81.360322),
+(81, 'Delaplane Cellars', '/wineries/delaplane-cellars', '2187 Winchester Road, Delaplane, Virginia 20144-1734', 38.950137, -77.935012),
+(82, 'DeVault Family Vineyards', '/wineries/devault-family-vineyards', '247 Station Lane, Concord, VA  24538', 37.346381, -78.971505),
+(83, 'Ditchley Ciderworks', '/wineries/ditchley-ciderworks', '1571 Ditchley Road, Ditchley Cider works, KILMARNOCK, VA 22482', 37.734187, -76.334615),
+(84, 'Domaine Fortier Vineyards', '/wineries/domaine-fortier-vineyards', '13235 Milltown Road, Lovettsville, VA 20180', 39.247995, -77.62508),
+(85, 'Doukénie Winery', '/wineries/doukenie-winery', '14727 Mountain Road, Hillsboro, Virginia 20132', 39.21148, -77.70939),
+(86, 'DuCard Vineyards', '/wineries/ducard-vineyards', '40 Gibson Hollow Lane, Etlan (Madison County), VA 22719', 38.515306, -78.303042),
+(87, 'Eagletree Farm Vineyards', '/wineries/eagletree-farm-vineyards', '15100 Harrison Hill Lane, Leesburg, Virginia 20176', 39.19871, -77.493871),
+(88, 'Early Mountain Vineyards', '/wineries/early-mountain-vineyards', '6109 Wolftown-Hood Road, Madison, Virginia 22727', 38.35037, -78.30801),
+(89, 'Eastwood Farm and Winery', '/wineries/eastwood-farm-and-winery', '2531 Scottsville Road, Charlottesville, VA 22902', 37.96616, -78.516503),
+(90, 'Ecco Adesso Vineyards', '/wineries/ecco-adesso-vineyards', '340 Ecco Adesso Lane, Fairfield, VA 24435', 37.835936, -79.307863),
+(91, 'Eden Try Estate and Winery', '/wineries/eden-try-estate-and-winery', '6818 River Road, Fredericksburg, VA 22407', 38.32908, -77.572856),
+(92, 'Effingham Manor & Winery', '/wineries/effingham-manor-winery', '14325 Trotters Ridge Place, Nokesville, VA 20181', 38.638003, -77.521652),
+(93, 'Elk Island Winery', '/wineries/elk-island-winery', '5759 River Road West  (Winery Entrance Sign), Goochland, VA 23063', 37.73009, -78.09434),
+(94, 'Endhardt Vineyards', '/wineries/endhardt-vineyards', '19600 Lincoln Rd., Purcellville, VA 20132', 39.074209, -77.694969),
+(95, 'Fabbioli Cellars', '/wineries/fabbioli-cellars', '15669 Limestone School Road, Leesburg, Virginia 20176', 39.183349, -77.518471),
+(96, 'Fables & Feathers Winery', '/wineries/fables-feathers-winery', '2117 Bruno Dr., Goodview, VA 24095', 37.231721, -79.708142),
+(97, 'Fifty-Third Winery and Vineyard', '/wineries/fifty-third-winery-and-vineyard-0', '13372 Shannon Hill Rd, Louisa, Virginia 23093', 37.9623, -77.92421),
+(98, 'Firefly Cellars', '/wineries/firefly-cellars', '40325 Charles Town Pike, Hamilton, VA 20158', 39.150327, -77.624978),
+(99, 'Fleetwood Farm Winery', '/wineries/fleetwood-farm-winery', '23075 Evergreen Mills Rd, Leesburg, VA 20175', 38.988606, -77.562177),
+(100, 'Flying Fox Vineyard', '/wineries/flying-fox-vineyard', '10368 Critzer Shop Road, Afton, Virginia 22920', 38.003436, -78.827802),
+(101, 'Fox Meadow Vineyards & Winery', '/wineries/fox-meadow-vineyards-winery', '3310 Freezeland Road, Linden, Virginia 22642', 38.935479, -78.046896),
+(102, 'Gabriele Rausse Winery', '/wineries/gabriele-rausse-winery', '3247 Carters Mountain Road, Charlottesville, VA 22902', 37.940968, -78.477278),
+(103, 'Gadino Cellars', '/wineries/gadino-cellars', '92 Schoolhouse Road, Washington, Virginia 22747', 38.682316, -78.170989),
+(104, 'Garden Grove Brewing & Urban Winery', '/wineries/garden-grove-brewing-urban-winery', '3445 West Cary Street, Richmond, VA 23221', 37.554832, -77.485919),
+(105, 'Gauthier Vineyard', '/wineries/gauthier-vineyard', '5000 Farmer''s Drive, Barhamsville, VA 23011', 37.473437, -76.832134),
+(106, 'General''s Ridge Vineyard', '/wineries/general-s-ridge-vineyard', '1618 Weldons Drive, Hague, Virginia 22469', 38.029978, -76.663473),
+(107, 'Glass House Winery', '/wineries/glass-house-winery', '5898 Free Union Rd, Free Union, Virginia 22940', 38.19916, -78.579643),
+(108, 'Glen Manor Vineyards', '/wineries/glen-manor-vineyards', '2244 Browntown Road, Front Royal, Virginia 22630', 38.840059, -78.22909),
+(109, 'Good Luck Cellars', '/wineries/good-luck-cellars', '1025 Good Luck Road, Kilmarnock, VA 22482', 37.735977, -76.381445),
+(110, 'Good Spirit Farm', '/wineries/good-spirit-farm', '35113 Snickersville Turnpike, Round Hill, VA 20141', 39.08789, -77.795094),
+(111, 'Grace Estate Winery', '/wineries/grace-estate-winery', '5273 Mount Juliet Farm, Crozet, Virginia 22932', 38.117793, -78.684255),
+(112, 'Graham Ordinary Lodge and Meadery', '/wineries/graham-ordinary-lodge-and-meadery', '8578 PEAKS RD, Bedford, VA 24523', 37.433701, -79.579905),
+(113, 'Granite Heights Winery', '/wineries/granite-heights-winery-0', '8141 Opal Rd. , Warrenton, VA 20186', 38.637908, -77.843669),
+(114, 'Gray Ghost Vineyards', '/wineries/gray-ghost-vineyards', '14706 Lee Highway, Amissville, Virginia 20106', 38.677702, -78.004565),
+(115, 'Grayhaven Winery', '/wineries/grayhaven-winery', '4675 East Grey Fox Circle, Gum Spring, VA 23065', 37.806031, -77.90729),
+(116, 'Great Valley Farm Winery', '/wineries/great-valley-farm-winery', '60 Great Valley Lane, Natural Bridge, Virginia 24578', 37.680191, -79.513087),
+(117, 'Greenhill Vineyards', '/wineries/greenhill-vineyards', '23595 Winery Lane, Middleburg, VA 20117', 38.966004, -77.705197),
+(118, 'Haley''s Honey Meadery', '/wineries/haley-s-honey-meadery', '235 E Broadway, Hopewell, VA 23860', 37.304769, -77.285578),
+(119, 'Hamlet Vineyards', '/wineries/hamlet-vineyards', '405 Riverside Drive, Bassett, VA 24055', 36.73553, -79.964899),
+(120, 'Hampton Roads Winery', '/wineries/hampton-roads-winery', '6074 New Design Road, Elberon, VA 23846', 37.07159, -76.875171),
+(121, 'Hardware Hills Vineyard', '/wineries/hardware-hills-vineyard', '5199 W River Rd., Scottsville, VA 24590', 37.78923, -78.40558),
+(122, 'Hark Vineyards', '/wineries/hark-vineyards', '1465 Davis Shop Rd, Earlysville, VA 22936', 38.213296, -78.549183),
+(123, 'Haunted Vineyards Winery', '/wineries/haunted-vineyards-winery', '25231 Selma Rd, Jetersville, Virginia 23083', 37.29803, -78.16507),
+(124, 'Hazy Mountain Vineyards', '/wineries/hazy-mountain-vineyards', '8736 Dick Woods Rd, Afton, VA 22920', 38.020124, -78.806513),
+(125, 'Henway Hard Cider', '/wineries/henway-hard-cider', '18780 Foggy Bottom Road, Bluemont, VA 20135', 39.095155, -77.825105),
+(126, 'Hickory Hill Vineyards', '/wineries/hickory-hill-vineyards', '1722 Hickory Cove Lane, Moneta, VA 24121', 37.130437, -79.630419),
+(127, 'Hidden Brook Winery', '/wineries/hidden-brook-winery', '43301 Sprinks Ferry Rd., Leesburg, VA 20176', 39.207638, -77.499804),
+(128, 'Hiddencroft Vineyards', '/wineries/hiddencroft-vineyards', '12202 Axline Road, Lovettsville, Virginia 20180', 39.273623, -77.674401),
+(129, 'Hillsborough Winery, Brewery & Vineyard', '/wineries/hillsborough-winery-brewery-vineyard', '36716 Charles Town Pike, Hillsboro, VA 20132', 39.206164, -77.733771),
+(130, 'Hill Top Berry Farm and Winery', '/wineries/hill-top-berry-farm-and-winery', '2800 Berry Hill Road, Nellysford, Virginia 22958', 37.900618, -78.846052),
+(131, 'Honah Lee Vineyard', '/wineries/honah-lee-vineyard', '13443 Honah Lee Farm Drive,  at intersection of Rt 718 and Rt 15, Gordonsville, Virginia 22942', 47.607798, 14.300144),
+(132, 'Horton Vineyards', '/wineries/horton-vineyards', '6399 Spotswood Trail, Gordonsville, VA 22942', 38.166799, -78.260872),
+(133, 'Hunting Creek Vineyards', '/wineries/hunting-creek-vineyards', '2000 Addie Williams Trail, Clover, Virginia 24534', 36.93308, -78.78347),
+(134, 'Ingleside Vineyards', '/wineries/ingleside-vineyards', '5872 Leedstown Road, Oak Grove, Virginia 22443', 38.1511, -77.003092),
+(135, 'Iron Heart Winery', '/wineries/iron-heart-winery', '3742 Boone Furnace Road, Allisonia, VA 24347', 36.92073, -80.76915),
+(136, 'Jacey Vineyards', '/wineries/jacey-vineyards', '619 Train Lane, P.O Box 338, Wicomico Church, VA 22579', 37.799948, -76.336318),
+(137, 'James Charles Winery & Vineyard', '/wineries/james-charles-winery-vineyard', '4063 Middle Rd, Winchester, VA 22602', 39.125873, -78.230598),
+(138, 'James River Cellars', '/wineries/james-river-cellars', '11008 Washington Highway, Glen Allen, Virginia 23059', 37.700754, -77.462385),
+(139, 'JBR Vineyards & Winery', '/wineries/jbr-vineyards-winery', '1360 Springdale Road, Pearisburg, VA 24134', 37.225073, -80.699124),
+(140, 'Jefferson Vineyards', '/wineries/jefferson-vineyards', '1353 Thomas Jefferson Parkway, Charlottesville, VA 22902', 37.990041, -78.443641),
+(141, 'Jolene Family Winery', '/wineries/jolene-family-winery', '2750 Pocahontas Trail, Quinton , VA 23141', 37.504769, -77.180983),
+(142, 'Jump Mountain Vineyard', '/wineries/jump-mountain-vineyard', '1493 Walkers Creek Rd, Rockbridge Baths, VA 24473', 37.93455, -79.38511),
+(143, 'Kalero Vineyard', '/wineries/kalero-vineyard', '36140 Charles Town Pike, Purcellville, VA 20132', 39.215708, -77.742741),
+(144, 'Keswick Vineyards', '/wineries/keswick-vineyards', '1575 Keswick Winery Drive, Keswick, VA 22947', 38.0702, -78.286718),
+(145, 'Kilaurwen Winery, LLC', '/wineries/kilaurwen-winery-llc', '1543 Evergreen Church Road , Stanardsville, VA 22973', 38.271292, -78.528259),
+(146, 'King Family Vineyards', '/wineries/king-family-vineyards', '6550 Roseland Farm, Crozet, Virginia 22932', 38.062852, -78.729881),
+(147, 'Knight''s Gambit Vineyard', '/wineries/knight-s-gambit-vineyard', '2218 Lake Albemarle Rd, Charlottesville, VA 22901', 38.09333, -78.62134),
+(148, 'Lake Anna Winery', '/wineries/lake-anna-winery', '5621 Courthouse Rd, Spotsylvania, VA 22551', 38.114017, -77.76988),
+(149, 'Lazy Days Winery', '/wineries/lazy-days-winery', '1351 N Amherst Hwy, Amherst, VA 24521', 37.61884, -79.02033),
+(150, 'Leo Grande Vineyards & Winery', '/wineries/leo-grande-vineyards-winery', '1343 Wingfield Drive, Goode, Virginia 24556', 37.344171, -79.411141),
+(151, 'Lexington Valley Vineyard', '/wineries/lexington-valley-vineyard', '80 Norton Way, Rockbridge Baths, Virginia 24473', 37.865475, -79.417431),
+(152, 'Lightwell Survey', '/wineries/lightwell-survey', '200 W. 12TH ST, UNIT# D53 , Waynesboro, VA 22908', 38.062471, -78.887272),
+(153, 'Linden Vineyards', '/wineries/linden-vineyards', '3708 Harrels Corner Road, Linden, VA 22642', 38.880747, -78.071606),
+(154, 'Little Washington Winery and Skyline Brewing', '/wineries/little-washington-winery-and-skyline-brewing', '65 Clark Lane, Washington, VA 22747', 38.695254, -78.184436),
+(155, 'Lost Boy Cider', '/wineries/lost-boy-cider', '317 Hooffs Run Drive, ALEXANDRIA, VA 22314', 38.798752, -77.063369),
+(156, 'Loving Cup Vineyard & Winery', '/wineries/loving-cup-vineyard-winery', '3340 Sutherland Road , North Garden, VA 22959', 37.951583, -78.686389),
+(157, 'Lovingston Winery', '/wineries/lovingston-winery', '885 Freshwater Cove Lane, Lovingston, VA 22949', 37.727264, -78.913507),
+(158, 'Magnolia Vineyards & Winery', '/wineries/magnolia-vineyards-winery', '200 Viewtown Rd, Amissville, VA 20106', 38.645137, -78.032039),
+(159, 'Marceline Vineyards', '/wineries/marceline-vineyards', '5887 Cross Keys Rd., Mt. Crawford, VA 22841', 38.323391, -78.868731),
+(160, 'Mattaponi Winery', '/wineries/mattaponi-winery', '7530 Morris Road, Spotsylvania, Virginia 22551', 38.144069, -77.593562),
+(161, 'Mediterranean Cellars', '/wineries/mediterranean-cellars', '8295 Falcon Glen Road, Warrenton, VA 20186', 38.7573, -77.85318),
+(162, 'Mermaid Winery', '/wineries/mermaid-winery', '101 Granby Street, Norfolk, Virginia 23510', 36.846547, -76.292514),
+(163, 'Merrie Mill Farm & Vineyard', '/wineries/merrie-mill-farm-vineyard', '594 Merrie Mill Farm, Keswick, VA 22947', 38.050982, -78.292579),
+(164, 'Michael Shaps Wineworks', '/wineries/michael-shaps-wineworks', '1781 Harris Creek Way, Charlottesville, VA 22902', 37.897995, -78.557253),
+(165, 'Misty Mountain Meadworks', '/wineries/misty-mountain-meadworks', '661 Warm Springs Rd., Winchester, VA 22603', 39.290002, -78.162851),
+(166, 'Molon Lave Vineyards', '/wineries/molon-lave-vineyards', '10075 Lees Mill Road, Warrenton, Virginia 20186', 38.61924, -77.82302),
+(167, 'Monroe Bay Vineyard', '/wineries/monroe-bay-vineyard', '4786 James Monroe Highway, Colonial Beach , VA 22443', 38.245367, -76.983032),
+(168, 'Montifalco Vineyard', '/wineries/montifalco-vineyard', '1800 Fray Road, Ruckersville, VA 22968', 38.194658, -78.436797),
+(169, 'Morais Vineyards & Winery', '/wineries/morais-vineyards-winery', '11409 Marsh Road, Bealeton, VA 22712', 38.567062, -77.751246),
+(170, 'Moss Vineyards', '/wineries/moss-vineyards', '1849 Simmons Gap Road, Dyke, Virginia 22935', 38.237535, -78.554387),
+(171, 'Mountain Cove Vineyards', '/wineries/mountain-cove-vineyards', '1362 Fortunes Cove Lane, Lovingston, VA 22949', 37.777262, -78.890418),
+(172, 'MountainRose Vineyards', '/wineries/mountainrose-vineyards', '10439 N. Reservoir Rd., Wise, VA 24293', 36.97085, -82.52407),
+(173, 'Mountain Run Winery', '/wineries/mountain-run-winery', '10753 Mountain Run Lake Road, Culpeper, Virginia 22701', 38.46633, -78.051538),
+(174, 'Mountain & Vine Vineyards and Winery', '/wineries/mountain-vine-vineyards-and-winery', '500 Del Fosse Winery Lane, Faber, VA 22938', 37.891809, -78.763215),
+(175, 'Mount Alto Vineyards', '/wineries/mount-alto-vineyards', '10436 Howardsville Tpke, Esmont, VA 22937', 37.750682, -78.656027),
+(176, 'Mount Fair Vineyard', '/wineries/mount-fair-vineyard', '4626 Slam Gate Road, Crozet, Virginia 22932', 38.16445, -78.67774),
+(177, 'Mt. Defiance Cider Barn', '/wineries/mt-defiance-cider-barn', '495 E. Washington St., Middleburg, VA 20117', 38.970779, -77.728358),
+(178, 'Muddy Paws Winery', '/wineries/muddy-paws-winery', '2640 Rock Island Rd, Scottsville, VA 24590', 37.739782, -78.54008),
+(179, 'Muse Orchard', '/wineries/muse-orchard', '533 Lantz Rd, Edinburg, VA 22824', 38.820345, -78.60114),
+(180, 'Muse Vineyards', '/wineries/muse-vineyards', '16 Serendipity Lane, Woodstock, VA 22664', 38.85688, -78.501743),
+(181, 'Naked Mountain Winery and Vineyards', '/wineries/naked-mountain-winery-and-vineyards', '2747 Leeds Manor Road, PO Box 115, Markham, Virginia 22643', 38.926876, -77.997419),
+(182, 'Narmada Winery', '/wineries/narmada-winery', '43 Narmada Lane, Amissville, Virginia 20106', 38.691709, -78.025621),
+(183, 'New Kent Winery', '/wineries/new-kent-winery', '8400 Old Church Road, New Kent, VA 23124', 37.528844, -77.075663),
+(184, 'Nicewonder Vineyards', '/wineries/nicewonder-vineyards', '22091 Nicewonder Drive, Bristol, VA 24202', 36.628847, -82.092378),
+(185, 'Nokesville Winery', '/wineries/nokesville-winery', '12593 Foremost Court, Nokesville, VA 20181', 38.684058, -77.570744),
+(186, 'North Mountain Vineyard & Winery', '/wineries/north-mountain-vineyard-winery', '4374 Swartz Road, Maurertown, Virginia 22644', 38.949273, -78.478329),
+(187, 'Notaviva Craft Fermentations', '/wineries/notaviva-craft-fermentations', '13274 Sagle Road, Hillsboro, VA 20132', 39.252883, -77.747823),
+(188, 'October One Vineyard', '/wineries/october-one-vineyard', '7 Loudoun St SW, Leesburg, VA 20175', 39.114321, -77.565935),
+(189, 'Old Farm Winery at Hartland', '/wineries/old-farm-winery-at-hartland', '23583 Fleetwood Road, Aldie, VA 20105', 38.96695, -77.568194),
+(190, 'Old Hill Cider', '/wineries/old-hill-cider', '17768 Honeyville Road, Timberville, VA 22853', 38.66771, -78.79657),
+(191, 'Old House Vineyards', '/wineries/old-house-vineyards', '18351 Corkys Lane, Culpeper, VA 22701', 38.454809, -77.912848),
+(192, 'Otium Cellars', '/wineries/otium-cellars', '18050 Tranquility Rd., Purcellville, VA 20132', 39.115226, -77.746727),
+(193, 'Ox Eye Vineyards', '/wineries/ox-eye-vineyards', '44 Middlebrook Avenue, Staunton, VA 24401', 38.146975, -79.073941),
+(194, 'Paradise Springs Winery', '/wineries/paradise-springs-winery', '13219 Yates Ford Road, Clifton, Virginia 20124', 38.765678, -77.405048),
+(195, 'Peaks of Otter Winery', '/wineries/peaks-of-otter-winery', '2122 Sheep Creek Rd, Bedford, Virginia 24523', 37.400067, -79.624412),
+(196, 'Pearmund Cellars', '/wineries/pearmund-cellars', '6190 Georgetown Road, Broad Run, VA 20137', 38.78455, -77.738865),
+(197, 'Philip Carter Winery', '/wineries/philip-carter-winery', '4366 Stillhouse Road, Hume, VA 22639', 38.856093, -77.990813),
+(198, 'Pippin Hill Farm & Vineyards', '/wineries/pippin-hill-farm-vineyards', '5022 Plank Road, North Garden, VA 22959', 37.961924, -78.658242),
+(199, 'Plum Creek Winery', '/wineries/plum-creek-winery', '5418 Thompson Valley Road, Tazwell, VA 24651', 37.047448, -81.586463),
+(200, 'Pollak Vineyards', '/wineries/pollak-vineyards', '330 Newtown Road, Greenwood, VA 22943', 38.03455, -78.794362),
+(201, 'Potomac Point Winery & Vineyard', '/wineries/potomac-point-winery-vineyard', '275 Decatur Road, Stafford, Virginia 22554', 38.457871, -77.344286),
+(202, 'Potter''s Craft Cider', '/wineries/potter-s-craft-cider', '1350 Arrowhead Valley Rd. , Charlottesville, VA 22903', 37.998634, -78.579809),
+(203, 'Potter''s Craft Cider- Cider Garden', '/wineries/potter-s-craft-cider-cider-garden', '209 Monticello Rd, Charlottesville, VA 22902', 38.027245, -78.47681),
+(204, 'Preston Ridge Winery', '/wineries/preston-ridge-winery', '4105 Preston Rd, Martinsville, VA 24112', 36.671704, -79.994372),
+(205, 'Prince Michel Vineyard & Winery', '/wineries/prince-michel-vineyard-winery', '154 Winery Lane, Leon, Virginia 22725', 38.436349, -78.154191),
+(206, 'Quattro Goombas Winery', '/wineries/quattro-goombas-winery', '22860 James Monroe Hwy., Aldie, Virginia 20105', 38.985434, -77.616799),
+(207, 'Quièvremont Vineyard & Winery', '/wineries/quievremont-vineyard-winery-0', '162 Gid Brown Hollow Road, Washington, VA 22747', 38.689886, -78.211262),
+(208, 'Ramulose Ridge Vineyards', '/wineries/ramulose-ridge-vineyards', '3061 Hendricks Store Rd, Moneta, VA 24121', 37.13608, -79.62929),
+(209, 'Rappahannock Cellars', '/wineries/rappahannock-cellars', '14437 Hume Road, Huntly, VA 22640', 38.834681, -78.114022),
+(210, 'Rassawek Vineyard', '/wineries/rassawek-vineyard', '6276 River Road West, Columbia, VA 23038', 37.751846, -78.131612),
+(211, 'RdV Vineyards', '/wineries/rdv-vineyards', '2550 Delaplane Grade Rd, Delaplane, VA 20144', 38.934952, -77.917967),
+(212, 'Rebec Vineyards Inc', '/wineries/rebec-vineyards-inc', '2229 North Amherst Hwy, Amherst, VA 24521', 37.641276, -78.985628),
+(213, 'Reitano Vineyards', '/wineries/reitano-vineyards', '137 Lee Burke Rd, Front Royal, VA 22630', 38.903711, -78.260196),
+(214, 'Reserve: Winery & Lounge', '/wineries/reserve-winery-lounge', '1101 Jefferson St, Suite 100, Lynchburg, VA 24504', 37.414007, -79.139112),
+(215, 'Revalation Vineyards', '/wineries/revalation-vineyards', '2710 Hebron Valley Road, Madison, VA 22727', 38.438497, -78.23345),
+(216, 'Reynard Florence Vineyard', '/wineries/reynard-florence-vineyard', '16109 Burnley Road, Barboursville, VA 22923', 38.185428, -78.337219),
+(217, 'Rivah Vineyards at the Grove', '/wineries/rivah-vineyards-at-the-grove', '671 Kinsale Bridge Road  , Kinsale, VA 22488', 38.03831, -76.57727),
+(218, 'River Dog Winery', '/wineries/river-dog-winery', '7959 Bradbury Rd, Henrico, Virginia 23231', 37.445909, -77.275254),
+(219, 'Rockbridge Vineyard & Brewery', '/wineries/rockbridge-vineyard-brewery', '35 Hill View Lane, Raphine, VA 24472', 37.937543, -79.232796),
+(220, 'Rogers Ford Farm Winery', '/wineries/rogers-ford-farm-winery', '14674 Rogers Ford Road, Sumerduck, VA 22742', 38.425003, -77.732164),
+(221, 'Rosemond Vineyards', '/wineries/rosemond-vineyards', 'Rosemond Vineyards, 10691 SPOTSYLVANIA AVE, Fredericksburg, VA 22408', 38.247207, -77.494762),
+(222, 'Rosemont Vineyards', '/wineries/rosemont-vineyards', '1050 Blackridge Road, LaCrosse, Virginia 23950', 36.58668, -78.05738),
+(223, 'Saga Meadery & Winery', '/wineries/saga-meadery-winery', '7 South Street, Front Royal, VA 22630', 38.911792, -78.194013),
+(224, 'Sage Bird Ciderworks', '/wineries/sage-bird-ciderworks', '325 North Liberty Street, Harrisonburg, VA 22802', 38.453112, -78.86998),
+(225, 'Saudé Creek Vineyards', '/wineries/saude-creek-vineyards', '16230 Cooks Mill Rd, Lanexa, VA 23089', 37.517472, -76.885806),
+(226, 'Septenary Winery', '/wineries/septenary-winery', '200 Seven Oaks Farm, Greenwood, VA 22943', 38.04155, -78.747357),
+(227, 'Seven Doors Winery', '/wineries/seven-doors-winery', '5800 Johnson Mountain Rd, Huddleston , VA 24104', 37.185169, -79.387214),
+(228, 'Sharp Rock Vineyards', '/wineries/sharp-rock-vineyards', '5 Sharp Rock Rd, Sperryville, Virginia 22740', 38.555387, -78.255006),
+(229, 'Shenandoah Vineyards', '/wineries/shenandoah-vineyards', '3659 S. Ox Rd., Edinburg, VA 22824', 38.84896, -78.559),
+(230, 'Skippers Creek Vineyard', '/wineries/skippers-creek-vineyard', '965 Rocky Ford Rd, Powhatan, VA 23139', 37.470652, -77.883681),
+(231, 'Slater Run Vineyards', '/wineries/slater-run-vineyards', '1500 Crenshaw Road, Upperville, VA 20184', 38.972906, -77.832322),
+(232, 'Sly Clyde Ciderworks', '/wineries/sly-clyde-ciderworks', '207 East Mellen Street, Hampton, VA 23663', 37.016486, -76.319472),
+(233, 'Southern Revere Cellars', '/wineries/southern-revere-cellars', '1100 E. Jack Jouett Road, Louisa, VA 23093', 37.969381, -78.098142),
+(234, 'Southwest Mountains Vineyards', '/wineries/southwest-mountains-vineyards', '2300 Whipper In Lane, Keswick, VA 22947', 38.06444, -78.33112),
+(235, 'Spinning Jenny Vineyard', '/wineries/spinning-jenny-vineyard', '2664 Old Route 100 Road, Draper, Draper, VA 24324', 37.0049, -80.74228),
+(236, 'Spring Run Vineyards', '/wineries/spring-run-vineyards', '10700 Spring Run Road, Chesterfield, VA 23832', 37.363484, -77.595046),
+(237, 'Stanburn Winery', '/wineries/stanburn-winery', '158 Conner Dr., Stuart, VA 24171', 36.587953, -80.196126),
+(238, 'Star in the Valley Estate Winery', '/wineries/star-in-the-valley-estate-winery', '33 Amos Lane, Strasburg, VA 22657', 39.029074, -78.41),
+(239, 'Star Party Winery', '/wineries/star-party-winery', '23 E Beverley St, Staunton, VA 24401', 38.149727, -79.071787),
+(240, 'Stinson Vineyards', '/wineries/stinson-vineyards', '4744 Sugar Hollow Road , Crozet, VA 22932', 38.119587, -78.664578),
+(241, 'Stone House Meadery', '/wineries/stone-house-meadery', '36580 Shoemaker School Road, PURCELLVILLE, VA 20132', 39.087577, -77.740639),
+(242, 'Stone Mountain Vineyards', '/wineries/stone-mountain-vineyards', '1376 Wyatt Mountain Road, Dyke, VA 22935', 38.279764, -78.587327),
+(243, 'Stone Tower Winery', '/wineries/stone-tower-winery', '19925 Hogback Mountain Rd, Leesburg, VA 20175', 39.063941, -77.634825),
+(244, 'Stoney Brook Vineyards & Winery', '/wineries/stoney-brook-vineyards-winery', '516 Stoney Battery Rd, Troutville, VA 24175', 37.413515, -79.867938),
+(245, 'SummerWind Vineyard', '/wineries/summerwind-vineyard', '71 Eagle Nest Ln, Smithfield, VA 23430', 37.012623, -76.609426),
+(246, 'Sunset Hills Vineyard', '/wineries/sunset-hills-vineyard', '38295 Fremont Overlook Lane, Purcellville, Virginia 20132', 39.179787, -77.67792),
+(247, 'Tarara Winery', '/wineries/tarara-winery', '13648 Tarara Lane, Leesburg, Virginia 20176', 39.237099, -77.479699),
+(248, 'Tasting Room & Taphouse at Mount Ida Reserve', '/wineries/tasting-room-taphouse-at-mount-ida-reserve', '5931 Blenheim Road, Charlottesville, VA 22902', 37.865375, -78.480244),
+(249, 'Terra Nebulo Vineyards', '/wineries/terra-nebulo-vineyards', '39892 Old Wheatland Rd , Waterford, VA 20197', 39.191422, -77.620373),
+(250, 'The Barns at Hamilton Station Vineyards', '/wineries/the-barns-at-hamilton-station-vineyards', '16804 Hamilton Station Road, Hamilton, VA, VA 20158', 39.15176, -77.644414),
+(251, 'The Briede Family Vineyards', '/wineries/the-briede-family-vineyards-0', '450 Green Spring Road, Winchester, VA 22603', 39.298377, -78.154987),
+(252, 'The Dog and Oyster Vineyard', '/wineries/the-dog-and-oyster-vineyard', '170 White Fences Drive (Vineyard), 65 Tavern Road (IHotel), Irvington, VA 22480', 37.66397, -76.41344),
+(253, 'The Estate at White Hall Vineyard', '/wineries/the-estate-at-white-hall-vineyard', '3668 White Hall Road, King George, VA 22485', 38.2789, -77.28517),
+(254, 'The Hague Winery', '/wineries/the-hague-winery', '8268 Cople Highway, PO Box 141, Hague, Virginia 22469', 38.07169, -76.656057),
+(255, 'The Homeplace Vineyard', '/wineries/the-homeplace-vineyard', '568 Rigney Circle, Chatham, VA 24531', 36.867789, -79.473607),
+(256, 'The New River Vineyard & Winery LLC', '/wineries/the-new-river-vineyard-winery-llc', '6750 Falling Branch Road, Fairlawn, VA 24141', 37.120546, -80.606307),
+(257, 'The Vineyards & Winery at Lost Creek', '/wineries/the-vineyards-winery-at-lost-creek', '43285 Spinks Ferry Rd, Leesburg, Virginia 20176', 39.200273, -77.495823),
+(258, 'The Wine Reserve at Waterford', '/wineries/the-wine-reserve-at-waterford', '38516 Charles Town Pike, Waterford, VA 20197', 39.190551, -77.669838),
+(259, 'The Winery at Bull Run', '/wineries/the-winery-at-bull-run', '15950 Lee Highway, Centreville, VA 20120', 38.82875, -77.498412),
+(260, 'The Winery at La Grange', '/wineries/the-winery-at-la-grange', '4970 Antioch Road, Haymarket, Virginia 20169', 38.85113, -77.686562),
+(261, 'The Winery at Sunshine Ridge Farm', '/wineries/the-winery-at-sunshine-ridge-farm', '15850 Sunshine Ridge Lane, Gainesville, VA 20155', 38.76334, -77.656688),
+(262, 'Thibaut-Janisson Winery', '/wineries/thibaut-janisson-winery', '1413 Dairy Rd, Charlottesville, Virginia 22903', 38.051918, -78.488755),
+(263, 'Three Creeks Winery', '/wineries/three-creeks-winery', '18548 Harmony Church Rd, Hamilton, VA 20158', 39.109668, -77.651788),
+(264, 'Three Fox Vineyards & Farm Brewery', '/wineries/three-fox-vineyards-farm-brewery', '10100 Three Fox Lane, Delaplane, Virginia 20144', 38.916224, -77.925925),
+(265, 'Three Sisters of Shiney Rock', '/wineries/three-sisters-of-shiney-rock', '5484 Shiney Rock Rd, Clarksville, VA 23927', 36.551862, -78.59956),
+(266, 'Triple V Farms', '/wineries/triple-v-farms', '3138 Jessie Dupont Memorial Hwy, Heathsville, VA 22473', 37.843957, -76.370178),
+(267, 'Troddenvale at Oakley Farm', '/wineries/troddenvale-at-oakley-farm', '170 Oakley Farm Lane, Warm Springs, VA 24484', 38.04316, -79.78983),
+(268, 'Trump Winery', '/wineries/trump-winery', '385 Albemarle House Drive, Charlottesville, VA 22902', 37.9511, -78.50811),
+(269, 'Tumbling Creek Cider Company', '/wineries/tumbling-creek-cider-company', '112 Court Street NE, Abingdon, VA 24210', 36.71282, -81.969703),
+(270, 'Turk Mountain Vineyards', '/wineries/turk-mountain-vineyards', '8982 Dick Woods Rd, Afton, VA 22920', 38.018354, -78.812451),
+(271, 'Twin Oaks Tavern Winery', '/wineries/twin-oaks-tavern-winery', '18035 Raven Rocks Rd, Bluemont, Virginia 20135', 39.120995, -77.844952),
+(272, 'Two Twisted Posts Winery', '/wineries/two-twisted-posts-winery', '12944 Harpers Ferry Rd, Purcellville, VA 20132', 39.25944, -77.72192),
+(273, 'Upper Shirley Vineyards', '/wineries/upper-shirley-vineyards', '600 Shirley Plantation Road, Charles City, VA 23030', 37.345907, -77.256536),
+(274, 'Valerie Hill Vineyard & Winery', '/wineries/valerie-hill-vineyard-winery', '1687 Marlboro Road , Stephens City, VA 22655', 39.089876, -78.274009),
+(275, 'Valhalla Vineyards', '/wineries/valhalla-vineyards', '6500 Mt. Chestnut Rd., Roanoke, VA 24018', 37.224232, -80.055472),
+(276, 'Valley Road Vineyards', '/wineries/valley-road-vineyards', '9264 Critzers Shop Road, Afton, VA 22920', 38.021208, -78.821911),
+(277, 'Veramar Vineyard', '/wineries/veramar-vineyard-0', '905 Quarry Road, Berryville, VA 22611', 39.117999, -77.914622),
+(278, 'Veritas Vineyards and Winery', '/wineries/veritas-vineyards-and-winery', '151 Veritas Lane, Afton, Virginia 22920', 38.015429, -78.836395),
+(279, 'Villa Appalaccia Winery', '/wineries/villa-appalaccia-winery', 'We are located right off the beautiful Blue Ridge Parkway between milepost #170 & #171 (adjacent to the Floyd Fest grounds).  Turn onto gravel road Route 720 (Rock Castle Gorge Rd) and continue until you see our sign! 752 Rock Castle Gorge Rd, Floyd VA.  24091  , Floyd, Virginia 24091', 36.7985107543, -80.3738865612),
+(280, 'Village Winery', '/wineries/village-winery', '40405 Browns Lane, Waterford, Virginia 20197', 39.18685, -77.60289),
+(281, 'Vincent''s Vineyard', '/wineries/vincent-s-vineyard', '2313 East Main St, Lebanon, Virginia 24266', 36.91077, -82.04194),
+(282, 'Vint Hill Craft Winery', '/wineries/vint-hill-craft-winery', '7150 Lineweaver Road, Warrenton, VA 20187', 38.742471, -77.676059),
+(283, 'Virginia Mountain Vineyards', '/wineries/virginia-mountain-vineyards', '4204 Old Fincastle Rd, Fincastle, Virginia 24090-3559', 37.569284, -79.878157),
+(284, 'Walsh Family Wine', '/wineries/walsh-family-wine', '16031 Hillsboro Rd, Purcellville, VA 20132', 39.175133, -77.725856),
+(285, 'Webster C Hall Vineyards', '/wineries/webster-c-hall-vineyards', '2120 Webster Corner Road, Callaway , VA 24067', 37.11251, -80.04328),
+(286, 'Weston Farm Vineyard and Winery', '/wineries/weston-farm-vineyard-and-winery', '206 Harris Creek Rd, Louisa, VA 23093', 38.021428, -78.013778),
+(287, 'West Wind Farm Vineyard and Winery', '/wineries/west-wind-farm-vineyard-and-winery', '180 West Wind Dr., Max Meadows, Wythe County, Virginia 24360', 36.902254, -80.909617),
+(288, 'White Hall Vineyards', '/wineries/white-hall-vineyards', '5282 Sugar Ridge Rd., Crozet, Virginia 22932', 38.134904, -78.684057),
+(289, 'White Oak Lavender & The Purple Wolf Vineyard', '/wineries/white-oak-lavender-the-purple-wolf-vineyard', '2644 Cross Keys Road, Rockingham, VA 22801', 38.364226, -78.838825),
+(290, 'Wilderness Run Vineyards', '/wineries/wilderness-run-vineyards', '11109 Plank Road, Spotsylvania, VA 22553', 38.32721, -77.71902),
+(291, 'Wild Hare Cider Barn', '/wineries/wild-hare-cider-barn', '106 A South Street SE, Leesburg, VA 20175', 39.114255, -77.565097),
+(292, 'Williamsburg Winery', '/wineries/williamsburg-winery', '5800 Wessex Hundred, Williamsburg, Virginia 23185', 37.232071, -76.718452),
+(293, 'Williams Gap Vineyard', '/wineries/williams-gap-vineyard', '35785 Sexton Farm Lane, Round Hill, VA 20141', 39.147045, -77.778622),
+(294, 'Willowcroft Farm Vineyards', '/wineries/willowcroft-farm-vineyards', '38906 Mt. Gilead Road, Leesburg, Virginia 20175', 39.071964, -77.659511),
+(295, 'Winchester Ciderworks', '/wineries/winchester-ciderworks', '30 E Piccadilly Street, Winchester, Virginia 22601', 39.186328, -78.163777),
+(296, 'Wind Vineyards at Laurel Grove', '/wineries/wind-vineyards-at-laurel-grove', '5178 Richmond Hwy, Tappahannock, VA 22560', 37.844312, -76.927572),
+(297, 'Winery at Kindred Pointe', '/wineries/winery-at-kindred-pointe', '3575 Conicville Road, Mount Jackson, VA 22842', 38.796444, -78.651782),
+(298, 'Wineworks Extended', '/wineries/wineworks-extended', '1585 Avon Street Extended, Charlottesville, Virginia 22902', 38.008203, -78.490938),
+(299, 'Wisdom Oak Winery', '/wineries/wisdom-oak-winery-0', '3613 Walnut Branch Lane, North Garden, VA 22959', 37.938734, -78.613359),
+(300, 'Wisteria Farm & Vineyard', '/wineries/wisteria-farm-vineyard', '1126 Marksville Rd., Stanley, Virginia 22851', 38.572561, -78.474871),
+(301, 'Wolf Gap Vineyard & Winery', '/wineries/wolf-gap-vineyard-winery', '123 Stout Road, Edinburg, Virginia 22824', 38.827292, -78.632336),
+(302, 'Woodbine Vineyards', '/wineries/woodbine-vineyards', '1142 Hite Dr, Buffalo Junction, Virginia 24529', 36.634839, -78.659418),
+(303, 'Woodbrook Farm Vineyard', '/wineries/woodbrook-farm-vineyard', '11461 Spicers Mill Road, Orange, VA 22960', 38.24553, -78.17248),
+(304, 'Zephaniah Farm Vineyard', '/wineries/zephaniah-farm-vineyard', '19381 Dunlop Mill Road, Leesburg, VA 20175', 39.081099, -77.624612),
+(305, 'Zoll Vineyards', '/wineries/zoll-vineyards', '10309 Vineyard Road, Dutton , VA 23050', 37.494486, -76.444382)
+
+-- Create feedback table for user suggestions and feedback
+CREATE TABLE public.feedback (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users,
+  email TEXT,
+  feedback_type TEXT NOT NULL,
+  message TEXT NOT NULL,
+  rating INTEGER,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL
+);
+
+-- Create bug reports table
+CREATE TABLE public.bug_reports (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users,
+  email TEXT,
+  description TEXT NOT NULL,
+  steps_to_reproduce TEXT,
+  device TEXT,
+  platform TEXT,
+  version TEXT,
+  status TEXT DEFAULT 'new',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL
+);
+
+-- Create contact messages table
+CREATE TABLE public.contact_messages (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users,
+  email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  responded BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL
+);
+
+-- Enable Row Level Security
+ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.bug_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies for feedback table
+CREATE POLICY "Users can insert their own feedback" 
+ON public.feedback FOR INSERT 
+WITH CHECK (
+  auth.uid() = user_id OR user_id IS NULL
+);
+
+CREATE POLICY "Users can read their own feedback" 
+ON public.feedback FOR SELECT 
+USING (
+  auth.uid() = user_id
+);
+
+-- Create RLS policies for bug reports table
+CREATE POLICY "Users can insert their own bug reports" 
+ON public.bug_reports FOR INSERT 
+WITH CHECK (
+  auth.uid() = user_id OR user_id IS NULL
+);
+
+CREATE POLICY "Users can read their own bug reports" 
+ON public.bug_reports FOR SELECT 
+USING (
+  auth.uid() = user_id
+);
+
+-- Create RLS policies for contact messages table
+CREATE POLICY "Users can insert their own contact messages" 
+ON public.contact_messages FOR INSERT 
+WITH CHECK (
+  auth.uid() = user_id OR user_id IS NULL
+);
+
+CREATE POLICY "Users can read their own contact messages" 
+ON public.contact_messages FOR SELECT 
+USING (
+  auth.uid() = user_id
+);
+
+-- Grant access to authenticated and anon users
+GRANT INSERT ON public.feedback TO anon, authenticated;
+GRANT SELECT ON public.feedback TO authenticated;
+
+GRANT INSERT ON public.bug_reports TO anon, authenticated;
+GRANT SELECT ON public.bug_reports TO authenticated;
+
+GRANT INSERT ON public.contact_messages TO anon, authenticated;
+GRANT SELECT ON public.contact_messages TO authenticated;
+
+-- Create a stored procedure to delete all user data
+-- This needs to be run in your Supabase SQL editor
+
+CREATE OR REPLACE FUNCTION public.delete_user_data()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  user_id uuid;
+BEGIN
+  -- Get the current user's ID
+  user_id := auth.uid();
+  
+  -- Delete wine flavor notes for this user's wines
+  DELETE FROM public.wine_flavor_notes
+  WHERE wine_id IN (
+    SELECT w.id
+    FROM public.wines w
+    JOIN public.visits v ON w.visit_id = v.id
+    WHERE v.user_id = user_id
+  );
+  
+  -- Delete wines
+  DELETE FROM public.wines
+  WHERE visit_id IN (
+    SELECT id FROM public.visits
+    WHERE user_id = user_id
+  );
+  
+  -- Delete visits
+  DELETE FROM public.visits
+  WHERE user_id = user_id;
+  
+  -- Delete wishlist items
+  DELETE FROM public.wishlist
+  WHERE user_id = user_id;
+  
+  -- Delete favorites
+  DELETE FROM public.favorites
+  WHERE user_id = user_id;
+  
+  -- Delete feedback
+  DELETE FROM public.feedback
+  WHERE user_id = user_id;
+  
+  -- Delete bug reports
+  DELETE FROM public.bug_reports
+  WHERE user_id = user_id;
+  
+  -- Delete contact messages
+  DELETE FROM public.contact_messages
+  WHERE user_id = user_id;
+  
+  -- Delete user profile
+  DELETE FROM public.users
+  WHERE id = user_id;
+  
+  -- Note: The actual user account in auth.users will be deleted
+  -- separately using the Supabase Auth API deleteUser function
+END;
+$$;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION public.delete_user_data() TO authenticated;
+
+-- Create Wishlist table (instead of Itinerary)
+CREATE TABLE public.wishlist (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.users NOT NULL,
+  winery_id BIGINT REFERENCES public.wineries NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+  UNIQUE(user_id, winery_id)
+);
+
+-- Enable Row-Level Security
+ALTER TABLE public.wishlist ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for wishlist
+CREATE POLICY "Users can read their own wishlist" 
+  ON public.wishlist FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own wishlist entries" 
+  ON public.wishlist FOR INSERT 
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own wishlist entries" 
+  ON public.wishlist FOR DELETE 
+  USING (auth.uid() = user_id);
+
+  -- Favorites table
+CREATE TABLE public.favorites (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.users NOT NULL,
+  winery_id BIGINT REFERENCES public.wineries NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now() NOT NULL,
+  UNIQUE(user_id, winery_id)
+);
+
+ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+
+-- Favorites policies
+CREATE POLICY "Users can read their own favorites" 
+  ON public.favorites FOR SELECT 
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own favorites" 
+  ON public.favorites FOR INSERT 
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own favorites" 
+  ON public.favorites FOR DELETE 
+  USING (auth.uid() = user_id);

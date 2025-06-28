@@ -1,4 +1,4 @@
-// components/VisitLogForm.js
+// Updated VisitLogForm.js with multiple photos support
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
@@ -24,7 +24,6 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   
   // Form state
   const [visitDate, setVisitDate] = useState(() => {
-    // Get current date in local timezone and format as YYYY-MM-DD
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -32,22 +31,23 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
     return `${year}-${month}-${day}`;
   });
   const [wineryNotes, setWineryNotes] = useState('');
-  const [wineryPhoto, setWineryPhoto] = useState(null);
+  const [wineryPhotos, setWineryPhotos] = useState([]); // Changed to array
   const [wines, setWines] = useState([]);
   const [showWineForm, setShowWineForm] = useState(false);
   const [currentWineIndex, setCurrentWineIndex] = useState(null);
+  
+  // Photo modal state
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
-  // Fix header
   const insets = useSafeAreaInsets();
   
-  // Tab configuration
   const tabs = [
     { id: 0, label: 'Wines', icon: 'wine' },
     { id: 1, label: 'Winery Details', icon: 'business' },
     { id: 2, label: 'Review & Save', icon: 'checkmark-circle' }
   ];
 
-  // Alert for exiting wine form
   const handleExitWineForm = () => {
     Alert.alert(
       'Discard Changes?',
@@ -61,29 +61,25 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    // Create date object from string and adjust for local timezone
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      timeZone: 'UTC' // Use UTC to prevent timezone shifting
+      timeZone: 'UTC'
     });
   };
   
-  // Add a new wine
   const handleAddWine = () => {
     setCurrentWineIndex(null);
     setShowWineForm(true);
   };
   
-  // Edit an existing wine
   const handleEditWine = (index) => {
     setCurrentWineIndex(index);
     setShowWineForm(true);
   };
   
-  // Delete a wine entry
   const handleDeleteWine = (index) => {
     Alert.alert(
       'Delete Wine',
@@ -102,15 +98,12 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
     );
   };
   
-  // Save a wine entry
   const handleSaveWine = (wineData) => {
     if (currentWineIndex !== null) {
-      // Update existing wine
       const updatedWines = [...wines];
       updatedWines[currentWineIndex] = wineData;
       setWines(updatedWines);
     } else {
-      // Add new wine
       setWines([...wines, wineData]);
     }
     
@@ -120,7 +113,6 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   // Take photo for winery
   const takeWineryPhoto = async () => {
     try {
-      // Request camera permission
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       
       if (status !== 'granted') {
@@ -139,7 +131,8 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setWineryPhoto(result.assets[0].uri);
+        const newPhoto = result.assets[0].uri;
+        setWineryPhotos(prev => [...prev, newPhoto]);
       }
     } catch (error) {
       console.log('Camera error:', error);
@@ -150,7 +143,6 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
   // Pick image for winery
   const pickWineryImage = async () => {
     try {
-      // Request media library permission
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (status !== 'granted') {
@@ -166,20 +158,44 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 0.8,
+        allowsMultipleSelection: true,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setWineryPhoto(result.assets[0].uri);
+        const newPhotos = result.assets.map(asset => asset.uri);
+        setWineryPhotos(prev => [...prev, ...newPhotos]);
       }
     } catch (error) {
       console.log('Image picker error:', error);
       Alert.alert('Error', 'Failed to select image. Please try again.');
     }
   };
+
+  // Remove a winery photo
+  const removeWineryPhoto = (index) => {
+    Alert.alert(
+      'Remove Photo',
+      'Are you sure you want to remove this photo?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            setWineryPhotos(prev => prev.filter((_, i) => i !== index));
+          }
+        }
+      ]
+    );
+  };
+
+  // View photo in full screen
+  const viewWineryPhoto = (index) => {
+    setSelectedPhotoIndex(index);
+    setShowPhotoModal(true);
+  };
   
-  // Save the entire visit
   const handleSaveVisit = () => {
-    // Validate
     if (!visitDate) {
       Alert.alert('Missing Information', 'Please enter a visit date.');
       return;
@@ -190,329 +206,256 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
       return;
     }
     
-    // Create visit object
     const visitData = {
       wineryId: winery.id,
-      wineryName: winery.name,
       date: visitDate,
       notes: wineryNotes,
-      wines,
-      wineryPhoto,
-      timestamp: new Date().toISOString()
+      wines: wines,
+      wineryPhotos: wineryPhotos,
+      // Legacy support
+      wineryPhoto: wineryPhotos.length > 0 ? wineryPhotos[0] : null
     };
     
-    // Call the save handler
     onSave(visitData);
   };
-  
+
+  // Render photo gallery for winery
+  const renderWineryPhotoGallery = () => {
+    if (wineryPhotos.length === 0) {
+      return (
+        <View style={styles.noPhotosContainer}>
+          <Ionicons name="camera-outline" size={32} color="#999" />
+          <Text style={styles.noPhotosText}>No photos added</Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.photoGallery}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {wineryPhotos.map((photo, index) => (
+            <View key={index} style={styles.photoContainer}>
+              <TouchableOpacity onPress={() => viewWineryPhoto(index)}>
+                <Image source={{ uri: photo }} style={styles.photoThumbnail} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.removePhotoButton}
+                onPress={() => removeWineryPhoto(index)}
+              >
+                <Ionicons name="close-circle" size={24} color="#FF4444" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  };
+
   // Render tab header
   const renderTabHeader = () => (
-    <View style={styles.tabContainer}>
+    <View style={styles.tabHeader}>
       {tabs.map((tab) => (
         <TouchableOpacity
           key={tab.id}
           style={[styles.tab, activeTab === tab.id && styles.activeTab]}
           onPress={() => setActiveTab(tab.id)}
         >
-          <Ionicons 
-            name={tab.icon} 
-            size={20} 
-            color={activeTab === tab.id ? '#8C1C13' : '#999'} 
+          <Ionicons
+            name={tab.icon}
+            size={20}
+            color={activeTab === tab.id ? '#8C1C13' : '#666'}
           />
-          <Text style={[styles.tabText, activeTab === tab.id && styles.activeTabText]}>
+          <Text style={[
+            styles.tabLabel,
+            activeTab === tab.id && styles.activeTabLabel
+          ]}>
             {tab.label}
           </Text>
         </TouchableOpacity>
       ))}
     </View>
   );
-  
-  // Render wine list item (improved card matching wines tab style)
-  const renderWineCard = (wine, index) => {
-    // Helper to get wine type color
-    const getWineTypeColor = (type) => {
-      switch (type?.toLowerCase()) {
-        case 'red':
-        case 'red blend':
-          return '#8B0000';
-        case 'white':
-        case 'white blend':
-          return '#F0E68C';
-        case 'rosé':
-          return '#FFB6C1';
-        case 'sparkling':
-          return '#FFD700';
-        case 'dessert':
-          return '#D2691E';
-        case 'orange':
-          return '#FFA500';
-        default:
-          return '#8E2DE2';
-      }
-    };
-    
-    return (
-      <TouchableOpacity 
-        key={index} 
-        style={styles.wineCard}
-        onPress={() => handleEditWine(index)}
-      >
-        <View style={styles.wineImageContainer}>
-          <View style={[
-            styles.wineImagePlaceholder,
-            { backgroundColor: getWineTypeColor(wine.type) }
-          ]}>
-            <Ionicons 
-              name="wine" 
-              size={24} 
-              color={wine.type?.toLowerCase() === 'white' || wine.type?.toLowerCase() === 'white blend' ? '#333' : '#fff'} 
-            />
-          </View>
-        </View>
-        
-        <View style={styles.wineInfo}>
-          {wine.varietal && (
-            <Text style={styles.wineVarietal}>{wine.varietal}</Text>
-          )}
-          <Text style={styles.wineName}>
-            {wine.name || wine.type || 'Unnamed Wine'} 
-            {wine.year && ` (${wine.year})`}
-          </Text>
-          
-          {/* Overall Rating */}
-          <View style={styles.ratingContainer}>
-            <View style={styles.ratingStars}>
-              {[1, 2, 3, 4, 5].map(star => (
-                <Ionicons 
-                  key={star}
-                  name={star <= Math.floor(wine.overallRating) ? "star" : star <= wine.overallRating ? "star-half" : "star-outline"} 
-                  size={14} 
-                  color="#FFD700" 
-                />
-              ))}
-            </View>
-            <Text style={styles.ratingText}>{wine.overallRating.toFixed(1)}</Text>
-          </View>
-          
-          {/* All Rating Bars */}
-          {wine.ratings && (
-            <View style={styles.ratingsContainer}>
-              <View style={styles.ratingRow}>
-                <Text style={styles.ratingLabel}>Sweet</Text>
-                <View style={styles.ratingBar}>
-                  <View style={[styles.ratingBarFill, { width: `${(wine.ratings.sweetness / 5) * 100}%` }]} />
-                </View>
-                <Text style={styles.ratingValue}>{wine.ratings.sweetness.toFixed(1)}</Text>
-              </View>
-              
-              <View style={styles.ratingRow}>
-                <Text style={styles.ratingLabel}>Tannin</Text>
-                <View style={styles.ratingBar}>
-                  <View style={[styles.ratingBarFill, { width: `${(wine.ratings.tannins / 5) * 100}%` }]} />
-                </View>
-                <Text style={styles.ratingValue}>{wine.ratings.tannins.toFixed(1)}</Text>
-              </View>
-              
-              <View style={styles.ratingRow}>
-                <Text style={styles.ratingLabel}>Acidity</Text>
-                <View style={styles.ratingBar}>
-                  <View style={[styles.ratingBarFill, { width: `${(wine.ratings.acidity / 5) * 100}%` }]} />
-                </View>
-                <Text style={styles.ratingValue}>{wine.ratings.acidity.toFixed(1)}</Text>
-              </View>
-              
-              <View style={styles.ratingRow}>
-                <Text style={styles.ratingLabel}>Body</Text>
-                <View style={styles.ratingBar}>
-                  <View style={[styles.ratingBarFill, { width: `${(wine.ratings.body / 5) * 100}%` }]} />
-                </View>
-                <Text style={styles.ratingValue}>{wine.ratings.body.toFixed(1)}</Text>
-              </View>
-              
-              <View style={styles.ratingRow}>
-                <Text style={styles.ratingLabel}>Alcohol</Text>
-                <View style={styles.ratingBar}>
-                  <View style={[styles.ratingBarFill, { width: `${(wine.ratings.alcohol / 5) * 100}%` }]} />
-                </View>
-                <Text style={styles.ratingValue}>{wine.ratings.alcohol.toFixed(1)}</Text>
-              </View>
-            </View>
-          )}
-        </View>
-        
-        <TouchableOpacity 
-          style={styles.deleteButton}
-          onPress={(e) => {
-            e.stopPropagation();
-            handleDeleteWine(index);
-          }}
-        >
-          <Ionicons name="trash-outline" size={20} color="#FF3B30" />
-        </TouchableOpacity>
-      </TouchableOpacity>
-    );
-  };
-  
+
   // Render wines tab
   const renderWinesTab = () => (
-    <ScrollView style={styles.tabContent}>
-      {wines.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Ionicons name="wine-outline" size={60} color="#B08442" />
-          <Text style={styles.emptyStateTitle}>No wines added yet</Text>
-          <Text style={styles.emptyStateText}>Start by adding the wines you tried</Text>
-        </View>
-      ) : (
-        <View style={styles.winesList}>
-          {wines.map((wine, index) => renderWineCard(wine, index))}
-        </View>
-      )}
+    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+      <View style={styles.winesHeader}>
+        <Text style={styles.winesTitle}>Wines Tasted</Text>
+        <Text style={styles.winesCount}>({wines.length})</Text>
+      </View>
       
-      <TouchableOpacity 
-        style={styles.addWineButton}
-        onPress={handleAddWine}
-      >
-        <Ionicons name="add-circle" size={24} color="#fff" />
+      {wines.map((wine, index) => (
+        <View key={index} style={styles.wineCard}>
+          <View style={styles.wineCardHeader}>
+            <View style={styles.wineInfo}>
+              <Text style={styles.wineName}>
+                {wine.name || `${wine.type} Wine`}
+              </Text>
+              <Text style={styles.wineDetails}>
+                {wine.type} {wine.varietal && `• ${wine.varietal}`} {wine.year && `• ${wine.year}`}
+              </Text>
+            </View>
+            <View style={styles.wineRating}>
+              <Ionicons name="star" size={16} color="#FFD700" />
+              <Text style={styles.ratingText}>
+                {wine.overallRating ? wine.overallRating.toFixed(1) : '0.0'}
+              </Text>
+            </View>
+          </View>
+          
+          {/* Show wine photos if any */}
+          {wine.photos && wine.photos.length > 0 && (
+            <View style={styles.winePhotosPreview}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {wine.photos.slice(0, 3).map((photo, photoIndex) => (
+                  <Image 
+                    key={photoIndex} 
+                    source={{ uri: photo }} 
+                    style={styles.winePhotoThumbnail} 
+                  />
+                ))}
+                {wine.photos.length > 3 && (
+                  <View style={styles.morePhotosIndicator}>
+                    <Text style={styles.morePhotosText}>+{wine.photos.length - 3}</Text>
+                  </View>
+                )}
+              </ScrollView>
+            </View>
+          )}
+          
+          <View style={styles.wineCardActions}>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => handleEditWine(index)}
+            >
+              <Ionicons name="pencil" size={16} color="#8C1C13" />
+              <Text style={styles.editButtonText}>Edit</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={() => handleDeleteWine(index)}
+            >
+              <Ionicons name="trash" size={16} color="#FF4444" />
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ))}
+      
+      <TouchableOpacity style={styles.addWineButton} onPress={handleAddWine}>
+        <Ionicons name="add" size={20} color="#fff" />
         <Text style={styles.addWineButtonText}>Add Wine</Text>
       </TouchableOpacity>
     </ScrollView>
   );
-  
+
   // Render winery details tab
   const renderWineryDetailsTab = () => (
-    <KeyboardAvoidingView 
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
-    >
-      <ScrollView 
-        style={styles.tabContent}
-        contentContainerStyle={styles.scrollContentContainer}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.detailsSection}>
-          <Text style={styles.label}>Visit Date</Text>
-          <TextInput
-            style={styles.input}
-            value={visitDate}
-            onChangeText={setVisitDate}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor='#8a8484'
-          />
-          <Text style={styles.dateDisplay}>{formatDate(visitDate)}</Text>
-        </View>
+    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+      <View style={styles.detailsSection}>
+        <Text style={styles.label}>Visit Date</Text>
+        <TextInput
+          style={styles.input}
+          value={visitDate}
+          onChangeText={setVisitDate}
+          placeholder="YYYY-MM-DD"
+          placeholderTextColor="#999"
+        />
+        <Text style={styles.dateDisplay}>
+          {formatDate(visitDate)}
+        </Text>
+      </View>
+      
+      <View style={styles.detailsSection}>
+        <Text style={styles.label}>Winery Notes</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={wineryNotes}
+          onChangeText={setWineryNotes}
+          placeholder="Share your thoughts about the winery, atmosphere, staff, etc..."
+          placeholderTextColor="#999"
+          multiline
+          textAlignVertical="top"
+        />
+      </View>
+      
+      <View style={styles.detailsSection}>
+        <Text style={styles.label}>Winery Photos ({wineryPhotos.length})</Text>
         
-        <View style={styles.detailsSection}>
-          <Text style={styles.label}>Winery Notes</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={wineryNotes}
-            onChangeText={setWineryNotes}
-            placeholder="How was the atmosphere, service, overall experience?"
-            multiline
-            numberOfLines={6}
-            textAlignVertical="top"
-            placeholderTextColor='#8a8484'
-          />
-        </View>
-        
-        <View style={styles.detailsSection}>
-          <Text style={styles.label}>Winery Photo</Text>
+        <View style={styles.photoButtons}>
+          <TouchableOpacity style={styles.photoButton} onPress={takeWineryPhoto}>
+            <Ionicons name="camera" size={20} color="#E7E3E2" />
+            <Text style={styles.photoButtonText}>Take Photo</Text>
+          </TouchableOpacity>
           
-          <View style={styles.photoButtons}>
-            <TouchableOpacity style={styles.photoButton} onPress={takeWineryPhoto}>
-              <Ionicons name="camera" size={20} color="#E7E3E2" />
-              <Text style={styles.photoButtonText}>Take Photo</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.photoButton} onPress={pickWineryImage}>
-              <Ionicons name="image" size={20} color="#E7E3E2" />
-              <Text style={styles.photoButtonText}>Choose Photo</Text>
-            </TouchableOpacity>
-          </View>
-          
-          {wineryPhoto && (
-            <View style={styles.photoPreviewContainer}>
-              <Image source={{ uri: wineryPhoto }} style={styles.photoPreview} />
-              <TouchableOpacity
-                style={styles.removePhotoButton}
-                onPress={() => setWineryPhoto(null)}
-              >
-                <Ionicons name="close-circle" size={24} color="#FF3B30" />
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-        
-        {/* Add extra padding at bottom to ensure content is accessible above keyboard */}
-        <View style={styles.bottomPadding} />
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
-  
-  // Render review tab
-  const renderReviewTab = () => (
-    <ScrollView style={styles.tabContent}>
-      <View style={styles.reviewSection}>
-        <View style={styles.reviewHeader}>
-          <Text style={styles.reviewTitle}>Visit Summary</Text>
-          <TouchableOpacity onPress={() => setActiveTab(1)}>
-            <Text style={styles.editLink}>Edit Details</Text>
+          <TouchableOpacity style={styles.photoButton} onPress={pickWineryImage}>
+            <Ionicons name="images" size={20} color="#E7E3E2" />
+            <Text style={styles.photoButtonText}>Choose Photos</Text>
           </TouchableOpacity>
         </View>
+
+        {renderWineryPhotoGallery()}
+      </View>
+    </ScrollView>
+  );
+
+  // Render review tab
+  const renderReviewTab = () => (
+    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+      <View style={styles.reviewSection}>
+        <Text style={styles.reviewHeader}>Visit Summary</Text>
+        <Text style={styles.reviewItem}>
+          <Text style={styles.reviewLabel}>Winery:</Text> {winery.name}
+        </Text>
+        <Text style={styles.reviewItem}>
+          <Text style={styles.reviewLabel}>Date:</Text> {formatDate(visitDate)}
+        </Text>
+        <Text style={styles.reviewItem}>
+          <Text style={styles.reviewLabel}>Wines:</Text> {wines.length} wine{wines.length !== 1 ? 's' : ''}
+        </Text>
+        <Text style={styles.reviewItem}>
+          <Text style={styles.reviewLabel}>Photos:</Text> {wineryPhotos.length} winery photo{wineryPhotos.length !== 1 ? 's' : ''}
+        </Text>
         
-        <View style={styles.reviewItem}>
-          <Text style={styles.reviewLabel}>Date:</Text>
-          <Text style={styles.reviewValue}>{formatDate(visitDate)}</Text>
-        </View>
-        
-        {wineryNotes ? (
-          <View style={styles.reviewItem}>
+        {wineryNotes && (
+          <>
             <Text style={styles.reviewLabel}>Notes:</Text>
-            <Text style={styles.reviewValue}>{wineryNotes}</Text>
-          </View>
-        ) : null}
-        
-        {wineryPhoto && (
-          <View style={styles.reviewItem}>
-            <Text style={styles.reviewLabel}>Photo:</Text>
-            <Image source={{ uri: wineryPhoto }} style={styles.reviewPhoto} />
-          </View>
+            <Text style={styles.reviewNotes}>{wineryNotes}</Text>
+          </>
         )}
       </View>
       
       <View style={styles.reviewSection}>
-        <View style={styles.reviewHeader}>
-          <Text style={styles.reviewTitle}>Wines ({wines.length})</Text>
-          <TouchableOpacity onPress={() => setActiveTab(0)}>
-            <Text style={styles.editLink}>Edit Wines</Text>
-          </TouchableOpacity>
-        </View>
-        
+        <Text style={styles.reviewHeader}>Wines Summary</Text>
         {wines.map((wine, index) => (
-          <View key={index} style={styles.reviewWine}>
-            <Text style={styles.reviewWineType}>{wine.type}</Text>
-            {wine.varietal && <Text style={styles.reviewWineVarietal}>{wine.varietal}</Text>}
-            {wine.name && <Text style={styles.reviewWineName}>{wine.name}</Text>}
-            <View style={styles.reviewRating}>
-              <Text style={styles.reviewRatingText}>Rating: </Text>
-              {[1, 2, 3, 4, 5].map(star => (
-                <Ionicons 
+          <View key={index} style={styles.wineReviewCard}>
+            <Text style={styles.wineReviewName}>
+              {wine.name || `${wine.type} Wine`}
+            </Text>
+            <Text style={styles.wineReviewDetails}>
+              {wine.type} {wine.varietal && `• ${wine.varietal}`} {wine.year && `• ${wine.year}`}
+            </Text>
+            <View style={styles.wineReviewRating}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Ionicons
                   key={star}
-                  name={star <= wine.overallRating ? "star" : "star-outline"} 
-                  size={14} 
-                  color="#FFD700" 
+                  name={star <= (wine.overallRating || 0) ? "star" : "star-outline"}
+                  size={14}
+                  color="#FFD700"
                 />
               ))}
             </View>
+            {wine.photos && wine.photos.length > 0 && (
+              <Text style={styles.winePhotoCount}>
+                📷 {wine.photos.length} photo{wine.photos.length !== 1 ? 's' : ''}
+              </Text>
+            )}
           </View>
         ))}
       </View>
       
-      <TouchableOpacity 
-        style={styles.saveButton}
-        onPress={handleSaveVisit}
-      >
+      <TouchableOpacity style={styles.saveButton} onPress={handleSaveVisit}>
         <Text style={styles.saveButtonText}>Save Visit</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -561,176 +504,202 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
           />
         </SafeAreaView>
       </Modal>
+
+      {/* Photo Viewer Modal */}
+      <Modal
+        visible={showPhotoModal}
+        animationType="fade"
+        transparent={true}
+      >
+        <View style={styles.photoModalOverlay}>
+          <TouchableOpacity
+            style={styles.photoModalClose}
+            onPress={() => setShowPhotoModal(false)}
+          >
+            <Ionicons name="close" size={32} color="#fff" />
+          </TouchableOpacity>
+          
+          {wineryPhotos.length > 0 && (
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              contentOffset={{ x: selectedPhotoIndex * 400, y: 0 }}
+            >
+              {wineryPhotos.map((photo, index) => (
+                <View key={index} style={styles.photoModalContainer}>
+                  <Image source={{ uri: photo }} style={styles.photoModalImage} />
+                </View>
+              ))}
+            </ScrollView>
+          )}
+          
+          <View style={styles.photoModalIndicator}>
+            <Text style={styles.photoModalText}>
+              {selectedPhotoIndex + 1} of {wineryPhotos.length}
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E7E3E2',
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    padding: 16,
     backgroundColor: '#E7E3E2',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    paddingTop: 8, // Reduced top padding for better positioning
+    borderBottomColor: '#ddd',
   },
   closeButton: {
-    padding: 8,
     marginRight: 16,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    flex: 1,
     color: '#3E3E3E',
+    flex: 1,
   },
-  tabContainer: {
+  tabHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f4f1ef',
+    backgroundColor: '#E7E3E2',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#ddd',
   },
   tab: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
     gap: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
   activeTab: {
     borderBottomWidth: 2,
     borderBottomColor: '#8C1C13',
   },
-  tabText: {
-    fontSize: 14,
-    color: '#888',
-  },
-  activeTabText: {
-    color: '#8C1C13',
+  tabLabel: {
+    fontSize: 12,
+    color: '#666',
     fontWeight: '500',
+  },
+  activeTabLabel: {
+    color: '#8C1C13',
+    fontWeight: '600',
   },
   tabContentContainer: {
     flex: 1,
   },
   tabContent: {
     flex: 1,
-    padding: 16,
+    backgroundColor: '#E7E3E2',
   },
-  scrollContentContainer: {
-    paddingBottom: 50, // Extra space for keyboard
-  },
-  bottomPadding: {
-    height: 150, // Extra space to ensure content is accessible above keyboard
-  },
-  emptyState: {
+  winesHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 60,
+    padding: 16,
+    paddingBottom: 8,
   },
-  emptyStateTitle: {
-    fontSize: 18,
+  winesTitle: {
+    fontSize: 20,
     fontWeight: '600',
-    marginTop: 16,
-    marginBottom: 8,
     color: '#3E3E3E',
   },
-  emptyStateText: {
+  winesCount: {
+    fontSize: 16,
     color: '#666',
-  },
-  winesList: {
-    marginBottom: 20,
+    marginLeft: 8,
   },
   wineCard: {
-    flexDirection: 'row',
-    padding: 12,
     backgroundColor: '#f4f1ef',
-    borderRadius: 8,
+    marginHorizontal: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderRadius: 12,
+    padding: 16,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#ddd',
   },
-  wineImageContainer: {
-    marginRight: 15,
-  },
-  wineImagePlaceholder: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
+  wineCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
   },
   wineInfo: {
     flex: 1,
   },
-  wineVarietal: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#3E3E3E',
-    marginBottom: 2,
-  },
   wineName: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '600',
     color: '#3E3E3E',
-    marginBottom: 5,
+    marginBottom: 4,
   },
-  ratingContainer: {
+  wineDetails: {
+    fontSize: 14,
+    color: '#666',
+  },
+  wineRating: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  ratingStars: {
-    flexDirection: 'row',
-    marginRight: 5,
+    gap: 4,
   },
   ratingText: {
-    fontSize: 12,
-    color: '#888',
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#3E3E3E',
   },
-  ratingsContainer: {
-    marginTop: 4,
+  winePhotosPreview: {
+    marginVertical: 8,
   },
-  ratingRow: {
+  winePhotoThumbnail: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  morePhotosIndicator: {
+    width: 40,
+    height: 40,
+    borderRadius: 6,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  morePhotosText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  wineCardActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  editButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 3,
+    gap: 4,
+    padding: 6,
   },
-  ratingLabel: {
-    fontSize: 11,
-    color: '#666',
-    width: 45,
-  },
-  ratingBar: {
-    flex: 1,
-    height: 4,
-    backgroundColor: '#ccc',
-    borderRadius: 2,
-    marginHorizontal: 8,
-    overflow: 'hidden',
-  },
-  ratingBarFill: {
-    height: '100%',
-    backgroundColor: '#8C1C13',
-  },
-  ratingValue: {
-    fontSize: 11,
-    color: '#666',
-    width: 25,
-    textAlign: 'right',
+  editButtonText: {
+    color: '#8C1C13',
+    fontSize: 14,
+    fontWeight: '500',
   },
   deleteButton: {
-    justifyContent: 'center',
-    paddingLeft: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 6,
+  },
+  deleteButtonText: {
+    color: '#FF4444',
+    fontSize: 14,
+    fontWeight: '500',
   },
   addWineButton: {
     flexDirection: 'row',
@@ -740,6 +709,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+    margin: 16,
   },
   addWineButtonText: {
     color: '#fff',
@@ -748,6 +718,7 @@ const styles = StyleSheet.create({
   },
   detailsSection: {
     marginBottom: 24,
+    paddingHorizontal: 16,
   },
   label: {
     fontSize: 16,
@@ -777,6 +748,7 @@ const styles = StyleSheet.create({
   photoButtons: {
     flexDirection: 'row',
     gap: 12,
+    marginBottom: 16,
   },
   photoButton: {
     flex: 1,
@@ -792,98 +764,108 @@ const styles = StyleSheet.create({
     color: '#E7E3E2',
     fontWeight: '500',
   },
-  photoPreviewContainer: {
-    marginTop: 12,
-    position: 'relative',
+  noPhotosContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    backgroundColor: '#f4f1ef',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
   },
-  photoPreview: {
-    width: '100%',
-    height: 200,
+  noPhotosText: {
+    marginTop: 8,
+    color: '#999',
+    fontSize: 14,
+  },
+  photoGallery: {
+    backgroundColor: '#f4f1ef',
+    borderRadius: 8,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  photoContainer: {
+    position: 'relative',
+    marginRight: 8,
+  },
+  photoThumbnail: {
+    width: 80,
+    height: 80,
     borderRadius: 8,
   },
   removePhotoButton: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    top: -8,
+    right: -8,
+    backgroundColor: '#fff',
     borderRadius: 12,
   },
   reviewSection: {
     backgroundColor: '#f4f1ef',
     borderRadius: 12,
     padding: 16,
+    marginHorizontal: 16,
     marginBottom: 16,
   },
   reviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  reviewTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#3E3E3E',
-  },
-  editLink: {
-    color: '#8C1C13',
-    fontWeight: '500',
-  },
-  reviewItem: {
     marginBottom: 12,
   },
+  reviewItem: {
+    fontSize: 15,
+    color: '#3E3E3E',
+    marginBottom: 4,
+  },
   reviewLabel: {
+    fontWeight: '600',
+  },
+  reviewNotes: {
     fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  wineReviewCard: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  wineReviewName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#3E3E3E',
+    marginBottom: 2,
+  },
+  wineReviewDetails: {
+    fontSize: 13,
     color: '#666',
     marginBottom: 4,
   },
-  reviewValue: {
-    fontSize: 15,
-    color: '#3E3E3E',
-  },
-  reviewPhoto: {
-    width: '100%',
-    height: 150,
-    borderRadius: 8,
-    marginTop: 8,
-  },
-  reviewWine: {
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#ccc',
-  },
-  reviewWineType: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#3E3E3E',
-  },
-  reviewWineVarietal: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#3E3E3E',
-  },
-  reviewWineName: {
-    fontSize: 14,
-    color: '#3E3E3E',
-  },
-  reviewRating: {
+  wineReviewRating: {
     flexDirection: 'row',
+    gap: 2,
+    marginBottom: 4,
   },
-  reviewRatingText: {
-    fontSize: 14,
+  winePhotoCount: {
+    fontSize: 12,
     color: '#666',
-    marginRight: 4,
   },
   saveButton: {
     backgroundColor: '#8C1C13',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 40,
+    margin: 16,
   },
   saveButtonText: {
-    color: '#fff',
+    color: '#E7E3E2',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -894,19 +876,55 @@ const styles = StyleSheet.create({
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    padding: 16,
     backgroundColor: '#E7E3E2',
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   modalCloseButton: {
-    padding: 5,
+    marginRight: 16,
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginLeft: 15,
     color: '#3E3E3E',
+    flex: 1,
+  },
+  photoModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoModalClose: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 1,
+    padding: 8,
+  },
+  photoModalContainer: {
+    width: 400,
+    height: 400,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoModalImage: {
+    width: '90%',
+    height: '90%',
+    resizeMode: 'contain',
+  },
+  photoModalIndicator: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  photoModalText: {
+    color: '#fff',
+    fontSize: 14,
   },
 });

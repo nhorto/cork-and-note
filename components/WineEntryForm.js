@@ -1,4 +1,4 @@
-// Updated WineEntryForm.js with autocomplete varietal
+// Updated WineEntryForm.js with multiple photos support
 import { Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
@@ -16,7 +16,7 @@ import {
   View
 } from 'react-native';
 
-import AutocompleteVarietal from './AutocompleteVarietal'; // Import the new component
+import AutocompleteVarietal from './AutocompleteVarietal';
 import FlavorTagSelector from './FlavorTagSelector';
 import RatingSlider from './RatingSlider';
 
@@ -29,7 +29,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   // Form state
   const [wineName, setWineName] = useState('');
   const [wineType, setWineType] = useState('Red');
-  const [wineVarietal, setWineVarietal] = useState(''); // Now handles free text input
+  const [wineVarietal, setWineVarietal] = useState('');
   const [wineYear, setWineYear] = useState('');
   const [overallRating, setOverallRating] = useState(0);
   const [ratings, setRatings] = useState({
@@ -41,10 +41,12 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   });
   const [flavorNotes, setFlavorNotes] = useState([]);
   const [additionalNotes, setAdditionalNotes] = useState('');
-  const [photo, setPhoto] = useState(null);
+  const [photos, setPhotos] = useState([]); // Changed from single photo to array
   
-  // Modal state for wine type selector only (varietal now uses autocomplete)
+  // Modal state
   const [showTypeModal, setShowTypeModal] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   
   // Load initial data if editing an existing wine
   useEffect(() => {
@@ -63,7 +65,15 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
       });
       setFlavorNotes(initialData.flavorNotes || []);
       setAdditionalNotes(initialData.additionalNotes || '');
-      setPhoto(initialData.photo || null);
+      
+      // Handle both legacy single photo and new multiple photos
+      if (initialData.photos && Array.isArray(initialData.photos)) {
+        setPhotos(initialData.photos);
+      } else if (initialData.photo) {
+        setPhotos([initialData.photo]);
+      } else {
+        setPhotos([]);
+      }
     }
   }, [initialData]);
   
@@ -87,17 +97,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   // Take a photo with the camera
   const takePhoto = async () => {
     try {
-      // Request camera permission
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Camera permission is needed to take photos.',
-          [{ text: 'OK' }]
-        );
-        return;
-      }
+      const hasPermissions = await requestPermissions();
+      if (!hasPermissions) return;
       
       const result = await ImagePicker.launchCameraAsync({
         allowsEditing: true,
@@ -107,7 +108,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
       });
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setPhoto(result.assets[0].uri);
+        const newPhoto = result.assets[0].uri;
+        setPhotos(prevPhotos => [...prevPhotos, newPhoto]);
       }
     } catch (error) {
       console.log('Camera error:', error);
@@ -118,7 +120,6 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   // Pick an image from the media library
   const pickImage = async () => {
     try {
-      // Request media library permission
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       
       if (status !== 'granted') {
@@ -135,15 +136,41 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
+        allowsMultipleSelection: true, // Allow multiple selection
       });
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        setPhoto(result.assets[0].uri);
+        const newPhotos = result.assets.map(asset => asset.uri);
+        setPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
       }
     } catch (error) {
       console.log('Image picker error:', error);
       Alert.alert('Error', 'Failed to select image. Please try again.');
     }
+  };
+
+  // Remove a photo
+  const removePhoto = (index) => {
+    Alert.alert(
+      'Remove Photo',
+      'Are you sure you want to remove this photo?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            setPhotos(prevPhotos => prevPhotos.filter((_, i) => i !== index));
+          }
+        }
+      ]
+    );
+  };
+
+  // View photo in full screen
+  const viewPhoto = (index) => {
+    setSelectedPhotoIndex(index);
+    setShowPhotoModal(true);
   };
   
   // Update specific rating value
@@ -168,220 +195,264 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
       return;
     }
     
-    // Create wine object - varietal is now just the text input value
+    // Create wine data object
     const wineData = {
       name: wineName,
       type: wineType,
-      varietal: wineVarietal.trim(), // Use the autocomplete input value directly
+      varietal: wineVarietal,
       year: wineYear,
-      overallRating,
-      ratings,
-      flavorNotes,
-      additionalNotes,
-      photo,
-      dateAdded: new Date().toISOString(),
+      overallRating: overallRating,
+      ratings: ratings,
+      flavorNotes: flavorNotes,
+      additionalNotes: additionalNotes,
+      photos: photos, // Send array of photos
+      // Keep legacy support
+      photo: photos.length > 0 ? photos[0] : null
     };
     
-    // Pass wine data to parent component
     onSave(wineData);
   };
-  
-  // Render the wine type modal (keeping this unchanged)
-  const renderTypeModal = () => (
-    <Modal
-      visible={showTypeModal}
-      animationType="slide"
-      transparent={true}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Select Wine Type</Text>
-            <TouchableOpacity onPress={() => setShowTypeModal(false)}>
-              <Ionicons name="close" size={24} color="#333" />
-            </TouchableOpacity>
-          </View>
-          <ScrollView style={styles.optionsList}>
-            {WINE_TYPES.map((type) => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.optionItem,
-                  wineType === type && styles.selectedOption
-                ]}
-                onPress={() => handleWineTypeSelect(type)}
-              >
-                <Text style={[
-                  styles.optionText,
-                  wineType === type && styles.selectedOptionText
-                ]}>
-                  {type}
-                </Text>
-                {wineType === type && (
-                  <Ionicons name="checkmark" size={20} color="#8C1C13" />
-                )}
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+
+  // Render photo gallery
+  const renderPhotoGallery = () => {
+    if (photos.length === 0) {
+      return (
+        <View style={styles.noPhotosContainer}>
+          <Ionicons name="camera-outline" size={32} color="#999" />
+          <Text style={styles.noPhotosText}>No photos added</Text>
         </View>
+      );
+    }
+
+    return (
+      <View style={styles.photoGallery}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {photos.map((photo, index) => (
+            <View key={index} style={styles.photoContainer}>
+              <TouchableOpacity onPress={() => viewPhoto(index)}>
+                <Image source={{ uri: photo }} style={styles.photoThumbnail} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.removePhotoButton}
+                onPress={() => removePhoto(index)}
+              >
+                <Ionicons name="close-circle" size={24} color="#FF4444" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
       </View>
-    </Modal>
-  );
-  
+    );
+  };
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Wine Name</Text>
-        <TextInput
-          style={styles.input}
-          value={wineName}
-          onChangeText={setWineName}
-          placeholder="Optional"
-        />
-      </View>
-      
-      <View style={styles.formRow}>
-        <View style={styles.formGroupHalf}>
-          <Text style={styles.label}>Wine Type *</Text>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Wine Basic Info */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Wine Information</Text>
+        
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Wine Name</Text>
+          <TextInput
+            style={styles.input}
+            value={wineName}
+            onChangeText={setWineName}
+            placeholder="Enter wine name"
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Type *</Text>
           <TouchableOpacity
             style={styles.selectorButton}
             onPress={() => setShowTypeModal(true)}
           >
             <Text style={styles.selectorText}>{wineType}</Text>
-            <Ionicons name="chevron-down" size={20} color="#8C1C13" />
+            <Ionicons name="chevron-down" size={20} color="#666" />
           </TouchableOpacity>
         </View>
-        
-        <View style={styles.formGroupHalf}>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Varietal</Text>
+          <AutocompleteVarietal
+            value={wineVarietal}
+            onChangeText={setWineVarietal}
+            wineType={wineType}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
           <Text style={styles.label}>Year</Text>
           <TextInput
             style={styles.input}
             value={wineYear}
             onChangeText={setWineYear}
             placeholder="e.g., 2021"
+            placeholderTextColor="#999"
             keyboardType="numeric"
             maxLength={4}
           />
         </View>
       </View>
-      
-      {/* Updated Varietal Section with Autocomplete */}
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Wine Varietal</Text>
-        <AutocompleteVarietal
-          value={wineVarietal}
-          onChangeText={setWineVarietal}
-          placeholder="Enter varietal (optional)"
-        />
-      </View>
-      
-      {/* Wine Characteristics */}
-      <View style={styles.formGroup}>
-        <Text style={styles.sectionTitle}>Wine Characteristics</Text>
-        
+
+      {/* Overall Rating */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Overall Rating</Text>
         <RatingSlider
-          label="Sweetness"
-          value={ratings.sweetness}
-          onValueChange={(value) => updateRating('sweetness', value)}
-        />
-        
-        <RatingSlider
-          label="Tannins"
-          value={ratings.tannins}
-          onValueChange={(value) => updateRating('tannins', value)}
-        />
-        
-        <RatingSlider
-          label="Acidity"
-          value={ratings.acidity}
-          onValueChange={(value) => updateRating('acidity', value)}
-        />
-        
-        <RatingSlider
-          label="Body"
-          value={ratings.body}
-          onValueChange={(value) => updateRating('body', value)}
-        />
-        
-        <RatingSlider
-          label="Alcohol"
-          value={ratings.alcohol}
-          onValueChange={(value) => updateRating('alcohol', value)}
+          value={overallRating}
+          onValueChange={setOverallRating}
+          label="Overall Rating"
+          showLabel={false}
         />
       </View>
 
+      {/* Detailed Ratings */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Detailed Ratings</Text>
+        
+        {Object.entries(ratings).map(([key, value]) => (
+          <RatingSlider
+            key={key}
+            value={value}
+            onValueChange={(newValue) => updateRating(key, newValue)}
+            label={key.charAt(0).toUpperCase() + key.slice(1)}
+          />
+        ))}
+      </View>
+
       {/* Flavor Notes */}
-      <View style={styles.formGroup}>
+      <View style={styles.section}>
         <Text style={styles.sectionTitle}>Flavor Notes</Text>
         <FlavorTagSelector
           selectedTags={flavorNotes}
           onTagsChange={setFlavorNotes}
         />
       </View>
-      
+
+      {/* Photos Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Photos ({photos.length})</Text>
+        
+        {/* Photo buttons */}
+        <View style={styles.photoButtons}>
+          <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
+            <Ionicons name="camera" size={20} color="#E7E3E2" />
+            <Text style={styles.photoButtonText}>Take Photo</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
+            <Ionicons name="images" size={20} color="#E7E3E2" />
+            <Text style={styles.photoButtonText}>Choose Photos</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Photo gallery */}
+        {renderPhotoGallery()}
+      </View>
+
       {/* Additional Notes */}
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Additional Notes</Text>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Additional Notes</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           value={additionalNotes}
           onChangeText={setAdditionalNotes}
-          placeholder="Optional notes about this wine..."
-          multiline={true}
-          numberOfLines={4}
+          placeholder="Any additional thoughts about this wine..."
+          placeholderTextColor="#999"
+          multiline
           textAlignVertical="top"
         />
       </View>
-      
-      {/* Overall Rating */}
-      <View style={styles.formGroup}>
-        <Text style={styles.sectionTitle}>Overall Rating</Text>
-        <RatingSlider
-          label=""
-          value={overallRating}
-          onValueChange={setOverallRating}
-        />
-      </View>
-      
-      {/* Photo Section */}
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Photo</Text>
-        {photo ? (
-          <View style={styles.photoContainer}>
-            <Image source={{ uri: photo }} style={styles.photoPreview} />
-            <TouchableOpacity
-              style={styles.removePhotoButton}
-              onPress={() => setPhoto(null)}
-            >
-              <Ionicons name="close-circle" size={24} color="#FF4444" />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.photoButtons}>
-            <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
-              <Ionicons name="camera" size={24} color="#E7E3E2" />
-              <Text style={styles.photoButtonText}>Take Photo</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-              <Ionicons name="image" size={24} color="#E7E3E2" />
-              <Text style={styles.photoButtonText}>Choose Photo</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-      
+
       {/* Action Buttons */}
-      <View style={styles.buttonContainer}>
+      <View style={styles.actionButtons}>
         <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
           <Text style={styles.cancelButtonText}>Cancel</Text>
         </TouchableOpacity>
+        
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Save Wine</Text>
         </TouchableOpacity>
       </View>
-      
+
       {/* Wine Type Modal */}
-      {renderTypeModal()}
+      <Modal
+        visible={showTypeModal}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Wine Type</Text>
+              <TouchableOpacity onPress={() => setShowTypeModal(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView>
+              {WINE_TYPES.map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  style={[
+                    styles.typeOption,
+                    wineType === type && styles.selectedTypeOption
+                  ]}
+                  onPress={() => handleWineTypeSelect(type)}
+                >
+                  <Text style={[
+                    styles.typeOptionText,
+                    wineType === type && styles.selectedTypeOptionText
+                  ]}>
+                    {type}
+                  </Text>
+                  {wineType === type && (
+                    <Ionicons name="checkmark" size={20} color="#8C1C13" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Photo Viewer Modal */}
+      <Modal
+        visible={showPhotoModal}
+        animationType="fade"
+        transparent={true}
+      >
+        <View style={styles.photoModalOverlay}>
+          <TouchableOpacity
+            style={styles.photoModalClose}
+            onPress={() => setShowPhotoModal(false)}
+          >
+            <Ionicons name="close" size={32} color="#fff" />
+          </TouchableOpacity>
+          
+          {photos.length > 0 && (
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              contentOffset={{ x: selectedPhotoIndex * 400, y: 0 }}
+            >
+              {photos.map((photo, index) => (
+                <View key={index} style={styles.photoModalContainer}>
+                  <Image source={{ uri: photo }} style={styles.photoModalImage} />
+                </View>
+              ))}
+            </ScrollView>
+          )}
+          
+          <View style={styles.photoModalIndicator}>
+            <Text style={styles.photoModalText}>
+              {selectedPhotoIndex + 1} of {photos.length}
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -390,41 +461,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#E7E3E2',
-  },
-  contentContainer: {
     padding: 16,
-    paddingBottom: 50,
   },
-  formGroup: {
-    marginBottom: 20,
-  },
-  formRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  formGroupHalf: {
-    width: '48%',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#3E3E3E',
-    marginBottom: 8,
+  section: {
+    marginBottom: 24,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 15,
-    color: '#8C1C13',
+    color: '#3E3E3E',
+    marginBottom: 16,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginBottom: 8,
+    color: '#3E3E3E',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f4f1ef',
     color: '#3E3E3E',
   },
   textArea: {
@@ -433,42 +496,22 @@ const styles = StyleSheet.create({
   },
   selectorButton: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 12,
-    backgroundColor: '#f9f9f9',
-    minHeight: 50,
+    backgroundColor: '#f4f1ef',
   },
   selectorText: {
     fontSize: 15,
     color: '#3E3E3E',
   },
-  placeholderText: {
-    color: '#999',
-  },
-  photoContainer: {
-    position: 'relative',
-    alignItems: 'center',
-  },
-  photoPreview: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-    resizeMode: 'cover',
-  },
-  removePhotoButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderRadius: 15,
-  },
   photoButtons: {
     flexDirection: 'row',
     gap: 12,
+    marginBottom: 16,
   },
   photoButton: {
     flex: 1,
@@ -478,52 +521,91 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     borderRadius: 8,
-    backgroundColor: '#8C1C13', // solid red background
+    backgroundColor: '#8C1C13',
   },
   photoButtonText: {
-    color: '#E7E3E2', // soft beige text color
+    color: '#E7E3E2',
     fontWeight: '500',
   },
-  buttonContainer: {
+  noPhotosContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    backgroundColor: '#f4f1ef',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+  },
+  noPhotosText: {
+    marginTop: 8,
+    color: '#999',
+    fontSize: 14,
+  },
+  photoGallery: {
+    backgroundColor: '#f4f1ef',
+    borderRadius: 8,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  photoContainer: {
+    position: 'relative',
+    marginRight: 8,
+  },
+  photoThumbnail: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  removePhotoButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+  },
+  actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 30,
+    gap: 12,
+    marginTop: 24,
+    marginBottom: 32,
   },
   cancelButton: {
-    width: '48%',
-    padding: 15,
+    flex: 1,
+    padding: 16,
     borderRadius: 8,
-    backgroundColor: '#FF3B30',
+    borderWidth: 1,
+    borderColor: '#8C1C13',
     alignItems: 'center',
   },
   cancelButtonText: {
-    color: '#fff',
+    color: '#8C1C13',
     fontSize: 16,
     fontWeight: '600',
   },
   saveButton: {
-    width: '48%',
-    padding: 15,
+    flex: 1,
+    padding: 16,
     borderRadius: 8,
     backgroundColor: '#8C1C13',
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#fff',
+    color: '#E7E3E2',
     fontSize: 16,
     fontWeight: '600',
   },
-  // Modal styles (restored to original)
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
-  modalContainer: {
+  modalContent: {
     backgroundColor: '#E7E3E2',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: '70%',
+    maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -531,17 +613,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#ddd',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#3E3E3E',
   },
-  optionsList: {
-    maxHeight: 400,
-  },
-  optionItem: {
+  typeOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -549,15 +628,52 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  selectedOption: {
-    backgroundColor: 'rgba(140, 28, 19, 0.1)',
+  selectedTypeOption: {
+    backgroundColor: '#f0f0f0',
   },
-  optionText: {
+  typeOptionText: {
     fontSize: 16,
     color: '#3E3E3E',
   },
-  selectedOptionText: {
+  selectedTypeOptionText: {
+    fontWeight: '600',
     color: '#8C1C13',
-    fontWeight: '500',
+  },
+  photoModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoModalClose: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 1,
+    padding: 8,
+  },
+  photoModalContainer: {
+    width: 400,
+    height: 400,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  photoModalImage: {
+    width: '90%',
+    height: '90%',
+    resizeMode: 'contain',
+  },
+  photoModalIndicator: {
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  photoModalText: {
+    color: '#fff',
+    fontSize: 14,
   },
 });

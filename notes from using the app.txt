@@ -1,0 +1,14 @@
+1. need to move overall rating to bottom of model. 
+    1. since when you are talking about a wine you would want to give it a overall rating last. 
+2. figure out what would happen if you go to a winery multiple times and log notes about the winery. im sure 
+    what would happen when you do this. and im not talking about notes about the wine. im talking about notes about the winery
+3. i get a error when creating a custom tasting note. i just tried to do it and it gave me this error: 
+     ERROR  Error creating flavor note: {"code": "42501", "details": null, "hint": null, "message": 
+        "new row violates row-level security policy for table \"flavor_notes\""}
+4. 
+
+
+add in help button on the map
+maybe make it to where the winery id tab is not a model but a page or something like that 
+look at the filters for the wine tab. if you have had a lot of different wines or been to a lot of different wineries, it gets 
+    really long and you have to scroll to the side a lot for this. 
