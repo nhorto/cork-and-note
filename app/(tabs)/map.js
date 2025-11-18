@@ -1,332 +1,273 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import Supercluster from 'supercluster';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import WinerySearchModal from '../../components/WinerySearchModal';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
-import { wineryStatusService } from '../../lib/wineryStatus';
+
+// Hardcoded demo data - these wineries will show status badges for portfolio demo
+const DEMO_WINERY_STATUS = {
+  18: { visited: true, isFavorite: true, isWantToVisit: false },   // Barboursville Vineyards
+  146: { visited: true, isFavorite: false, isWantToVisit: false },  // King Family Vineyards
+  25: { visited: false, isFavorite: true, isWantToVisit: false },   // Blenheim Vineyards
+  88: { visited: false, isFavorite: false, isWantToVisit: true },   // Early Mountain Vineyards
+  278: { visited: true, isFavorite: false, isWantToVisit: false },  // Veritas Vineyards
+  198: { visited: false, isFavorite: true, isWantToVisit: false },  // Pippin Hill Farm & Vineyards
+  144: { visited: false, isFavorite: false, isWantToVisit: true },  // Keswick Vineyards
+  36: { visited: true, isFavorite: false, isWantToVisit: true },    // Breaux Vineyards
+  268: { visited: true, isFavorite: false, isWantToVisit: false },  // Trump Winery
+  68: { visited: false, isFavorite: true, isWantToVisit: true },    // Chrysalis Vineyards
+};
 
 export default function MapScreen() {
   const router = useRouter();
-  const mapRef = useRef(null);
-  const [clusters, setClusters] = useState([]);
-  const [region, setRegion] = useState({
-    latitude: 37.4316, // Approximate center of Virginia
-    longitude: -78.6569,
-    latitudeDelta: 5,  // Wider delta to show the whole state
-    longitudeDelta: 5,
-  });
-
-  //insert hooks for user location and search modal
-  const [userLocation, setUserLocation] = useState(null);
+  const mapContainer = useRef(null);
+  const map = useRef(null);
+  const markers = useRef({});
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
-  // status loading
-  const [wineriesWithStatus, setWineriesWithStatus] = useState([]);
-  const [statusLoaded, setStatusLoaded] = useState(false);
-
-  useEffect(() => {
-    loadWineriesWithStatus();
-  }, []);
-
-  const loadWineriesWithStatus = async () => {
-    try {
-      const { success, wineries: data } = await wineryStatusService.getAllWineriesWithStatus(wineries);
-      setWineriesWithStatus(
-        success 
-          ? data 
-          : wineries.map(w => ({ ...w, status: { visited: false, isFavorite: false, isWantToVisit: false } }))
-      );
-    } catch (err) {
-      console.error(err);
-      setWineriesWithStatus(
-        wineries.map(w => ({ ...w, status: { visited: false, isFavorite: false, isWantToVisit: false } }))
-      );
-    } finally {
-      setStatusLoaded(true);
-    }
-  };
-
-  // Request and set user location
-  useEffect(() => {
-    (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
-          return;
-        }
-        
-        const loc = await Location.getCurrentPositionAsync({});
-        const userLoc = { 
-          latitude: loc.coords.latitude, 
-          longitude: loc.coords.longitude 
-        };
-        setUserLocation(userLoc);
-        
-        // Optionally zoom to user location on initial load
-        // mapRef.current?.animateToRegion({
-        //   ...userLoc,
-        //   latitudeDelta: 0.5,
-        //   longitudeDelta: 0.5,
-        // }, 1000);
-      } catch (error) {
-        console.error("Error getting location:", error);
-        Alert.alert('Location Error', 'Unable to get your current location.');
-      }
-    })();
-  }, []);
-
-  // zoom to users location
-  const zoomToUserLocation = async () => {
-    if (!userLocation) {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
-          return;
-        }
-        
-        const loc = await Location.getCurrentPositionAsync({});
-        const userLoc = { 
-          latitude: loc.coords.latitude, 
-          longitude: loc.coords.longitude 
-        };
-        setUserLocation(userLoc);
-        
-        mapRef.current?.animateToRegion({
-          ...userLoc,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }, 1000);
-      } catch (error) {
-        console.error("Error getting location:", error);
-        Alert.alert('Location Error', 'Unable to get your current location.');
-      }
-    } else {
-      mapRef.current?.animateToRegion({
-        ...userLocation,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }, 1000);
-    }
-  };
-  
-  // handle winery select
-  const handleWinerySelect = winery => {
-    mapRef.current?.animateToRegion({
-      latitude: winery.latitude,
-      longitude: winery.longitude,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
-    }, 1000);
-  };
-
-  // Convert wineries to GeoJSON format for Supercluster - memoized to prevent recalculation
-  const points = useMemo(() => {
-    // Use wineriesWithStatus if available and loaded, otherwise use the original wineries
-    const wineryData = statusLoaded && wineriesWithStatus.length > 0 ? wineriesWithStatus : wineries;
-    
-    return wineryData.map(winery => ({
-      type: 'Feature',
-      properties: { 
-        cluster: false, 
-        wineryId: winery.id, 
-        name: winery.name, 
-        status: winery.status || { visited: false, isFavorite: false, isWantToVisit: false },
-      },
-      geometry: {
-        type: 'Point',
-        coordinates: [winery.longitude, winery.latitude]
-      }
+  // Add status to wineries for demo
+  const wineriesWithStatus = useMemo(() => {
+    return wineries.map(winery => ({
+      ...winery,
+      status: DEMO_WINERY_STATUS[winery.id] || { visited: false, isFavorite: false, isWantToVisit: false }
     }));
-  }, [wineriesWithStatus, wineries, statusLoaded]);
-
-  // Create supercluster instance - memoized to prevent recreation
-  const supercluster = useMemo(() => {
-    const instance = new Supercluster({
-      radius: 40,
-      maxZoom: 16
-    });
-    instance.load(points);
-    return instance;
-  }, [points]);
-
-  // Update clusters when region changes, using a memoized function
-  const updateClusters = useMemo(() => {
-    return (newRegion) => {
-      // Get map bounds
-      const northEast = {
-        latitude: newRegion.latitude + newRegion.latitudeDelta/2,
-        longitude: newRegion.longitude + newRegion.longitudeDelta/2
-      };
-      const southWest = {
-        latitude: newRegion.latitude - newRegion.latitudeDelta/2,
-        longitude: newRegion.longitude - newRegion.longitudeDelta/2
-      };
-      const bounds = [
-        southWest.longitude, southWest.latitude, 
-        northEast.longitude, northEast.latitude
-      ];
-
-      const zoom = Math.log2(360 / newRegion.longitudeDelta) - 1;
-      const newClusters = supercluster.getClusters(bounds, Math.floor(zoom));
-      setClusters(newClusters);
-    };
-  }, [supercluster]);
-
-  // Update clusters when region changes
-  useEffect(() => {
-    updateClusters(region);
-  }, [region, updateClusters]);
-
-  // Use useEffect to measure and update before painting to prevent flickering
-  useEffect(() => {
-    // Only run once on mount to set initial clusters
-    updateClusters(region);
   }, []);
 
-  const onRegionChangeComplete = (newRegion) => {
-    setRegion(newRegion);
-  };
+  useEffect(() => {
+    // Only run on web
+    if (typeof window === 'undefined') return;
 
-  // Memoize cluster rendering to prevent flickering
-  const renderCluster = useMemo(() => {
-    return (cluster) => {
-      const { cluster_id, point_count } = cluster.properties;
-      
-      return (
-        <Marker
-          key={`cluster-${cluster_id}`}
-          coordinate={{
-            latitude: cluster.geometry.coordinates[1],
-            longitude: cluster.geometry.coordinates[0]
-          }}
-          onPress={() => {
-            // Zoom in on cluster when pressed
-            const children = supercluster.getLeaves(cluster_id, 100);
-            const childrenCoordinates = children.map(child => ({
-              latitude: child.geometry.coordinates[1],
-              longitude: child.geometry.coordinates[0]
-            }));
-            
-            mapRef.current.fitToCoordinates(childrenCoordinates, {
-              edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-              animated: true
-            });
-          }}
-        >
-          <View style={{
-            width: 35,
-            height: 35,
-            borderRadius: 20,
-            backgroundColor: '#8C1C13',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: '#3E3E3E',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.3,
-            shadowRadius: 1,
-            elevation: 5
-          }}>
-            <Text style={{ 
-              color: '#fff', 
-              fontWeight: 'bold',
-              fontSize: 14,
-              textAlign: 'center'
-            }}>
-              {point_count}
-            </Text>
-          </View>
-        </Marker>
-      );
+    // Get Mapbox token from environment variable
+    const mapboxToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
+
+    if (!mapboxToken) {
+      console.error('Mapbox access token not found. Please add EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN to your environment variables.');
+      return;
+    }
+
+    const loadMapbox = async () => {
+      // Load CSS
+      if (!document.querySelector('link[href*="mapbox-gl.css"]')) {
+        const link = document.createElement('link');
+        link.href = 'https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.css';
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+      }
+
+      // Load JS
+      if (!window.mapboxgl) {
+        const script = document.createElement('script');
+        script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js';
+        document.head.appendChild(script);
+
+        await new Promise((resolve) => {
+          script.onload = resolve;
+        });
+      }
+
+      // Initialize map
+      window.mapboxgl.accessToken = mapboxToken;
+
+      map.current = new window.mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [-78.6569, 37.4316], // Virginia center
+        zoom: 7
+      });
+
+      // Wait for map to load
+      map.current.on('load', () => {
+        addWineryMarkers();
+        setMapLoaded(true);
+      });
     };
-  }, [supercluster]);
 
-  // Memoize marker rendering to prevent flickering
-  const renderMarker = useMemo(() => {
-    return (cluster) => {
-      const winery = cluster.properties;
-      // Ensure status exists with default values if not present
+    const addWineryMarkers = () => {
+      wineriesWithStatus.forEach(winery => {
+        // Create marker element
+        const markerEl = createMarkerElement(winery);
+
+        // Create marker
+        const marker = new window.mapboxgl.Marker({ element: markerEl })
+          .setLngLat([winery.longitude, winery.latitude])
+          .addTo(map.current);
+
+        markers.current[winery.id] = marker;
+
+        // Add click handler to navigate to winery detail
+        markerEl.addEventListener('click', () => {
+          router.push(`/winery/${winery.id}`);
+        });
+      });
+    };
+
+    const createMarkerElement = (winery) => {
+      const el = document.createElement('div');
+      el.className = 'custom-marker';
+      el.style.cursor = 'pointer';
+
       const status = winery.status || { visited: false, isFavorite: false, isWantToVisit: false };
 
-      return (
-        <Marker
-          key={winery.wineryId}
-          coordinate={{
-            latitude: cluster.geometry.coordinates[1],
-            longitude: cluster.geometry.coordinates[0]
-          }}
-          tracksViewChanges={false}
-          onPress={() => router.push(`/winery/${winery.wineryId}`)}
-        >
-          <View style={styles.markerContainer}>
-            {/* Winery name label */}
-            <View style={styles.markerLabelContainer}>
-              <Text style={styles.markerLabel} numberOfLines={1}>
-                {winery.name}
-              </Text>
-            </View>
+      // Create status badges HTML
+      let statusBadges = '';
+      if (status.visited) {
+        statusBadges += '<div class="status-badge visited"></div>';
+      }
+      if (status.isFavorite) {
+        statusBadges += '<div class="status-badge favorite"></div>';
+      }
+      if (status.isWantToVisit) {
+        statusBadges += '<div class="status-badge want-to-visit"></div>';
+      }
 
-            {/* Icon + status badges */}
-            <View style={styles.markerWrapper}>
-              <View style={styles.wineryMarker}>
-                <Ionicons 
-                  name="wine" 
-                  size={Platform.OS === 'android' ? 22 : 16} 
-                  color="#FFFFFF" 
-                />
-              </View>
+      el.innerHTML = `
+        <div class="marker-container">
+          <div class="marker-label-container">
+            <div class="marker-label">${winery.name}</div>
+          </div>
+          <div class="marker-wrapper">
+            <div class="winery-marker">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                <path d="M10.657 19.333c-.872 0-1.599-.179-2.182-.537-.583-.358-1.013-.862-1.29-1.512l-.006.001c-.277-.65-.415-1.417-.415-2.301V9.667c0-.383-.033-.717-.1-1.001C6.582 8.366 6.448 8.15 6.247 8c.2-.15.335-.366.416-.65.083-.284.116-.618.116-1.001V5H5.333V3.667h10V5H14v1.333c0 .383.033.717.1 1.001.083.284.217.5.418.65-.2.15-.335.366-.418.65-.067.284-.1.618-.1 1.001v5.333c0 .883-.138 1.65-.415 2.3-.277.65-.707 1.154-1.29 1.513-.583.358-1.31.537-2.182.537h-.656zm1-6.583l.333 1.667c0 .483.067.883.2 1.2.133.317.333.55.6.7.267.15.583.225.95.225h.317c.367 0 .683-.075.95-.225.267-.15.467-.383.6-.7.133-.317.2-.717.2-1.2V9.917L14.74 8.25c-.183-.917-.35-1.75-.5-2.5-.15-.75-.25-1.333-.3-1.75h-2.88c-.05.417-.15 1-.3 1.75-.15.75-.317 1.583-.5 2.5l-1.077 4.5z"/>
+              </svg>
+            </div>
+            ${statusBadges ? `<div class="status-container">${statusBadges}</div>` : ''}
+          </div>
+        </div>
+      `;
 
-              {/* status badges */}
-              <View style={styles.statusContainer}>
-                {status.visited && <View style={[styles.statusBadge, styles.visited]} />}
-                {status.isFavorite && <View style={[styles.statusBadge, styles.favorite]} />}
-                {status.isWantToVisit && <View style={[styles.statusBadge, styles.wantToVisit]} />}
-              </View>
-            </View>
-          </View>
-        </Marker>
-      );
+      return el;
     };
-  }, [router]);
+
+    // Set up global navigation function for popup buttons
+    window.navigateToWinery = (wineryId) => {
+      router.push(`/winery/${wineryId}`);
+    };
+
+    loadMapbox().catch(console.error);
+
+    // Cleanup
+    return () => {
+      if (map.current) {
+        map.current.remove();
+      }
+      // Clean up global function
+      delete window.navigateToWinery;
+    };
+  }, [router, wineriesWithStatus]);
+
+  // Handle winery select from search
+  const handleWinerySelect = (winery) => {
+    if (map.current) {
+      map.current.flyTo({
+        center: [winery.longitude, winery.latitude],
+        zoom: 14,
+        duration: 1000
+      });
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={{ flex: 1 }}
-        region={region}
-        onRegionChangeComplete={onRegionChangeComplete}
-        showsUserLocation={true}
-        showsMyLocationButton={false}
-        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-      >
-        {clusters.map(cluster => {
-          // Render a cluster marker if a cluster
-          if (cluster.properties.cluster) {
-            return renderCluster(cluster);
-          }
-          
-          // Render a single marker if not
-          return renderMarker(cluster);
-        })}
-      </MapView>
+      <div
+        ref={mapContainer}
+        style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0
+        }}
+      />
 
-      {/* Location Button */}
-      <TouchableOpacity 
-        style={styles.locationButton}
-        onPress={zoomToUserLocation}
-      >
-        <Ionicons name="locate" size={24} color="#8C1C13" />
-      </TouchableOpacity>
+      {/* Add custom styles for markers */}
+      <style jsx>{`
+        .custom-marker {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
 
-      <TouchableOpacity 
+        .marker-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .marker-label-container {
+          background-color: rgba(255, 255, 255, 0.85);
+          padding: 2px 6px;
+          border-radius: 10px;
+          margin-bottom: 4px;
+          border: 1px solid #ccc;
+          max-width: 120px;
+        }
+
+        .marker-label {
+          font-size: 9px;
+          font-weight: bold;
+          color: #3E3E3E;
+          text-align: center;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .marker-wrapper {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .winery-marker {
+          background-color: #8C1C13;
+          padding: 6px;
+          border-radius: 50%;
+          border: 2px solid #FFFFFF;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .status-container {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          display: flex;
+          flex-direction: row;
+        }
+
+        .status-badge {
+          width: 10px;
+          height: 10px;
+          border-radius: 5px;
+          border: 1px solid #fff;
+          margin-left: 1px;
+        }
+
+        .status-badge.visited {
+          background-color: #4CAF50;
+        }
+
+        .status-badge.favorite {
+          background-color: #E91E63;
+        }
+
+        .status-badge.want-to-visit {
+          background-color: #2196F3;
+        }
+      `}</style>
+
+      {/* Search Button */}
+      <TouchableOpacity
         style={styles.searchButton}
         onPress={() => setShowSearchModal(true)}
       >
@@ -354,7 +295,7 @@ export default function MapScreen() {
       <WinerySearchModal
         visible={showSearchModal}
         onClose={() => setShowSearchModal(false)}
-        wineries={statusLoaded ? wineriesWithStatus : wineries}
+        wineries={wineriesWithStatus}
         onWinerySelect={handleWinerySelect}
       />
     </View>
@@ -363,47 +304,10 @@ export default function MapScreen() {
 
 
 const styles = StyleSheet.create({
-  // Marker container includes both the label and the actual marker
-  container: { 
+  container: {
     flex: 1,
   },
-  markerContainer: {
-    alignItems: 'center',
-  },
-  // Label styling
-  markerLabelContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-    marginBottom: 4,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    maxWidth: 120, // Limit width to prevent very long labels
-  },
-  markerLabel: {
-    fontSize: Platform.OS === 'android' ? 10 : 9,
-    fontWeight: 'bold',
-    color: '#3E3E3E',
-    textAlign: 'center',
-  },
-  markerWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  wineryMarker: {
-    backgroundColor: '#8C1C13',
-    padding: Platform.OS === 'android' ? 8 : 6,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    // Make marker bigger on Android
-    width: Platform.OS === 'android' ? 40 : 32,
-    height: Platform.OS === 'android' ? 40 : 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  locationButton: {
+  searchButton: {
     position: 'absolute',
     bottom: 20,
     right: 15,
@@ -419,78 +323,46 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  searchButton: {
+  // Legend styles
+  legendContainer: {
     position: 'absolute',
-    bottom: 80,
-    right: 15,
-    backgroundColor: '#fff',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
+    top: 50,
+    left: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 8,
+    padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.15,
     shadowRadius: 3,
-    elevation: 5,
+    elevation: 3,
+    minWidth: 120,
   },
-  // small circles around the marker
-  statusContainer: {
-    position: 'absolute',
-    top: Platform.OS === 'android' ? -6 : -4,
-    right: Platform.OS === 'android' ? -6 : -4,
+  legendTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  legendItem: {
     flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
   },
-  statusBadge: {
-    width: Platform.OS === 'android' ? 12 : 10,
-    height: Platform.OS === 'android' ? 12 : 10,
-    borderRadius: Platform.OS === 'android' ? 6 : 5,
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
     borderWidth: 1,
     borderColor: '#fff',
-    marginHorizontal: 1,
+  },
+  legendText: {
+    fontSize: 11,
+    color: '#333',
   },
   visited: { backgroundColor: '#4CAF50' },
   favorite: { backgroundColor: '#E91E63' },
   wantToVisit: { backgroundColor: '#2196F3' },
-
-  // Legend styles
-legendContainer: {
-  position: 'absolute',
-  top: 50,
-  left: 15,
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  borderRadius: 8,
-  padding: 12,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.15,
-  shadowRadius: 3,
-  elevation: 3,
-  minWidth: 120,
-},
-legendTitle: {
-  fontSize: 12,
-  fontWeight: 'bold',
-  color: '#333',
-  marginBottom: 8,
-  textAlign: 'center',
-},
-legendItem: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: 2,
-},
-legendDot: {
-  width: 10,
-  height: 10,
-  borderRadius: 5,
-  marginRight: 8,
-  borderWidth: 1,
-  borderColor: '#fff',
-},
-legendText: {
-  fontSize: 11,
-  color: '#333',
-},
-})
+});
