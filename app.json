@@ -34,8 +34,12 @@
       ],
       "config": {
         "googleMaps": {
-          "apiKey": "@GOOGLE_MAPS_API_KEY"
+          "apiKey": "AIzaSyCjWku9UYdqgXCYWQMGuBgAiJfme0sql70"
         }
+      },
+      "statusBar": {
+        "style": "dark",
+        "translucent": false
       }
     },
     "web": {
@@ -57,7 +61,8 @@
       "expo-camera",
       "expo-image-picker",
       "expo-location",
-      "expo-media-library"
+      "expo-media-library",
+      "expo-maps"
     ],
     "experiments": {
       "typedRoutes": true

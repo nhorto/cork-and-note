@@ -52,7 +52,7 @@ export default function RootLayout() {
 
     const initializeAuth = async () => {
       try {
-        console.log('🔐 Initializing authentication...');
+        //console.log('🔐 Initializing authentication...');
         
         // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();

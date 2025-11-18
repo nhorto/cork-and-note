@@ -1,335 +1,336 @@
-// this is me just getting reps at typing out the code and adding alot of comments 
-//  explaining what is going on
+/* 
+This is going through the WineEntryForm to get reps at doing this and to comment everything.
+i am going to start with the imports then skip to the UI elements and do the style sheet.
+i think this will give me a good understanding of how to do this since i already know how 
+things look on the app. lets give this a shot.
+*/ 
 
-// app/_layout.js
-
-/*
-the _layout file is one of the first files that gets run in the app. In this file you 
-put things that are used throughout the app. like the AuthContext. you also add 
-auth in this and see if the user already has a session
-and set up a listener for auth changes and other things like this
-*/
-
-// IMPORTS
-import * as SplashScreen from 'expo-splash-screen';
-import { createContext, useEffect, useState } from 'react';
-import 'react-native-reanimated';
-
-// Prevent the splahs screen from auto-hiding
-SplashScreen.preventAutoHideAsync();
-/*
-This give you control over when to hide the splash screen. this can be useful when you need
-to control when the splashscreen dispeaers. by default, this will disapear whenever the 
-JS bundle is do loading. but there is a need sometimes to still show the splash screen to 
-wait for other things to load. like if you need to wait for auth or founts, or signing in
-or signing out and things like that. this allow you to control when to not show the splash
-screen until everything is ready to be displayed
-*/
-
-// Auth context
-export const AuthContext = createContext({
-    signIn: () => {},
-    signOut: () => {},
-    signup: () => {},
-    resetPassword: () => {}, 
-    changePassword:() => {},
-    user: null,
-    isLoading: true,
-    ssession: null,
-    isAuthenticated: false,
-});
-
-/*
-this is to set up the AuthContext that can be accessed througout the app. 
-i am creating empty states to be filled for this context which will later be filled in.
-
-*/
-
-
-
-
-// app/(tabs)/profile.js - FIXED VERSION with race condition handling
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useContext } from 'react';
+// imports
+import { Ionicons } from "@expo/vector-icons";
+import { Camera } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
+import { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import VisitStatsCard from '../../components/VisitStatsCard';
-import { AuthContext } from '../_layout';
 
-export default function ProfileScreen() {
-  const { signOut, user, isLoading } = useContext(AuthContext);
-  const router = useRouter();
-  
-  // Add state to track if we've initialized user-dependent data
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
+import AutocompleteVarietal from './AutocompleteVarietal';
+import FlavorTagSelector from './FlavorTagSelector';
+import RatingSlider from './RatingSlider';
 
-  // Wait for auth to be ready before loading user data
-  useEffect(() => {
-    if (!isLoading && user) {
-      // Auth is ready and we have a user - safe to load user data
-      console.log('✅ Auth ready, loading user profile data...');
-      loadUserData();
-    } else if (!isLoading && !user) {
-      // Auth is ready but no user - this shouldn't happen on profile screen
-      // but handle it gracefully
-      setIsDataLoaded(true);
-    }
-  }, [isLoading, user]);
+export default function WineEntryForm({ onSave, onCancel, initialData }) {
+    // Form State
+  const [wineName, setWineName] = useState('');
+  const [wineType, setWineType] = useState('Red');
+  const [wineVarietal, setSineVarietal] = useState('');
+  const [wineYear, setWineYear] = useState('');
+  const [overallRating, setOverallRating] = useState(0);
+  cosnt [RatingSlider, setRatings] = useState({
+    sweetness: 0,
+    tannins: 0,
+     acidity: 0,
+    alcohol:0
+  });
+  const [flavorNotes, setFlavorNotes] = useState([]);
+  cosnt [additionalNotes, setAdditionalNotes] = useState('');
+  const [photos, setPhotos] = useState([]);
 
-  const loadUserData = async () => {
-    try {
-      // This is where you'd load any additional user-specific data
-      // For now, we'll just mark as loaded since user data comes from auth context
-      
-      // Example: if you had additional profile data to fetch:
-      // const profileData = await profileService.getUserProfile();
-      // setProfileData(profileData);
-      
-      setIsDataLoaded(true);
-      console.log('✅ Profile data loaded');
-    } catch (error) {
-      console.error('Error loading profile data:', error);
-      setIsDataLoaded(true); // Still mark as loaded to show the UI
-    }
-  };
+  const [showTypeModal, setShowTypeModal] = useState(false)
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
+  cosnt [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
-  const handleLogout = async () => {
+// Load initial data if editing an existing wine
+/*
+THis use Effect is used to hold existing values of the wine if any.
+when the the WineEntryForm first mounts the inital data is null because there has been nothing
+logged about the wine. this useEffect is used when the user wants to go back in and edit the 
+wine that they were logging. you can see at the end of the useEffect [initialData]. this is
+the dependency array. what this does in a useEffect is rerun the useEffect everytime this 
+dependencey array is changed. so if a user goes back in to edit the wine, this condition 
+checks to see if there is initialData. lets say a user left one of these as null, then the
+way this is coded is to "fall back" to whatever is after the ||. if the inital data changes, 
+(like the user going to eidit differet wines) then the effect re-runs and updates thr form.
+the logic for how inital data is passed into this function is used in the VistitLogForm
+and it is too much to cover here 
+*/
+useEffect(() => {
+  if (initialData) {
+    setWineName(initialData.name || '')
+    setWineType(initialData.type || 'Red')
+    setWineVarietal(initialData.varietal || '')
+    setWineYear(initialData.year || '')
+    setOverallRating(initialData.overallRating || 0)
+    setRatings(initialData.ratings || {
+      sweetness: 0,
+      tannis: 0,
+      acidity: 0,
+      body: 0,
+      alcohol: 0
+    });
+    setFlavorNotes(initialData.flavorNotes || [])
+    setAdditionalNotes(initialData.additionalNotes || '')
+  }
+}, [initialData]);
+
+// Request permissions for camera and media library
+const requestPermissions = async () => {
+  //this is what asked the user to all access to camera and mediaLibrary
+  const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
+  const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
+
+  // if either of these are falsue, show alert and return false
+  if (cameraStatus !== 'granted' || mediaStatus !== 'granded') {
     Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to sign out. Please try again.');
-            }
-          }
-        }
-      ]
+      'Permissions Required',
+      'Camera and media library permissions are needed to take and save photos.',
+      [{ text: 'OK' }]
     );
+    return false;
+  }
+
+  // if both are true, this async function returns true. 
+  return true;
+};
+
+// Take a photo with the camera
+const takePhoto = async () => {
+  try {
+    // this tries to wait for the requestPermissions function to run. if it hasnt, then it
+    // just returns.
+    const hasPermissions = await requestPermissions();
+    if (!hasPermissions) return;
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4,3],
+      quality: .8,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    });
+    // this checks to make sure the action was not canceled, and that there is a "asset"
+    // and the asset has to be > 0 
+    if (!result.canceled && result.assets && result.assets.length > 0) {
+      const newPhoto = result.assets[0].uri;
+      setPhotos(prevPhotos => [...prevPhotos, newPhoto]);
+      // this line adds a new photo to the end of a already existing list of photos then 
+      // updates the state (newPhoto). remembre that the thing in the state that you use to 
+      // update the state can take a function. like here were, prevPhotos are any photos that
+      // had been previsously taken, the ... unpacks them an adds newPhoto to the end of it
+    }
+  } catch (error) {
+    console.log('Camera error:', error);
+    Alert.alert('Error', 'failed to take phot. please try again.')
+  }
+};
+
+// pick an image from the meida library
+const pickImage = async () => {
+  try { 
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert(
+        'Permission Denied',
+        'Photo library permission is needed to select photos.',
+        [{ text: "OK "}]
+      );
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4,3],
+      quality: 0.8,
+      allowsMultipleSelection: true,
+    });
+    
+    if (!result.canceled && result.assets && result.assets.length > 0 ) {
+      const newPhotos = result.assets.map(asset => asset.uri);
+      setPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
+    }
+  } catch (error) {
+    Alert.alert('Error', 'Failed to select image. Please try again.')
+  }
+};
+
+// Remove a photo
+const removePhoto = (index) => {
+  Alert.alert(
+    'Remove Photo',
+    'are you sure you want to remove this photo?',
+    [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () => {
+          setPhotos(prevPhotos => prevPhotos.filter((_, i) => i !== index));
+        }
+      }
+    ]
+  );
+};
+
+// View photo in full screen
+const viewPhoto = (index) => {
+  setSelectedPhotoIndex(index);
+  setShowPhotoModal(true);
+};
+
+// update specific rating value
+const updateRating = (key, value) => {
+  setRatings((prevRating) => ({
+    ...prevRatings,
+    [key]: value,
+  }));
+};
+
+//handel wine type selection
+const handleWineTypeSelect = (type) => {
+  setWineType(type);
+  setShowTypeModal(false);
+};
+
+// Handle form submission
+const handleSave = () => {
+  // Wine type is required
+  if (!wineType) {
+    Alert.alert('Missing Informaiton', 'Please selct a wine type.');
+    return;
+  }
+
+  // Create wine data object 
+  const wineData = {
+    name: wineName,
+    type: wineType,
+    varietal: wineVarietal,
+    year: wineYear,
+    overallRating: overallRating,
+    ratings: ratings,
+    flavorNotes: flavorNotes,
+    additionalNotes: additionalNotes,
+    photos: photos,
+    photo: photos.length > 0 ? photos[0] : null
   };
 
-  // Show loading indicator while auth is initializing OR while loading user data
-  if (isLoading || !isDataLoaded) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#8C1C13" />
-        <Text style={styles.loadingText}>
-          {isLoading ? 'Initializing...' : 'Loading profile...'}
-        </Text>
-      </View>
-    );
-  }
+  onSave(wineData);
+};
 
-  // If no user after loading is complete, show error state
-  if (!user) {
+// Render photo gallery
+const renderPhotoGallery = () => {
+  if (photos.length === 0) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle" size={48} color="#d32f2f" />
-        <Text style={styles.errorText}>Unable to load profile</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={() => router.replace('/login')}>
-          <Text style={styles.retryText}>Return to Login</Text>
-        </TouchableOpacity>
+      <View style={styles.noPhotosContainer}>
+        <Ionicons name="camera-outline" size={32} color="#999" />
+        <Text style= {styles.noPotosText}>No photos added</Text>
       </View>
     );
   }
+}
+
+return (
+  <View style={styles.photoGallery}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      {photos.map((photo, index) => (
+        <View key={index} style={styles.photoContainer}>
+          <TouchableOpacity onPress={() => viewPhoto(index)}>
+            <Image source={{ uri: photo }} style={styles.photoThumbnail} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.removePhotoButton}
+            onPress={() => removePhoto(index)}
+          >
+            <Ionicons name="close-circle" size={24} color="#FF4444" />
+          </TouchableOpacity>
+        </View>
+      ))}
+    </ScrollView>
+  </View>
+);
+};
 
   return (
-    <View style={styles.container}>
-      <ScrollView>
-        {/* User Profile Header */}
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Ionicons name="person" size={50} color="white" />
-            </View>
-          </View>
-          {/* Now safely access user data - no more race condition! */}
-          <Text style={styles.name}>
-            {user?.user_metadata?.name || user?.email?.split('@')[0] || 'Wine Enthusiast'}
-          </Text>
-          <Text style={styles.email}>
-            {user?.email || 'user@example.com'}
-          </Text>
-        </View>
+    <ScrollView style={styles.container} showsHorizontalScrollIndicator={false}>
+      {/* Wine Basic Infor */}
+      <View style={styles.section}>
+        <Text style={styles.label}>Wine Name</Text>
+        <TextInput
+          style={styles.input}
+          value={wineName}
+          onChangeText={setWineName}
+          placeholder="Enter wine name"
+          placeholderTextColor='#999'
+          />
+      </View>
 
-        {/* Visit Stats - This component should also implement the same pattern */}
-        <View style={styles.statsContainer}>
-          <VisitStatsCard />
-        </View>
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Type *</Text>
+        <TouchableOpacity
+          style={styles.selectorButton}
+          onPress={() => setShowTypeModal(true)}
+        >
+          <Text style={styles.selectorText}>{wineType}</Text>
+          <Ionicons name="chevron-down" size={20} color='#666' />
+        </TouchableOpacity>
+      </View>
 
-        {/* Settings Section */}
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>Settings</Text>
-        </View>
-
-        <View style={styles.menuContainer}>
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => router.push('/profile/account-settings')}
-          >
-            <Ionicons name="settings" size={24} color="#8C1C13" style={styles.menuIcon} />
-            <Text style={styles.menuText}>Account Settings</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => router.push('/profile/help-support')}
-          >
-            <Ionicons name="help-circle" size={24} color="#8C1C13" style={styles.menuIcon} />
-            <Text style={styles.menuText}>Help & Support</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => router.push('/profile/feedback')}
-          >
-            <Ionicons name="chatbubble" size={24} color="#8C1C13" style={styles.menuIcon} />
-            <Text style={styles.menuText}>Feedback</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+    <Modal
+      visible={showTypeModal}
+      animationType="slide"
+      transparent={true}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalHeader}>Select Wine Type</Text>
+          <TouchableOpacity onPress={() => setShowTypeModal(false)}>
+            <Ionicons name="close" size={24} color='#333' />
           </TouchableOpacity>
         </View>
 
-        {/* Account Actions */}
-        <View style={styles.sectionTitle}>
-          <Text style={styles.sectionTitleText}>Account</Text>
-        </View>
-
-        <View style={styles.menuContainer}>
-          <TouchableOpacity 
-            style={[styles.menuItem, styles.logoutItem]}
-            onPress={handleLogout}
-          >
-            <Ionicons name="log-out" size={24} color="#d32f2f" style={styles.menuIcon} />
-            <Text style={[styles.menuText, styles.logoutText]}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </View>
-  );
+        <ScrollView>
+          {WINE_TYPES.map((type) => (
+            <TouchableOpacity
+              key={type}
+              style={[
+                styles.typeOption,
+                wineType === type && styles.selectedTypeOption
+              ]}
+              onPress={() => handleWineTypeSelect(type)}
+            >
+              <Text style={[
+                styles.typeOptionText,
+                wineType === type && styles.selectedTypeOptionText
+              ]}>
+                {type}
+              </Text>
+              {wineType === type && (
+                <Ionicons name="chekcmark" size={20} color='#333' />
+              )}}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>  
+    </Modal>
+    </ScrollView>
+  )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#E7E3E2',
+    padding: 16,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#E7E3E2',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#E7E3E2',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 18,
-    color: '#d32f2f',
-    marginVertical: 10,
-    textAlign: 'center',
-  },
-  retryButton: {
-    backgroundColor: '#8C1C13',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  retryText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  profileHeader: {
-    alignItems: 'center',
-    paddingVertical: 30,
-    backgroundColor: '#E7E3E2',
-    marginBottom: 20,
-  },
-  avatarContainer: {
-    marginBottom: 15,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#8C1C13',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  email: {
-    fontSize: 16,
-    color: '#666',
-  },
-  statsContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  sectionTitleText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  menuContainer: {
-    backgroundColor: 'white',
-    marginHorizontal: 20,
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  menuIcon: {
-    marginRight: 15,
-  },
-  menuText: {
-    flex: 1,
-    fontSize: 16,
-    color: '#333',
-  },
-  logoutItem: {
-    borderBottomWidth: 0,
-  },
-  logoutText: {
-    color: '#d32f2f',
-  },
-});
+  section: {
+    marginBottom: 24,
+  }
+})
