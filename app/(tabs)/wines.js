@@ -14,7 +14,7 @@ import {
   View
 } from 'react-native';
 import { visitsService } from '../../lib/visits';
-import { AuthContext } from '../_layout';
+// import { AuthContext } from '../_layout';
 
 export default function Wines() {
   const [search, setSearch] = useState('');

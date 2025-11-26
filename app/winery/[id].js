@@ -22,9 +22,9 @@ import VisitLogForm from '../../components/VisitLogForm';
 import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
-import { visitsService } from '../../lib/visits';
-import { wineryStatusService } from '../../lib/wineryStatus';
-import { AuthContext } from '../_layout';
+// import { visitsService } from '../../lib/visits';
+// import { wineryStatusService } from '../../lib/wineryStatus';
+// import { AuthContext } from '../_layout';
 
 export default function WineryDetail() {
   const { id } = useLocalSearchParams();
@@ -34,41 +34,41 @@ export default function WineryDetail() {
   
   const winery = wineries.find((w) => w.id.toString() === id.toString());
   const [showLogForm, setShowLogForm] = useState(false);
-  const [wineryStatus, setWineryStatus] = useState(null);
+  // const [wineryStatus, setWineryStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(true);
 
   // Load winery status
-  useEffect(() => {
-    if (user && winery) {
-      loadWineryStatus();
-    } else {
-      setStatusLoading(false);
-    }
-  }, [user, winery?.id]);
+  // useEffect(() => {
+  //   if (user && winery) {
+  //     loadWineryStatus();
+  //   } else {
+  //     setStatusLoading(false);
+  //   }
+  // }, [user, winery?.id]);
 
-  // Function to load winery status
-  const loadWineryStatus = async () => {
-    try {
-      setStatusLoading(true);
-      const { success, status } = await wineryStatusService.getWineryStatus(winery.id);
+  // // Function to load winery status
+  // const loadWineryStatus = async () => {
+  //   try {
+  //     setStatusLoading(true);
+  //     const { success, status } = await wineryStatusService.getWineryStatus(winery.id);
       
-      if (success) {
-        setWineryStatus(status);
-      }
-    } catch (error) {
-      console.error('Error loading winery status:', error);
-    } finally {
-      setStatusLoading(false);
-    }
-  };
+  //     if (success) {
+  //       setWineryStatus(status);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error loading winery status:', error);
+  //   } finally {
+  //     setStatusLoading(false);
+  //   }
+  // };
 
   const handleSaveVisit = async (visitData) => {
     console.log('Saving visit:', visitData);
     
     try {
       // Save to database using the visits service
-      const result = await visitsService.createVisit(visitData);
-      
+      // const result = await visitsService.createVisit(visitData);
+      const result = { success: true }; // Mock result for demonstration
       if (result.success) {
         Alert.alert(
           'Visit Logged!', 
@@ -79,7 +79,7 @@ export default function WineryDetail() {
               onPress: () => {
                 setShowLogForm(false);
                 // Reload status to show the visited badge
-                loadWineryStatus();
+                // loadWineryStatus();
                 // Reload the page to show the new visit
                 navigation.setParams({ refresh: Date.now() });
               }
@@ -117,10 +117,10 @@ export default function WineryDetail() {
 
   // Handle status change from action buttons
   const handleStatusChange = (newStatus) => {
-    setWineryStatus(prev => ({
-      ...prev,
-      ...newStatus
-    }));
+    // setWineryStatus(prev => ({
+    //   ...prev,
+    //   ...newStatus
+    // }));
   };
 
   if (!winery) {

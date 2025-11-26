@@ -12,7 +12,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { visitsService } from '../../lib/visits';
+// import { visitsService } from '../../lib/visits';
 
 export default function WineDetail() {
   const { id } = useLocalSearchParams();
@@ -27,15 +27,22 @@ export default function WineDetail() {
   }, [id]);
 
   const loadWineDetails = async () => {
+<<<<<<< Updated upstream
     try {
       setLoading(true);
       // Get all user visits and find the wine
       const { success, visits } = await visitsService.getUserVisits();
+=======
+    // try {
+    //   setLoading(true);
+    //   const { success, visits } = await visitsService.getUserVisits();
+>>>>>>> Stashed changes
       
-      if (success && visits) {
-        let foundWine = null;
-        let foundVisit = null;
+    //   if (success && visits) {
+    //     let foundWine = null;
+    //     let foundVisit = null;
         
+<<<<<<< Updated upstream
         // Search through all visits to find the wine
         visits.forEach(visit => {
           if (visit.wines) {
@@ -56,8 +63,74 @@ export default function WineDetail() {
     } catch (error) {
       console.error('Error loading wine details:', error);
     } finally {
+=======
+    //     // Search through all visits to find the wine
+    //     visits.forEach(visit => {
+    //       if (visit.wines) {
+    //         const wineInVisit = visit.wines.find(w => w.id === id);
+    //         if (wineInVisit) {
+    //           foundWine = {
+    //             ...wineInVisit,
+    //             flavorNotes: wineInVisit.wine_flavor_notes?.map(fn => fn.flavor_notes?.name) || [],
+    //             // Ensure photos is always an array
+    //             photos: wineInVisit.photos || []
+    //           };
+    //           foundVisit = visit;
+    //         }
+    //       }
+    //     });
+        
+    //     if (foundWine && foundVisit) {
+    //       setWine(foundWine);
+    //       setVisit(foundVisit);
+          
+    //       // Set navigation title
+    //       navigation.setOptions({
+    //         title: foundWine.wine_name || `${foundWine.wine_type} Wine`
+    //       });
+    //     } else {
+    //       router.back();
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error('Error loading wine details:', error);
+    //   router.back();
+    // } finally {
+    //   setLoading(false);
+    // }
+    // Mocked data for demonstration purposes
+    setTimeout(() => {
+      const mockedWine = {
+        id: id,
+        wine_name: "Chateau Mock 2018",
+        wine_type: "Red",
+        wine_varietal: "Cabernet Sauvignon",
+        wine_year: 2018,
+        overall_rating: 4.2,
+        sweetness: 2.5,
+        tannin: 4.0,
+        acidity: 3.5,
+        body: 4.0,
+        alcohol: 13.5,
+        flavorNotes: ["Blackberry", "Oak", "Vanilla"],
+        additional_notes: "A rich and full-bodied wine with a smooth finish.",
+      };
+      const mockedVisit = {
+        visit_date: "2023-05-15",
+        winery_id: "winery123",
+        wineries: {
+          name: "Mock Winery"
+        },
+        notes: "Had a wonderful time tasting various wines."
+      };
+      setWine(mockedWine);
+      setVisit(mockedVisit);
+      navigation.setOptions({
+        title: mockedWine.wine_name || `${mockedWine.wine_type} Wine`
+      });
+>>>>>>> Stashed changes
       setLoading(false);
-    }
+    });
   };
 
   // Helper function to get color based on wine type
@@ -88,6 +161,7 @@ export default function WineDetail() {
     const fullStars = Math.floor(rating || 0);
     const hasHalfStar = (rating || 0) % 1 >= 0.5;
 
+<<<<<<< Updated upstream
     for (let i = 0; i < 5; i++) {
       let iconName = 'star-outline';
       if (i < fullStars) {
@@ -163,6 +237,43 @@ export default function WineDetail() {
       </View>
     );
   };
+=======
+  const viewPhoto = (index) => {
+    setSelectedPhotoIndex(index);
+    setShowPhotoModal(true);
+  };
+
+  // const renderPhotoGallery = () => {
+  //   if (!wine.photos || wine.photos.length === 0) {
+  //     return (
+  //       <View style={styles.noPhotosContainer}>
+  //         <Ionicons name="camera-outline" size={48} color="#999" />
+  //         <Text style={styles.noPhotosText}>No photos available</Text>
+  //       </View>
+  //     );
+  //   }
+
+  //   return (
+  //     <View style={styles.photoGallery}>
+  //       <Text style={styles.photoGalleryTitle}>Wine Photos ({wine.photos.length})</Text>
+  //       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll}>
+  //         {wine.photos.map((photo, index) => (
+  //           <TouchableOpacity
+  //             key={index}
+  //             style={styles.photoThumbnailContainer}
+  //             onPress={() => viewPhoto(index)}
+  //           >
+  //             <Image source={{ uri: photo }} style={styles.photoThumbnail} />
+  //             <View style={styles.photoOverlay}>
+  //               <Ionicons name="expand-outline" size={20} color="#fff" />
+  //             </View>
+  //           </TouchableOpacity>
+  //         ))}
+  //       </ScrollView>
+  //     </View>
+  //   );
+  // };
+>>>>>>> Stashed changes
 
   if (loading) {
     return (
@@ -196,6 +307,7 @@ export default function WineDetail() {
 
   return (
     <SafeAreaView style={styles.container}>
+<<<<<<< Updated upstream
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton} 
@@ -221,6 +333,80 @@ export default function WineDetail() {
                   name="wine" 
                   size={80} 
                   color={wine.wine_type?.toLowerCase() === 'white' ? '#3E3E3E' : '#fff'} 
+=======
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backIcon}>
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Wine Details</Text>
+        </View>
+
+        {/* Wine Basic Info */}
+        <View style={styles.section}>
+          <Text style={styles.wineName}>
+            {wine.wine_name || `${wine.wine_type} Wine`}
+          </Text>
+          
+          <View style={styles.wineBasicInfo}>
+            <View style={styles.wineTypeContainer}>
+              <Text style={styles.wineType}>{wine.wine_type}</Text>
+              {wine.wine_varietal && (
+                <Text style={styles.wineVarietal}>• {wine.wine_varietal}</Text>
+              )}
+              {wine.wine_year && (
+                <Text style={styles.wineYear}>• {wine.wine_year}</Text>
+              )}
+            </View>
+          </View>
+
+          {/* Overall Rating */}
+          <View style={styles.overallRating}>
+            <View style={styles.ratingDisplay}>
+              <Text style={[styles.ratingValue, { color: getRatingColor(wine.overall_rating) }]}>
+                {wine.overall_rating ? wine.overall_rating.toFixed(1) : '0.0'}
+              </Text>
+              <View style={styles.starsContainer}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Ionicons
+                    key={star}
+                    name={star <= (wine.overall_rating || 0) ? "star" : "star-outline"}
+                    size={20}
+                    color="#FFD700"
+                  />
+                ))}
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Photo Gallery */}
+        {/* {renderPhotoGallery()} */}
+
+        {/* Detailed Ratings */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Detailed Ratings</Text>
+          
+          {[
+            { key: 'sweetness', label: 'Sweetness', value: wine.sweetness },
+            { key: 'tannin', label: 'Tannins', value: wine.tannin },
+            { key: 'acidity', label: 'Acidity', value: wine.acidity },
+            { key: 'body', label: 'Body', value: wine.body },
+            { key: 'alcohol', label: 'Alcohol', value: wine.alcohol }
+          ].map(({ key, label, value }) => (
+            <View key={key} style={styles.ratingRow}>
+              <Text style={styles.ratingLabel}>{label}</Text>
+              <View style={styles.ratingBar}>
+                <View 
+                  style={[
+                    styles.ratingFill, 
+                    { 
+                      width: `${(value || 0) * 20}%`,
+                      backgroundColor: getRatingColor(value || 0)
+                    }
+                  ]} 
+>>>>>>> Stashed changes
                 />
               </View>
             )}

@@ -47,245 +47,251 @@ export default function RootLayout() {
   const isAuthenticated = !!(user && session);
 
   // AUTH INITIALIZATION - Same as before
-  useEffect(() => {
-    let mounted = true;
+  // useEffect(() => {
+  //   let mounted = true;
 
+<<<<<<< Updated upstream
     const initializeAuth = async () => {
       try {
         console.log('🔐 Initializing authentication...');
+=======
+  //   const initializeAuth = async () => {
+  //     try {
+  //       //console.log('🔐 Initializing authentication...');
+>>>>>>> Stashed changes
         
-        // Get initial session
-        const { data: { session }, error } = await supabase.auth.getSession();
+  //       // Get initial session
+  //       const { data: { session }, error } = await supabase.auth.getSession();
         
-        console.log('📊 Session result:', {
-          hasSession: !!session,
-          hasUser: !!session?.user,
-          userId: session?.user?.id,
-          userEmail: session?.user?.email,
-          error: error?.message
-        });
+  //       console.log('📊 Session result:', {
+  //         hasSession: !!session,
+  //         hasUser: !!session?.user,
+  //         userId: session?.user?.id,
+  //         userEmail: session?.user?.email,
+  //         error: error?.message
+  //       });
         
-        if (mounted) {
-          if (error) {
-            console.error('❌ Session check error:', error);
-            setSession(null);
-            setUser(null);
-          } else {
-            console.log('✅ Session check result:', session ? 'Found session' : 'No session');
-            setSession(session);
-            setUser(session?.user ?? null);
-          }
+  //       if (mounted) {
+  //         if (error) {
+  //           console.error('❌ Session check error:', error);
+  //           setSession(null);
+  //           setUser(null);
+  //         } else {
+  //           console.log('✅ Session check result:', session ? 'Found session' : 'No session');
+  //           setSession(session);
+  //           setUser(session?.user ?? null);
+  //         }
           
-          setIsInitialized(true);
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('❌ Auth initialization error:', error);
-        if (mounted) {
-          setSession(null);
-          setUser(null);
-          setIsInitialized(true);
-          setIsLoading(false);
-        }
-      }
-    };
+  //         setIsInitialized(true);
+  //         setIsLoading(false);
+  //       }
+  //     } catch (error) {
+  //       console.error('❌ Auth initialization error:', error);
+  //       if (mounted) {
+  //         setSession(null);
+  //         setUser(null);
+  //         setIsInitialized(true);
+  //         setIsLoading(false);
+  //       }
+  //     }
+  //   };
 
-    // Initialize auth
-    initializeAuth();
+  //   // Initialize auth
+  //   initializeAuth();
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (mounted) {  // ← REMOVE isInitialized condition
-        console.log('🔄 Auth state changed:', {
-          event,
-          hasSession: !!session,
-          hasUser: !!session?.user,
-          userId: session?.user?.id,
-          userEmail: session?.user?.email,
-          isInitialized
-        });
-        setSession(session);
-        setUser(session?.user ?? null);
+  //   // Listen for auth state changes
+  //   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+  //     if (mounted) {  // ← REMOVE isInitialized condition
+  //       console.log('🔄 Auth state changed:', {
+  //         event,
+  //         hasSession: !!session,
+  //         hasUser: !!session?.user,
+  //         userId: session?.user?.id,
+  //         userEmail: session?.user?.email,
+  //         isInitialized
+  //       });
+  //       setSession(session);
+  //       setUser(session?.user ?? null);
         
-        // If this is a sign-in event, make sure loading is false
-        if (event === 'SIGNED_IN' && session) {
-          setIsLoading(false);
-        }
-      }
-    });
+  //       // If this is a sign-in event, make sure loading is false
+  //       if (event === 'SIGNED_IN' && session) {
+  //         setIsLoading(false);
+  //       }
+  //     }
+  //   });
 
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
+  //   return () => {
+  //     mounted = false;
+  //     subscription.unsubscribe();
+  //   };
+  // }, []);
 
   // NAVIGATION LOGIC - ADD THIS NEW EFFECT
-  useEffect(() => {
-    if (!isInitialized || isLoading) {
-      console.log('⏳ Auth not ready yet, skipping navigation');
-      return;
-    }
+  // useEffect(() => {
+  //   if (!isInitialized || isLoading) {
+  //     console.log('⏳ Auth not ready yet, skipping navigation');
+  //     return;
+  //   }
 
-    console.log('🚀 Auth ready, checking navigation...', {
-      isAuthenticated,
-      currentSegments: segments,
-      user: user?.email
-    });
+  //   console.log('🚀 Auth ready, checking navigation...', {
+  //     isAuthenticated,
+  //     currentSegments: segments,
+  //     user: user?.email
+  //   });
 
-    const inAuthGroup = segments[0] === '(tabs)';
-    const inAuthFlow = ['login', 'register', 'forgot-password'].includes(segments[0]);
-    const inProtectedRoute = ['winery', 'wine', 'profile'].includes(segments[0]) || inAuthGroup;
-    const onIndexPage = segments.length === 0; // ← ADD THIS CHECK
+  //   const inAuthGroup = segments[0] === '(tabs)';
+  //   const inAuthFlow = ['login', 'register', 'forgot-password'].includes(segments[0]);
+  //   const inProtectedRoute = ['winery', 'wine', 'profile'].includes(segments[0]) || inAuthGroup;
+  //   const onIndexPage = segments.length === 0; // ← ADD THIS CHECK
 
-    if (isAuthenticated && (inAuthFlow || onIndexPage)) {
-      // User is authenticated but on login/register page OR index page
-      console.log('✅ User authenticated, navigating from auth flow/index to main app');
-      router.replace('/(tabs)/map');
-    } else if (!isAuthenticated && !inAuthFlow && !onIndexPage) {
-      // User is not authenticated but trying to access protected content (not index)
-      console.log('❌ User not authenticated, navigating to login');
-      router.replace('/login');
-    } else if (!isAuthenticated && onIndexPage) {
-      // User is not authenticated and on index page
-      console.log('❌ User not authenticated on index, navigating to login');
-      router.replace('/login');
-    } else {
-      console.log('📍 User is in correct section, no navigation needed');
-    }
-  }, [isAuthenticated, isInitialized, isLoading, segments]);
+  //   if (isAuthenticated && (inAuthFlow || onIndexPage)) {
+  //     // User is authenticated but on login/register page OR index page
+  //     console.log('✅ User authenticated, navigating from auth flow/index to main app');
+  //     router.replace('/(tabs)/map');
+  //   } else if (!isAuthenticated && !inAuthFlow && !onIndexPage) {
+  //     // User is not authenticated but trying to access protected content (not index)
+  //     console.log('❌ User not authenticated, navigating to login');
+  //     router.replace('/login');
+  //   } else if (!isAuthenticated && onIndexPage) {
+  //     // User is not authenticated and on index page
+  //     console.log('❌ User not authenticated on index, navigating to login');
+  //     router.replace('/login');
+  //   } else {
+  //     console.log('📍 User is in correct section, no navigation needed');
+  //   }
+  // }, [isAuthenticated, isInitialized, isLoading, segments]);
 
   // YOUR EXISTING AUTH FUNCTIONS - Keep these the same
-  const signIn = async (email, password) => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  // const signIn = async (email, password) => {
+  //   try {
+  //     setIsLoading(true);
+  //     const { data, error } = await supabase.auth.signInWithPassword({
+  //       email,
+  //       password,
+  //     });
       
-      if (error) {
-        setIsLoading(false); // Only set to false on error
-        if (error.message.includes('Invalid login credentials')) {
-          return { error: { message: 'Invalid email or password. Please check your credentials or sign up for a new account.' } };
-        } else if (error.message.includes('Email not confirmed')) {
-          return { error: { message: 'Please check your email and click the confirmation link before signing in.' } };
-        } else if (error.message.includes('User not found')) {
-          return { error: { message: 'No account found with this email. Please sign up first.' } };
-        }
-        throw error;
-      }
+  //     if (error) {
+  //       setIsLoading(false); // Only set to false on error
+  //       if (error.message.includes('Invalid login credentials')) {
+  //         return { error: { message: 'Invalid email or password. Please check your credentials or sign up for a new account.' } };
+  //       } else if (error.message.includes('Email not confirmed')) {
+  //         return { error: { message: 'Please check your email and click the confirmation link before signing in.' } };
+  //       } else if (error.message.includes('User not found')) {
+  //         return { error: { message: 'No account found with this email. Please sign up first.' } };
+  //       }
+  //       throw error;
+  //     }
       
-      // Don't set isLoading to false here - let the auth state change handle it
-      return { error: null, data };
-    } catch (error) {
-      setIsLoading(false);
-      return { error };
-    }
-  };
+  //     // Don't set isLoading to false here - let the auth state change handle it
+  //     return { error: null, data };
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     return { error };
+  //   }
+  // };
 
-  const signUp = async (email, password, name) => {
-    try {
-      setIsLoading(true);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { name },
-        },
-      });
+  // const signUp = async (email, password, name) => {
+  //   try {
+  //     setIsLoading(true);
+  //     const { data, error } = await supabase.auth.signUp({
+  //       email,
+  //       password,
+  //       options: {
+  //         data: { name },
+  //       },
+  //     });
       
-      if (error) {
-        setIsLoading(false);
-        throw error;
-      }
+  //     if (error) {
+  //       setIsLoading(false);
+  //       throw error;
+  //     }
       
-      // Don't set isLoading to false here - let the auth state change handle it
-      return { error: null, data };
-    } catch (error) {
-      setIsLoading(false);
-      return { error };
-    }
-  };
+  //     // Don't set isLoading to false here - let the auth state change handle it
+  //     return { error: null, data };
+  //   } catch (error) {
+  //     setIsLoading(false);
+  //     return { error };
+  //   }
+  // };
 
-  const signOut = async () => {
-    try {
-      setIsLoading(true);
+  // const signOut = async () => {
+  //   try {
+  //     setIsLoading(true);
       
-      setSession(null);
-      setUser(null);
+  //     setSession(null);
+  //     setUser(null);
       
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Sign out error:', error);
-      }
+  //     const { error } = await supabase.auth.signOut();
+  //     if (error) {
+  //       console.error('Sign out error:', error);
+  //     }
       
-      setIsLoading(false);
-      return { error: null };
-    } catch (error) {
-      console.error('Error signing out:', error.message);
-      setIsLoading(false);
-      throw error;
-    }
-  };
+  //     setIsLoading(false);
+  //     return { error: null };
+  //   } catch (error) {
+  //     console.error('Error signing out:', error.message);
+  //     setIsLoading(false);
+  //     throw error;
+  //   }
+  // };
 
-  const resetPassword = async (email) => {
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'corkandnote://reset-password',
-      });
-      if (error) throw error;
-      return { error: null };
-    } catch (error) {
-      return { error };
-    }
-  };
+  // const resetPassword = async (email) => {
+  //   try {
+  //     const { error } = await supabase.auth.resetPasswordForEmail(email, {
+  //       redirectTo: 'corkandnote://reset-password',
+  //     });
+  //     if (error) throw error;
+  //     return { error: null };
+  //   } catch (error) {
+  //     return { error };
+  //   }
+  // };
 
-  const changePassword = async (currentPassword, newPassword) => {
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: currentPassword,
-      });
+  // const changePassword = async (currentPassword, newPassword) => {
+  //   try {
+  //     const { error: signInError } = await supabase.auth.signInWithPassword({
+  //       email: user.email,
+  //       password: currentPassword,
+  //     });
 
-      if (signInError) {
-        return { error: { message: 'Current password is incorrect' } };
-      }
+  //     if (signInError) {
+  //       return { error: { message: 'Current password is incorrect' } };
+  //     }
 
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword
-      });
+  //     const { error: updateError } = await supabase.auth.updateUser({
+  //       password: newPassword
+  //     });
 
-      if (updateError) {
-        return { error: updateError };
-      }
+  //     if (updateError) {
+  //       return { error: updateError };
+  //     }
 
-      return { error: null };
-    } catch (error) {
-      return { error };
-    }
-  };
+  //     return { error: null };
+  //   } catch (error) {
+  //     return { error };
+  //   }
+  // };
 
-  // Auth context value
-  const authContextValue = {
-    signIn,
-    signOut,
-    signUp,
-    resetPassword,
-    changePassword,
-    user,
-    isLoading,
-    session,
-    isAuthenticated,
-    isInitialized,
-  };
+  // // Auth context value
+  // const authContextValue = {
+  //   signIn,
+  //   signOut,
+  //   signUp,
+  //   resetPassword,
+  //   changePassword,
+  //   user,
+  //   isLoading,
+  //   session,
+  //   isAuthenticated,
+  //   isInitialized,
+  // };
 
-  // Show splash screen until everything is loaded
-  useEffect(() => {
-    if (loaded && !isLoading) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, isLoading]);
+  // // Show splash screen until everything is loaded
+  // useEffect(() => {
+  //   if (loaded && !isLoading) {
+  //     SplashScreen.hideAsync();
+  //   }
+  // }, [loaded, isLoading]);
 
   if (!loaded) {
     return null;

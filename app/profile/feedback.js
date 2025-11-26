@@ -61,75 +61,77 @@ export default function FeedbackScreen() {
   };
 
   // Submit feedback
-  const submitFeedback = async () => {
+  const submitFeedback = () => {
     if (!feedbackText.trim()) {
       Alert.alert('Error', 'Please enter your feedback');
       return;
     }
 
-    try {
-      setLoading(true);
+  //   try {
+  //     setLoading(true);
       
-      const { error } = await supabase
-        .from('feedback')
-        .insert({
-          user_id: user?.id || null,
-          email: user?.email || null,
-          feedback_type: feedbackType,
-          message: feedbackText.trim(),
-          rating: feedbackType === 'rating' ? rating : null
-        });
+  //     const { error } = await supabase
+  //       .from('feedback')
+  //       .insert({
+  //         user_id: user?.id || null,
+  //         email: user?.email || null,
+  //         feedback_type: feedbackType,
+  //         message: feedbackText.trim(),
+  //         rating: feedbackType === 'rating' ? rating : null
+  //       });
 
-      if (error) throw error;
+  //     if (error) throw error;
 
-      Alert.alert('Thank You!', 'Your feedback has been submitted successfully. We appreciate your input!');
-      setActiveSection(null);
-      setFeedbackText('');
-      setRating(0);
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to submit feedback');
-    } finally {
-      setLoading(false);
-    }
+  //     Alert.alert('Thank You!', 'Your feedback has been submitted successfully. We appreciate your input!');
+  //     setActiveSection(null);
+  //     setFeedbackText('');
+  //     setRating(0);
+  //   } catch (error) {
+  //     Alert.alert('Error', error.message || 'Failed to submit feedback');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  Alert.alert('Thank You!', 'Your feedback has been submitted successfully. We appreciate your input!');
   };
 
   // Report bug
-  const reportBug = async () => {
+  const reportBug = () => {
     if (!bugDescription.trim()) {
       Alert.alert('Error', 'Please describe the bug');
       return;
     }
 
-    try {
-      setLoading(true);
+    // try {
+    //   setLoading(true);
       
-      const { error } = await supabase
-        .from('bug_reports')
-        .insert({
-          user_id: user?.id || null,
-          email: user?.email || null,
-          description: bugDescription.trim(),
-          steps_to_reproduce: bugSteps.trim(),
-          device: bugDevice,
-          platform: Platform.OS,
-          version: '1.0.0' // App version
-        });
+    //   const { error } = await supabase
+    //     .from('bug_reports')
+    //     .insert({
+    //       user_id: user?.id || null,
+    //       email: user?.email || null,
+    //       description: bugDescription.trim(),
+    //       steps_to_reproduce: bugSteps.trim(),
+    //       device: bugDevice,
+    //       platform: Platform.OS,
+    //       version: '1.0.0' // App version
+    //     });
 
-      if (error) throw error;
+    //   if (error) throw error;
 
-      Alert.alert('Bug Reported', 'Thank you for reporting this issue. Our team will investigate it.');
-      setActiveSection(null);
-      setBugDescription('');
-      setBugSteps('');
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to report bug');
-    } finally {
-      setLoading(false);
-    }
+    //   Alert.alert('Bug Reported', 'Thank you for reporting this issue. Our team will investigate it.');
+    //   setActiveSection(null);
+    //   setBugDescription('');
+    //   setBugSteps('');
+    // } catch (error) {
+    //   Alert.alert('Error', error.message || 'Failed to report bug');
+    // } finally {
+    //   setLoading(false);
+    // }
+    Alert.alert('Bug Reported', 'Thank you for reporting this issue. Our team will investigate it.');
   };
 
   // Send contact message
-  const sendContactMessage = async () => {
+  const sendContactMessage = () => {
     if (!contactEmail.trim()) {
       Alert.alert('Error', 'Please enter your email');
       return;
@@ -145,45 +147,46 @@ export default function FeedbackScreen() {
       return;
     }
 
-    try {
-      setLoading(true);
+    // try {
+    //   setLoading(true);
       
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert({
-          user_id: user?.id || null,
-          email: contactEmail.trim(),
-          subject: contactSubject.trim(),
-          message: contactMessage.trim()
-        });
+    //   const { error } = await supabase
+    //     .from('contact_messages')
+    //     .insert({
+    //       user_id: user?.id || null,
+    //       email: contactEmail.trim(),
+    //       subject: contactSubject.trim(),
+    //       message: contactMessage.trim()
+    //     });
 
-      if (error) throw error;
+    //   if (error) throw error;
 
-      Alert.alert('Message Sent', 'Your message has been sent. We\'ll get back to you as soon as possible.');
-      setActiveSection(null);
-      setContactSubject('');
-      setContactMessage('');
-    } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to send message');
-    } finally {
-      setLoading(false);
-    }
+    //   Alert.alert('Message Sent', 'Your message has been sent. We\'ll get back to you as soon as possible.');
+    //   setActiveSection(null);
+    //   setContactSubject('');
+    //   setContactMessage('');
+    // } catch (error) {
+    //   Alert.alert('Error', error.message || 'Failed to send message');
+    // } finally {
+    //   setLoading(false);
+    // }
+    Alert.alert('Message Sent', 'Your message has been sent. We\'ll get back to you as soon as possible.');
   };
 
   // Rate the app (open app store)
-  const rateApp = () => {
-    const appStoreUrl = Platform.OS === 'ios' 
-      ? 'https://apps.apple.com/app/idXXXXXXXXXX' // Replace with actual App Store URL
-      : 'https://play.google.com/store/apps/details?id=com.yourcompany.corkandnote'; // Replace with actual Play Store URL
+  // const rateApp = () => {
+  //   const appStoreUrl = Platform.OS === 'ios' 
+  //     ? 'https://apps.apple.com/app/' 
+  //     : 'https://play.google.com/store/apps/; 
     
-    Linking.canOpenURL(appStoreUrl).then(supported => {
-      if (supported) {
-        Linking.openURL(appStoreUrl);
-      } else {
-        Alert.alert('Error', 'Could not open app store');
-      }
-    });
-  };
+  //   Linking.canOpenURL(appStoreUrl).then(supported => {
+  //     if (supported) {
+  //       Linking.openURL(appStoreUrl);
+  //     } else {
+  //       Alert.alert('Error', 'Could not open app store');
+  //     }
+  //   });
+  // };
 
   // Render star rating selector
   const renderRatingStars = () => {
@@ -467,7 +470,8 @@ export default function FeedbackScreen() {
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.sectionHeader}
-              onPress={rateApp}
+              // set this to show a alert for now
+              onPress={Alert.alert("Thank you for choosing to rate Cork & Note!")} 
             >
               <View style={styles.sectionTitle}>
                 <Ionicons name="star" size={22} color="#8C1C13" style={styles.sectionIcon} />

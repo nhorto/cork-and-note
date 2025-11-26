@@ -10,14 +10,14 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import VisitStatsCard from '../../components/VisitStatsCard';
+// import VisitStatsCard from '../../components/VisitStatsCard';
 import { AuthContext } from '../_layout';
 
 export default function ProfileScreen() {
-  const { signOut, user } = useContext(AuthContext);
+  // const { signOut, user } = useContext(AuthContext);
   const router = useRouter();
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     Alert.alert(
       'Sign Out',
       'Are you sure you want to sign out?',
@@ -26,13 +26,13 @@ export default function ProfileScreen() {
         { 
           text: 'Sign Out', 
           style: 'destructive',
-          onPress: async () => {
-            try {
-              await signOut();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to sign out. Please try again.');
-            }
-          }
+          // onPress: async () => {
+          //   try {
+          //     await signOut();
+          //   } catch (error) {
+          //     Alert.alert('Error', 'Failed to sign out. Please try again.');
+          //   }
+          // }
         }
       ]
     );
@@ -53,10 +53,10 @@ export default function ProfileScreen() {
           <Text style={styles.email}>{user?.email || 'user@example.com'}</Text>
         </View>
 
-        {/* Visit Stats */}
+        {/* Visit Stats
         <View style={styles.statsContainer}>
           <VisitStatsCard />
-        </View>
+        </View> */}
 
         {/* Settings Section */}
         <View style={styles.sectionTitle}>

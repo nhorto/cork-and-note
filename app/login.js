@@ -26,30 +26,31 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    // Basic validation
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
-      return;
-    }
+    // if (!email || !password) {
+    //   Alert.alert('Error', 'Please enter both email and password');
+    //   return;
+    // }
 
-    setIsLoading(true);
+    // setIsLoading(true);
 
-    try {
-      const { error, data } = await signIn(email, password);
+    // try {
+    //   const { error, data } = await signIn(email, password);
       
-      if (error) {
-        Alert.alert('Error', error.message);
-      } else {
-        // ← REMOVE MANUAL NAVIGATION - Let index.js handle it
-        console.log('✅ Login successful, auth context will handle navigation');
-        // Navigation will be handled automatically by the AuthContext and index.js
-        // No manual navigation needed here!
-      }
-    } catch (error) {
-      Alert.alert('Error', error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    //   if (error) {
+    //     Alert.alert('Error', error.message);
+    //   } else {
+    //     // ← REMOVE MANUAL NAVIGATION - Let index.js handle it
+    //     console.log('✅ Login successful, auth context will handle navigation');
+    //     // Navigation will be handled automatically by the AuthContext and index.js
+    //     // No manual navigation needed here!
+    //   }
+    // } catch (error) {
+    //   Alert.alert('Error', error.message);
+    // } finally {
+    //   setIsLoading(false);
+    // }
+    // Temporary bypass for login during development
+    router.replace('/(tabs)/map');
   };
 
   return (

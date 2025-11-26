@@ -96,54 +96,54 @@ export default function ChangePasswordScreen() {
       return;
     }
 
-    setIsLoading(true);
+    // setIsLoading(true);
 
-    try {
-      // First verify current password by attempting to sign in
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user.email,
-        password: currentPassword,
-      });
+    // try {
+    //   // First verify current password by attempting to sign in
+    //   const { error: signInError } = await supabase.auth.signInWithPassword({
+    //     email: user.email,
+    //     password: currentPassword,
+    //   });
 
-      if (signInError) {
-        setIsLoading(false);
-        Alert.alert('Error', 'Current password is incorrect');
-        return;
-      }
+    //   if (signInError) {
+    //     setIsLoading(false);
+    //     Alert.alert('Error', 'Current password is incorrect');
+    //     return;
+    //   }
 
-      // Update password using Supabase Auth
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword
-      });
+    //   // Update password using Supabase Auth
+    //   const { error: updateError } = await supabase.auth.updateUser({
+    //     password: newPassword
+    //   });
 
-      if (updateError) {
-        setIsLoading(false);
-        Alert.alert('Error', updateError.message || 'Failed to update password');
-        return;
-      }
+    //   if (updateError) {
+    //     setIsLoading(false);
+    //     Alert.alert('Error', updateError.message || 'Failed to update password');
+    //     return;
+    //   }
 
-      setIsLoading(false);
-      Alert.alert(
-        'Success',
-        'Your password has been updated successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              // Clear form and go back
-              setCurrentPassword('');
-              setNewPassword('');
-              setConfirmPassword('');
-              router.back();
-            }
-          }
-        ]
-      );
-    } catch (error) {
-      setIsLoading(false);
-      console.error('Change password error:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
-    }
+    //   setIsLoading(false);
+    //   Alert.alert(
+    //     'Success',
+    //     'Your password has been updated successfully!',
+    //     [
+    //       {
+    //         text: 'OK',
+    //         onPress: () => {
+    //           // Clear form and go back
+    //           setCurrentPassword('');
+    //           setNewPassword('');
+    //           setConfirmPassword('');
+    //           router.back();
+    //         }
+    //       }
+    //     ]
+    //   );
+    // } catch (error) {
+    //   setIsLoading(false);
+    //   console.error('Change password error:', error);
+    //   Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    // }
   };
 
   const passwordRequirements = getPasswordRequirements();
