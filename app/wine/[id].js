@@ -100,7 +100,7 @@ export default function WineDetail() {
         title: mockedWine.wine_name || `${mockedWine.wine_type} Wine`
       });
       setLoading(false);
-    });
+    }, 500);
   };
 
   // Helper function to get color based on wine type
@@ -125,47 +125,13 @@ export default function WineDetail() {
     }
   };
 
-  // Helper to generate star rating display
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating || 0);
-    const hasHalfStar = (rating || 0) % 1 >= 0.5;
-
-  const viewPhoto = (index) => {
-    setSelectedPhotoIndex(index);
-    setShowPhotoModal(true);
+  // Helper function to get rating color
+  const getRatingColor = (rating) => {
+    if (rating >= 4) return '#4CAF50'; // Green
+    if (rating >= 3) return '#FFC107'; // Yellow
+    if (rating >= 2) return '#FF9800'; // Orange
+    return '#F44336'; // Red
   };
-
-  // const renderPhotoGallery = () => {
-  //   if (!wine.photos || wine.photos.length === 0) {
-  //     return (
-  //       <View style={styles.noPhotosContainer}>
-  //         <Ionicons name="camera-outline" size={48} color="#999" />
-  //         <Text style={styles.noPhotosText}>No photos available</Text>
-  //       </View>
-  //     );
-  //   }
-
-  //   return (
-  //     <View style={styles.photoGallery}>
-  //       <Text style={styles.photoGalleryTitle}>Wine Photos ({wine.photos.length})</Text>
-  //       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll}>
-  //         {wine.photos.map((photo, index) => (
-  //           <TouchableOpacity
-  //             key={index}
-  //             style={styles.photoThumbnailContainer}
-  //             onPress={() => viewPhoto(index)}
-  //           >
-  //             <Image source={{ uri: photo }} style={styles.photoThumbnail} />
-  //             <View style={styles.photoOverlay}>
-  //               <Ionicons name="expand-outline" size={20} color="#fff" />
-  //             </View>
-  //           </TouchableOpacity>
-  //         ))}
-  //       </ScrollView>
-  //     </View>
-  //   );
-  // };
 
   if (loading) {
     return (
@@ -263,47 +229,25 @@ export default function WineDetail() {
             <View key={key} style={styles.ratingRow}>
               <Text style={styles.ratingLabel}>{label}</Text>
               <View style={styles.ratingBar}>
-                <View 
+                <View
                   style={[
-                    styles.ratingFill, 
-                    { 
+                    styles.ratingFill,
+                    {
                       width: `${(value || 0) * 20}%`,
                       backgroundColor: getRatingColor(value || 0)
                     }
-                  ]} 
+                  ]}
                 />
               </View>
-            )}
-          </View>
-          
-          <View style={styles.wineInfo}>
-            <Text style={styles.wineName}>
-              {wine.wine_name || wine.wine_type || 'Unnamed Wine'}
-            </Text>
-            {wine.wine_varietal && (
-              <Text style={styles.wineVarietal}>{wine.wine_varietal}</Text>
-            )}
-            {wine.wine_year && (
-              <Text style={styles.wineYear}>{wine.wine_year}</Text>
-            )}
-            <View style={[
-              styles.typeIndicator,
-              { backgroundColor: getWineTypeColor(wine.wine_type) }
-            ]}>
-              <Text style={[
-                styles.typeText,
-                { color: wine.wine_type?.toLowerCase() === 'white' ? '#3E3E3E' : '#fff' }
-              ]}>
-                {wine.wine_type}
-              </Text>
+              <Text style={styles.ratingValue}>{(value || 0).toFixed(1)}</Text>
             </View>
-          </View>
+          ))}
         </View>
 
         {/* Winery Info */}
         <View style={styles.wineryInfo}>
           <Text style={styles.wineryLabel}>From:</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => router.push(`/winery/${visit?.winery_id}`)}
             style={styles.wineryButton}
           >
@@ -315,22 +259,19 @@ export default function WineDetail() {
           </Text>
         </View>
 
-        {/* Overall Rating */}
-        <View style={styles.ratingSection}>
-          <Text style={styles.sectionTitle}>Overall Rating</Text>
-          <View style={styles.overallRating}>
-            {renderStars(wine.overall_rating)}
-            <Text style={styles.ratingValue}>
-              {wine.overall_rating?.toFixed(1) || 'N/A'}/5
-            </Text>
-          </View>
-        </View>
-
-        {/* Wine Attributes */}
-        {renderWineAttributes()}
-
         {/* Flavor Notes */}
-        {renderFlavorNotes()}
+        {wine.flavorNotes && wine.flavorNotes.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Flavor Notes</Text>
+            <View style={styles.tagsContainer}>
+              {wine.flavorNotes.map((note, index) => (
+                <View key={index} style={styles.flavorTag}>
+                  <Text style={styles.flavorTagText}>{note}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Additional Notes */}
         {wine.additional_notes && (
@@ -390,6 +331,20 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 16,
   },
+  scrollView: {
+    flex: 1,
+  },
+  section: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  backIcon: {
+    marginRight: 16,
+  },
   wineHeader: {
     flexDirection: 'row',
     marginBottom: 20,
@@ -419,21 +374,70 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   wineName: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#3E3E3E',
-    marginBottom: 4,
+    marginBottom: 12,
+    textAlign: 'center',
   },
-  wineVarietal: {
+  wineBasicInfo: {
+    marginBottom: 16,
+  },
+  wineTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  wineType: {
     fontSize: 16,
     color: '#8C1C13',
     fontWeight: '500',
-    marginBottom: 2,
+  },
+  wineVarietal: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+    marginLeft: 4,
   },
   wineYear: {
+    fontSize: 16,
+    color: '#666',
+    marginLeft: 4,
+  },
+  overallRating: {
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  ratingDisplay: {
+    alignItems: 'center',
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    marginTop: 4,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  ratingLabel: {
+    width: 80,
     fontSize: 14,
     color: '#666',
-    marginBottom: 8,
+    fontWeight: '500',
+  },
+  ratingBar: {
+    flex: 1,
+    height: 8,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 4,
+    marginHorizontal: 12,
+    overflow: 'hidden',
+  },
+  ratingFill: {
+    height: '100%',
+    borderRadius: 4,
   },
   typeIndicator: {
     alignSelf: 'flex-start',

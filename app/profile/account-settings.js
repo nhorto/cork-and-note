@@ -1,6 +1,6 @@
 // app/profile/account-settings.js
 import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
+// import * as Location from 'expo-location'; // Not needed for demo
 import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
@@ -23,60 +23,23 @@ export default function AccountSettingsScreen() {
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locationPermissionStatus, setLocationPermissionStatus] = useState(null);
 
-  // Check current location permission status on component mount
-  // useEffect(() => {
-  //   checkLocationPermission();
-  // }, []);
-
-  // const checkLocationPermission = async () => {
-  //   try {
-  //     const { status } = await Location.getForegroundPermissionsAsync();
-  //     setLocationPermissionStatus(status);
-  //     setLocationEnabled(status === 'granted');
-  //   } catch (error) {
-  //     console.error('Error checking location permission:', error);
-  //   }
-  // };
-
-  // const handleLocationToggle = async (value) => {
-  //   if (value) {
-  //     // User wants to enable location - request permission
-  //     try {
-  //       const { status } = await Location.requestForegroundPermissionsAsync();
-  //       if (status === 'granted') {
-  //         setLocationEnabled(true);
-  //         setLocationPermissionStatus('granted');
-  //         Alert.alert(
-  //           'Location Enabled', 
-  //           'Location services are now enabled. The app can now find nearby wineries and show your location on the map.'
-  //         );
-  //       } else {
-  //         setLocationEnabled(false);
-  //         setLocationPermissionStatus(status);
-  //           Alert.alert(
-  //             'Disable Location Services',
-  //             'To completely disable location access, please go to your device Settings > Privacy & Security > Location Services and turn off location access for this app.',
-  //             [
-  //               { text: 'OK', style: 'default' }
-  //             ]
-  //           );
-  //       }
-  //     } catch (error) {
-  //       console.error('Error requesting location permission:', error);
-  //       Alert.alert('Error', 'Unable to request location permission.');
-  //     }
-  //   } else {
-  //     // User wants to disable location - show info about how to disable in settings
-  //     setLocationEnabled(false);
-  //     Alert.alert(
-  //       'Disable Location Services',
-  //       'To completely disable location access, please go to your device Settings > Privacy & Security > Location Services and turn off location access for this app.',
-  //       [
-  //         { text: 'OK', style: 'default' }
-  //       ]
-  //     );
-  //   }
-  // };
+  // Mock location toggle for demo
+  const handleLocationToggle = (value) => {
+    setLocationEnabled(value);
+    if (value) {
+      setLocationPermissionStatus('granted');
+      Alert.alert(
+        'Location Enabled',
+        'Location services are now enabled (demo mode).'
+      );
+    } else {
+      setLocationPermissionStatus('denied');
+      Alert.alert(
+        'Location Disabled',
+        'Location services are now disabled (demo mode).'
+      );
+    }
+  };
 
   const handleNotificationsToggle = (value) => {
     setNotifications(value);

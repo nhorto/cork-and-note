@@ -22,20 +22,20 @@ import VisitLogForm from '../../components/VisitLogForm';
 import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
-// import { visitsService } from '../../lib/visits';
-// import { wineryStatusService } from '../../lib/wineryStatus';
-// import { AuthContext } from '../_layout';
+import { AuthContext } from '../_layout';
+// import { visitsService } from '../../lib/visits'; // Not needed for demo
+// import { wineryStatusService } from '../../lib/wineryStatus'; // Not needed for demo
 
 export default function WineryDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
-  
+
   const winery = wineries.find((w) => w.id.toString() === id.toString());
   const [showLogForm, setShowLogForm] = useState(false);
-  // const [wineryStatus, setWineryStatus] = useState(null);
-  const [statusLoading, setStatusLoading] = useState(true);
+  const [wineryStatus, setWineryStatus] = useState(null); // Mock status
+  const [statusLoading, setStatusLoading] = useState(false);
 
   // Load winery status
   // useEffect(() => {

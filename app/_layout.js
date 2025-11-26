@@ -9,7 +9,7 @@ import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { supabase } from '../lib/supabase';
+// import { supabase } from '../lib/supabase'; // Not needed for demo
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -32,260 +32,107 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
-  
-  // Authentication state
-  const [user, setUser] = useState(null);
-  const [session, setSession] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Navigation hooks - ADD THESE
+  // Mock user for demo purposes
+  const mockUser = {
+    id: 'demo-user-123',
+    email: 'demo@example.com',
+    user_metadata: {
+      name: 'Demo User'
+    }
+  };
+
+  const mockSession = {
+    user: mockUser,
+    access_token: 'mock-token'
+  };
+
+  // Authentication state - Using mock data
+  const [user, setUser] = useState(mockUser);
+  const [session, setSession] = useState(mockSession);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Start as not authenticated
+
+  // Navigation hooks
   const router = useRouter();
   const segments = useSegments();
 
-  // Derived state for cleaner checks
-  const isAuthenticated = !!(user && session);
+  // Navigation logic - redirect to login if not authenticated
+  useEffect(() => {
+    if (!loaded || isLoading) {
+      return;
+    }
 
-  // AUTH INITIALIZATION - Same as before
-  // useEffect(() => {
-  //   let mounted = true;
+    const inAuthFlow = ['login', 'register', 'forgot-password'].includes(segments[0]);
+    const onIndexPage = segments.length === 0;
 
-  //   const initializeAuth = async () => {
-  //     try {
-  //       //console.log('🔐 Initializing authentication...');
-        
-  //       // Get initial session
-  //       const { data: { session }, error } = await supabase.auth.getSession();
-        
-  //       console.log('📊 Session result:', {
-  //         hasSession: !!session,
-  //         hasUser: !!session?.user,
-  //         userId: session?.user?.id,
-  //         userEmail: session?.user?.email,
-  //         error: error?.message
-  //       });
-        
-  //       if (mounted) {
-  //         if (error) {
-  //           console.error('❌ Session check error:', error);
-  //           setSession(null);
-  //           setUser(null);
-  //         } else {
-  //           console.log('✅ Session check result:', session ? 'Found session' : 'No session');
-  //           setSession(session);
-  //           setUser(session?.user ?? null);
-  //         }
-          
-  //         setIsInitialized(true);
-  //         setIsLoading(false);
-  //       }
-  //     } catch (error) {
-  //       console.error('❌ Auth initialization error:', error);
-  //       if (mounted) {
-  //         setSession(null);
-  //         setUser(null);
-  //         setIsInitialized(true);
-  //         setIsLoading(false);
-  //       }
-  //     }
-  //   };
+    if (isAuthenticated && (inAuthFlow || onIndexPage)) {
+      // User is authenticated, go to main app
+      setTimeout(() => router.replace('/(tabs)/map'), 100);
+    } else if (!isAuthenticated && !inAuthFlow) {
+      // User is not authenticated but not on login/register page
+      setTimeout(() => router.replace('/login'), 100);
+    }
+  }, [isAuthenticated, loaded, isLoading, segments]);
 
-  //   // Initialize auth
-  //   initializeAuth();
+  // Mock auth functions
+  const signIn = async () => {
+    setIsLoading(true);
+    // Simulate login
+    setTimeout(() => {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+    }, 500);
+    return { error: null };
+  };
 
-  //   // Listen for auth state changes
-  //   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-  //     if (mounted) {  // ← REMOVE isInitialized condition
-  //       console.log('🔄 Auth state changed:', {
-  //         event,
-  //         hasSession: !!session,
-  //         hasUser: !!session?.user,
-  //         userId: session?.user?.id,
-  //         userEmail: session?.user?.email,
-  //         isInitialized
-  //       });
-  //       setSession(session);
-  //       setUser(session?.user ?? null);
-        
-  //       // If this is a sign-in event, make sure loading is false
-  //       if (event === 'SIGNED_IN' && session) {
-  //         setIsLoading(false);
-  //       }
-  //     }
-  //   });
+  const signUp = async () => {
+    setIsLoading(true);
+    // Simulate registration
+    setTimeout(() => {
+      setIsAuthenticated(true);
+      setIsLoading(false);
+    }, 500);
+    return { error: null };
+  };
 
-  //   return () => {
-  //     mounted = false;
-  //     subscription.unsubscribe();
-  //   };
-  // }, []);
+  const signOut = async () => {
+    setIsLoading(true);
+    setIsAuthenticated(false);
+    setIsLoading(false);
+    router.replace('/login');
+    return { error: null };
+  };
 
-  // NAVIGATION LOGIC - ADD THIS NEW EFFECT
-  // useEffect(() => {
-  //   if (!isInitialized || isLoading) {
-  //     console.log('⏳ Auth not ready yet, skipping navigation');
-  //     return;
-  //   }
+  const resetPassword = async (email) => {
+    // Mock password reset
+    return { error: null };
+  };
 
-  //   console.log('🚀 Auth ready, checking navigation...', {
-  //     isAuthenticated,
-  //     currentSegments: segments,
-  //     user: user?.email
-  //   });
+  const changePassword = async (currentPassword, newPassword) => {
+    // Mock password change
+    return { error: null };
+  };
 
-  //   const inAuthGroup = segments[0] === '(tabs)';
-  //   const inAuthFlow = ['login', 'register', 'forgot-password'].includes(segments[0]);
-  //   const inProtectedRoute = ['winery', 'wine', 'profile'].includes(segments[0]) || inAuthGroup;
-  //   const onIndexPage = segments.length === 0; // ← ADD THIS CHECK
+  // Auth context value
+  const authContextValue = {
+    signIn,
+    signOut,
+    signUp,
+    resetPassword,
+    changePassword,
+    user,
+    isLoading,
+    session,
+    isAuthenticated,
+  };
 
-  //   if (isAuthenticated && (inAuthFlow || onIndexPage)) {
-  //     // User is authenticated but on login/register page OR index page
-  //     console.log('✅ User authenticated, navigating from auth flow/index to main app');
-  //     router.replace('/(tabs)/map');
-  //   } else if (!isAuthenticated && !inAuthFlow && !onIndexPage) {
-  //     // User is not authenticated but trying to access protected content (not index)
-  //     console.log('❌ User not authenticated, navigating to login');
-  //     router.replace('/login');
-  //   } else if (!isAuthenticated && onIndexPage) {
-  //     // User is not authenticated and on index page
-  //     console.log('❌ User not authenticated on index, navigating to login');
-  //     router.replace('/login');
-  //   } else {
-  //     console.log('📍 User is in correct section, no navigation needed');
-  //   }
-  // }, [isAuthenticated, isInitialized, isLoading, segments]);
-
-  // YOUR EXISTING AUTH FUNCTIONS - Keep these the same
-  // const signIn = async (email, password) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const { data, error } = await supabase.auth.signInWithPassword({
-  //       email,
-  //       password,
-  //     });
-      
-  //     if (error) {
-  //       setIsLoading(false); // Only set to false on error
-  //       if (error.message.includes('Invalid login credentials')) {
-  //         return { error: { message: 'Invalid email or password. Please check your credentials or sign up for a new account.' } };
-  //       } else if (error.message.includes('Email not confirmed')) {
-  //         return { error: { message: 'Please check your email and click the confirmation link before signing in.' } };
-  //       } else if (error.message.includes('User not found')) {
-  //         return { error: { message: 'No account found with this email. Please sign up first.' } };
-  //       }
-  //       throw error;
-  //     }
-      
-  //     // Don't set isLoading to false here - let the auth state change handle it
-  //     return { error: null, data };
-  //   } catch (error) {
-  //     setIsLoading(false);
-  //     return { error };
-  //   }
-  // };
-
-  // const signUp = async (email, password, name) => {
-  //   try {
-  //     setIsLoading(true);
-  //     const { data, error } = await supabase.auth.signUp({
-  //       email,
-  //       password,
-  //       options: {
-  //         data: { name },
-  //       },
-  //     });
-      
-  //     if (error) {
-  //       setIsLoading(false);
-  //       throw error;
-  //     }
-      
-  //     // Don't set isLoading to false here - let the auth state change handle it
-  //     return { error: null, data };
-  //   } catch (error) {
-  //     setIsLoading(false);
-  //     return { error };
-  //   }
-  // };
-
-  // const signOut = async () => {
-  //   try {
-  //     setIsLoading(true);
-      
-  //     setSession(null);
-  //     setUser(null);
-      
-  //     const { error } = await supabase.auth.signOut();
-  //     if (error) {
-  //       console.error('Sign out error:', error);
-  //     }
-      
-  //     setIsLoading(false);
-  //     return { error: null };
-  //   } catch (error) {
-  //     console.error('Error signing out:', error.message);
-  //     setIsLoading(false);
-  //     throw error;
-  //   }
-  // };
-
-  // const resetPassword = async (email) => {
-  //   try {
-  //     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-  //       redirectTo: 'corkandnote://reset-password',
-  //     });
-  //     if (error) throw error;
-  //     return { error: null };
-  //   } catch (error) {
-  //     return { error };
-  //   }
-  // };
-
-  // const changePassword = async (currentPassword, newPassword) => {
-  //   try {
-  //     const { error: signInError } = await supabase.auth.signInWithPassword({
-  //       email: user.email,
-  //       password: currentPassword,
-  //     });
-
-  //     if (signInError) {
-  //       return { error: { message: 'Current password is incorrect' } };
-  //     }
-
-  //     const { error: updateError } = await supabase.auth.updateUser({
-  //       password: newPassword
-  //     });
-
-  //     if (updateError) {
-  //       return { error: updateError };
-  //     }
-
-  //     return { error: null };
-  //   } catch (error) {
-  //     return { error };
-  //   }
-  // };
-
-  // // Auth context value
-  // const authContextValue = {
-  //   signIn,
-  //   signOut,
-  //   signUp,
-  //   resetPassword,
-  //   changePassword,
-  //   user,
-  //   isLoading,
-  //   session,
-  //   isAuthenticated,
-  //   isInitialized,
-  // };
-
-  // // Show splash screen until everything is loaded
-  // useEffect(() => {
-  //   if (loaded && !isLoading) {
-  //     SplashScreen.hideAsync();
-  //   }
-  // }, [loaded, isLoading]);
+  // Show splash screen until fonts are loaded
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded]);
 
   if (!loaded) {
     return null;

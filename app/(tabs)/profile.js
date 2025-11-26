@@ -14,7 +14,7 @@ import {
 import { AuthContext } from '../_layout';
 
 export default function ProfileScreen() {
-  // const { signOut, user } = useContext(AuthContext);
+  const { signOut, user } = useContext(AuthContext);
   const router = useRouter();
 
   const handleLogout = () => {
@@ -23,16 +23,16 @@ export default function ProfileScreen() {
       'Are you sure you want to sign out?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
+        {
+          text: 'Sign Out',
           style: 'destructive',
-          // onPress: async () => {
-          //   try {
-          //     await signOut();
-          //   } catch (error) {
-          //     Alert.alert('Error', 'Failed to sign out. Please try again.');
-          //   }
-          // }
+          onPress: async () => {
+            try {
+              await signOut();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to sign out. Please try again.');
+            }
+          }
         }
       ]
     );

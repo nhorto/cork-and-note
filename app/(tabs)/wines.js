@@ -13,8 +13,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { visitsService } from '../../lib/visits';
-// import { AuthContext } from '../_layout';
+import { AuthContext } from '../_layout';
+// import { visitsService } from '../../lib/visits'; // Not needed for demo
 
 export default function Wines() {
   const [search, setSearch] = useState('');
@@ -52,7 +52,7 @@ export default function Wines() {
     }
   }, [wines]);
 
-  const loadUserWines = async (isRefresh = false) => {         
+  const loadUserWines = async (isRefresh = false) => {
     if (!user) {
       isRefresh ? setRefreshing(false) : setLoading(false);
       return;
@@ -61,30 +61,52 @@ export default function Wines() {
     try {
       isRefresh ? setRefreshing(true) : setLoading(true);
 
-      const { success, visits } = await visitsService.getUserVisits();
-      if (success && visits) {
-        const allWines = [];
-        visits.forEach((visit) => {
-          if (visit.wines) {
-            visit.wines.forEach((wine) => {
-              allWines.push({
-                ...wine,
-                wineryName: visit.wineries?.name,
-                wineryId: visit.winery_id,
-                visitDate: visit.visit_date,
-                visitId: visit.id,
-                flavorNotes:
-                  wine.wine_flavor_notes?.map((fn) => fn.flavor_notes?.name) ||
-                  [],
-              });
-            });
-          }
-        });
-        setWines(allWines);
-      }
+      // Mock wine data for demo
+      const mockWines = [
+        {
+          id: '1',
+          wine_name: 'Chateau Demo Cabernet 2019',
+          wine_type: 'Red',
+          wine_varietal: 'Cabernet Sauvignon',
+          wine_year: 2019,
+          overall_rating: 4.5,
+          wineryName: 'Demo Winery',
+          wineryId: 'winery1',
+          visitDate: '2024-01-15',
+          flavorNotes: ['Blackberry', 'Oak', 'Vanilla']
+        },
+        {
+          id: '2',
+          wine_name: 'Virginia Chardonnay 2020',
+          wine_type: 'White',
+          wine_varietal: 'Chardonnay',
+          wine_year: 2020,
+          overall_rating: 4.0,
+          wineryName: 'Mock Vineyard',
+          wineryId: 'winery2',
+          visitDate: '2024-02-10',
+          flavorNotes: ['Apple', 'Butter', 'Citrus']
+        },
+        {
+          id: '3',
+          wine_name: 'Rosé Reserve 2021',
+          wine_type: 'Rosé',
+          wine_varietal: 'Pinot Noir',
+          wine_year: 2021,
+          overall_rating: 3.8,
+          wineryName: 'Sample Estate',
+          wineryId: 'winery3',
+          visitDate: '2024-03-05',
+          flavorNotes: ['Strawberry', 'Watermelon', 'Rose']
+        }
+      ];
+
+      setTimeout(() => {
+        setWines(mockWines);
+        isRefresh ? setRefreshing(false) : setLoading(false);
+      }, 500);
     } catch (error) {
       console.error('Error loading wines:', error);
-    } finally {
       isRefresh ? setRefreshing(false) : setLoading(false);
     }
   };

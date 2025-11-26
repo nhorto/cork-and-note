@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { supabase } from '../../lib/supabase';
+// import { supabase } from '../../lib/supabase'; // Not needed for demo
 import { AuthContext } from '../_layout';
 
 export default function FeedbackScreen() {

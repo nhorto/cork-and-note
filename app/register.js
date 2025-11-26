@@ -67,69 +67,21 @@ export default function RegisterScreen() {
   };
 
   const handleRegister = async () => {
-    // Basic validation
-    if (!name || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
-      return;
+    // Demo mode - no validation or credentials required
+    setIsLoading(true);
+
+    try {
+      const { error } = await signUp();
+
+      if (error) {
+        Alert.alert('Error', error.message);
+        setIsLoading(false);
+      }
+      // Navigation will be handled automatically by the AuthContext
+    } catch (error) {
+      Alert.alert('Error', 'An unexpected error occurred');
+      setIsLoading(false);
     }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
-      return;
-    }
-
-    // Password validation
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      Alert.alert(
-        'Password Requirements Not Met', 
-        `Your password must have:\n• ${passwordValidation.errors.join('\n• ')}`
-      );
-      return;
-    }
-
-  //   setIsLoading(true);
-
-  //   try {
-  //     const { error, data } = await signUp(email, password, name);
-      
-  //     if (error) {
-  //       if (error.message.includes('User already registered')) {
-  //         Alert.alert(
-  //           'Account Already Exists', 
-  //           'An account with this email already exists. Would you like to sign in instead?',
-  //           [
-  //             { text: 'Cancel', style: 'cancel' },
-  //             { text: 'Sign In', onPress: () => router.replace('/login') }
-  //           ]
-  //         );
-  //       } else {
-  //         Alert.alert('Error', error.message);
-  //       }
-  //     } else {
-  //         // Check if user is immediately signed in (no email confirmation)
-  //         if (data.session && data.user) {
-  //           // ← REMOVE THIS MANUAL NAVIGATION
-  //           // setTimeout(() => {
-  //           //   router.replace('/(tabs)/map');
-  //           // }, 100);
-  //           console.log('✅ Registration successful, auth context will handle navigation');
-  //         } else {
-  //           // If for some reason they need to confirm email or sign in manually
-  //           Alert.alert(
-  //             'Account Created!', 
-  //             'Your account has been successfully created. You can now sign in.',
-  //             [
-  //               { text: 'OK', onPress: () => router.replace('/login') }
-  //             ]
-  //           );
-  //         }
-  //       }
-  //   } catch (error) {
-  //     Alert.alert('Error', error.message);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
   };
 
   const passwordRequirements = getPasswordRequirements();
