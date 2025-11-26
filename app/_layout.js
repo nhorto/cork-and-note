@@ -50,15 +50,9 @@ export default function RootLayout() {
   // useEffect(() => {
   //   let mounted = true;
 
-<<<<<<< Updated upstream
-    const initializeAuth = async () => {
-      try {
-        console.log('🔐 Initializing authentication...');
-=======
   //   const initializeAuth = async () => {
   //     try {
   //       //console.log('🔐 Initializing authentication...');
->>>>>>> Stashed changes
         
   //       // Get initial session
   //       const { data: { session }, error } = await supabase.auth.getSession();

@@ -27,43 +27,14 @@ export default function WineDetail() {
   }, [id]);
 
   const loadWineDetails = async () => {
-<<<<<<< Updated upstream
-    try {
-      setLoading(true);
-      // Get all user visits and find the wine
-      const { success, visits } = await visitsService.getUserVisits();
-=======
     // try {
     //   setLoading(true);
     //   const { success, visits } = await visitsService.getUserVisits();
->>>>>>> Stashed changes
       
     //   if (success && visits) {
     //     let foundWine = null;
     //     let foundVisit = null;
         
-<<<<<<< Updated upstream
-        // Search through all visits to find the wine
-        visits.forEach(visit => {
-          if (visit.wines) {
-            const wineInVisit = visit.wines.find(w => w.id === id);
-            if (wineInVisit) {
-              foundWine = {
-                ...wineInVisit,
-                flavorNotes: wineInVisit.wine_flavor_notes?.map(fn => fn.flavor_notes?.name) || []
-              };
-              foundVisit = visit;
-            }
-          }
-        });
-        
-        setWine(foundWine);
-        setVisit(foundVisit);
-      }
-    } catch (error) {
-      console.error('Error loading wine details:', error);
-    } finally {
-=======
     //     // Search through all visits to find the wine
     //     visits.forEach(visit => {
     //       if (visit.wines) {
@@ -128,7 +99,6 @@ export default function WineDetail() {
       navigation.setOptions({
         title: mockedWine.wine_name || `${mockedWine.wine_type} Wine`
       });
->>>>>>> Stashed changes
       setLoading(false);
     });
   };
@@ -161,83 +131,6 @@ export default function WineDetail() {
     const fullStars = Math.floor(rating || 0);
     const hasHalfStar = (rating || 0) % 1 >= 0.5;
 
-<<<<<<< Updated upstream
-    for (let i = 0; i < 5; i++) {
-      let iconName = 'star-outline';
-      if (i < fullStars) {
-        iconName = 'star';
-      } else if (i === fullStars && hasHalfStar) {
-        iconName = 'star-half';
-      }
-      
-      stars.push(
-        <Ionicons 
-          key={i} 
-          name={iconName} 
-          size={24} 
-          color="#FFD700" 
-          style={{ marginRight: 4 }}
-        />
-      );
-    }
-    
-    return (
-      <View style={styles.starContainer}>
-        {stars}
-      </View>
-    );
-  };
-
-  // Render wine attributes
-  const renderWineAttributes = () => {
-    if (!wine) return null;
-    
-    const attributes = [
-      { name: 'Sweetness', value: parseFloat(wine.sweetness) || 0 },
-      { name: 'Tannin', value: parseFloat(wine.tannin) || 0 },
-      { name: 'Acidity', value: parseFloat(wine.acidity) || 0 },
-      { name: 'Body', value: parseFloat(wine.body) || 0 },
-      { name: 'Alcohol', value: parseFloat(wine.alcohol) || 0 }
-    ];
-    
-    return (
-      <View style={styles.attributesContainer}>
-        <Text style={styles.sectionTitle}>Wine Profile</Text>
-        <View style={styles.attributesList}>
-          {attributes.map((attr, index) => (
-            <View key={index} style={styles.attributeItem}>
-              <Text style={styles.attributeName}>{attr.name}</Text>
-              <View style={styles.attributeBarContainer}>
-                <View style={[styles.attributeBar, { width: `${(attr.value / 5) * 100}%` }]} />
-              </View>
-              <Text style={styles.attributeValue}>{attr.value.toFixed(1)}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-    );
-  };
-
-  // Render flavor notes
-  const renderFlavorNotes = () => {
-    if (!wine?.flavorNotes || wine.flavorNotes.length === 0) {
-      return null;
-    }
-    
-    return (
-      <View style={styles.flavorContainer}>
-        <Text style={styles.sectionTitle}>Flavor Notes</Text>
-        <View style={styles.tagsContainer}>
-          {wine.flavorNotes.map((note, index) => (
-            <View key={index} style={styles.flavorTag}>
-              <Text style={styles.flavorTagText}>{note}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-    );
-  };
-=======
   const viewPhoto = (index) => {
     setSelectedPhotoIndex(index);
     setShowPhotoModal(true);
@@ -273,7 +166,6 @@ export default function WineDetail() {
   //     </View>
   //   );
   // };
->>>>>>> Stashed changes
 
   if (loading) {
     return (
@@ -307,33 +199,6 @@ export default function WineDetail() {
 
   return (
     <SafeAreaView style={styles.container}>
-<<<<<<< Updated upstream
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back" size={24} color="#3E3E3E" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Wine Details</Text>
-      </View>
-      
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Wine Header */}
-        <View style={styles.wineHeader}>
-          <View style={styles.wineImageContainer}>
-            {wine.photo_url ? (
-              <Image source={{ uri: wine.photo_url }} style={styles.wineImage} />
-            ) : (
-              <View style={[
-                styles.wineImagePlaceholder,
-                { backgroundColor: getWineTypeColor(wine.wine_type) }
-              ]}>
-                <Ionicons 
-                  name="wine" 
-                  size={80} 
-                  color={wine.wine_type?.toLowerCase() === 'white' ? '#3E3E3E' : '#fff'} 
-=======
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -406,7 +271,6 @@ export default function WineDetail() {
                       backgroundColor: getRatingColor(value || 0)
                     }
                   ]} 
->>>>>>> Stashed changes
                 />
               </View>
             )}
