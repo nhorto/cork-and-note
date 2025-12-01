@@ -26,19 +26,28 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
-    // Demo mode - no credentials required
+    // Basic validation
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter both email and password');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const { error } = await signIn();
-
+      const { error, data } = await signIn(email, password);
+      
       if (error) {
         Alert.alert('Error', error.message);
-        setIsLoading(false);
+      } else {
+        // ← REMOVE MANUAL NAVIGATION - Let index.js handle it
+        console.log('✅ Login successful, auth context will handle navigation');
+        // Navigation will be handled automatically by the AuthContext and index.js
+        // No manual navigation needed here!
       }
-      // Navigation will be handled automatically by the AuthContext
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred');
+      Alert.alert('Error', error.message);
+    } finally {
       setIsLoading(false);
     }
   };
