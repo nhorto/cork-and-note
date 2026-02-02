@@ -4,7 +4,7 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Callout, Marker } from 'react-native-maps';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import PinActionModal from '../../components/PinActionModal';
 import WineryNameModal from '../../components/WineryNameModal';
@@ -257,8 +257,38 @@ export default function MapScreen() {
     setRegion(newRegion);
   };
 
+  // Get marker color based on pin status
+  const getMarkerColor = (pin) => {
+    if (pin.hasVisit) return '#4CAF50'; // Green for visited
+    if (pin.inWishlist) return '#2196F3'; // Blue for wishlist
+    return '#8C1C13'; // Default wine color
+  };
+
   // Render a winery pin marker
   const renderPinMarker = (pin) => {
+    // Android: Use simple marker with callout (more reliable)
+    if (Platform.OS === 'android') {
+      return (
+        <Marker
+          key={pin.id}
+          coordinate={{
+            latitude: pin.latitude,
+            longitude: pin.longitude
+          }}
+          pinColor={getMarkerColor(pin)}
+          onPress={() => handlePinPress(pin)}
+        >
+          <Callout tooltip={false}>
+            <View style={styles.androidCallout}>
+              <Text style={styles.androidCalloutTitle}>{pin.name}</Text>
+              <Text style={styles.androidCalloutSubtitle}>Tap marker for options</Text>
+            </View>
+          </Callout>
+        </Marker>
+      );
+    }
+
+    // iOS: Use custom marker view (works well on iOS)
     return (
       <Marker
         key={pin.id}
@@ -285,7 +315,7 @@ export default function MapScreen() {
           ]}>
             <Ionicons
               name="wine"
-              size={Platform.OS === 'android' ? 22 : 16}
+              size={16}
               color="#FFFFFF"
             />
           </View>
@@ -546,5 +576,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     fontWeight: '500',
+  },
+  // Android callout styles
+  androidCallout: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 8,
+    minWidth: 120,
+    maxWidth: 200,
+  },
+  androidCalloutTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3E3E3E',
+    marginBottom: 4,
+  },
+  androidCalloutSubtitle: {
+    fontSize: 11,
+    color: '#888',
   },
 });
