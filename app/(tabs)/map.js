@@ -266,7 +266,7 @@ export default function MapScreen() {
 
   // Render a winery pin marker
   const renderPinMarker = (pin) => {
-    // Android: Use custom view with Android-specific fixes
+    // Android: Use standard marker with title (most reliable)
     if (Platform.OS === 'android') {
       return (
         <Marker
@@ -275,34 +275,11 @@ export default function MapScreen() {
             latitude: pin.latitude,
             longitude: pin.longitude
           }}
-          tracksViewChanges={false}
+          pinColor={getMarkerColor(pin)}
+          title={pin.name}
+          description="Tap for options"
           onPress={() => handlePinPress(pin)}
-        >
-          <View style={styles.androidMarkerContainer} collapsable={false}>
-            {/* Winery name label */}
-            <View style={styles.androidLabelContainer} collapsable={false}>
-              <Text style={styles.androidLabelText} numberOfLines={1}>
-                {pin.name}
-              </Text>
-            </View>
-
-            {/* Pin icon */}
-            <View
-              style={[
-                styles.androidPinIcon,
-                pin.hasVisit && styles.visitedMarker,
-                pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
-              ]}
-              collapsable={false}
-            >
-              <Ionicons
-                name="wine"
-                size={20}
-                color="#FFFFFF"
-              />
-            </View>
-          </View>
-        </Marker>
+        />
       );
     }
 
@@ -594,37 +571,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     fontWeight: '500',
-  },
-  // Android marker styles
-  androidMarkerContainer: {
-    alignItems: 'center',
-    width: 120,
-    height: 70,
-  },
-  androidLabelContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginBottom: 4,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    maxWidth: 110,
-  },
-  androidLabelText: {
-    fontSize: 11,
-    fontWeight: '600',
-    color: '#3E3E3E',
-    textAlign: 'center',
-  },
-  androidPinIcon: {
-    backgroundColor: '#8C1C13',
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
   },
 });
