@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import Supercluster from 'supercluster';
 import WinerySearchModal from '../../components/WinerySearchModal';
 import wineries from '../../data/wineries_with_coordinates_and_id.json';
@@ -305,7 +305,6 @@ export default function MapScreen() {
         onRegionChangeComplete={onRegionChangeComplete}
         showsUserLocation={true}
         showsMyLocationButton={false}
-        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
       >
         {clusters.map(cluster => {
           // Render a cluster marker if a cluster

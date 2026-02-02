@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourdomain.corkandnote",
+      "bundleIdentifier": "com.nicholashorton.corkandnote",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Cork & Note uses the camera to take photos of wines and wineries.",
@@ -23,7 +23,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yourdomain.corkandnote",
+      "package": "com.nicholashorton.corkandnote",
       "edgeToEdgeEnabled": true,
       "permissions": [
         "CAMERA",
