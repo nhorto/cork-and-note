@@ -1,8 +1,9 @@
 // components/VisitStatsCard.js
-import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { visitsService } from '../lib/visits';
 
 const VisitStatsCard = () => {
@@ -16,9 +17,12 @@ const VisitStatsCard = () => {
   });
   const router = useRouter();
 
-  useEffect(() => {
-    loadStats();
-  }, []);
+  // Reload stats when the screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [])
+  );
 
   const loadStats = async () => {
     try {

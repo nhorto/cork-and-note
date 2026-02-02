@@ -4,7 +4,7 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import MapView, { Callout, Marker } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import PinActionModal from '../../components/PinActionModal';
 import WineryNameModal from '../../components/WineryNameModal';
@@ -266,7 +266,7 @@ export default function MapScreen() {
 
   // Render a winery pin marker
   const renderPinMarker = (pin) => {
-    // Android: Use simple marker with callout (more reliable)
+    // Android: Use custom view with Android-specific fixes
     if (Platform.OS === 'android') {
       return (
         <Marker
@@ -275,15 +275,33 @@ export default function MapScreen() {
             latitude: pin.latitude,
             longitude: pin.longitude
           }}
-          pinColor={getMarkerColor(pin)}
+          tracksViewChanges={false}
           onPress={() => handlePinPress(pin)}
         >
-          <Callout tooltip={false}>
-            <View style={styles.androidCallout}>
-              <Text style={styles.androidCalloutTitle}>{pin.name}</Text>
-              <Text style={styles.androidCalloutSubtitle}>Tap marker for options</Text>
+          <View style={styles.androidMarkerContainer} collapsable={false}>
+            {/* Winery name label */}
+            <View style={styles.androidLabelContainer} collapsable={false}>
+              <Text style={styles.androidLabelText} numberOfLines={1}>
+                {pin.name}
+              </Text>
             </View>
-          </Callout>
+
+            {/* Pin icon */}
+            <View
+              style={[
+                styles.androidPinIcon,
+                pin.hasVisit && styles.visitedMarker,
+                pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
+              ]}
+              collapsable={false}
+            >
+              <Ionicons
+                name="wine"
+                size={20}
+                color="#FFFFFF"
+              />
+            </View>
+          </View>
         </Marker>
       );
     }
@@ -577,22 +595,36 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
   },
-  // Android callout styles
-  androidCallout: {
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 8,
-    minWidth: 120,
-    maxWidth: 200,
+  // Android marker styles
+  androidMarkerContainer: {
+    alignItems: 'center',
+    width: 120,
+    height: 70,
   },
-  androidCalloutTitle: {
-    fontSize: 14,
+  androidLabelContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    maxWidth: 110,
+  },
+  androidLabelText: {
+    fontSize: 11,
     fontWeight: '600',
     color: '#3E3E3E',
-    marginBottom: 4,
+    textAlign: 'center',
   },
-  androidCalloutSubtitle: {
-    fontSize: 11,
-    color: '#888',
+  androidPinIcon: {
+    backgroundColor: '#8C1C13',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
 });
