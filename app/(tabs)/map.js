@@ -1,52 +1,65 @@
+// app/(tabs)/map.js - France/Bordeaux Trip Version
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import Supercluster from 'supercluster';
-import WinerySearchModal from '../../components/WinerySearchModal';
-import wineries from '../../data/wineries_with_coordinates_and_id.json';
-import { wineryStatusService } from '../../lib/wineryStatus';
+import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
+import PinActionModal from '../../components/PinActionModal';
+import WineryNameModal from '../../components/WineryNameModal';
+import { wineriesService } from '../../lib/wineries';
+import { wishlistService } from '../../lib/wishlist';
 
 export default function MapScreen() {
   const router = useRouter();
   const mapRef = useRef(null);
-  const [clusters, setClusters] = useState([]);
+
+  // Region state - centered on Bordeaux, France
   const [region, setRegion] = useState({
-    latitude: 37.4316, // Approximate center of Virginia
-    longitude: -78.6569,
-    latitudeDelta: 5,  // Wider delta to show the whole state
-    longitudeDelta: 5,
+    latitude: 44.8378,   // Bordeaux latitude
+    longitude: -0.5792,  // Bordeaux longitude
+    latitudeDelta: 1.5,
+    longitudeDelta: 1.5,
   });
 
-  //insert hooks for user location and search modal
+  // User location
   const [userLocation, setUserLocation] = useState(null);
-  const [showSearchModal, setShowSearchModal] = useState(false);
 
-  // status loading
-  const [wineriesWithStatus, setWineriesWithStatus] = useState([]);
-  const [statusLoaded, setStatusLoaded] = useState(false);
+  // User's wineries (from visits + wishlist)
+  const [userPins, setUserPins] = useState([]);
+  const [pinsLoaded, setPinsLoaded] = useState(false);
 
+  // Temporary pin state (for dropping new pins)
+  const [tempPin, setTempPin] = useState(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+
+  // Pin action modal state
+  const [selectedPin, setSelectedPin] = useState(null);
+  const [showPinActions, setShowPinActions] = useState(false);
+
+  // FAB menu state
+  const [showFabMenu, setShowFabMenu] = useState(false);
+
+  // Manual entry modal state
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // 'visit' or 'wishlist'
+
+  // Load user's wineries on mount
   useEffect(() => {
-    loadWineriesWithStatus();
+    loadUserPins();
   }, []);
 
-  const loadWineriesWithStatus = async () => {
+  const loadUserPins = async () => {
     try {
-      const { success, wineries: data } = await wineryStatusService.getAllWineriesWithStatus(wineries);
-      setWineriesWithStatus(
-        success 
-          ? data 
-          : wineries.map(w => ({ ...w, status: { visited: false, isFavorite: false, isWantToVisit: false } }))
-      );
-    } catch (err) {
-      console.error(err);
-      setWineriesWithStatus(
-        wineries.map(w => ({ ...w, status: { visited: false, isFavorite: false, isWantToVisit: false } }))
-      );
+      const { success, wineries } = await wineriesService.getUserWineries();
+      if (success) {
+        setUserPins(wineries);
+      }
+    } catch (error) {
+      console.error('Error loading user pins:', error);
     } finally {
-      setStatusLoaded(true);
+      setPinsLoaded(true);
     }
   };
 
@@ -56,54 +69,45 @@ export default function MapScreen() {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
           return;
         }
-        
-        const loc = await Location.getCurrentPositionAsync({});
-        const userLoc = { 
-          latitude: loc.coords.latitude, 
-          longitude: loc.coords.longitude 
-        };
-        setUserLocation(userLoc);
-        
-        // Optionally zoom to user location on initial load
-        // mapRef.current?.animateToRegion({
-        //   ...userLoc,
-        //   latitudeDelta: 0.5,
-        //   longitudeDelta: 0.5,
-        // }, 1000);
+
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced
+        });
+        setUserLocation({
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude
+        });
       } catch (error) {
-        console.error("Error getting location:", error);
-        Alert.alert('Location Error', 'Unable to get your current location.');
+        console.error('Error getting location:', error);
       }
     })();
   }, []);
 
-  // zoom to users location
+  // Zoom to user's location
   const zoomToUserLocation = async () => {
     if (!userLocation) {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Location permission is required to show your location on the map.');
+          Alert.alert('Permission Denied', 'Location permission is required.');
           return;
         }
-        
+
         const loc = await Location.getCurrentPositionAsync({});
-        const userLoc = { 
-          latitude: loc.coords.latitude, 
-          longitude: loc.coords.longitude 
+        const userLoc = {
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude
         };
         setUserLocation(userLoc);
-        
+
         mapRef.current?.animateToRegion({
           ...userLoc,
           latitudeDelta: 0.05,
           longitudeDelta: 0.05,
         }, 1000);
       } catch (error) {
-        console.error("Error getting location:", error);
         Alert.alert('Location Error', 'Unable to get your current location.');
       }
     } else {
@@ -114,187 +118,181 @@ export default function MapScreen() {
       }, 1000);
     }
   };
-  
-  // handle winery select
-  const handleWinerySelect = winery => {
-    mapRef.current?.animateToRegion({
-      latitude: winery.latitude,
-      longitude: winery.longitude,
-      latitudeDelta: 0.05,
-      longitudeDelta: 0.05,
-    }, 1000);
+
+  // Handle long press on map to drop a pin
+  const handleMapLongPress = useCallback((event) => {
+    const { coordinate } = event.nativeEvent;
+    setTempPin(coordinate);
+    setShowNameModal(true);
+  }, []);
+
+  // Drop pin at current GPS location
+  const dropPinAtMyLocation = async () => {
+    setShowFabMenu(false);
+
+    if (userLocation) {
+      setTempPin(userLocation);
+      setShowNameModal(true);
+    } else {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Location permission is required to drop a pin.');
+          return;
+        }
+
+        const loc = await Location.getCurrentPositionAsync({});
+        const coordinate = {
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude
+        };
+        setUserLocation(coordinate);
+        setTempPin(coordinate);
+        setShowNameModal(true);
+      } catch (error) {
+        Alert.alert('Location Error', 'Unable to get your current location.');
+      }
+    }
   };
 
-  // Convert wineries to GeoJSON format for Supercluster - memoized to prevent recalculation
-  const points = useMemo(() => {
-    // Use wineriesWithStatus if available and loaded, otherwise use the original wineries
-    const wineryData = statusLoaded && wineriesWithStatus.length > 0 ? wineriesWithStatus : wineries;
-    
-    return wineryData.map(winery => ({
-      type: 'Feature',
-      properties: { 
-        cluster: false, 
-        wineryId: winery.id, 
-        name: winery.name, 
-        status: winery.status || { visited: false, isFavorite: false, isWantToVisit: false },
-      },
-      geometry: {
-        type: 'Point',
-        coordinates: [winery.longitude, winery.latitude]
-      }
-    }));
-  }, [wineriesWithStatus, wineries, statusLoaded]);
-
-  // Create supercluster instance - memoized to prevent recreation
-  const supercluster = useMemo(() => {
-    const instance = new Supercluster({
-      radius: 40,
-      maxZoom: 16
+  // Save a new pin (create winery in Supabase)
+  const handleSavePin = async (name, coordinate) => {
+    const { success, winery, error } = await wineriesService.createWinery({
+      name,
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude
     });
-    instance.load(points);
-    return instance;
-  }, [points]);
 
-  // Update clusters when region changes, using a memoized function
-  const updateClusters = useMemo(() => {
-    return (newRegion) => {
-      // Get map bounds
-      const northEast = {
-        latitude: newRegion.latitude + newRegion.latitudeDelta/2,
-        longitude: newRegion.longitude + newRegion.longitudeDelta/2
-      };
-      const southWest = {
-        latitude: newRegion.latitude - newRegion.latitudeDelta/2,
-        longitude: newRegion.longitude - newRegion.longitudeDelta/2
-      };
-      const bounds = [
-        southWest.longitude, southWest.latitude, 
-        northEast.longitude, northEast.latitude
-      ];
+    if (success && winery) {
+      setUserPins(prev => [...prev, winery]);
+      setTempPin(null);
 
-      const zoom = Math.log2(360 / newRegion.longitudeDelta) - 1;
-      const newClusters = supercluster.getClusters(bounds, Math.floor(zoom));
-      setClusters(newClusters);
-    };
-  }, [supercluster]);
+      // Zoom to the new pin
+      mapRef.current?.animateToRegion({
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        latitudeDelta: 0.1,
+        longitudeDelta: 0.1,
+      }, 500);
+    } else {
+      Alert.alert('Error', error || 'Failed to save pin. Please try again.');
+    }
+  };
 
-  // Update clusters when region changes
-  useEffect(() => {
-    updateClusters(region);
-  }, [region, updateClusters]);
-
-  // Use useEffect to measure and update before painting to prevent flickering
-  useEffect(() => {
-    // Only run once on mount to set initial clusters
-    updateClusters(region);
+  // Handle tap on existing pin
+  const handlePinPress = useCallback((pin) => {
+    setSelectedPin(pin);
+    setShowPinActions(true);
   }, []);
+
+  // Pin action handlers
+  const handleLogVisit = () => {
+    setShowPinActions(false);
+    if (selectedPin) {
+      router.push(`/winery/${selectedPin.id}`);
+    }
+  };
+
+  const handleAddPinToWishlist = async () => {
+    if (!selectedPin) return;
+
+    const { success, error } = await wishlistService.addToWishlist(selectedPin.id);
+    setShowPinActions(false);
+
+    if (success) {
+      Alert.alert('Added', `${selectedPin.name} has been added to your wishlist.`);
+      // Update the pin to show it's in wishlist
+      setUserPins(prev => prev.map(p =>
+        p.id === selectedPin.id ? { ...p, inWishlist: true } : p
+      ));
+    } else if (error?.includes('already')) {
+      Alert.alert('Already Added', `${selectedPin.name} is already in your wishlist.`);
+    } else {
+      Alert.alert('Error', 'Failed to add to wishlist.');
+    }
+  };
+
+  const handleRemovePin = async () => {
+    if (!selectedPin) return;
+
+    const { success, error } = await wineriesService.deleteWinery(selectedPin.id);
+    setShowPinActions(false);
+
+    if (success) {
+      setUserPins(prev => prev.filter(p => p.id !== selectedPin.id));
+    } else {
+      Alert.alert('Cannot Remove', error || 'Failed to remove pin.');
+    }
+  };
+
+  // Manual entry handlers (from FAB menu)
+  const handleManualEntry = async (wineryData, actionType) => {
+    // First create the winery
+    const { success, winery, error } = await wineriesService.createWinery(wineryData);
+
+    if (!success || !winery) {
+      Alert.alert('Error', error || 'Failed to create winery.');
+      return;
+    }
+
+    // Add to user pins
+    setUserPins(prev => [...prev, winery]);
+
+    if (actionType === 'visit') {
+      // Navigate to winery page to log visit
+      router.push(`/winery/${winery.id}`);
+    } else if (actionType === 'wishlist') {
+      // Add to wishlist
+      const { success: wishlistSuccess } = await wishlistService.addToWishlist(winery.id);
+      if (wishlistSuccess) {
+        Alert.alert('Added', `${winery.name} has been added to your wishlist.`);
+        setUserPins(prev => prev.map(p =>
+          p.id === winery.id ? { ...p, inWishlist: true } : p
+        ));
+      }
+    }
+  };
 
   const onRegionChangeComplete = (newRegion) => {
     setRegion(newRegion);
   };
 
-  // Memoize cluster rendering to prevent flickering
-  const renderCluster = useMemo(() => {
-    return (cluster) => {
-      const { cluster_id, point_count } = cluster.properties;
-      
-      return (
-        <Marker
-          key={`cluster-${cluster_id}`}
-          coordinate={{
-            latitude: cluster.geometry.coordinates[1],
-            longitude: cluster.geometry.coordinates[0]
-          }}
-          onPress={() => {
-            // Zoom in on cluster when pressed
-            const children = supercluster.getLeaves(cluster_id, 100);
-            const childrenCoordinates = children.map(child => ({
-              latitude: child.geometry.coordinates[1],
-              longitude: child.geometry.coordinates[0]
-            }));
-            
-            mapRef.current.fitToCoordinates(childrenCoordinates, {
-              edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-              animated: true
-            });
-          }}
-        >
-          <View style={{
-            width: 35,
-            height: 35,
-            borderRadius: 20,
-            backgroundColor: '#8C1C13',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: '#3E3E3E',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.3,
-            shadowRadius: 1,
-            elevation: 5
-          }}>
-            <Text style={{ 
-              color: '#fff', 
-              fontWeight: 'bold',
-              fontSize: 14,
-              textAlign: 'center'
-            }}>
-              {point_count}
+  // Render a winery pin marker
+  const renderPinMarker = (pin) => {
+    return (
+      <Marker
+        key={pin.id}
+        coordinate={{
+          latitude: pin.latitude,
+          longitude: pin.longitude
+        }}
+        tracksViewChanges={false}
+        onPress={() => handlePinPress(pin)}
+      >
+        <View style={styles.markerContainer}>
+          {/* Winery name label */}
+          <View style={styles.markerLabelContainer}>
+            <Text style={styles.markerLabel} numberOfLines={1}>
+              {pin.name}
             </Text>
           </View>
-        </Marker>
-      );
-    };
-  }, [supercluster]);
 
-  // Memoize marker rendering to prevent flickering
-  const renderMarker = useMemo(() => {
-    return (cluster) => {
-      const winery = cluster.properties;
-      // Ensure status exists with default values if not present
-      const status = winery.status || { visited: false, isFavorite: false, isWantToVisit: false };
-
-      return (
-        <Marker
-          key={winery.wineryId}
-          coordinate={{
-            latitude: cluster.geometry.coordinates[1],
-            longitude: cluster.geometry.coordinates[0]
-          }}
-          tracksViewChanges={false}
-          onPress={() => router.push(`/winery/${winery.wineryId}`)}
-        >
-          <View style={styles.markerContainer}>
-            {/* Winery name label */}
-            <View style={styles.markerLabelContainer}>
-              <Text style={styles.markerLabel} numberOfLines={1}>
-                {winery.name}
-              </Text>
-            </View>
-
-            {/* Icon + status badges */}
-            <View style={styles.markerWrapper}>
-              <View style={styles.wineryMarker}>
-                <Ionicons 
-                  name="wine" 
-                  size={Platform.OS === 'android' ? 22 : 16} 
-                  color="#FFFFFF" 
-                />
-              </View>
-
-              {/* status badges */}
-              <View style={styles.statusContainer}>
-                {status.visited && <View style={[styles.statusBadge, styles.visited]} />}
-                {status.isFavorite && <View style={[styles.statusBadge, styles.favorite]} />}
-                {status.isWantToVisit && <View style={[styles.statusBadge, styles.wantToVisit]} />}
-              </View>
-            </View>
+          {/* Pin icon */}
+          <View style={[
+            styles.wineryMarker,
+            pin.hasVisit && styles.visitedMarker,
+            pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
+          ]}>
+            <Ionicons
+              name="wine"
+              size={Platform.OS === 'android' ? 22 : 16}
+              color="#FFFFFF"
+            />
           </View>
-        </Marker>
-      );
-    };
-  }, [router]);
+        </View>
+      </Marker>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -303,92 +301,154 @@ export default function MapScreen() {
         style={{ flex: 1 }}
         region={region}
         onRegionChangeComplete={onRegionChangeComplete}
+        onLongPress={handleMapLongPress}
         showsUserLocation={true}
         showsMyLocationButton={false}
       >
-        {clusters.map(cluster => {
-          // Render a cluster marker if a cluster
-          if (cluster.properties.cluster) {
-            return renderCluster(cluster);
-          }
-          
-          // Render a single marker if not
-          return renderMarker(cluster);
-        })}
+        {/* Render user's pins */}
+        {userPins.map(pin => renderPinMarker(pin))}
+
+        {/* Render temporary pin while naming */}
+        {tempPin && (
+          <Marker
+            coordinate={tempPin}
+            pinColor="#8C1C13"
+          />
+        )}
       </MapView>
 
+      {/* FAB Button */}
+      <TouchableOpacity
+        style={styles.fabButton}
+        onPress={() => setShowFabMenu(!showFabMenu)}
+      >
+        <Ionicons
+          name={showFabMenu ? "close" : "add"}
+          size={28}
+          color="#fff"
+        />
+      </TouchableOpacity>
+
+      {/* FAB Menu */}
+      {showFabMenu && (
+        <View style={styles.fabMenu}>
+          <TouchableOpacity
+            style={styles.fabMenuItem}
+            onPress={() => {
+              setShowFabMenu(false);
+              setPendingAction('visit');
+              setShowManualModal(true);
+            }}
+          >
+            <Ionicons name="wine" size={20} color="#8C1C13" />
+            <Text style={styles.fabMenuText}>Log Visit</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.fabMenuItem}
+            onPress={() => {
+              setShowFabMenu(false);
+              setPendingAction('wishlist');
+              setShowManualModal(true);
+            }}
+          >
+            <Ionicons name="bookmark" size={20} color="#8C1C13" />
+            <Text style={styles.fabMenuText}>Add to Wishlist</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.fabMenuItem}
+            onPress={dropPinAtMyLocation}
+          >
+            <Ionicons name="location" size={20} color="#8C1C13" />
+            <Text style={styles.fabMenuText}>Drop Pin Here</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Location Button */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.locationButton}
         onPress={zoomToUserLocation}
       >
         <Ionicons name="locate" size={24} color="#8C1C13" />
       </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.searchButton}
-        onPress={() => setShowSearchModal(true)}
-      >
-        <Ionicons name="search" size={24} color="#8C1C13" />
-      </TouchableOpacity>
+      {/* Hint text for first-time users */}
+      {pinsLoaded && userPins.length === 0 && (
+        <View style={styles.hintContainer}>
+          <Text style={styles.hintText}>
+            Long-press on the map to drop a pin, or tap + to get started
+          </Text>
+        </View>
+      )}
 
-      {/* Legend */}
-      <View style={styles.legendContainer}>
-        <Text style={styles.legendTitle}>Status</Text>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.visited]} />
-          <Text style={styles.legendText}>Visited</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.favorite]} />
-          <Text style={styles.legendText}>Favorite</Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendDot, styles.wantToVisit]} />
-          <Text style={styles.legendText}>Want to Visit</Text>
-        </View>
-      </View>
+      {/* Pin Name Modal */}
+      <WineryNameModal
+        visible={showNameModal}
+        coordinate={tempPin}
+        onClose={() => {
+          setShowNameModal(false);
+          setTempPin(null);
+        }}
+        onSave={handleSavePin}
+      />
 
-      {/* Search Modal */}
-      <WinerySearchModal
-        visible={showSearchModal}
-        onClose={() => setShowSearchModal(false)}
-        wineries={statusLoaded ? wineriesWithStatus : wineries}
-        onWinerySelect={handleWinerySelect}
+      {/* Pin Action Modal */}
+      <PinActionModal
+        visible={showPinActions}
+        winery={selectedPin}
+        onClose={() => {
+          setShowPinActions(false);
+          setSelectedPin(null);
+        }}
+        onLogVisit={handleLogVisit}
+        onAddToWishlist={handleAddPinToWishlist}
+        onRemovePin={handleRemovePin}
+        onViewDetails={handleLogVisit}
+      />
+
+      {/* Manual Entry Modal */}
+      <ManualWineryEntryModal
+        visible={showManualModal}
+        actionType={pendingAction}
+        onClose={() => {
+          setShowManualModal(false);
+          setPendingAction(null);
+        }}
+        onSave={handleManualEntry}
       />
     </View>
   );
 }
 
-
 const styles = StyleSheet.create({
-  // Marker container includes both the label and the actual marker
-  container: { 
+  container: {
     flex: 1,
   },
   markerContainer: {
     alignItems: 'center',
   },
-  // Label styling
   markerLabelContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
     marginBottom: 4,
     borderWidth: 1,
-    borderColor: '#ccc',
-    maxWidth: 120, // Limit width to prevent very long labels
+    borderColor: '#ddd',
+    maxWidth: 140,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   markerLabel: {
-    fontSize: Platform.OS === 'android' ? 10 : 9,
-    fontWeight: 'bold',
+    fontSize: Platform.OS === 'android' ? 11 : 10,
+    fontWeight: '600',
     color: '#3E3E3E',
     textAlign: 'center',
-  },
-  markerWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   wineryMarker: {
     backgroundColor: '#8C1C13',
@@ -396,11 +456,64 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderWidth: 2,
     borderColor: '#FFFFFF',
-    // Make marker bigger on Android
     width: Platform.OS === 'android' ? 40 : 32,
     height: Platform.OS === 'android' ? 40 : 32,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  visitedMarker: {
+    backgroundColor: '#4CAF50', // Green for visited
+  },
+  wishlistMarker: {
+    backgroundColor: '#2196F3', // Blue for wishlist
+  },
+  fabButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 15,
+    backgroundColor: '#8C1C13',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  fabMenu: {
+    position: 'absolute',
+    bottom: 90,
+    left: 15,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 6,
+    minWidth: 160,
+  },
+  fabMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  fabMenuText: {
+    marginLeft: 12,
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#3E3E3E',
   },
   locationButton: {
     position: 'absolute',
@@ -418,78 +531,20 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  searchButton: {
+  hintContainer: {
     position: 'absolute',
-    bottom: 80,
-    right: 15,
-    backgroundColor: '#fff',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    top: 60,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(140, 28, 19, 0.9)',
+    padding: 14,
+    borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
   },
-  // small circles around the marker
-  statusContainer: {
-    position: 'absolute',
-    top: Platform.OS === 'android' ? -6 : -4,
-    right: Platform.OS === 'android' ? -6 : -4,
-    flexDirection: 'row',
+  hintText: {
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'center',
+    fontWeight: '500',
   },
-  statusBadge: {
-    width: Platform.OS === 'android' ? 12 : 10,
-    height: Platform.OS === 'android' ? 12 : 10,
-    borderRadius: Platform.OS === 'android' ? 6 : 5,
-    borderWidth: 1,
-    borderColor: '#fff',
-    marginHorizontal: 1,
-  },
-  visited: { backgroundColor: '#4CAF50' },
-  favorite: { backgroundColor: '#E91E63' },
-  wantToVisit: { backgroundColor: '#2196F3' },
-
-  // Legend styles
-legendContainer: {
-  position: 'absolute',
-  top: 50,
-  left: 15,
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  borderRadius: 8,
-  padding: 12,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.15,
-  shadowRadius: 3,
-  elevation: 3,
-  minWidth: 120,
-},
-legendTitle: {
-  fontSize: 12,
-  fontWeight: 'bold',
-  color: '#333',
-  marginBottom: 8,
-  textAlign: 'center',
-},
-legendItem: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: 2,
-},
-legendDot: {
-  width: 10,
-  height: 10,
-  borderRadius: 5,
-  marginRight: 8,
-  borderWidth: 1,
-  borderColor: '#fff',
-},
-legendText: {
-  fontSize: 11,
-  color: '#333',
-},
-})
+});

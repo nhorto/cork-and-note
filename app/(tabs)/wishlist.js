@@ -95,8 +95,7 @@ export default function WishlistScreen() {
         <WineryStatusBadges
           status={{
             isWantToVisit: true,
-            visited: item.status?.visited ?? false,
-            isFavorite: item.status?.isFavorite ?? false
+            visited: item.status?.visited ?? false
           }}
         />
       </View>

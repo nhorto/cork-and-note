@@ -1,8 +1,9 @@
-// app/winery/[id].js - Updated with WineryActionButtons
+// app/winery/[id].js - France Trip Version
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   Linking,
@@ -21,8 +22,8 @@ import PastVisitsSection from '../../components/PastVisitsSection';
 import VisitLogForm from '../../components/VisitLogForm';
 import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
-import wineries from '../../data/wineries_with_coordinates_and_id.json';
 import { visitsService } from '../../lib/visits';
+import { wineriesService } from '../../lib/wineries';
 import { wineryStatusService } from '../../lib/wineryStatus';
 import { AuthContext } from '../_layout';
 
@@ -31,11 +32,35 @@ export default function WineryDetail() {
   const router = useRouter();
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
-  
-  const winery = wineries.find((w) => w.id.toString() === id.toString());
+
+  // Winery data from Supabase
+  const [winery, setWinery] = useState(null);
+  const [wineryLoading, setWineryLoading] = useState(true);
+
   const [showLogForm, setShowLogForm] = useState(false);
   const [wineryStatus, setWineryStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(true);
+
+  // Load winery from Supabase
+  useEffect(() => {
+    const fetchWinery = async () => {
+      try {
+        setWineryLoading(true);
+        const { success, winery: data } = await wineriesService.getWinery(id);
+        if (success && data) {
+          setWinery(data);
+        }
+      } catch (error) {
+        console.error('Error fetching winery:', error);
+      } finally {
+        setWineryLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchWinery();
+    }
+  }, [id]);
 
   // Load winery status
   useEffect(() => {
@@ -123,11 +148,33 @@ export default function WineryDetail() {
     }));
   };
 
-  if (!winery) {
+  // Loading state
+  if (wineryLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.centerContainer}>
-          <Text>Winery not found</Text>
+          <ActivityIndicator size="large" color="#8C1C13" />
+          <Text style={styles.loadingText}>Loading winery...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!winery) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="chevron-back" size={24} color="#3E3E3E" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Winery</Text>
+        </View>
+        <View style={styles.centerContainer}>
+          <Ionicons name="wine-outline" size={48} color="#ccc" />
+          <Text style={styles.notFoundText}>Winery not found</Text>
         </View>
       </SafeAreaView>
     );
@@ -215,7 +262,7 @@ export default function WineryDetail() {
           <View style={styles.infoSection}>
             <Text style={styles.sectionTitle}>About {winery.name}</Text>
             <Text style={styles.infoText}>
-              Visit this beautiful Virginia winery and experience their selection of wines.
+              Discover this winery and experience their selection of wines.
             </Text>
           </View>
         </View>
@@ -287,6 +334,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
+  },
+  notFoundText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
   },
   detailsContainer: {
     padding: isVeryNarrowScreen ? responsive(12) : isNarrowScreen ? responsive(16) : responsive(20),

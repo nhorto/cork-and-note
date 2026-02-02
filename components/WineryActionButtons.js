@@ -2,18 +2,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { favoritesService } from '../lib/favorites';
 import { wishlistService } from '../lib/wishlist';
 
-const WineryActionButtons = ({ 
-  winery, 
+const WineryActionButtons = ({
+  winery,
   initialStatus = null,
   onStatusChange = () => {},
   compact = false
 }) => {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState({
-    isFavorite: false,
     isWantToVisit: false
   });
 
@@ -25,7 +23,6 @@ const WineryActionButtons = ({
   useEffect(() => {
     if (initialStatus) {
       setStatus({
-        isFavorite: initialStatus.isFavorite || false,
         isWantToVisit: initialStatus.isWantToVisit || false
       });
       setLoading(false);
@@ -37,15 +34,11 @@ const WineryActionButtons = ({
   const loadStatus = async () => {
     try {
       setLoading(true);
-      
-      // Check favorite status
-      const { success: favSuccess, isFavorite } = await favoritesService.isFavorite(winery.id);
-      
+
       // Check wishlist status
-      const { success: wishlistSuccess, isInWishlist } = await wishlistService.isInWishlist(winery.id);
+      const { isInWishlist } = await wishlistService.isInWishlist(winery.id);
 
       setStatus({
-        isFavorite: isFavorite,
         isWantToVisit: isInWishlist
       });
     } catch (error) {
@@ -55,38 +48,11 @@ const WineryActionButtons = ({
     }
   };
 
-  // Toggle favorite status
-  const toggleFavorite = async () => {
-    try {
-      setLoading(true);
-      
-      if (status.isFavorite) {
-        // Remove from favorites
-        const { success } = await favoritesService.removeFavorite(winery.id);
-        if (success) {
-          setStatus(prev => ({ ...prev, isFavorite: false }));
-          onStatusChange({ ...status, isFavorite: false });
-        }
-      } else {
-        // Add to favorites
-        const { success } = await favoritesService.addFavorite(winery.id);
-        if (success) {
-          setStatus(prev => ({ ...prev, isFavorite: true }));
-          onStatusChange({ ...status, isFavorite: true });
-        }
-      }
-    } catch (error) {
-      Alert.alert('Error', `Failed to update favorite status: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Toggle wishlist status
   const toggleWishlist = async () => {
     try {
       setLoading(true);
-      
+
       if (status.isWantToVisit) {
         // Remove from wishlist
         const { success } = await wishlistService.removeFromWishlistByWineryId(winery.id);
@@ -100,7 +66,7 @@ const WineryActionButtons = ({
         if (success) {
           setStatus(prev => ({ ...prev, isWantToVisit: true }));
           onStatusChange({ ...status, isWantToVisit: true });
-          
+
           Alert.alert('Added', `${winery.name} has been added to your "Want to Visit" list.`);
         }
       }
@@ -116,17 +82,15 @@ const WineryActionButtons = ({
     if (isVeryNarrowScreen) {
       return {
         ...styles.actionButton,
-        paddingHorizontal: width * 0.02, // 2% of screen width
-        paddingVertical: width * 0.025,  // 2.5% of screen width
-        flex: 1,
-        marginHorizontal: width * 0.01,  // 1% margin
+        paddingHorizontal: width * 0.02,
+        paddingVertical: width * 0.025,
+        marginHorizontal: width * 0.01,
       };
     } else if (isNarrowScreen) {
       return {
         ...styles.actionButton,
         paddingHorizontal: width * 0.03,
         paddingVertical: width * 0.03,
-        flex: 1,
         marginHorizontal: width * 0.015,
       };
     } else {
@@ -142,21 +106,6 @@ const WineryActionButtons = ({
   if (compact) {
     return (
       <View style={styles.compactContainer}>
-        <TouchableOpacity
-          style={[
-            styles.compactButton,
-            status.isFavorite && styles.activeFavoriteButton
-          ]}
-          onPress={toggleFavorite}
-          disabled={loading}
-        >
-          <Ionicons
-            name={status.isFavorite ? "heart" : "heart-outline"}
-            size={24}
-            color={status.isFavorite ? "#fff" : "#8C1C13"}
-          />
-        </TouchableOpacity>
-        
         <TouchableOpacity
           style={[
             styles.compactButton,
@@ -180,29 +129,6 @@ const WineryActionButtons = ({
       styles.container,
       isNarrowScreen && styles.narrowContainer
     ]}>
-      <TouchableOpacity
-        style={[
-          getButtonStyle(),
-          status.isFavorite && styles.activeFavoriteButton
-        ]}
-        onPress={toggleFavorite}
-        disabled={loading}
-      >
-        <Ionicons
-          name={status.isFavorite ? "heart" : "heart-outline"}
-          size={isVeryNarrowScreen ? 20 : 24}
-          color={status.isFavorite ? "#fff" : "#8C1C13"}
-        />
-        <Text
-          style={[
-            getTextStyle(),
-            status.isFavorite && styles.activeButtonText
-          ]}
-        >
-          {status.isFavorite ? "Favorited" : "Favorite"}
-        </Text>
-      </TouchableOpacity>
-      
       <TouchableOpacity
         style={[
           getButtonStyle(),
@@ -232,14 +158,14 @@ const WineryActionButtons = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // Changed from space-around
+    justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 20,
-    paddingHorizontal: 8, // Add horizontal padding
+    paddingHorizontal: 8,
   },
   narrowContainer: {
-    paddingHorizontal: 4, // Less padding on narrow screens
+    paddingHorizontal: 4,
   },
   compactContainer: {
     flexDirection: 'row',
@@ -256,9 +182,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: '#8C1C13',
-    flex: 1, // Make buttons flexible
-    marginHorizontal: 4, // Space between buttons
-    maxWidth: 180, // Prevent buttons from getting too wide
+    marginHorizontal: 4,
+    maxWidth: 180,
   },
   compactButton: {
     alignItems: 'center',
@@ -272,10 +197,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
-  activeFavoriteButton: {
-    backgroundColor: '#8C1C13',
-    borderColor: '#8C1C13',
-  },
   activeWishlistButton: {
     backgroundColor: '#8C1C13',
     borderColor: '#8C1C13',
@@ -286,7 +207,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#8C1C13',
     textAlign: 'center',
-    flexShrink: 1, // Allow text to shrink if needed
+    flexShrink: 1,
   },
   activeButtonText: {
     color: '#fff',

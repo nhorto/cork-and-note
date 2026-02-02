@@ -1,11 +1,11 @@
 // components/WineryStatusBadges.js
-import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, View } from 'react-native';
 
 const WineryStatusBadges = ({ status, compact = false }) => {
   if (!status) return null;
-  
-  const { visited, visitCount, isFavorite, isWantToVisit } = status;
+
+  const { visited, visitCount, isWantToVisit } = status;
 
   // Use different layouts based on compact mode
   if (compact) {
@@ -16,13 +16,7 @@ const WineryStatusBadges = ({ status, compact = false }) => {
             <Ionicons name="checkmark-circle" size={14} color="#fff" />
           </View>
         )}
-        
-        {isFavorite && (
-          <View style={[styles.badge, styles.favoriteBadge]}>
-            <Ionicons name="heart" size={14} color="#fff" />
-          </View>
-        )}
-        
+
         {isWantToVisit && (
           <View style={[styles.badge, styles.wishlistBadge]}>
             <Ionicons name="bookmark" size={14} color="#fff" />
@@ -42,14 +36,7 @@ const WineryStatusBadges = ({ status, compact = false }) => {
           </Text>
         </View>
       )}
-      
-      {isFavorite && (
-        <View style={[styles.statusBadge, styles.favoriteBadge]}>
-          <Ionicons name="heart" size={16} color="#fff" />
-          <Text style={styles.badgeText}>Favorite</Text>
-        </View>
-      )}
-      
+
       {isWantToVisit && (
         <View style={[styles.statusBadge, styles.wishlistBadge]}>
           <Ionicons name="bookmark" size={16} color="#fff" />
@@ -89,9 +76,6 @@ const styles = StyleSheet.create({
   },
   visitedBadge: {
     backgroundColor: '#4CAF50', // Green
-  },
-  favoriteBadge: {
-    backgroundColor: '#E91E63', // Pink
   },
   wishlistBadge: {
     backgroundColor: '#2196F3', // Blue
