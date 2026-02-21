@@ -1,4 +1,5 @@
 // Updated PastVisitsSection.js with photo display support
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -14,6 +15,9 @@ import {
   View
 } from 'react-native';
 import { visitsService } from '../lib/visits';
+import theme from '../styles/theme';
+
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 const PastVisitsSection = ({ wineryId }) => {
   const [loading, setLoading] = useState(true);
@@ -121,7 +125,9 @@ const PastVisitsSection = ({ wineryId }) => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="small" color="#8C1C13" />
+        <View style={styles.loadingIcon}>
+          <Ionicons name="wine-outline" size={24} color={colors.gold.muted} />
+        </View>
         <Text style={styles.loadingText}>Loading your past visits...</Text>
       </View>
     );
@@ -131,13 +137,18 @@ const PastVisitsSection = ({ wineryId }) => {
   if (visits.length === 0) {
     return (
       <View style={styles.emptyContainer}>
+        <View style={styles.emptyIcon}>
+          <Ionicons name="calendar-outline" size={32} color={colors.gold.muted} />
+        </View>
         <Text style={styles.emptyText}>
           You haven't logged any visits to this winery yet.
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.addVisitButton}
           onPress={() => Alert.alert('Log Visit', 'Use the "Log Your Visit" button at the top to add a visit.')}
+          activeOpacity={0.7}
         >
+          <Ionicons name="add" size={18} color={colors.neutral.cream} />
           <Text style={styles.addVisitButtonText}>Log Your First Visit</Text>
         </TouchableOpacity>
       </View>
@@ -146,7 +157,13 @@ const PastVisitsSection = ({ wineryId }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Your Past Visits ({visits.length})</Text>
+      {/* Section Header */}
+      <View style={styles.sectionHeader}>
+        <View style={styles.decorativeLine} />
+        <Text style={styles.sectionLabel}>YOUR VISITS</Text>
+        <View style={styles.decorativeLine} />
+      </View>
+      <Text style={styles.visitCount}>{visits.length} {visits.length === 1 ? 'visit' : 'visits'} logged</Text>
       
       {visits.map((visit) => (
         <View key={visit.id} style={styles.visitCard}>
@@ -169,7 +186,7 @@ const PastVisitsSection = ({ wineryId }) => {
             <Ionicons
               name={expandedVisit === visit.id ? "chevron-up" : "chevron-down"}
               size={20}
-              color="#8C1C13"
+              color={colors.primary.burgundy}
             />
           </TouchableOpacity>
 
@@ -227,13 +244,13 @@ const PastVisitsSection = ({ wineryId }) => {
                       <View style={styles.wineRating}>
                         {wine.overall_rating > 0 && (
                           <>
-                            <Ionicons name="star" size={16} color="#FFD700" />
+                            <Ionicons name="star" size={16} color={colors.gold.rich} />
                             <Text style={styles.ratingText}>
                               {wine.overall_rating.toFixed(1)}
                             </Text>
                           </>
                         )}
-                        <Ionicons name="chevron-forward" size={16} color="#8C1C13" />
+                        <Ionicons name="chevron-forward" size={16} color={colors.primary.burgundy} />
                       </View>
                     </TouchableOpacity>
                   ))
@@ -295,87 +312,150 @@ const PastVisitsSection = ({ wineryId }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.lg,
+    padding: spacing.lg,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    ...shadows.soft,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#3E3E3E',
-    marginBottom: 16,
-  },
-  loadingContainer: {
-    padding: 32,
+
+  // Section Header
+  sectionHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  decorativeLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.gold.muted,
+  },
+  sectionLabel: {
+    ...typography.body.caption,
+    color: colors.gold.shimmer,
+    marginHorizontal: spacing.md,
+  },
+  visitCount: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    textAlign: 'center',
+    marginBottom: spacing.lg,
+  },
+
+  // Loading
+  loadingContainer: {
+    padding: spacing.xl,
+    alignItems: 'center',
+  },
+  loadingIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.neutral.parchment,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
   },
   loadingText: {
-    marginTop: 8,
-    color: '#666',
-    fontSize: 14,
+    ...typography.body.regular,
+    color: colors.neutral.pewter,
+    fontStyle: 'italic',
   },
+
+  // Empty State
   emptyContainer: {
-    padding: 32,
+    padding: spacing.xl,
     alignItems: 'center',
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+  },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.neutral.cream,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
   },
   emptyText: {
-    color: '#666',
-    fontSize: 16,
+    ...typography.body.regular,
+    color: colors.neutral.pewter,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: spacing.lg,
+    maxWidth: 260,
   },
   addVisitButton: {
-    backgroundColor: '#8C1C13',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary.burgundy,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.md,
+    gap: spacing.sm,
   },
   addVisitButtonText: {
-    color: '#fff',
-    fontSize: 14,
+    ...typography.body.regular,
+    color: colors.neutral.cream,
     fontWeight: '600',
   },
+
+  // Visit Card
   visitCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 12,
+    backgroundColor: colors.neutral.cream,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
     overflow: 'hidden',
   },
   visitHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.md,
   },
   visitHeaderLeft: {
     flex: 1,
   },
   visitDate: {
-    fontSize: 16,
+    ...typography.body.regular,
     fontWeight: '600',
-    color: '#3E3E3E',
-    marginBottom: 4,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+    marginBottom: spacing.xs,
   },
   wineCount: {
-    fontSize: 14,
-    color: '#666',
+    ...typography.body.small,
+    color: colors.neutral.pewter,
     marginBottom: 2,
   },
   photoCount: {
+    ...typography.body.small,
+    color: colors.primary.burgundy,
     fontSize: 12,
-    color: '#8C1C13',
   },
+
+  // Visit Photos Section
   visitPhotosSection: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: colors.neutral.linen,
   },
   photosSectionTitle: {
-    fontSize: 14,
+    ...typography.body.small,
     fontWeight: '500',
-    color: '#666',
-    marginBottom: 8,
+    color: colors.neutral.pewter,
+    marginBottom: spacing.sm,
+    marginTop: spacing.sm,
   },
   photoThumbnails: {
     marginHorizontal: -4,
@@ -386,7 +466,9 @@ const styles = StyleSheet.create({
   thumbnail: {
     width: 60,
     height: 60,
-    borderRadius: 6,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   moreThumbnailContainer: {
     justifyContent: 'center',
@@ -395,107 +477,116 @@ const styles = StyleSheet.create({
   moreThumbnail: {
     width: 60,
     height: 60,
-    borderRadius: 6,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.overlay.dark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   moreThumbnailText: {
-    color: '#fff',
-    fontSize: 12,
+    ...typography.body.small,
+    color: colors.neutral.cream,
     fontWeight: '600',
   },
+
+  // Expanded Content
   expandedContent: {
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: colors.neutral.linen,
   },
   notesSection: {
-    padding: 16,
-    backgroundColor: '#f9f9f9',
+    padding: spacing.md,
+    backgroundColor: colors.neutral.linen,
   },
   notesTitle: {
-    fontSize: 14,
+    ...typography.body.small,
     fontWeight: '600',
-    color: '#3E3E3E',
-    marginBottom: 8,
+    color: colors.neutral.charcoal,
+    marginBottom: spacing.sm,
   },
   notesText: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 20,
+    ...typography.body.regular,
+    color: colors.neutral.graphite,
+    lineHeight: 22,
   },
+
+  // Wines Section
   winesSection: {
-    padding: 16,
+    padding: spacing.md,
   },
   winesSectionTitle: {
-    fontSize: 16,
+    ...typography.body.regular,
     fontWeight: '600',
-    color: '#3E3E3E',
-    marginBottom: 12,
+    color: colors.neutral.charcoal,
+    marginBottom: spacing.md,
   },
   wineItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f4f1ef',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
+    backgroundColor: colors.neutral.parchment,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   wineInfo: {
     flex: 1,
   },
   wineName: {
-    fontSize: 15,
+    ...typography.body.regular,
     fontWeight: '600',
-    color: '#3E3E3E',
-    marginBottom: 4,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+    marginBottom: spacing.xs,
   },
   wineDetails: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginBottom: spacing.xs,
   },
   winePhotosPreview: {
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   wineRating: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
   },
   ratingText: {
-    fontSize: 13,
+    ...typography.body.small,
     fontWeight: '500',
-    color: '#3E3E3E',
-    marginRight: 4,
+    color: colors.neutral.charcoal,
+    marginRight: spacing.xs,
   },
   noWinesText: {
-    color: '#999',
-    fontSize: 14,
+    ...typography.body.regular,
+    color: colors.neutral.silver,
     fontStyle: 'italic',
     textAlign: 'center',
-    padding: 16,
+    padding: spacing.lg,
   },
+
+  // Photo Modal
   photoModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
   },
   photoModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 50,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.lg,
   },
   photoModalTitle: {
-    color: '#fff',
-    fontSize: 16,
+    ...typography.body.regular,
+    color: colors.neutral.cream,
     fontWeight: '600',
     flex: 1,
   },
   photoModalClose: {
-    padding: 8,
+    padding: spacing.sm,
   },
   photoModalContainer: {
     width: 400,
@@ -512,14 +603,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 50,
     alignSelf: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: colors.overlay.dark,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
   },
   photoModalText: {
-    color: '#fff',
-    fontSize: 14,
+    ...typography.body.regular,
+    color: colors.neutral.cream,
   },
 });
 

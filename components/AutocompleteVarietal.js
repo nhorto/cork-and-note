@@ -1,3 +1,4 @@
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -8,6 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import theme from '../styles/theme';
+
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 // Common wine varietals for autocomplete suggestions
 const WINE_VARIETALS = [
@@ -113,7 +117,8 @@ const AutocompleteVarietal = ({
           onChangeText={onChangeText}
           onFocus={handleFocus}
           placeholder={placeholder}
-          placeholderTextColor="#999"
+          placeholderTextColor={colors.neutral.silver}
+          selectionColor={colors.primary.burgundy}
           autoCapitalize="words"
           autoCorrect={false}
         />
@@ -124,7 +129,7 @@ const AutocompleteVarietal = ({
             onPress={clearInput}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="close-circle" size={20} color="#999" />
+            <Ionicons name="close-circle" size={20} color={colors.neutral.silver} />
           </TouchableOpacity>
         )}
       </View>
@@ -148,7 +153,7 @@ const AutocompleteVarietal = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.suggestionText}>{suggestion}</Text>
-                <Ionicons name="arrow-up-outline" size={16} color="#8C1C13" />
+                <Ionicons name="arrow-up-outline" size={16} color={colors.primary.burgundy} />
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -172,18 +177,19 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    borderRadius: 8,
-    paddingHorizontal: 15,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
     paddingRight: 40,
-    fontSize: 16,
-    backgroundColor: '#FAFAFA',
-    color: '#333',
+    ...typography.body.regular,
+    backgroundColor: colors.neutral.parchment,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
   },
   inputFocused: {
-    borderColor: '#8C1C13',
-    backgroundColor: '#FFF',
-    shadowColor: '#8C1C13',
+    borderColor: colors.primary.burgundy,
+    backgroundColor: colors.neutral.cream,
+    shadowColor: colors.primary.burgundy,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -198,7 +204,7 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     position: 'absolute',
-    right: 15,
+    right: spacing.md,
     top: '50%',
     transform: [{ translateY: -10 }],
   },
@@ -207,20 +213,13 @@ const styles = StyleSheet.create({
     top: '100%',
     left: 0,
     right: 0,
-    backgroundColor: '#FFF',
+    backgroundColor: colors.neutral.cream,
     borderWidth: 1,
     borderTopWidth: 0,
-    borderColor: '#8C1C13',
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5,
+    borderColor: colors.primary.burgundy,
+    borderBottomLeftRadius: borderRadius.md,
+    borderBottomRightRadius: borderRadius.md,
+    ...shadows.medium,
     zIndex: 1001,
     maxHeight: 200,
   },
@@ -231,17 +230,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: colors.neutral.linen,
   },
   lastSuggestionItem: {
     borderBottomWidth: 0,
   },
   suggestionText: {
-    fontSize: 16,
-    color: '#333',
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
     flex: 1,
   },
 });

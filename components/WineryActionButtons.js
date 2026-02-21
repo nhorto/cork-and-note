@@ -1,8 +1,12 @@
 // components/WineryActionButtons.js
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { wishlistService } from '../lib/wishlist';
+import theme from '../styles/theme';
+
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 const WineryActionButtons = ({
   winery,
@@ -117,7 +121,7 @@ const WineryActionButtons = ({
           <Ionicons
             name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}
             size={24}
-            color={status.isWantToVisit ? "#fff" : "#8C1C13"}
+            color={status.isWantToVisit ? colors.neutral.cream : colors.primary.burgundy}
           />
         </TouchableOpacity>
       </View>
@@ -140,7 +144,7 @@ const WineryActionButtons = ({
         <Ionicons
           name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}
           size={isVeryNarrowScreen ? 20 : 24}
-          color={status.isWantToVisit ? "#fff" : "#8C1C13"}
+          color={status.isWantToVisit ? colors.neutral.cream : colors.primary.burgundy}
         />
         <Text
           style={[
@@ -160,12 +164,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-    paddingHorizontal: 8,
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.sm,
   },
   narrowContainer: {
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing.xs,
   },
   compactContainer: {
     flexDirection: 'row',
@@ -176,41 +180,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
     borderWidth: 1,
-    borderColor: '#8C1C13',
-    marginHorizontal: 4,
+    borderColor: colors.primary.burgundy,
+    marginHorizontal: spacing.xs,
     maxWidth: 180,
+    ...shadows.soft,
   },
   compactButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 8,
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
     borderWidth: 1,
-    borderColor: '#8C1C13',
-    marginLeft: 8,
-    width: 40,
-    height: 40,
+    borderColor: colors.primary.burgundy,
+    marginLeft: spacing.sm,
+    width: 44,
+    height: 44,
   },
   activeWishlistButton: {
-    backgroundColor: '#8C1C13',
-    borderColor: '#8C1C13',
+    backgroundColor: colors.primary.burgundy,
+    borderColor: colors.primary.burgundy,
   },
   actionButtonText: {
-    marginLeft: 8,
-    fontSize: 14,
+    marginLeft: spacing.sm,
+    ...typography.body.regular,
     fontWeight: '500',
-    color: '#8C1C13',
+    color: colors.primary.burgundy,
     textAlign: 'center',
     flexShrink: 1,
   },
   activeButtonText: {
-    color: '#fff',
+    color: colors.neutral.cream,
   },
 });
 

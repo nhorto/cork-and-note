@@ -1,4 +1,5 @@
 // components/WineryNameModal.js
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
@@ -12,6 +13,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import theme from '../styles/theme';
+
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 const WineryNameModal = ({
   visible,
@@ -24,7 +28,7 @@ const WineryNameModal = ({
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter a winery name');
+      Alert.alert('Required', 'Please enter a winery name');
       return;
     }
 
@@ -66,32 +70,56 @@ const WineryNameModal = ({
             onPress={(e) => e.stopPropagation()}
           >
             <View style={styles.container}>
+              {/* Header */}
               <View style={styles.header}>
-                <Ionicons name="location" size={24} color="#8C1C13" />
-                <Text style={styles.title}>Name this winery</Text>
+                <View style={styles.headerIcon}>
+                  <Ionicons name="location" size={22} color={colors.primary.burgundy} />
+                </View>
+                <View style={styles.headerText}>
+                  <Text style={styles.title}>Drop a Pin</Text>
+                  <Text style={styles.subtitle}>Name this location</Text>
+                </View>
               </View>
 
-              <TextInput
-                style={styles.input}
-                placeholder="Enter winery name"
-                placeholderTextColor="#999"
-                value={name}
-                onChangeText={setName}
-                autoFocus={true}
-                returnKeyType="done"
-                onSubmitEditing={handleSave}
-              />
+              {/* Decorative Divider */}
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <View style={styles.dividerDiamond} />
+                <View style={styles.dividerLine} />
+              </View>
 
+              {/* Input */}
+              <View style={styles.inputSection}>
+                <Text style={styles.label}>WINERY NAME</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g., Château Margaux"
+                  placeholderTextColor={colors.neutral.silver}
+                  value={name}
+                  onChangeText={setName}
+                  autoFocus={true}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSave}
+                  selectionColor={colors.primary.burgundy}
+                />
+              </View>
+
+              {/* Coordinates */}
               {coordinate && (
-                <Text style={styles.coordinates}>
-                  Location: {coordinate.latitude.toFixed(4)}, {coordinate.longitude.toFixed(4)}
-                </Text>
+                <View style={styles.coordinatesContainer}>
+                  <Ionicons name="navigate-outline" size={14} color={colors.neutral.pewter} />
+                  <Text style={styles.coordinates}>
+                    {coordinate.latitude.toFixed(4)}°, {coordinate.longitude.toFixed(4)}°
+                  </Text>
+                </View>
               )}
 
+              {/* Buttons */}
               <View style={styles.buttons}>
                 <TouchableOpacity
                   style={styles.cancelButton}
                   onPress={handleClose}
+                  activeOpacity={0.7}
                 >
                   <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
@@ -100,11 +128,14 @@ const WineryNameModal = ({
                   style={[styles.saveButton, loading && styles.disabled]}
                   onPress={handleSave}
                   disabled={loading}
+                  activeOpacity={0.7}
                 >
-                  <Ionicons name="checkmark" size={20} color="#fff" />
                   <Text style={styles.saveText}>
                     {loading ? 'Saving...' : 'Save Pin'}
                   </Text>
+                  {!loading && (
+                    <Ionicons name="checkmark" size={18} color={colors.neutral.cream} />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -118,82 +149,135 @@ const WineryNameModal = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: colors.overlay.dark,
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 24,
+    backgroundColor: colors.neutral.cream,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
     width: 320,
     maxWidth: '90%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
+    ...shadows.strong,
   },
+
+  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
+  },
+  headerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: colors.neutral.parchment,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+  },
+  headerText: {
+    flex: 1,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#3E3E3E',
-    marginLeft: 10,
+    ...typography.heading.h2,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+  },
+  subtitle: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginTop: 2,
+  },
+
+  // Divider
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.gold.muted,
+  },
+  dividerDiamond: {
+    width: 6,
+    height: 6,
+    backgroundColor: colors.gold.rich,
+    transform: [{ rotate: '45deg' }],
+    marginHorizontal: spacing.sm,
+  },
+
+  // Input Section
+  inputSection: {
+    marginBottom: spacing.md,
+  },
+  label: {
+    ...typography.body.caption,
+    color: colors.gold.shimmer,
+    marginBottom: spacing.sm,
   },
   input: {
+    backgroundColor: colors.neutral.parchment,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    marginBottom: 12,
-    backgroundColor: '#f9f9f9',
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    fontSize: typography.body.regular.fontSize,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+  },
+
+  // Coordinates
+  coordinatesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+    gap: spacing.xs,
   },
   coordinates: {
-    fontSize: 12,
-    color: '#888',
-    marginBottom: 20,
-    textAlign: 'center',
+    ...typography.body.small,
+    color: colors.neutral.pewter,
   },
+
+  // Buttons
   buttons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: spacing.md,
   },
   cancelButton: {
-    padding: 14,
     flex: 1,
-    marginRight: 8,
-    borderRadius: 10,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.neutral.parchment,
   },
   cancelText: {
-    color: '#666',
+    ...typography.body.regular,
+    color: colors.neutral.graphite,
     fontWeight: '500',
-    fontSize: 16,
   },
   saveButton: {
-    padding: 14,
     flex: 1,
-    marginLeft: 8,
-    borderRadius: 10,
-    backgroundColor: '#8C1C13',
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary.burgundy,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
+    gap: spacing.sm,
   },
   saveText: {
-    color: '#fff',
+    ...typography.body.regular,
+    color: colors.neutral.cream,
     fontWeight: '600',
-    fontSize: 16,
-    marginLeft: 6,
   },
   disabled: {
     opacity: 0.6,

@@ -30,6 +30,13 @@ yarn-error.*
 .DS_Store
 *.pem
 
+# IDE
+.idea/
+.claude/
+
+# Lock files
+bun.lock
+
 # local env files
 .env*.local
 

@@ -1,4 +1,5 @@
 // app/(tabs)/map.js - France/Bordeaux Trip Version
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
@@ -10,6 +11,9 @@ import PinActionModal from '../../components/PinActionModal';
 import WineryNameModal from '../../components/WineryNameModal';
 import { wineriesService } from '../../lib/wineries';
 import { wishlistService } from '../../lib/wishlist';
+import theme from '../../styles/theme';
+
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 export default function MapScreen() {
   const router = useRouter();
@@ -17,35 +21,23 @@ export default function MapScreen() {
 
   // Region state - centered on Bordeaux, France
   const [region, setRegion] = useState({
-    latitude: 44.8378,   // Bordeaux latitude
-    longitude: -0.5792,  // Bordeaux longitude
+    latitude: 44.8378,
+    longitude: -0.5792,
     latitudeDelta: 1.5,
     longitudeDelta: 1.5,
   });
 
-  // User location
   const [userLocation, setUserLocation] = useState(null);
-
-  // User's wineries (from visits + wishlist)
   const [userPins, setUserPins] = useState([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
-
-  // Temporary pin state (for dropping new pins)
   const [tempPin, setTempPin] = useState(null);
   const [showNameModal, setShowNameModal] = useState(false);
-
-  // Pin action modal state
   const [selectedPin, setSelectedPin] = useState(null);
   const [showPinActions, setShowPinActions] = useState(false);
-
-  // FAB menu state
   const [showFabMenu, setShowFabMenu] = useState(false);
-
-  // Manual entry modal state
   const [showManualModal, setShowManualModal] = useState(false);
-  const [pendingAction, setPendingAction] = useState(null); // 'visit' or 'wishlist'
+  const [pendingAction, setPendingAction] = useState(null);
 
-  // Load user's wineries on mount
   useEffect(() => {
     loadUserPins();
   }, []);
@@ -63,14 +55,11 @@ export default function MapScreen() {
     }
   };
 
-  // Request and set user location
   useEffect(() => {
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          return;
-        }
+        if (status !== 'granted') return;
 
         const loc = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced
@@ -85,7 +74,6 @@ export default function MapScreen() {
     })();
   }, []);
 
-  // Zoom to user's location
   const zoomToUserLocation = async () => {
     if (!userLocation) {
       try {
@@ -119,14 +107,12 @@ export default function MapScreen() {
     }
   };
 
-  // Handle long press on map to drop a pin
   const handleMapLongPress = useCallback((event) => {
     const { coordinate } = event.nativeEvent;
     setTempPin(coordinate);
     setShowNameModal(true);
   }, []);
 
-  // Drop pin at current GPS location
   const dropPinAtMyLocation = async () => {
     setShowFabMenu(false);
 
@@ -155,7 +141,6 @@ export default function MapScreen() {
     }
   };
 
-  // Save a new pin (create winery in Supabase)
   const handleSavePin = async (name, coordinate) => {
     const { success, winery, error } = await wineriesService.createWinery({
       name,
@@ -167,7 +152,6 @@ export default function MapScreen() {
       setUserPins(prev => [...prev, winery]);
       setTempPin(null);
 
-      // Zoom to the new pin
       mapRef.current?.animateToRegion({
         latitude: coordinate.latitude,
         longitude: coordinate.longitude,
@@ -179,13 +163,11 @@ export default function MapScreen() {
     }
   };
 
-  // Handle tap on existing pin
   const handlePinPress = useCallback((pin) => {
     setSelectedPin(pin);
     setShowPinActions(true);
   }, []);
 
-  // Pin action handlers
   const handleLogVisit = () => {
     setShowPinActions(false);
     if (selectedPin) {
@@ -201,7 +183,6 @@ export default function MapScreen() {
 
     if (success) {
       Alert.alert('Added', `${selectedPin.name} has been added to your wishlist.`);
-      // Update the pin to show it's in wishlist
       setUserPins(prev => prev.map(p =>
         p.id === selectedPin.id ? { ...p, inWishlist: true } : p
       ));
@@ -225,9 +206,7 @@ export default function MapScreen() {
     }
   };
 
-  // Manual entry handlers (from FAB menu)
   const handleManualEntry = async (wineryData, actionType) => {
-    // First create the winery
     const { success, winery, error } = await wineriesService.createWinery(wineryData);
 
     if (!success || !winery) {
@@ -235,14 +214,11 @@ export default function MapScreen() {
       return;
     }
 
-    // Add to user pins
     setUserPins(prev => [...prev, winery]);
 
     if (actionType === 'visit') {
-      // Navigate to winery page to log visit
       router.push(`/winery/${winery.id}`);
     } else if (actionType === 'wishlist') {
-      // Add to wishlist
       const { success: wishlistSuccess } = await wishlistService.addToWishlist(winery.id);
       if (wishlistSuccess) {
         Alert.alert('Added', `${winery.name} has been added to your wishlist.`);
@@ -257,16 +233,13 @@ export default function MapScreen() {
     setRegion(newRegion);
   };
 
-  // Get marker color based on pin status
   const getMarkerColor = (pin) => {
-    if (pin.hasVisit) return '#4CAF50'; // Green for visited
-    if (pin.inWishlist) return '#2196F3'; // Blue for wishlist
-    return '#8C1C13'; // Default wine color
+    if (pin.hasVisit) return colors.status.visited;
+    if (pin.inWishlist) return colors.status.wishlist;
+    return colors.primary.burgundy;
   };
 
-  // Render a winery pin marker
   const renderPinMarker = (pin) => {
-    // Android: Use standard marker with title (most reliable)
     if (Platform.OS === 'android') {
       return (
         <Marker
@@ -283,7 +256,6 @@ export default function MapScreen() {
       );
     }
 
-    // iOS: Use custom marker view (works well on iOS)
     return (
       <Marker
         key={pin.id}
@@ -295,24 +267,17 @@ export default function MapScreen() {
         onPress={() => handlePinPress(pin)}
       >
         <View style={styles.markerContainer}>
-          {/* Winery name label */}
           <View style={styles.markerLabelContainer}>
             <Text style={styles.markerLabel} numberOfLines={1}>
               {pin.name}
             </Text>
           </View>
-
-          {/* Pin icon */}
           <View style={[
             styles.wineryMarker,
             pin.hasVisit && styles.visitedMarker,
             pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
           ]}>
-            <Ionicons
-              name="wine"
-              size={16}
-              color="#FFFFFF"
-            />
+            <Ionicons name="wine" size={16} color={colors.neutral.cream} />
           </View>
         </View>
       </Marker>
@@ -330,14 +295,12 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={false}
       >
-        {/* Render user's pins */}
         {userPins.map(pin => renderPinMarker(pin))}
 
-        {/* Render temporary pin while naming */}
         {tempPin && (
           <Marker
             coordinate={tempPin}
-            pinColor="#8C1C13"
+            pinColor={colors.primary.burgundy}
           />
         )}
       </MapView>
@@ -346,17 +309,22 @@ export default function MapScreen() {
       <TouchableOpacity
         style={styles.fabButton}
         onPress={() => setShowFabMenu(!showFabMenu)}
+        activeOpacity={0.8}
       >
         <Ionicons
           name={showFabMenu ? "close" : "add"}
           size={28}
-          color="#fff"
+          color={colors.neutral.cream}
         />
       </TouchableOpacity>
 
       {/* FAB Menu */}
       {showFabMenu && (
         <View style={styles.fabMenu}>
+          <View style={styles.fabMenuHeader}>
+            <Text style={styles.fabMenuTitle}>Quick Actions</Text>
+          </View>
+
           <TouchableOpacity
             style={styles.fabMenuItem}
             onPress={() => {
@@ -364,9 +332,15 @@ export default function MapScreen() {
               setPendingAction('visit');
               setShowManualModal(true);
             }}
+            activeOpacity={0.7}
           >
-            <Ionicons name="wine" size={20} color="#8C1C13" />
-            <Text style={styles.fabMenuText}>Log Visit</Text>
+            <View style={[styles.fabMenuIcon, { backgroundColor: colors.primary.burgundy }]}>
+              <Ionicons name="wine" size={18} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.fabMenuContent}>
+              <Text style={styles.fabMenuText}>Log Visit</Text>
+              <Text style={styles.fabMenuSubtext}>Record a new winery visit</Text>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -376,17 +350,31 @@ export default function MapScreen() {
               setPendingAction('wishlist');
               setShowManualModal(true);
             }}
+            activeOpacity={0.7}
           >
-            <Ionicons name="bookmark" size={20} color="#8C1C13" />
-            <Text style={styles.fabMenuText}>Add to Wishlist</Text>
+            <View style={[styles.fabMenuIcon, { backgroundColor: colors.status.wishlist }]}>
+              <Ionicons name="bookmark" size={18} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.fabMenuContent}>
+              <Text style={styles.fabMenuText}>Add to Wishlist</Text>
+              <Text style={styles.fabMenuSubtext}>Save for later</Text>
+            </View>
           </TouchableOpacity>
+
+          <View style={styles.fabMenuDivider} />
 
           <TouchableOpacity
             style={styles.fabMenuItem}
             onPress={dropPinAtMyLocation}
+            activeOpacity={0.7}
           >
-            <Ionicons name="location" size={20} color="#8C1C13" />
-            <Text style={styles.fabMenuText}>Drop Pin Here</Text>
+            <View style={[styles.fabMenuIcon, { backgroundColor: colors.status.visited }]}>
+              <Ionicons name="location" size={18} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.fabMenuContent}>
+              <Text style={styles.fabMenuText}>Drop Pin Here</Text>
+              <Text style={styles.fabMenuSubtext}>Mark your current location</Text>
+            </View>
           </TouchableOpacity>
         </View>
       )}
@@ -395,20 +383,27 @@ export default function MapScreen() {
       <TouchableOpacity
         style={styles.locationButton}
         onPress={zoomToUserLocation}
+        activeOpacity={0.7}
       >
-        <Ionicons name="locate" size={24} color="#8C1C13" />
+        <Ionicons name="locate" size={22} color={colors.primary.burgundy} />
       </TouchableOpacity>
 
       {/* Hint text for first-time users */}
       {pinsLoaded && userPins.length === 0 && (
         <View style={styles.hintContainer}>
-          <Text style={styles.hintText}>
-            Long-press on the map to drop a pin, or tap + to get started
-          </Text>
+          <View style={styles.hintIcon}>
+            <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+          </View>
+          <View style={styles.hintContent}>
+            <Text style={styles.hintTitle}>Welcome to Bordeaux</Text>
+            <Text style={styles.hintText}>
+              Long-press on the map to drop a pin, or tap + to get started
+            </Text>
+          </View>
         </View>
       )}
 
-      {/* Pin Name Modal */}
+      {/* Modals */}
       <WineryNameModal
         visible={showNameModal}
         coordinate={tempPin}
@@ -419,7 +414,6 @@ export default function MapScreen() {
         onSave={handleSavePin}
       />
 
-      {/* Pin Action Modal */}
       <PinActionModal
         visible={showPinActions}
         winery={selectedPin}
@@ -433,7 +427,6 @@ export default function MapScreen() {
         onViewDetails={handleLogVisit}
       />
 
-      {/* Manual Entry Modal */}
       <ManualWineryEntryModal
         visible={showManualModal}
         actionType={pendingAction}
@@ -451,125 +444,173 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
+  // Marker Styles
   markerContainer: {
     alignItems: 'center',
   },
   markerLabelContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
+    backgroundColor: colors.neutral.cream,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
     marginBottom: 4,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.gold.muted,
     maxWidth: 140,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    ...shadows.soft,
   },
   markerLabel: {
-    fontSize: Platform.OS === 'android' ? 11 : 10,
+    fontSize: 11,
     fontWeight: '600',
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
     textAlign: 'center',
+    fontFamily: 'Georgia',
   },
   wineryMarker: {
-    backgroundColor: '#8C1C13',
-    padding: Platform.OS === 'android' ? 8 : 6,
+    backgroundColor: colors.primary.burgundy,
+    padding: 6,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
-    width: Platform.OS === 'android' ? 40 : 32,
-    height: Platform.OS === 'android' ? 40 : 32,
+    borderColor: colors.neutral.cream,
+    width: 32,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
+    ...shadows.medium,
   },
   visitedMarker: {
-    backgroundColor: '#4CAF50', // Green for visited
+    backgroundColor: colors.status.visited,
   },
   wishlistMarker: {
-    backgroundColor: '#2196F3', // Blue for wishlist
+    backgroundColor: colors.status.wishlist,
   },
+
+  // FAB Button
   fabButton: {
     position: 'absolute',
-    bottom: 20,
-    left: 15,
-    backgroundColor: '#8C1C13',
+    bottom: 24,
+    left: 16,
+    backgroundColor: colors.primary.burgundy,
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 6,
+    borderWidth: 2,
+    borderColor: colors.gold.muted,
+    ...shadows.medium,
   },
+
+  // FAB Menu
   fabMenu: {
     position: 'absolute',
-    bottom: 90,
-    left: 15,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 6,
-    minWidth: 160,
+    bottom: 92,
+    left: 16,
+    backgroundColor: colors.neutral.cream,
+    borderRadius: borderRadius.lg,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    minWidth: 220,
+    ...shadows.strong,
+  },
+  fabMenuHeader: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral.linen,
+    marginBottom: spacing.xs,
+  },
+  fabMenuTitle: {
+    ...typography.body.caption,
+    color: colors.gold.shimmer,
   },
   fabMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 8,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
   },
-  fabMenuText: {
-    marginLeft: 12,
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#3E3E3E',
-  },
-  locationButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 15,
-    backgroundColor: '#fff',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  fabMenuIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
+    marginRight: spacing.md,
   },
+  fabMenuContent: {
+    flex: 1,
+  },
+  fabMenuText: {
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
+    fontWeight: '500',
+  },
+  fabMenuSubtext: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginTop: 1,
+  },
+  fabMenuDivider: {
+    height: 1,
+    backgroundColor: colors.neutral.linen,
+    marginVertical: spacing.xs,
+  },
+
+  // Location Button
+  locationButton: {
+    position: 'absolute',
+    bottom: 24,
+    right: 16,
+    backgroundColor: colors.neutral.cream,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    ...shadows.soft,
+  },
+
+  // Hint Container
   hintContainer: {
     position: 'absolute',
     top: 60,
-    left: 20,
-    right: 20,
-    backgroundColor: 'rgba(140, 28, 19, 0.9)',
-    padding: 14,
-    borderRadius: 10,
+    left: 16,
+    right: 16,
+    backgroundColor: colors.primary.burgundy,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    ...shadows.medium,
+  },
+  hintIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  hintContent: {
+    flex: 1,
+  },
+  hintTitle: {
+    ...typography.body.regular,
+    color: colors.neutral.cream,
+    fontWeight: '600',
+    fontFamily: 'Georgia',
+    marginBottom: 2,
   },
   hintText: {
-    color: '#fff',
-    fontSize: 14,
-    textAlign: 'center',
-    fontWeight: '500',
+    ...typography.body.small,
+    color: colors.primary.rosé,
   },
 });

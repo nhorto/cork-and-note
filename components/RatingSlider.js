@@ -1,7 +1,11 @@
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { Slider } from '@miblanchard/react-native-slider';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import theme from '../styles/theme';
+
+const { colors, typography, spacing, borderRadius } = theme;
 
 const RatingSlider = ({ 
   label, 
@@ -40,16 +44,16 @@ const RatingSlider = ({
 
     for (let i = 0; i < 5; i++) {
       let iconName = 'star-outline';
-      let iconColor = '#B0B0B0'; // Light gray for empty stars
-      
+      let iconColor = colors.neutral.silver; // Light for empty stars
+
       if (i < fullStars) {
         iconName = 'star';
-        iconColor = '#FF8C00'; // Bright orange for filled stars
+        iconColor = colors.gold.rich; // Gold for filled stars
       } else if (i === fullStars && hasHalfStar) {
         iconName = 'star-half';
-        iconColor = '#FF8C00'; // Bright orange for half stars
+        iconColor = colors.gold.rich; // Gold for half stars
       }
-      
+
       stars.push(
         <View key={i} style={styles.starWrapper}>
           <Ionicons
@@ -81,8 +85,8 @@ const RatingSlider = ({
           onValueChange={handleValueChange}
           thumbStyle={styles.thumb}
           trackStyle={styles.track}
-          minimumTrackTintColor="#8C1C13"
-          maximumTrackTintColor="#f0f0f0"
+          minimumTrackTintColor={colors.primary.burgundy}
+          maximumTrackTintColor={colors.neutral.linen}
           containerStyle={styles.sliderWrapper}
         />
       </View>
@@ -94,23 +98,23 @@ const RatingSlider = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
+    marginVertical: spacing.sm,
   },
   labelContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   label: {
-    fontSize: 15,
+    ...typography.body.regular,
     fontWeight: '500',
-    color: '#444',
+    color: colors.neutral.charcoal,
   },
   valueText: {
-    fontSize: 15,
+    ...typography.body.regular,
     fontWeight: 'bold',
-    color: '#666',
+    color: colors.neutral.graphite,
   },
   sliderContainer: {
     height: 40,
@@ -128,23 +132,25 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#8C1C13',
+    backgroundColor: colors.primary.burgundy,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 4,
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: colors.neutral.cream,
   },
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 15,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: 25,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    marginTop: spacing.md,
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
   },
   starWrapper: {
     marginHorizontal: 3,
@@ -155,7 +161,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   starIcon: {
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowColor: 'rgba(0, 0, 0, 0.15)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },

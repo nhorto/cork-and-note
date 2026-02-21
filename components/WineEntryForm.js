@@ -1,4 +1,5 @@
 // Updated WineEntryForm.js with multiple photos support
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
@@ -15,10 +16,13 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import theme from '../styles/theme';
 
 import AutocompleteVarietal from './AutocompleteVarietal';
 import FlavorTagSelector from './FlavorTagSelector';
 import RatingSlider from './RatingSlider';
+
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 const WINE_TYPES = [
   'Red', 'White', 'Rosé', 'Sparkling', 'Dessert',
@@ -460,35 +464,35 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E7E3E2',
-    padding: 16,
+    backgroundColor: colors.neutral.cream,
+    padding: spacing.lg,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#3E3E3E',
-    marginBottom: 16,
+    ...typography.heading.h3,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+    marginBottom: spacing.md,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: spacing.md,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
-    color: '#3E3E3E',
+    ...typography.body.caption,
+    color: colors.gold.shimmer,
+    marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 15,
-    backgroundColor: '#f4f1ef',
-    color: '#3E3E3E',
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    ...typography.body.regular,
+    backgroundColor: colors.neutral.parchment,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
   },
   textArea: {
     height: 120,
@@ -499,149 +503,161 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#f4f1ef',
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    backgroundColor: colors.neutral.parchment,
   },
   selectorText: {
-    fontSize: 15,
-    color: '#3E3E3E',
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
   },
+
+  // Photo Buttons
   photoButtons: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
+    gap: spacing.md,
+    marginBottom: spacing.md,
   },
   photoButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: '#8C1C13',
+    gap: spacing.sm,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary.burgundy,
   },
   photoButtonText: {
-    color: '#E7E3E2',
+    ...typography.body.regular,
+    color: colors.neutral.cream,
     fontWeight: '500',
   },
   noPhotosContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
-    backgroundColor: '#f4f1ef',
-    borderRadius: 8,
+    padding: spacing.xl,
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
     borderStyle: 'dashed',
   },
   noPhotosText: {
-    marginTop: 8,
-    color: '#999',
-    fontSize: 14,
+    ...typography.body.small,
+    marginTop: spacing.sm,
+    color: colors.neutral.silver,
   },
   photoGallery: {
-    backgroundColor: '#f4f1ef',
-    borderRadius: 8,
-    padding: 8,
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
   },
   photoContainer: {
     position: 'relative',
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   photoThumbnail: {
     width: 80,
     height: 80,
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   removePhotoButton: {
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: '#fff',
+    backgroundColor: colors.neutral.cream,
     borderRadius: 12,
   },
+
+  // Action Buttons
   actionButtons: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 24,
-    marginBottom: 32,
+    gap: spacing.md,
+    marginTop: spacing.xl,
+    marginBottom: spacing.xxl,
   },
   cancelButton: {
     flex: 1,
-    padding: 16,
-    borderRadius: 8,
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: '#8C1C13',
+    borderColor: colors.neutral.stone,
     alignItems: 'center',
+    backgroundColor: colors.neutral.parchment,
   },
   cancelButtonText: {
-    color: '#8C1C13',
-    fontSize: 16,
+    ...typography.body.regular,
+    color: colors.neutral.graphite,
     fontWeight: '600',
   },
   saveButton: {
     flex: 1,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#8C1C13',
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary.burgundy,
     alignItems: 'center',
   },
   saveButtonText: {
-    color: '#E7E3E2',
-    fontSize: 16,
+    ...typography.body.regular,
+    color: colors.neutral.cream,
     fontWeight: '600',
   },
+
+  // Wine Type Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: colors.overlay.dark,
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#E7E3E2',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: colors.neutral.cream,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
     maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: colors.neutral.linen,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#3E3E3E',
+    ...typography.heading.h3,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
   },
   typeOption: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.neutral.linen,
   },
   selectedTypeOption: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.neutral.parchment,
   },
   typeOptionText: {
-    fontSize: 16,
-    color: '#3E3E3E',
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
   },
   selectedTypeOptionText: {
     fontWeight: '600',
-    color: '#8C1C13',
+    color: colors.primary.burgundy,
   },
+
+  // Photo Modal
   photoModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -650,7 +666,7 @@ const styles = StyleSheet.create({
     top: 50,
     right: 20,
     zIndex: 1,
-    padding: 8,
+    padding: spacing.sm,
   },
   photoModalContainer: {
     width: 400,
@@ -667,13 +683,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 50,
     alignSelf: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: colors.overlay.dark,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
   },
   photoModalText: {
-    color: '#fff',
-    fontSize: 14,
+    ...typography.body.regular,
+    color: colors.neutral.cream,
   },
 });
