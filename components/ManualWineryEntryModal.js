@@ -59,8 +59,8 @@ const ManualWineryEntryModal = ({
     try {
       await onSave({
         name: name.trim(),
-        latitude: location?.latitude || 44.8378,
-        longitude: location?.longitude || -0.5792,
+        latitude: location?.latitude || 37.4316,
+        longitude: location?.longitude || -78.6569,
       }, actionType);
 
       setName('');
@@ -160,7 +160,7 @@ const ManualWineryEntryModal = ({
                     <View>
                       <Text style={styles.locationLabel}>Use Current Location</Text>
                       <Text style={styles.locationSubtext}>
-                        {useCurrentLocation ? 'GPS coordinates will be saved' : 'Will use default Bordeaux location'}
+                        {useCurrentLocation ? 'GPS coordinates will be saved' : 'Will use a default location'}
                       </Text>
                     </View>
                   </View>

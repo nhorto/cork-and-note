@@ -1,4 +1,4 @@
-// app/(tabs)/map.js - France/Bordeaux Trip Version
+// app/(tabs)/map.js
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
@@ -19,12 +19,13 @@ export default function MapScreen() {
   const router = useRouter();
   const mapRef = useRef(null);
 
-  // Region state - centered on Bordeaux, France
+  // Region state - falls back to a wide Virginia view until the user's
+  // location resolves, then re-centers on the user (see effect below).
   const [region, setRegion] = useState({
-    latitude: 44.8378,
-    longitude: -0.5792,
-    latitudeDelta: 1.5,
-    longitudeDelta: 1.5,
+    latitude: 37.4316, // Approximate center of Virginia
+    longitude: -78.6569,
+    latitudeDelta: 5, // Wider delta to show the whole state
+    longitudeDelta: 5,
   });
 
   const [userLocation, setUserLocation] = useState(null);
@@ -64,10 +65,20 @@ export default function MapScreen() {
         const loc = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced
         });
-        setUserLocation({
+        const coords = {
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude
-        });
+        };
+        setUserLocation(coords);
+
+        // Center the map on the user's location once we have it.
+        const userRegion = {
+          ...coords,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        };
+        setRegion(userRegion);
+        mapRef.current?.animateToRegion(userRegion, 1000);
       } catch (error) {
         console.error('Error getting location:', error);
       }
@@ -395,7 +406,7 @@ export default function MapScreen() {
             <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
           </View>
           <View style={styles.hintContent}>
-            <Text style={styles.hintTitle}>Welcome to Bordeaux</Text>
+            <Text style={styles.hintTitle}>Welcome</Text>
             <Text style={styles.hintText}>
               Long-press on the map to drop a pin, or tap + to get started
             </Text>
