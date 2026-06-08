@@ -40,10 +40,10 @@ export default function LoginScreen() {
       if (error) {
         Alert.alert('Error', error.message);
       } else {
-        // Navigation will be handled by the AuthContext and index.js
-        setTimeout(() => {
-          router.replace('/(tabs)/map');
-        }, 100);
+        // ← REMOVE MANUAL NAVIGATION - Let index.js handle it
+        console.log('✅ Login successful, auth context will handle navigation');
+        // Navigation will be handled automatically by the AuthContext and index.js
+        // No manual navigation needed here!
       }
     } catch (error) {
       Alert.alert('Error', error.message);
@@ -80,6 +80,7 @@ export default function LoginScreen() {
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
+              placeholderTextColor='#8a8484'
             />
           </View>
 
@@ -91,6 +92,7 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
+              placeholderTextColor='#8a8484'
             />
             <TouchableOpacity
               style={styles.visibilityIcon}
@@ -211,6 +213,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
+    color: '#333'
   },
   visibilityIcon: {
     padding: 4,

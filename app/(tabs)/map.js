@@ -1,457 +1,627 @@
-// import { useRouter } from 'expo-router';
-// import { useEffect, useMemo, useRef, useState } from 'react';
-// import { Text, View } from 'react-native';
-// import MapView, { Marker } from 'react-native-maps';
-// import Supercluster from 'supercluster';
-// import wineries from '../../data/wineries_with_coordinates_and_id.json';
-
-// export default function MapScreen() {
-//   const router = useRouter();
-//   const mapRef = useRef(null);
-//   const [clusters, setClusters] = useState([]);
-//   const [region, setRegion] = useState({
-//     latitude: 37.4316, // Approximate center of Virginia
-//     longitude: -78.6569,
-//     latitudeDelta: 5,  // Wider delta to show the whole state
-//     longitudeDelta: 5,
-//   });
-//    // Convert wineries to GeoJSON format for Supercluster - memoized to prevent recalculation
-//   const points = useMemo(() => {
-//     return wineries.map(winery => ({
-//       type: 'Feature',
-//       properties: { cluster: false, wineryId: winery.id, name: winery.name },
-//       geometry: {
-//         type: 'Point',
-//         coordinates: [winery.longitude, winery.latitude]
-//       }
-//     }));
-//   }, [wineries]);
-
-//   // Create supercluster instance - memoized to prevent recreation
-//   const supercluster = useMemo(() => {
-//     const instance = new Supercluster({
-//       radius: 40,
-//       maxZoom: 16
-//     });
-//     instance.load(points);
-//     return instance;
-//   }, [points]);
-
-//   // Update clusters when region changes, using a memoized function
-//   const updateClusters = useMemo(() => {
-//     return (newRegion) => {
-//       // Get map bounds
-//       const northEast = {
-//         latitude: newRegion.latitude + newRegion.latitudeDelta/2,
-//         longitude: newRegion.longitude + newRegion.longitudeDelta/2
-//       };
-//       const southWest = {
-//         latitude: newRegion.latitude - newRegion.latitudeDelta/2,
-//         longitude: newRegion.longitude - newRegion.longitudeDelta/2
-//       };
-//       const bounds = [
-//         southWest.longitude, southWest.latitude, 
-//         northEast.longitude, northEast.latitude
-//       ];
-
-//       const zoom = Math.log2(360 / newRegion.longitudeDelta) - 1;
-//       const newClusters = supercluster.getClusters(bounds, Math.floor(zoom));
-//       setClusters(newClusters);
-//     };
-//   }, [supercluster]);
-
-//   // Update clusters when region changes
-//   useEffect(() => {
-//     updateClusters(region);
-//   }, [region, updateClusters]);
-
-//   // Use useLayoutEffect to measure and update before painting to prevent flickering
-//   useEffect(() => {
-//     // Only run once on mount to set initial clusters
-//     updateClusters(region);
-//   }, []);
-
-//   const onRegionChangeComplete = (newRegion) => {
-//     setRegion(newRegion);
-//   };
-
-//   // Memoize cluster rendering to prevent flickering
-//   const renderCluster = useMemo(() => {
-//     return (cluster) => {
-//       const { cluster_id, point_count } = cluster.properties;
-      
-//       return (
-//         <Marker
-//           key={`cluster-${cluster_id}`}
-//           coordinate={{
-//             latitude: cluster.geometry.coordinates[1],
-//             longitude: cluster.geometry.coordinates[0]
-//           }}
-//           onPress={() => {
-//             // Zoom in on cluster when pressed
-//             const children = supercluster.getLeaves(cluster_id, 100);
-//             const childrenCoordinates = children.map(child => ({
-//               latitude: child.geometry.coordinates[1],
-//               longitude: child.geometry.coordinates[0]
-//             }));
-            
-//             mapRef.current.fitToCoordinates(childrenCoordinates, {
-//               edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-//               animated: true
-//             });
-//           }}
-//         >
-//           <View style={{
-//             width: 35,
-//             height: 35,
-//             borderRadius: 20, // Make sure this is half the width/height for a perfect circle
-//             backgroundColor: '#8C1C13',
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//             borderWidth: 2,
-//             borderColor: '#3E3E3E', // Add a border to make it more visible
-//             // Add a shadow for better visibility
-//             shadowColor: '#000',
-//             shadowOffset: { width: 0, height: 1 },
-//             shadowOpacity: 0.3,
-//             shadowRadius: 1,
-//             elevation: 5 // For Android
-//           }}>
-//             <Text style={{ 
-//               color: '#fff', 
-//               fontWeight: 'bold',
-//               fontSize: 14,
-//               textAlign: 'center'
-//             }}>
-//               {point_count}
-//             </Text>
-//           </View>
-//         </Marker>
-//       );
-//     };
-//   }, [supercluster]);
-
-//   // Memoize marker rendering to prevent flickering
-//   const renderMarker = useMemo(() => {
-//     return (cluster) => {
-//       return (
-//         <Marker
-//           key={cluster.properties.wineryId}
-//           coordinate={{
-//             latitude: cluster.geometry.coordinates[1],
-//             longitude: cluster.geometry.coordinates[0]
-//           }}
-//           title={cluster.properties.name}
-//           onPress={() => router.push(`/winery/${cluster.properties.wineryId}`)}
-//         />
-//       );
-//     };
-//   }, [router]);
-
-//   return (
-//     <MapView
-//       ref={mapRef}
-//       style={{ flex: 1 }}
-//       region={region}
-//       onRegionChangeComplete={onRegionChangeComplete}
-//     >
-//       {clusters.map(cluster => {
-//         // Render a cluster marker if a cluster
-//         if (cluster.properties.cluster) {
-//           return renderCluster(cluster);
-//         }
-        
-//         // Render a single marker if not
-//         return renderMarker(cluster);
-//       })}
-//     </MapView>
-//   );
-// }
-
-// uncomment this to get it just have a placeholder screen
-// import { StyleSheet, Text, View } from 'react-native';
-
-// export default function map() {
-//   return (
-//     <View style={{ flex: 1 }}>
-//       <Text>This is a placeholder until i can get the map to work</Text>
-//     </View>
-//   );
-// }
-
-// TESET TO SEE IF I CAN GET THE MAP TO WORK AS A WEBAPP!!
 // app/(tabs)/map.js
+// Château Label Design - Elegant & Refined
+import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { View, Text, Platform, StyleSheet } from 'react-native';
-import wineries from '../../data/wineries_with_coordinates_and_id.json';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
+import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
+import PinActionModal from '../../components/PinActionModal';
+import WineryNameModal from '../../components/WineryNameModal';
+import { wineriesService } from '../../lib/wineries';
+import { wishlistService } from '../../lib/wishlist';
+import theme from '../../styles/theme';
+
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 export default function MapScreen() {
   const router = useRouter();
-  const webViewRef = useRef(null);
+  const mapRef = useRef(null);
 
-  if (Platform.OS === 'web') {
-    return <WebMap wineries={wineries} router={router} />;
-  }
+  // Region state - falls back to a wide Virginia view until the user's
+  // location resolves, then re-centers on the user (see effect below).
+  const [region, setRegion] = useState({
+    latitude: 37.4316, // Approximate center of Virginia
+    longitude: -78.6569,
+    latitudeDelta: 5, // Wider delta to show the whole state
+    longitudeDelta: 5,
+  });
 
-  // For native platforms, you could implement a native map or show a message
-  return (
-    <View style={styles.container}>
-      <Text>Map not available on this platform</Text>
-    </View>
-  );
-}
-
-// Web-specific map component
-function WebMap({ wineries, router }) {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [userPins, setUserPins] = useState([]);
+  const [pinsLoaded, setPinsLoaded] = useState(false);
+  const [tempPin, setTempPin] = useState(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [selectedPin, setSelectedPin] = useState(null);
+  const [showPinActions, setShowPinActions] = useState(false);
+  const [showFabMenu, setShowFabMenu] = useState(false);
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
 
   useEffect(() => {
-    // Only run on web
-    if (typeof window === 'undefined') return;
+    loadUserPins();
+  }, []);
 
-    // Get Mapbox token from environment variable
-    const mapboxToken = process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN;
-    
-    if (!mapboxToken) {
-      console.error('Mapbox access token not found. Please add EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN to your environment variables.');
+  const loadUserPins = async () => {
+    try {
+      const { success, wineries } = await wineriesService.getUserWineries();
+      if (success) {
+        setUserPins(wineries);
+      }
+    } catch (error) {
+      console.error('Error loading user pins:', error);
+    } finally {
+      setPinsLoaded(true);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') return;
+
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced
+        });
+        const coords = {
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude
+        };
+        setUserLocation(coords);
+
+        // Center the map on the user's location once we have it.
+        const userRegion = {
+          ...coords,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        };
+        setRegion(userRegion);
+        mapRef.current?.animateToRegion(userRegion, 1000);
+      } catch (error) {
+        console.error('Error getting location:', error);
+      }
+    })();
+  }, []);
+
+  const zoomToUserLocation = async () => {
+    if (!userLocation) {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Location permission is required.');
+          return;
+        }
+
+        const loc = await Location.getCurrentPositionAsync({});
+        const userLoc = {
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude
+        };
+        setUserLocation(userLoc);
+
+        mapRef.current?.animateToRegion({
+          ...userLoc,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }, 1000);
+      } catch (error) {
+        Alert.alert('Location Error', 'Unable to get your current location.');
+      }
+    } else {
+      mapRef.current?.animateToRegion({
+        ...userLocation,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      }, 1000);
+    }
+  };
+
+  const handleMapLongPress = useCallback((event) => {
+    const { coordinate } = event.nativeEvent;
+    setTempPin(coordinate);
+    setShowNameModal(true);
+  }, []);
+
+  const dropPinAtMyLocation = async () => {
+    setShowFabMenu(false);
+
+    if (userLocation) {
+      setTempPin(userLocation);
+      setShowNameModal(true);
+    } else {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert('Permission Denied', 'Location permission is required to drop a pin.');
+          return;
+        }
+
+        const loc = await Location.getCurrentPositionAsync({});
+        const coordinate = {
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude
+        };
+        setUserLocation(coordinate);
+        setTempPin(coordinate);
+        setShowNameModal(true);
+      } catch (error) {
+        Alert.alert('Location Error', 'Unable to get your current location.');
+      }
+    }
+  };
+
+  const handleSavePin = async (name, coordinate) => {
+    const { success, winery, error } = await wineriesService.createWinery({
+      name,
+      latitude: coordinate.latitude,
+      longitude: coordinate.longitude
+    });
+
+    if (success && winery) {
+      setUserPins(prev => [...prev, winery]);
+      setTempPin(null);
+
+      mapRef.current?.animateToRegion({
+        latitude: coordinate.latitude,
+        longitude: coordinate.longitude,
+        latitudeDelta: 0.1,
+        longitudeDelta: 0.1,
+      }, 500);
+    } else {
+      Alert.alert('Error', error || 'Failed to save pin. Please try again.');
+    }
+  };
+
+  const handlePinPress = useCallback((pin) => {
+    setSelectedPin(pin);
+    setShowPinActions(true);
+  }, []);
+
+  const handleLogVisit = () => {
+    setShowPinActions(false);
+    if (selectedPin) {
+      router.push(`/winery/${selectedPin.id}`);
+    }
+  };
+
+  const handleAddPinToWishlist = async () => {
+    if (!selectedPin) return;
+
+    const { success, error } = await wishlistService.addToWishlist(selectedPin.id);
+    setShowPinActions(false);
+
+    if (success) {
+      Alert.alert('Added', `${selectedPin.name} has been added to your wishlist.`);
+      setUserPins(prev => prev.map(p =>
+        p.id === selectedPin.id ? { ...p, inWishlist: true } : p
+      ));
+    } else if (error?.includes('already')) {
+      Alert.alert('Already Added', `${selectedPin.name} is already in your wishlist.`);
+    } else {
+      Alert.alert('Error', 'Failed to add to wishlist.');
+    }
+  };
+
+  const handleRemovePin = async () => {
+    if (!selectedPin) return;
+
+    const { success, error } = await wineriesService.deleteWinery(selectedPin.id);
+    setShowPinActions(false);
+
+    if (success) {
+      setUserPins(prev => prev.filter(p => p.id !== selectedPin.id));
+    } else {
+      Alert.alert('Cannot Remove', error || 'Failed to remove pin.');
+    }
+  };
+
+  const handleManualEntry = async (wineryData, actionType) => {
+    const { success, winery, error } = await wineriesService.createWinery(wineryData);
+
+    if (!success || !winery) {
+      Alert.alert('Error', error || 'Failed to create winery.');
       return;
     }
 
-    // Dynamically load Mapbox GL JS
-    const loadMapbox = async () => {
-      // Load CSS
-      if (!document.querySelector('link[href*="mapbox-gl.css"]')) {
-        const link = document.createElement('link');
-        link.href = 'https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.css';
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
+    setUserPins(prev => [...prev, winery]);
+
+    if (actionType === 'visit') {
+      router.push(`/winery/${winery.id}`);
+    } else if (actionType === 'wishlist') {
+      const { success: wishlistSuccess } = await wishlistService.addToWishlist(winery.id);
+      if (wishlistSuccess) {
+        Alert.alert('Added', `${winery.name} has been added to your wishlist.`);
+        setUserPins(prev => prev.map(p =>
+          p.id === winery.id ? { ...p, inWishlist: true } : p
+        ));
       }
+    }
+  };
 
-      // Load JS
-      if (!window.mapboxgl) {
-        const script = document.createElement('script');
-        script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.8.2/mapbox-gl.js';
-        document.head.appendChild(script);
-        
-        await new Promise((resolve) => {
-          script.onload = resolve;
-        });
-      }
+  const onRegionChangeComplete = (newRegion) => {
+    setRegion(newRegion);
+  };
 
-      // Initialize map
-      window.mapboxgl.accessToken = mapboxToken;
-      
-      map.current = new window.mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v11',
-        center: [-78.6569, 37.4316], // Virginia center
-        zoom: 7
-      });
+  const getMarkerColor = (pin) => {
+    if (pin.hasVisit) return colors.status.visited;
+    if (pin.inWishlist) return colors.status.wishlist;
+    return colors.primary.burgundy;
+  };
 
-      // Wait for map to load
-      map.current.on('load', () => {
-        addWineryMarkers();
-        addClustering();
-      });
-    };
+  const renderPinMarker = (pin) => {
+    if (Platform.OS === 'android') {
+      return (
+        <Marker
+          key={pin.id}
+          coordinate={{
+            latitude: pin.latitude,
+            longitude: pin.longitude
+          }}
+          pinColor={getMarkerColor(pin)}
+          title={pin.name}
+          description="Tap for options"
+          onPress={() => handlePinPress(pin)}
+        />
+      );
+    }
 
-    const addWineryMarkers = () => {
-      // Add wineries as a source
-      map.current.addSource('wineries', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: wineries.map(winery => ({
-            type: 'Feature',
-            properties: {
-              id: winery.id,
-              name: winery.name,
-              address: winery.address,
-              website: winery.website
-            },
-            geometry: {
-              type: 'Point',
-              coordinates: [winery.longitude, winery.latitude]
-            }
-          }))
-        },
-        cluster: true,
-        clusterMaxZoom: 14,
-        clusterRadius: 50
-      });
-    };
-
-    const addClustering = () => {
-      // Add cluster layer
-      map.current.addLayer({
-        id: 'clusters',
-        type: 'circle',
-        source: 'wineries',
-        filter: ['has', 'point_count'],
-        paint: {
-          'circle-color': [
-            'step',
-            ['get', 'point_count'],
-            '#8C1C13',
-            100,
-            '#f1f075',
-            750,
-            '#f28cb1'
-          ],
-          'circle-radius': [
-            'step',
-            ['get', 'point_count'],
-            20,
-            100,
-            30,
-            750,
-            40
-          ]
-        }
-      });
-
-      // Add cluster count labels
-      map.current.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'wineries',
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-field': '{point_count_abbreviated}',
-          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 12
-        },
-        paint: {
-          'text-color': '#ffffff'
-        }
-      });
-
-      // Add unclustered points
-      map.current.addLayer({
-        id: 'unclustered-point',
-        type: 'circle',
-        source: 'wineries',
-        filter: ['!', ['has', 'point_count']],
-        paint: {
-          'circle-color': '#8C1C13',
-          'circle-radius': 8,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#3E3E3E'
-        }
-      });
-
-      // Add click events
-      map.current.on('click', 'clusters', (e) => {
-        const features = map.current.queryRenderedFeatures(e.point, {
-          layers: ['clusters']
-        });
-        const clusterId = features[0].properties.cluster_id;
-        map.current.getSource('wineries').getClusterExpansionZoom(
-          clusterId,
-          (err, zoom) => {
-            if (err) return;
-
-            map.current.easeTo({
-              center: features[0].geometry.coordinates,
-              zoom: zoom
-            });
-          }
-        );
-      });
-
-      map.current.on('click', 'unclustered-point', (e) => {
-        const coordinates = e.features[0].geometry.coordinates.slice();
-        const properties = e.features[0].properties;
-
-        // Ensure popup appears on top of marker
-        while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-          coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-        }
-
-        // Create popup content
-        const popupContent = `
-          <div style="padding: 10px; max-width: 200px;">
-            <h3 style="margin: 0 0 8px 0; font-size: 16px; color: #3E3E3E;">${properties.name}</h3>
-            <p style="margin: 0 0 10px 0; font-size: 12px; color: #666;">${properties.address}</p>
-            <button 
-              onclick="window.navigateToWinery(${properties.id})" 
-              style="
-                background: #8C1C13; 
-                color: white; 
-                border: none; 
-                padding: 8px 12px; 
-                border-radius: 4px; 
-                cursor: pointer;
-                font-size: 12px;
-                width: 100%;
-              "
-            >
-              View Details
-            </button>
-          </div>
-        `;
-
-        new window.mapboxgl.Popup()
-          .setLngLat(coordinates)
-          .setHTML(popupContent)
-          .addTo(map.current);
-      });
-
-      // Change cursor on hover
-      map.current.on('mouseenter', 'clusters', () => {
-        map.current.getCanvas().style.cursor = 'pointer';
-      });
-      map.current.on('mouseleave', 'clusters', () => {
-        map.current.getCanvas().style.cursor = '';
-      });
-      map.current.on('mouseenter', 'unclustered-point', () => {
-        map.current.getCanvas().style.cursor = 'pointer';
-      });
-      map.current.on('mouseleave', 'unclustered-point', () => {
-        map.current.getCanvas().style.cursor = '';
-      });
-    };
-
-    // Set up global navigation function for popup buttons
-    window.navigateToWinery = (wineryId) => {
-      router.push(`/winery/${wineryId}`);
-    };
-
-    loadMapbox().catch(console.error);
-
-    // Cleanup
-    return () => {
-      if (map.current) {
-        map.current.remove();
-      }
-      // Clean up global function
-      delete window.navigateToWinery;
-    };
-  }, [router]);
+    return (
+      <Marker
+        key={pin.id}
+        coordinate={{
+          latitude: pin.latitude,
+          longitude: pin.longitude
+        }}
+        tracksViewChanges={false}
+        onPress={() => handlePinPress(pin)}
+      >
+        <View style={styles.markerContainer}>
+          <View style={styles.markerLabelContainer}>
+            <Text style={styles.markerLabel} numberOfLines={1}>
+              {pin.name}
+            </Text>
+          </View>
+          <View style={[
+            styles.wineryMarker,
+            pin.hasVisit && styles.visitedMarker,
+            pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
+          ]}>
+            <Ionicons name="wine" size={16} color={colors.neutral.cream} />
+          </View>
+        </View>
+      </Marker>
+    );
+  };
 
   return (
-    <div 
-      ref={mapContainer} 
-      style={{ 
-        width: '100%', 
-        height: '100%',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0
-      }} 
-    />
+    <View style={styles.container}>
+      <MapView
+        ref={mapRef}
+        style={{ flex: 1 }}
+        region={region}
+        onRegionChangeComplete={onRegionChangeComplete}
+        onLongPress={handleMapLongPress}
+        showsUserLocation={true}
+        showsMyLocationButton={false}
+      >
+        {userPins.map(pin => renderPinMarker(pin))}
+
+        {tempPin && (
+          <Marker
+            coordinate={tempPin}
+            pinColor={colors.primary.burgundy}
+          />
+        )}
+      </MapView>
+
+      {/* FAB Button */}
+      <TouchableOpacity
+        style={styles.fabButton}
+        onPress={() => setShowFabMenu(!showFabMenu)}
+        activeOpacity={0.8}
+      >
+        <Ionicons
+          name={showFabMenu ? "close" : "add"}
+          size={28}
+          color={colors.neutral.cream}
+        />
+      </TouchableOpacity>
+
+      {/* FAB Menu */}
+      {showFabMenu && (
+        <View style={styles.fabMenu}>
+          <View style={styles.fabMenuHeader}>
+            <Text style={styles.fabMenuTitle}>Quick Actions</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.fabMenuItem}
+            onPress={() => {
+              setShowFabMenu(false);
+              setPendingAction('visit');
+              setShowManualModal(true);
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.fabMenuIcon, { backgroundColor: colors.primary.burgundy }]}>
+              <Ionicons name="wine" size={18} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.fabMenuContent}>
+              <Text style={styles.fabMenuText}>Log Visit</Text>
+              <Text style={styles.fabMenuSubtext}>Record a new winery visit</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.fabMenuItem}
+            onPress={() => {
+              setShowFabMenu(false);
+              setPendingAction('wishlist');
+              setShowManualModal(true);
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.fabMenuIcon, { backgroundColor: colors.status.wishlist }]}>
+              <Ionicons name="bookmark" size={18} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.fabMenuContent}>
+              <Text style={styles.fabMenuText}>Add to Wishlist</Text>
+              <Text style={styles.fabMenuSubtext}>Save for later</Text>
+            </View>
+          </TouchableOpacity>
+
+          <View style={styles.fabMenuDivider} />
+
+          <TouchableOpacity
+            style={styles.fabMenuItem}
+            onPress={dropPinAtMyLocation}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.fabMenuIcon, { backgroundColor: colors.status.visited }]}>
+              <Ionicons name="location" size={18} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.fabMenuContent}>
+              <Text style={styles.fabMenuText}>Drop Pin Here</Text>
+              <Text style={styles.fabMenuSubtext}>Mark your current location</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Location Button */}
+      <TouchableOpacity
+        style={styles.locationButton}
+        onPress={zoomToUserLocation}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="locate" size={22} color={colors.primary.burgundy} />
+      </TouchableOpacity>
+
+      {/* Hint text for first-time users */}
+      {pinsLoaded && userPins.length === 0 && (
+        <View style={styles.hintContainer}>
+          <View style={styles.hintIcon}>
+            <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+          </View>
+          <View style={styles.hintContent}>
+            <Text style={styles.hintTitle}>Welcome</Text>
+            <Text style={styles.hintText}>
+              Long-press on the map to drop a pin, or tap + to get started
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Modals */}
+      <WineryNameModal
+        visible={showNameModal}
+        coordinate={tempPin}
+        onClose={() => {
+          setShowNameModal(false);
+          setTempPin(null);
+        }}
+        onSave={handleSavePin}
+      />
+
+      <PinActionModal
+        visible={showPinActions}
+        winery={selectedPin}
+        onClose={() => {
+          setShowPinActions(false);
+          setSelectedPin(null);
+        }}
+        onLogVisit={handleLogVisit}
+        onAddToWishlist={handleAddPinToWishlist}
+        onRemovePin={handleRemovePin}
+        onViewDetails={handleLogVisit}
+      />
+
+      <ManualWineryEntryModal
+        visible={showManualModal}
+        actionType={pendingAction}
+        onClose={() => {
+          setShowManualModal(false);
+          setPendingAction(null);
+        }}
+        onSave={handleManualEntry}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+  },
+
+  // Marker Styles
+  markerContainer: {
     alignItems: 'center',
-    backgroundColor: '#E7E3E2',
+  },
+  markerLabelContainer: {
+    backgroundColor: colors.neutral.cream,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 4,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    maxWidth: 140,
+    ...shadows.soft,
+  },
+  markerLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.neutral.charcoal,
+    textAlign: 'center',
+    fontFamily: 'Georgia',
+  },
+  wineryMarker: {
+    backgroundColor: colors.primary.burgundy,
+    padding: 6,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: colors.neutral.cream,
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.medium,
+  },
+  visitedMarker: {
+    backgroundColor: colors.status.visited,
+  },
+  wishlistMarker: {
+    backgroundColor: colors.status.wishlist,
+  },
+
+  // FAB Button
+  fabButton: {
+    position: 'absolute',
+    bottom: 24,
+    left: 16,
+    backgroundColor: colors.primary.burgundy,
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.gold.muted,
+    ...shadows.medium,
+  },
+
+  // FAB Menu
+  fabMenu: {
+    position: 'absolute',
+    bottom: 92,
+    left: 16,
+    backgroundColor: colors.neutral.cream,
+    borderRadius: borderRadius.lg,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    minWidth: 220,
+    ...shadows.strong,
+  },
+  fabMenuHeader: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral.linen,
+    marginBottom: spacing.xs,
+  },
+  fabMenuTitle: {
+    ...typography.body.caption,
+    color: colors.gold.shimmer,
+  },
+  fabMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: borderRadius.md,
+  },
+  fabMenuIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  fabMenuContent: {
+    flex: 1,
+  },
+  fabMenuText: {
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
+    fontWeight: '500',
+  },
+  fabMenuSubtext: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginTop: 1,
+  },
+  fabMenuDivider: {
+    height: 1,
+    backgroundColor: colors.neutral.linen,
+    marginVertical: spacing.xs,
+  },
+
+  // Location Button
+  locationButton: {
+    position: 'absolute',
+    bottom: 24,
+    right: 16,
+    backgroundColor: colors.neutral.cream,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    ...shadows.soft,
+  },
+
+  // Hint Container
+  hintContainer: {
+    position: 'absolute',
+    top: 60,
+    left: 16,
+    right: 16,
+    backgroundColor: colors.primary.burgundy,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    ...shadows.medium,
+  },
+  hintIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  hintContent: {
+    flex: 1,
+  },
+  hintTitle: {
+    ...typography.body.regular,
+    color: colors.neutral.cream,
+    fontWeight: '600',
+    fontFamily: 'Georgia',
+    marginBottom: 2,
+  },
+  hintText: {
+    ...typography.body.small,
+    color: colors.primary.rosé,
   },
 });

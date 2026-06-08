@@ -1,6 +1,10 @@
 // components/WineCard.js
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import theme from '../styles/theme';
+
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 const WineCard = ({ wine, expanded = false, onPress }) => {
   if (!wine) return null;
@@ -10,20 +14,20 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
     switch (type.toLowerCase()) {
       case 'red':
       case 'red blend':
-        return '#8B0000';
+        return colors.primary.burgundy;
       case 'white':
       case 'white blend':
-        return '#F0E68C';
+        return colors.gold.rich;
       case 'rosé':
-        return '#FFB6C1';
+        return colors.primary.rosé;
       case 'sparkling':
-        return '#FFD700';
+        return colors.gold.shimmer;
       case 'dessert':
-        return '#D2691E';
+        return colors.gold.muted;
       case 'orange':
-        return '#FFA500';
+        return '#E8A259';
       default:
-        return '#8E2DE2';
+        return colors.primary.merlot;
     }
   };
 
@@ -42,11 +46,11 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
       }
       
       stars.push(
-        <Ionicons 
-          key={i} 
-          name={iconName} 
-          size={16} 
-          color="#FFD700" 
+        <Ionicons
+          key={i}
+          name={iconName}
+          size={16}
+          color={colors.gold.rich}
           style={{ marginRight: 2 }}
         />
       );
@@ -143,17 +147,22 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
       <View style={styles.headerContainer}>
         <View style={styles.titleContainer}>
           <Text style={styles.name} numberOfLines={1}>
-            {wineName}
+            {wineName || wineVarietal || wineType || 'Unnamed Wine'}
           </Text>
           <View style={styles.wineDetails}>
-            {wineVarietal && (
+            {!wineName && !wineVarietal && wineType && (
+              <Text style={styles.type}>
+                {wineType}
+              </Text>
+            )}
+            {wineName && wineVarietal && (
               <Text style={styles.varietal}>
                 {wineVarietal}
               </Text>
             )}
             {wineYear && (
               <Text style={styles.year}>
-                {wineVarietal ? ' • ' : ''}
+                {(wineName && wineVarietal) ? ' • ' : ''}
                 {wineYear}
               </Text>
             )}
@@ -196,159 +205,163 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: colors.neutral.cream,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    ...shadows.soft,
     borderLeftWidth: 5,
-    borderLeftColor: '#8E2DE2',
+    borderLeftColor: colors.primary.merlot,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   headerContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   titleContainer: {
     flex: 1,
-    marginRight: 10,
+    marginRight: spacing.sm,
   },
   name: {
-    fontSize: 18,
+    ...typography.body.regular,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+    fontSize: 17,
   },
   wineDetails: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: spacing.xs,
     flexWrap: 'wrap',
   },
   varietal: {
-    fontSize: 14,
-    color: '#8E2DE2',
+    ...typography.body.small,
+    color: colors.primary.burgundy,
     fontWeight: '500',
   },
   year: {
-    fontSize: 14,
-    color: '#666',
+    ...typography.body.small,
+    color: colors.neutral.pewter,
   },
   typeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
+    backgroundColor: colors.neutral.parchment,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   typeIndicator: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 6,
+    marginRight: spacing.xs,
   },
   type: {
-    fontSize: 14,
+    ...typography.body.small,
     fontWeight: '500',
-    color: '#555',
+    color: colors.neutral.graphite,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 5,
+    marginVertical: spacing.xs,
   },
   ratingLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginRight: 5,
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginRight: spacing.xs,
   },
   starContainer: {
     flexDirection: 'row',
-    marginRight: 5,
+    marginRight: spacing.xs,
   },
   ratingValue: {
-    fontSize: 14,
+    ...typography.body.small,
     fontWeight: 'bold',
-    color: '#666',
+    color: colors.neutral.graphite,
   },
   expandedContent: {
-    marginTop: 15,
+    marginTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 15,
+    borderTopColor: colors.neutral.linen,
+    paddingTop: spacing.md,
   },
   flavorContainer: {
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: 16,
+    ...typography.body.regular,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    color: colors.neutral.charcoal,
+    marginBottom: spacing.sm,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
   flavorTag: {
-    backgroundColor: 'rgba(142, 45, 226, 0.1)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
-    marginRight: 6,
-    marginBottom: 6,
+    backgroundColor: colors.primary.rosé,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    marginRight: spacing.xs,
+    marginBottom: spacing.xs,
   },
   flavorTagText: {
-    color: '#8E2DE2',
-    fontSize: 12,
+    ...typography.body.small,
+    color: colors.primary.burgundy,
     fontWeight: '500',
+    fontSize: 12,
   },
   attributesContainer: {
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   attributesList: {
-    marginTop: 5,
+    marginTop: spacing.xs,
   },
   attributeItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   attributeName: {
     width: 70,
-    fontSize: 14,
-    color: '#666',
+    ...typography.body.small,
+    color: colors.neutral.pewter,
   },
   attributeBarContainer: {
     flex: 1,
     height: 6,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.neutral.linen,
     borderRadius: 3,
-    marginHorizontal: 10,
+    marginHorizontal: spacing.sm,
     overflow: 'hidden',
   },
   attributeBar: {
     height: '100%',
-    backgroundColor: '#8E2DE2',
+    backgroundColor: colors.primary.burgundy,
     borderRadius: 3,
   },
   attributeValue: {
     width: 25,
-    fontSize: 13,
-    color: '#666',
+    ...typography.body.small,
+    color: colors.neutral.graphite,
     textAlign: 'right',
+    fontSize: 13,
   },
   notesContainer: {
-    marginBottom: 5,
+    marginBottom: spacing.xs,
   },
   notes: {
-    fontSize: 14,
-    color: '#666',
+    ...typography.body.regular,
+    color: colors.neutral.graphite,
     fontStyle: 'italic',
   },
 });

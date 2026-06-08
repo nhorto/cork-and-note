@@ -10,15 +10,37 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.corkandnote"
+      "bundleIdentifier": "com.nicholashorton.corkandnote",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "Cork & Note uses the camera to take photos of wines and wineries.",
+        "NSLocationWhenInUseUsageDescription": "Cork & Note uses your location to find nearby wineries and log visit locations.",
+        "NSPhotoLibraryUsageDescription": "Cork & Note accesses your photo library to save and select wine photos."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.yourcompany.corkandnote",
-      "edgeToEdgeEnabled": true
+      "package": "com.nicholashorton.corkandnote",
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCjWku9UYdqgXCYWQMGuBgAiJfme0sql70"
+        }
+      },
+      "statusBar": {
+        "style": "dark",
+        "translucent": false
+      }
     },
     "web": {
       "bundler": "metro",
@@ -35,10 +57,27 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-camera",
+      "expo-image-picker",
+      "expo-location",
+      "expo-media-library",
+      "expo-maps"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3338eff4-c93e-49be-b32c-e802c16d122c"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3338eff4-c93e-49be-b32c-e802c16d122c"
+      }
     }
   }
 }

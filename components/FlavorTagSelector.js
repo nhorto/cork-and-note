@@ -1,14 +1,18 @@
 // components/FlavorTagSelector.js
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  TextInput 
-} from 'react-native';
+// Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import theme from '../styles/theme';
+
+const { colors, typography, spacing, borderRadius } = theme;
 
 // Predefined flavor categories and notes
 const FLAVOR_CATEGORIES = {
@@ -105,13 +109,13 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
           <Text style={styles.noTagsText}>No flavor notes selected</Text>
         ) : (
           selectedTags.map((tag, index) => (
-            <TouchableOpacity 
-              key={index} 
+            <TouchableOpacity
+              key={index}
               style={styles.selectedTag}
               onPress={() => toggleTag(tag)}
             >
               <Text style={styles.selectedTagText}>{tag}</Text>
-              <Ionicons name="close-circle" size={16} color="#8E2DE2" style={styles.removeIcon} />
+              <Ionicons name="close-circle" size={16} color={colors.primary.burgundy} style={styles.removeIcon} />
             </TouchableOpacity>
           ))
         )}
@@ -120,20 +124,22 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
       {/* Search and Custom Tag Input */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={18} color="#8E2DE2" style={styles.searchIcon} />
+          <Ionicons name="search" size={18} color={colors.primary.burgundy} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search flavor notes..."
             value={searchQuery}
             onChangeText={setSearchQuery}
+            placeholderTextColor={colors.neutral.silver}
+            selectionColor={colors.primary.burgundy}
           />
           {searchQuery !== '' && (
             <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={18} color="#8E2DE2" />
+              <Ionicons name="close-circle" size={18} color={colors.primary.burgundy} />
             </TouchableOpacity>
           )}
         </View>
-        
+
         <View style={styles.customTagContainer}>
           <TextInput
             style={styles.customTagInput}
@@ -141,16 +147,18 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             value={customTag}
             onChangeText={setCustomTag}
             onSubmitEditing={addCustomTag}
+            placeholderTextColor={colors.neutral.silver}
+            selectionColor={colors.primary.burgundy}
           />
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.addButton}
             onPress={addCustomTag}
             disabled={customTag.trim() === ''}
           >
-            <Ionicons 
-              name="add-circle" 
-              size={24} 
-              color={customTag.trim() === '' ? '#ccc' : '#8E2DE2'} 
+            <Ionicons
+              name="add-circle"
+              size={24}
+              color={customTag.trim() === '' ? colors.neutral.stone : colors.primary.burgundy}
             />
           </TouchableOpacity>
         </View>
@@ -193,15 +201,15 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
         {Object.entries(filteredCategories).map(([category, tags]) => (
           <View key={category} style={styles.categorySection}>
             {searchQuery ? (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.categoryHeader}
                 onPress={() => toggleCategory(category)}
               >
                 <Text style={styles.categoryTitle}>{category}</Text>
-                <Ionicons 
-                  name={expandedCategories[category] ? "chevron-up" : "chevron-down"} 
-                  size={18} 
-                  color="#8E2DE2" 
+                <Ionicons
+                  name={expandedCategories[category] ? "chevron-up" : "chevron-down"}
+                  size={18}
+                  color={colors.primary.burgundy}
                 />
               </TouchableOpacity>
             ) : (
@@ -231,7 +239,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
                       {tag}
                     </Text>
                     {selectedTags.includes(tag) && (
-                      <Ionicons name="checkmark" size={14} color="#fff" style={styles.checkIcon} />
+                      <Ionicons name="checkmark" size={14} color={colors.neutral.cream} style={styles.checkIcon} />
                     )}
                   </TouchableOpacity>
                 ))}
@@ -246,152 +254,163 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 15,
+    marginVertical: spacing.md,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 10,
+    ...typography.body.caption,
+    color: colors.gold.shimmer,
+    marginBottom: spacing.sm,
   },
   selectedTagsScroll: {
     maxHeight: 50,
   },
   selectedTagsContainer: {
-    paddingVertical: 5,
-    paddingHorizontal: 5,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.xs,
   },
   noTagsText: {
+    ...typography.body.small,
     fontStyle: 'italic',
-    color: '#999',
-    paddingHorizontal: 5,
+    color: colors.neutral.silver,
+    paddingHorizontal: spacing.xs,
   },
   selectedTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(142, 45, 226, 0.1)',
-    borderRadius: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginRight: 8,
+    backgroundColor: colors.primary.rosé,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    marginRight: spacing.sm,
   },
   selectedTagText: {
-    color: '#8E2DE2',
+    ...typography.body.small,
+    color: colors.primary.burgundy,
     fontWeight: '500',
-    fontSize: 14,
   },
   removeIcon: {
-    marginLeft: 5,
+    marginLeft: spacing.xs,
   },
   searchContainer: {
-    marginVertical: 15,
+    marginVertical: spacing.md,
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: '#f9f9f9',
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.neutral.parchment,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   searchInput: {
     flex: 1,
-    paddingVertical: 10,
-    fontSize: 14,
+    paddingVertical: spacing.sm,
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
   },
   customTagContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: spacing.sm,
   },
   customTagInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: '#f9f9f9',
-    fontSize: 14,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.neutral.parchment,
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
   },
   addButton: {
-    marginLeft: 10,
-    padding: 5,
+    marginLeft: spacing.sm,
+    padding: spacing.xs,
   },
   categoryTabsScroll: {
     maxHeight: 44,
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   categoryTab: {
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    backgroundColor: '#f0f0f0',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.full,
+    marginRight: spacing.sm,
+    backgroundColor: colors.neutral.linen,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   activeCategoryTab: {
-    backgroundColor: '#8E2DE2',
+    backgroundColor: colors.primary.burgundy,
+    borderColor: colors.primary.burgundy,
   },
   categoryTabText: {
-    fontSize: 14,
-    color: '#666',
+    ...typography.body.small,
+    color: colors.neutral.graphite,
     fontWeight: '500',
   },
   activeCategoryTabText: {
-    color: '#fff',
+    color: colors.neutral.cream,
   },
   tagsScrollView: {
     maxHeight: 200,
   },
   categorySection: {
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   categoryHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6,
-    marginBottom: 8,
+    backgroundColor: colors.neutral.parchment,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   categoryTitle: {
-    fontSize: 15,
+    ...typography.body.regular,
     fontWeight: 'bold',
-    color: '#444',
-    marginBottom: 8,
+    color: colors.neutral.charcoal,
+    marginBottom: spacing.sm,
   },
   tagsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 5,
+    paddingHorizontal: spacing.xs,
   },
   tagButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 15,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginRight: 8,
-    marginBottom: 8,
+    backgroundColor: colors.neutral.linen,
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    marginRight: spacing.sm,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   selectedTagButton: {
-    backgroundColor: '#8E2DE2',
+    backgroundColor: colors.primary.burgundy,
+    borderColor: colors.primary.burgundy,
   },
   tagText: {
-    color: '#555',
-    fontSize: 13,
+    ...typography.body.small,
+    color: colors.neutral.graphite,
   },
   selectedTagButtonText: {
-    color: '#fff',
+    color: colors.neutral.cream,
   },
   checkIcon: {
-    marginLeft: 4,
+    marginLeft: spacing.xs,
   },
 });
 
