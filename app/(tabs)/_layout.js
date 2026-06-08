@@ -120,6 +120,16 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
+        name="sommelier"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="chatbubbles" color={color} focused={focused} size={iconSize} />
+          ),
+          title: 'Sommelier',
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ color, focused }) => (
