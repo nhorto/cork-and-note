@@ -21,6 +21,7 @@ import theme from '../styles/theme';
 import AutocompleteVarietal from './AutocompleteVarietal';
 import FlavorTagSelector from './FlavorTagSelector';
 import RatingSlider from './RatingSlider';
+import WineChatModal from './WineChatModal';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
@@ -51,6 +52,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [showChatModal, setShowChatModal] = useState(false);
   
   // Load initial data if editing an existing wine
   useEffect(() => {
@@ -191,6 +193,18 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
     setShowTypeModal(false);
   };
   
+  // Handle AI suggestions auto-fill
+  const handleUseSuggestions = (suggestions) => {
+    if (suggestions.wine_name) setWineName(suggestions.wine_name);
+    if (suggestions.wine_type) setWineType(suggestions.wine_type);
+    if (suggestions.varietal) setWineVarietal(suggestions.varietal);
+    if (suggestions.year) setWineYear(suggestions.year);
+    if (suggestions.flavor_tags && Array.isArray(suggestions.flavor_tags)) {
+      setFlavorNotes(suggestions.flavor_tags);
+    }
+    setShowChatModal(false);
+  };
+
   // Handle form submission
   const handleSave = () => {
     // Wine type is required
@@ -298,6 +312,16 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
             maxLength={4}
           />
         </View>
+
+        {/* Ask the Sommelier button */}
+        <TouchableOpacity
+          style={styles.sommelierButton}
+          onPress={() => setShowChatModal(true)}
+        >
+          <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
+          <Text style={styles.sommelierButtonText}>Ask the Sommelier</Text>
+          <Ionicons name="chevron-forward" size={16} color={colors.gold.shimmer} />
+        </TouchableOpacity>
       </View>
 
       {/* Overall Rating */}
@@ -421,6 +445,24 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         </View>
       </Modal>
 
+      {/* Wine Chat Modal */}
+      <WineChatModal
+        visible={showChatModal}
+        onClose={() => setShowChatModal(false)}
+        onUseSuggestions={handleUseSuggestions}
+        currentWineData={{
+          name: wineName,
+          type: wineType,
+          varietal: wineVarietal,
+          year: wineYear,
+          overallRating,
+          ratings,
+          flavorNotes,
+          additionalNotes,
+          photoCount: photos.length,
+        }}
+      />
+
       {/* Photo Viewer Modal */}
       <Modal
         visible={showPhotoModal}
@@ -511,6 +553,28 @@ const styles = StyleSheet.create({
   selectorText: {
     ...typography.body.regular,
     color: colors.neutral.charcoal,
+  },
+
+  // Sommelier button
+  sommelierButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    borderRadius: borderRadius.md,
+    marginTop: spacing.sm,
+  },
+  sommelierButtonText: {
+    ...typography.body.regular,
+    color: colors.gold.shimmer,
+    fontWeight: '600',
+    fontFamily: 'Georgia',
+    flex: 1,
   },
 
   // Photo Buttons
