@@ -23,7 +23,7 @@ This is exactly what the owner asked for: "leave it as A, but let B happen when 
 
 Both land in the same session object — they differ only in whether the place is pre-filled.
 
-> **Open question for the owner:** do we ship *both* entry points in v1, or start with just "+ Log a wine" and let the winery-visit shortcut come later? (The mockup footer raises this.)
+> **DECIDED (owner):** ship **both** entry points in v1 — "+ Log a wine" (B-first) and "Start a winery visit" (A-first).
 
 ---
 
@@ -58,8 +58,11 @@ Both land in the same session object — they differ only in whether the place i
 
 ---
 
-## Open questions for the owner (to settle before #19/implementation)
-1. **Entry points:** ship both "+ Log a wine" and "Start a winery visit" in v1, or just the first?
-2. **Winemaker selection:** when typing a winemaker that matches a known winery, auto-suggest linking it (so the pin/place can pre-fill)? Recommended: yes.
-3. **Single-wine display:** in lists/Home, should a one-wine session show as just the wine (hide the session chrome)? Recommended: yes — only show "session" framing at 2+ wines.
-4. **Cellar tie-in:** when "opening a bottle" from the Cellar (Epic #6), create a one-wine session with place = none? Recommended: yes — keeps one consistent model.
+## Resolved decisions (owner-approved)
+1. **Entry points:** ✅ ship **both** "+ Log a wine" and "Start a winery visit" in v1.
+2. **Hybrid model:** ✅ approved — one session holds 1…N wines; single wine = B, multiple = A.
+3. **Winemaker selection:** adopted — when a typed winemaker matches a known winery, auto-suggest linking it so the pin/place can pre-fill.
+4. **Single-wine display:** adopted — a one-wine session renders as just the wine (no session chrome); "session" framing appears only at 2+ wines.
+5. **Cellar tie-in:** adopted — "opening a bottle" (Epic #6) creates a one-wine session with no place, keeping one consistent model.
+
+(Items 3–5 are sensible defaults locked to keep momentum; flag if you want any changed.)

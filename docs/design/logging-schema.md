@@ -96,7 +96,7 @@ The Cellar's "open a bottle → log a tasting" needs a tasting with no winery vi
 
 ---
 
-## Open questions for the owner
-1. OK to **keep the table named `visits`** (semantics = session), or do you want a rename to `sessions` now (more churn)?
-2. Enforce `winemaker`/`varietal` required at the **DB level** (NOT NULL after backfill) or **app level only**?
-3. For cellar tastings, auto-create a session (recommended) vs. allow `visit_id` null?
+## Resolved defaults (owner-approved direction; flag to change)
+1. **Keep the table named `visits`** (semantics = session); a rename to `sessions` is deferred cleanup.
+2. Enforce `winemaker`/`varietal` required at the **app level first**; consider DB `NOT NULL` after existing rows are backfilled.
+3. **Cellar tastings auto-create a one-wine session** (place = none), keeping every wine in a session — rather than nulling `visit_id`.
