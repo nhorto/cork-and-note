@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>cork-and-note · Hybrid Logging Flow Mockup</title>
+<style>
+  :root{
+    --burgundy:#722F37; --wine:#8B1A1A; --merlot:#5C1A1A; --rose:#D4A5A5;
+    --gold:#C9A962; --gold-muted:#D4C4A8; --gold-light:#E8DCC8;
+    --cream:#FAF8F5; --parchment:#F5F2ED; --linen:#EDE8E0; --stone:#D8D2C8;
+    --charcoal:#2C2C2C; --graphite:#4A4A4A; --pewter:#7A7A7A; --silver:#A8A8A8;
+    --sage:#5B7B5B; --slate:#6B7B8B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:linear-gradient(160deg,#efe9e1,#e3dccf);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    color:var(--charcoal); padding:40px 20px 80px; line-height:1.5;
+  }
+  .serif{font-family:Georgia,"Times New Roman",serif;}
+  header.page{max-width:1180px;margin:0 auto 36px;text-align:center;}
+  header.page h1{font-family:Georgia,serif;font-weight:300;letter-spacing:1.5px;font-size:34px;color:var(--burgundy);}
+  header.page .rule{width:80px;height:2px;background:var(--gold);margin:14px auto;}
+  header.page p{color:var(--graphite);max-width:680px;margin:0 auto;font-size:15px;}
+  .legend{max-width:1180px;margin:0 auto 30px;display:flex;gap:18px;justify-content:center;flex-wrap:wrap;}
+  .legend span{font-size:12.5px;color:var(--graphite);display:flex;align-items:center;gap:7px;}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  .stage{max-width:1180px;margin:0 auto;display:flex;gap:26px;justify-content:center;flex-wrap:wrap;align-items:flex-start;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:14px;width:300px;}
+  .col .caption{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--pewter);font-weight:600;}
+  .col .ab{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;}
+  .ab.b{background:#e7efe7;color:var(--sage);border:1px solid #cfe0cf;}
+  .ab.a{background:#e7ecf2;color:var(--slate);border:1px solid #cfd9e6;}
+  .ab.both{background:var(--gold-light);color:#8a6d2f;border:1px solid var(--gold-muted);}
+
+  /* phone */
+  .phone{
+    width:300px;height:600px;background:var(--cream);border-radius:34px;
+    border:1px solid var(--stone);box-shadow:0 12px 30px rgba(44,44,44,.16);
+    overflow:hidden;display:flex;flex-direction:column;position:relative;
+  }
+  .nav{padding:16px 18px 12px;background:var(--cream);border-bottom:1px solid var(--linen);display:flex;align-items:center;gap:10px;}
+  .nav .back{color:var(--burgundy);font-size:20px;}
+  .nav h2{font-family:Georgia,serif;font-weight:500;font-size:19px;color:var(--charcoal);letter-spacing:.3px;}
+  .nav .step{margin-left:auto;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--silver);}
+  .screen{padding:16px 18px;overflow-y:auto;flex:1;}
+  .label{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--pewter);font-weight:600;margin:14px 0 6px;display:flex;align-items:center;gap:6px;}
+  .req{color:var(--wine);font-size:13px;}
+  .opt{color:var(--silver);font-weight:500;letter-spacing:.5px;text-transform:none;font-size:10.5px;}
+  .field{background:#fff;border:1px solid var(--stone);border-radius:8px;padding:11px 12px;font-size:14px;color:var(--charcoal);}
+  .field.filled{border-color:var(--gold-muted);background:#fffdf9;}
+  .field.ph{color:var(--silver);}
+  .field.focus{border-color:var(--burgundy);box-shadow:0 0 0 2px rgba(114,47,55,.10);}
+  .hint{font-size:11.5px;color:var(--pewter);margin-top:5px;}
+  .row{display:flex;gap:8px;}
+  .row .field{flex:1;}
+  .ai{margin-top:10px;display:flex;align-items:center;gap:8px;background:linear-gradient(90deg,#f7efe0,#faf6ef);border:1px solid var(--gold-muted);border-radius:8px;padding:10px 12px;font-size:12.5px;color:#7a5a1e;}
+  .ai .spark{font-size:14px;}
+  .collapse{margin-top:10px;border-top:1px solid var(--linen);padding-top:10px;}
+  .collapse .crow{display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-size:13.5px;color:var(--graphite);border-bottom:1px solid var(--linen);}
+  .collapse .crow .v{color:var(--silver);font-size:12.5px;}
+  .chev{color:var(--silver);}
+  .placecard{margin-top:14px;border:1px dashed var(--gold-muted);border-radius:10px;padding:12px;background:#fffdf8;}
+  .placecard .pt{font-size:13px;color:var(--burgundy);font-weight:600;display:flex;align-items:center;gap:7px;}
+  .placecard .ps{font-size:11.5px;color:var(--pewter);margin-top:4px;}
+  .seg{display:flex;gap:6px;margin-top:10px;}
+  .seg .s{flex:1;text-align:center;font-size:12px;padding:9px 4px;border-radius:8px;border:1px solid var(--stone);color:var(--graphite);background:#fff;}
+  .seg .s.on{background:var(--burgundy);color:#fff;border-color:var(--burgundy);}
+  .map{margin-top:12px;height:96px;border-radius:10px;border:1px solid var(--stone);
+    background:
+      radial-gradient(circle at 60% 55%, rgba(114,47,55,.0) 0 12px, rgba(114,47,55,.10) 12px 14px, transparent 15px),
+      linear-gradient(135deg,#eef1ea,#e6ece4);position:relative;overflow:hidden;}
+  .map .pin{position:absolute;left:58%;top:42%;font-size:22px;color:var(--burgundy);transform:translate(-50%,-100%);}
+  .map .mlabel{position:absolute;left:10px;bottom:8px;font-size:10.5px;color:var(--graphite);background:rgba(250,248,245,.85);padding:2px 7px;border-radius:6px;}
+  .btn{margin-top:16px;background:var(--burgundy);color:#fff;text-align:center;padding:13px;border-radius:6px;font-size:14.5px;letter-spacing:.5px;font-family:Georgia,serif;}
+  .btn.ghost{background:transparent;color:var(--burgundy);border:1px solid var(--burgundy);margin-top:9px;}
+  .btn.small{padding:10px;font-size:13px;}
+
+  /* session screen */
+  .occasion{background:var(--parchment);border:1px solid var(--stone);border-radius:12px;padding:14px;margin-bottom:6px;}
+  .occasion .oh{display:flex;align-items:center;gap:8px;}
+  .occasion .oh .ic{font-size:16px;}
+  .occasion .oh .on{font-family:Georgia,serif;font-size:16px;color:var(--charcoal);}
+  .occasion .meta{font-size:11.5px;color:var(--pewter);margin-top:3px;display:flex;gap:10px;}
+  .doublerule{border-top:1px solid var(--gold-muted);border-bottom:1px solid var(--gold-muted);height:4px;margin:12px 0;}
+  .winerow{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--linen);}
+  .winerow .glass{width:30px;height:30px;border-radius:7px;background:var(--gold-light);display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .winerow .wn{font-size:13.5px;color:var(--charcoal);font-weight:600;}
+  .winerow .wv{font-size:11.5px;color:var(--pewter);}
+  .winerow .score{margin-left:auto;font-family:Georgia,serif;color:var(--burgundy);font-size:14px;}
+  .annot{width:300px;font-size:12px;color:var(--graphite);background:#fff;border:1px solid var(--stone);border-left:3px solid var(--gold);border-radius:8px;padding:11px 13px;}
+  .annot b{color:var(--burgundy);}
+  .flow-arrow{align-self:center;color:var(--gold);font-size:30px;padding-top:250px;}
+  @media(max-width:1180px){.flow-arrow{display:none;}}
+  .footer{max-width:900px;margin:46px auto 0;background:#fff;border:1px solid var(--stone);border-radius:14px;padding:24px 28px;}
+  .footer h3{font-family:Georgia,serif;color:var(--burgundy);font-weight:500;margin-bottom:6px;font-size:20px;}
+  .footer ul{margin:10px 0 0 18px;color:var(--graphite);font-size:14px;}
+  .footer li{margin:6px 0;}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;margin-right:4px;}
+</style>
+</head>
+<body>
+  <header class="page">
+    <h1 class="serif">Logging Flow — Hybrid Model</h1>
+    <div class="rule"></div>
+    <p>A proposal for how a <b>single-wine log (B)</b> and a <b>multi-wine session/occasion (A)</b> share one experience. You always start by logging a wine; a "session" simply emerges when you add more than one. Mock data shown.</p>
+  </header>
+
+  <div class="legend">
+    <span><i class="dot" style="background:#5B7B5B"></i> B · single wine (default)</span>
+    <span><i class="dot" style="background:#6B7B8B"></i> A · session of several wines</span>
+    <span><i class="dot" style="background:#C9A962"></i> both share the same screens</span>
+    <span><i class="dot" style="background:#722F37"></i> required field</span>
+  </div>
+
+  <div class="stage">
+
+    <!-- SCREEN 1 -->
+    <div class="col">
+      <div class="caption">1 · Log a wine</div>
+      <span class="ab both">Same screen for A &amp; B</span>
+      <div class="phone">
+        <div class="nav"><span class="back">‹</span><h2 class="serif">Log a Wine</h2><span class="step">Wine 1</span></div>
+        <div class="screen">
+          <div class="label">Winemaker <span class="req">●</span></div>
+          <div class="field filled">King Family Vineyards</div>
+          <div class="hint">Search a winery — or just type a producer.</div>
+
+          <div class="label">Varietal <span class="req">●</span></div>
+          <div class="field filled">Viognier</div>
+
+          <div class="ai"><span class="spark">✨</span> Suggest characteristics with the Sommelier</div>
+
+          <div class="collapse">
+            <div class="crow">Type <span class="v">White ›</span></div>
+            <div class="crow">Vintage <span class="v">2022 ›</span></div>
+            <div class="crow">Rating <span class="v">Add ›</span></div>
+            <div class="crow">Flavor notes <span class="v">Add ›</span></div>
+            <div class="crow">Photo &amp; notes <span class="v">Add ›</span></div>
+          </div>
+
+          <div class="placecard">
+            <div class="pt">📍 Add a place <span class="opt">· optional</span></div>
+            <div class="ps">Tap to say where you had it (and drop a pin).</div>
+          </div>
+
+          <div class="btn">Save wine</div>
+          <div class="btn ghost small">＋ Add another wine to this session</div>
+        </div>
+      </div>
+      <div class="annot"><b>This is the B path.</b> Winemaker + varietal are the only required fields. Save now and you're done — a one-wine log. Everything else is optional and editable later.</div>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <!-- SCREEN 2 -->
+    <div class="col">
+      <div class="caption">2 · Add a place (optional)</div>
+      <span class="ab both">Skippable for any log</span>
+      <div class="phone">
+        <div class="nav"><span class="back">‹</span><h2 class="serif">Where?</h2><span class="step">Optional</span></div>
+        <div class="screen">
+          <div class="label">Place type</div>
+          <div class="seg">
+            <div class="s on">Winery</div>
+            <div class="s">Restaurant</div>
+            <div class="s">Elsewhere</div>
+          </div>
+          <div class="hint">Pick a type, or skip this entirely.</div>
+
+          <div class="label">Winery</div>
+          <div class="field filled">King Family Vineyards</div>
+          <div class="hint">Matched from your winery list — pin auto-set.</div>
+
+          <div class="label">Pin <span class="opt">· drop or adjust</span></div>
+          <div class="map"><span class="pin">📍</span><span class="mlabel">Crozet, VA</span></div>
+
+          <div class="btn">Use this place</div>
+          <div class="btn ghost small">Skip — no location</div>
+        </div>
+      </div>
+      <div class="annot">Place is attached to the <b>session</b>, so every wine you log here inherits it. <b>Restaurant</b> takes a name + optional pin; <b>Elsewhere</b> needs nothing. Default is no location.</div>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <!-- SCREEN 3 -->
+    <div class="col">
+      <div class="caption">3 · The session recap</div>
+      <span class="ab a">A emerges once there are 2+ wines</span>
+      <div class="phone">
+        <div class="nav"><span class="back">‹</span><h2 class="serif">Session</h2><span class="step">3 wines</span></div>
+        <div class="screen">
+          <div class="occasion">
+            <div class="oh"><span class="ic">🍇</span><span class="on serif">King Family Vineyards</span></div>
+            <div class="meta"><span>📅 Jun 8, 2026</span><span>📍 Crozet, VA</span></div>
+          </div>
+          <div class="doublerule"></div>
+          <div class="winerow"><div class="glass">🍷</div><div><div class="wn">Viognier</div><div class="wv">King Family · 2022 · White</div></div><div class="score">4.5</div></div>
+          <div class="winerow"><div class="glass">🍷</div><div><div class="wn">Crosé</div><div class="wv">King Family · 2024 · Rosé</div></div><div class="score">4.0</div></div>
+          <div class="winerow"><div class="glass">🍷</div><div><div class="wn">Meritage</div><div class="wv">King Family · 2021 · Red</div></div><div class="score">4.8</div></div>
+
+          <div class="btn ghost small">＋ Add another wine</div>
+          <div class="btn small">Done</div>
+        </div>
+      </div>
+      <div class="annot"><b>This is the A path</b> — but it's the <i>same</i> log, just with more wines added. One wine → looks like a single B log. Several → this session recap. Same data model underneath.</div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <h3 class="serif">How the hybrid works</h3>
+    <p style="color:var(--graphite);font-size:14px;">There's one underlying object — a <b>logging session</b> (today's "visit", generalized). It holds 1…N wines and an <i>optional</i> place.</p>
+    <ul>
+      <li><span class="tag" style="background:#e7efe7;color:#5B7B5B">B</span><b>Log one wine, save.</b> The session has a single wine and (usually) no place. Feels like a quick wine entry.</li>
+      <li><span class="tag" style="background:#e7ecf2;color:#6B7B8B">A</span><b>Add another wine.</b> The same session now groups several wines under one place/date — the winery-trip recap you have today.</li>
+      <li><span class="tag" style="background:#E8DCC8;color:#8a6d2f">↺</span><b>Start at a winery.</b> Tapping a winery (map/Home) opens a session pre-set to that place; you just keep adding wines.</li>
+      <li><span class="tag" style="background:#E8DCC8;color:#8a6d2f">✎</span><b>Editable later.</b> Add a place, add wines, or fix details after saving — including turning a one-wine log into a session.</li>
+    </ul>
+    <p style="color:var(--pewter);font-size:12.5px;margin-top:12px;">Open question for you: should the entry point default to <b>“Log a wine”</b> (B-first, add place/wines as you go) or also offer an explicit <b>“Start a winery visit”</b> shortcut? The mockup shows both coexisting.</p>
+  </div>
+</body>
+</html>
