@@ -695,3 +695,51 @@ CREATE POLICY "Users can create their own favorites"
 CREATE POLICY "Users can delete their own favorites" 
   ON public.favorites FOR DELETE 
   USING (auth.uid() = user_id);
+-- ============================================================
+-- Wine Cellar (Epic #6) — added 2026-06-09
+-- Source of truth: supabase/migrations/20260609000000_cellar_inventory.sql
+-- ============================================================
+
+create type public.cellar_status as enum
+  ('in_cellar','consumed','gifted','sold','spoiled');
+
+create table public.cellar_bottles (
+  id            uuid default uuid_generate_v4() primary key,
+  user_id       uuid references public.users not null,
+  winery_id     bigint references public.wineries,
+  producer      text,
+  wine_name     text not null,
+  vintage       text,
+  wine_type     text,
+  varietal      text,
+  region        text,
+  quantity      integer not null default 1 check (quantity >= 0),
+  bottle_size   text not null default '750ml',
+  location      text,
+  bin           text,
+  purchase_date  date,
+  purchase_price numeric(10,2),
+  currency       text default 'USD',
+  store          text,
+  current_value  numeric(10,2),
+  drink_from    integer,
+  drink_by      integer,
+  rating        decimal(3,1),
+  notes         text,
+  status        public.cellar_status not null default 'in_cellar',
+  created_at    timestamp with time zone default now() not null,
+  updated_at    timestamp with time zone default now() not null
+);
+
+create table public.cellar_consumptions (
+  id            uuid default uuid_generate_v4() primary key,
+  user_id       uuid references public.users not null,
+  bottle_id     uuid references public.cellar_bottles on delete cascade not null,
+  consumed_date date not null default current_date,
+  reason        public.cellar_status not null default 'consumed',
+  quantity      integer not null default 1 check (quantity > 0),
+  note          text,
+  wine_id       uuid references public.wines on delete set null,
+  created_at    timestamp with time zone default now() not null
+);
+-- RLS: owner-scoped (auth.uid() = user_id) on both tables.
