@@ -1,8 +1,11 @@
 // app/(tabs)/_layout.js
 // Château Label Design - Elegant & Refined
+// 5-tab layout: Home · Cellar · ＋Log (center) · Explore · Profile.
+// Wishlist / Wines / Sommelier routes are preserved but hidden from the bar
+// (reached contextually / nested) per docs/design/information-architecture.md.
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Dimensions, Platform, StyleSheet, View } from 'react-native';
+import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import theme from '../../styles/theme';
 
 const { colors } = theme;
@@ -76,6 +79,22 @@ const TabIcon = ({ name, color, focused, size }) => (
   </View>
 );
 
+// Raised center "＋ Log" button
+const LogTabButton = ({ onPress, accessibilityState }) => (
+  <View style={styles.logButtonSlot}>
+    <TouchableOpacity
+      style={styles.logButton}
+      onPress={onPress}
+      activeOpacity={0.85}
+      accessibilityRole="button"
+      accessibilityLabel="Log a wine"
+      accessibilityState={accessibilityState}
+    >
+      <Ionicons name="add" size={30} color={colors.neutral.cream} />
+    </TouchableOpacity>
+  </View>
+);
+
 export default function Layout() {
   const iconSize = getIconSize();
 
@@ -90,43 +109,41 @@ export default function Layout() {
       }}
     >
       <Tabs.Screen
+        name="home"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="home" color={color} focused={focused} size={iconSize} />
+          ),
+          title: 'Home',
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="cellar"
+        options={{
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="file-tray-stacked" color={color} focused={focused} size={iconSize} />
+          ),
+          title: 'Cellar',
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="log"
+        options={{
+          title: 'Log',
+          headerShown: false,
+          tabBarButton: (props) => <LogTabButton {...props} />,
+        }}
+      />
+      <Tabs.Screen
         name="map"
         options={{
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="map" color={color} focused={focused} size={iconSize} />
           ),
-          title: 'Map',
+          title: 'Explore',
           headerShown: false, // Hide header on map for more space
-        }}
-      />
-      <Tabs.Screen
-        name="wishlist"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="bookmark" color={color} focused={focused} size={iconSize} />
-          ),
-          title: 'Wishlist',
-          headerShown: false, // Custom header in wishlist screen
-        }}
-      />
-      <Tabs.Screen
-        name="wines"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="wine" color={color} focused={focused} size={iconSize} />
-          ),
-          title: 'Wines',
-          headerShown: false, // Custom header in wines screen
-        }}
-      />
-      <Tabs.Screen
-        name="sommelier"
-        options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="chatbubbles" color={color} focused={focused} size={iconSize} />
-          ),
-          title: 'Sommelier',
-          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -139,6 +156,11 @@ export default function Layout() {
           headerShown: false, // Custom header in profile screen
         }}
       />
+
+      {/* Routes preserved but hidden from the tab bar (reached contextually) */}
+      <Tabs.Screen name="wishlist" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="wines" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="sommelier" options={{ href: null, headerShown: false }} />
     </Tabs>
   );
 }
@@ -155,5 +177,27 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     backgroundColor: colors.primary.burgundy,
+  },
+  // Raised center Log button
+  logButtonSlot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  logButton: {
+    top: -18,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary.burgundy,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: colors.neutral.cream,
+    shadowColor: colors.primary.burgundy,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 8,
   },
 });
