@@ -141,7 +141,7 @@ export default function RootLayout() {
     if (isAuthenticated && (inAuthFlow || onIndexPage)) {
       // User is authenticated but on login/register page OR index page
       console.log('✅ User authenticated, navigating from auth flow/index to main app');
-      router.replace('/(tabs)/map');
+      router.replace('/(tabs)/home');
     } else if (!isAuthenticated && !inAuthFlow && !onIndexPage) {
       // User is not authenticated but trying to access protected content (not index)
       console.log('❌ User not authenticated, navigating to login');
