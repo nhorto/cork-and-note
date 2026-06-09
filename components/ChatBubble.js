@@ -2,8 +2,10 @@
 // Chat message bubble - burgundy for user, parchment for AI
 // AI messages render markdown, user messages render plain text
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
+import { chatService } from '../lib/chat';
 import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
@@ -106,9 +108,31 @@ const mdStyles = {
 
 export default function ChatBubble({ message, onUseSuggestions }) {
   const isUser = message.role === 'user';
-  const imageUrls = message.image_urls || [];
   const hasSuggestions = message.ai_suggestions && Object.keys(message.ai_suggestions).length > 0;
   const displayContent = message.displayText || message.content;
+
+  // chat-photos is a private bucket — resolve stored paths to short-lived signed
+  // URLs for display (handles both new path-based rows and legacy public URLs).
+  const [imageUrls, setImageUrls] = useState([]);
+  useEffect(() => {
+    let active = true;
+    const raw = message.image_urls || [];
+    if (raw.length === 0) {
+      setImageUrls([]);
+      return;
+    }
+    chatService
+      .getSignedUrls(raw)
+      .then((urls) => {
+        if (active) setImageUrls(urls.filter(Boolean));
+      })
+      .catch(() => {
+        if (active) setImageUrls([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [message.image_urls]);
 
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.aiContainer]}>

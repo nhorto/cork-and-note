@@ -53,3 +53,7 @@ app-example
 ios/
 android/
 .agent/
+
+# local-only (symlinked for linting in this worktree) + deno check artifact
+node_modules
+deno.lock
