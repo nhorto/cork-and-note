@@ -25,6 +25,39 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Building the native iOS dev client
+
+The iOS build has two environment requirements that are handled for you by
+`scripts/ios-build.sh` (run it via `npm run ios:build`):
+
+```bash
+npm run ios:build            # build + launch on a simulator
+npm run ios:build -- --clean # regenerate ios/ from scratch first
+```
+
+What the script (and the project config) take care of:
+
+1. **UTF-8 locale.** CocoaPods crashes ("Unicode Normalization not appropriate
+   for ASCII-8BIT") unless the shell uses a UTF-8 locale. The script exports
+   `LANG`/`LC_ALL=en_US.UTF-8`. If you run `npx expo run:ios` directly instead,
+   export these yourself first:
+
+   ```bash
+   export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+   ```
+
+2. **fmt `consteval` compile error.** react-native 0.79.x pins the `fmt` pod to
+   git tag `11.0.2` (this does **not** change between 0.79.4–0.79.7). With the
+   current Xcode/Apple-Clang, fmt 11.0.2's `consteval`-based `FMT_STRING` fails
+   to compile (`call to consteval function ... is not a constant expression` in
+   `ios/Pods/fmt/include/fmt/format-inl.h`). The
+   [`plugins/withFmtConstevalFix`](plugins/withFmtConstevalFix.js) Expo config
+   plugin injects a CocoaPods `post_install` hook that forces
+   `FMT_USE_CONSTEVAL 0` in `Pods/fmt/include/fmt/base.h` on every `pod install`,
+   so the fix survives `expo prebuild --clean`. (A `-DFMT_USE_CONSTEVAL=0`
+   compiler flag does not work — base.h `#define`s the macro unconditionally
+   with no `#ifndef` guard, so the header value always wins.)
+
 ## Get a fresh project
 
 When you're ready, run:

@@ -62,7 +62,8 @@
       "expo-image-picker",
       "expo-location",
       "expo-media-library",
-      "expo-maps"
+      "expo-maps",
+      "./plugins/withFmtConstevalFix"
     ],
     "experiments": {
       "typedRoutes": true
