@@ -28,7 +28,11 @@ export default function LogScreen() {
       <View style={styles.body}>
         <Text style={styles.prompt}>What would you like to do?</Text>
 
-        <TouchableOpacity style={styles.choice} activeOpacity={0.9}>
+        <TouchableOpacity
+          style={styles.choice}
+          activeOpacity={0.9}
+          onPress={() => router.push('/log-session?mode=wine')}
+        >
           <View style={styles.choiceIcon}>
             <Ionicons name="wine" size={24} color={colors.primary.burgundy} />
           </View>
@@ -41,7 +45,11 @@ export default function LogScreen() {
           <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.choice} activeOpacity={0.9}>
+        <TouchableOpacity
+          style={styles.choice}
+          activeOpacity={0.9}
+          onPress={() => router.push('/log-session?mode=winery')}
+        >
           <View style={styles.choiceIcon}>
             <Ionicons name="location" size={24} color={colors.primary.burgundy} />
           </View>
@@ -53,8 +61,6 @@ export default function LogScreen() {
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
         </TouchableOpacity>
-
-        <Text style={styles.note}>The full logging flow is coming soon.</Text>
       </View>
     </View>
   );

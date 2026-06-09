@@ -483,6 +483,7 @@ export default function VisitLogForm({ winery, onSave, onCancel }) {
             onSave={handleSaveWine}
             onCancel={handleExitWineForm}
             initialData={currentWineIndex !== null ? wines[currentWineIndex] : null}
+            defaultWinemaker={winery?.name || ''}
           />
         </SafeAreaView>
       </Modal>
