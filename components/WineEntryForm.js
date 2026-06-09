@@ -30,10 +30,11 @@ const WINE_TYPES = [
   'Red Blend', 'White Blend', 'Orange'
 ];
 
-export default function WineEntryForm({ onSave, onCancel, initialData }) {
+export default function WineEntryForm({ onSave, onCancel, initialData, defaultWinemaker = '' }) {
   // Form state
+  const [winemaker, setWinemaker] = useState(defaultWinemaker);
   const [wineName, setWineName] = useState('');
-  const [wineType, setWineType] = useState('Red');
+  const [wineType, setWineType] = useState(''); // optional — no longer defaults to "Red"
   const [wineVarietal, setWineVarietal] = useState('');
   const [wineYear, setWineYear] = useState('');
   const [overallRating, setOverallRating] = useState(0);
@@ -57,8 +58,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   // Load initial data if editing an existing wine
   useEffect(() => {
     if (initialData) {
+      setWinemaker(initialData.winemaker || defaultWinemaker || '');
       setWineName(initialData.name || '');
-      setWineType(initialData.type || 'Red');
+      setWineType(initialData.type || '');
       setWineVarietal(initialData.varietal || '');
       setWineYear(initialData.year || '');
       setOverallRating(initialData.overallRating || 0);
@@ -195,6 +197,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
   
   // Handle AI suggestions auto-fill
   const handleUseSuggestions = (suggestions) => {
+    if (suggestions.winemaker) setWinemaker(suggestions.winemaker);
     if (suggestions.wine_name) setWineName(suggestions.wine_name);
     if (suggestions.wine_type) setWineType(suggestions.wine_type);
     if (suggestions.varietal) setWineVarietal(suggestions.varietal);
@@ -207,16 +210,21 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
 
   // Handle form submission
   const handleSave = () => {
-    // Wine type is required
-    if (!wineType) {
-      Alert.alert('Missing Information', 'Please select a wine type.');
+    // Required = winemaker + varietal (everything else is optional)
+    if (!winemaker.trim()) {
+      Alert.alert('Missing Information', 'Please enter the winemaker (a winery or producer).');
       return;
     }
-    
+    if (!wineVarietal.trim()) {
+      Alert.alert('Missing Information', 'Please enter the varietal.');
+      return;
+    }
+
     // Create wine data object
     const wineData = {
+      winemaker: winemaker.trim(),
       name: wineName,
-      type: wineType,
+      type: wineType || null,
       varietal: wineVarietal,
       year: wineYear,
       overallRating: overallRating,
@@ -268,36 +276,50 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
       {/* Wine Basic Info */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Wine Information</Text>
-        
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Winemaker *</Text>
+          <TextInput
+            style={styles.input}
+            value={winemaker}
+            onChangeText={setWinemaker}
+            placeholder="Winery or producer — whatever made it"
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Varietal *</Text>
+          <AutocompleteVarietal
+            value={wineVarietal}
+            onChangeText={setWineVarietal}
+            wineType={wineType}
+            placeholder="Grape — e.g. Cabernet, Viognier"
+          />
+        </View>
+
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Wine Name</Text>
           <TextInput
             style={styles.input}
             value={wineName}
             onChangeText={setWineName}
-            placeholder="Enter wine name"
+            placeholder="Optional — a specific bottling or label"
             placeholderTextColor="#999"
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Type *</Text>
+          <Text style={styles.label}>Type</Text>
           <TouchableOpacity
             style={styles.selectorButton}
             onPress={() => setShowTypeModal(true)}
           >
-            <Text style={styles.selectorText}>{wineType}</Text>
+            <Text style={[styles.selectorText, !wineType && styles.selectorPlaceholder]}>
+              {wineType || 'Select type (optional)'}
+            </Text>
             <Ionicons name="chevron-down" size={20} color="#666" />
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Varietal</Text>
-          <AutocompleteVarietal
-            value={wineVarietal}
-            onChangeText={setWineVarietal}
-            wineType={wineType}
-          />
         </View>
 
         <View style={styles.inputGroup}>
@@ -451,6 +473,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData }) {
         onClose={() => setShowChatModal(false)}
         onUseSuggestions={handleUseSuggestions}
         currentWineData={{
+          winemaker: winemaker,
           name: wineName,
           type: wineType,
           varietal: wineVarietal,
@@ -553,6 +576,9 @@ const styles = StyleSheet.create({
   selectorText: {
     ...typography.body.regular,
     color: colors.neutral.charcoal,
+  },
+  selectorPlaceholder: {
+    color: colors.neutral.silver,
   },
 
   // Sommelier button
