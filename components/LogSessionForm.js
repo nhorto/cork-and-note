@@ -49,12 +49,59 @@ const formatDate = (s) => {
   });
 };
 
-export default function LogSessionForm({ mode = 'wine', winery = null, onSave, onCancel }) {
+// Map a DB wine row (snake_case, singular ratings) to the in-app wine shape
+// WineEntryForm / the wine cards expect. Preserves the row id so the edit flow
+// can diff existing wines from new ones.
+const dbWineToApp = (w) => ({
+  id: w.id,
+  winemaker: w.winemaker || '',
+  name: w.wine_name || '',
+  type: w.wine_type || '',
+  varietal: w.wine_varietal || '',
+  year: w.wine_year != null ? String(w.wine_year) : '',
+  overallRating: w.overall_rating || 0,
+  ratings: {
+    sweetness: w.sweetness || 0,
+    tannins: w.tannin || 0, // DB column is singular `tannin`
+    acidity: w.acidity || 0,
+    body: w.body || 0,
+    alcohol: w.alcohol || 0,
+  },
+  flavorNotes:
+    w.wine_flavor_notes?.map((fn) => fn.flavor_notes?.name).filter(Boolean) || [],
+  additionalNotes: w.additional_notes || '',
+  photos: w.photos || [],
+});
+
+// Map a DB visit row to LogSessionForm's `place` shape (or null when no place).
+const dbVisitToPlace = (v) => {
+  if (!v.place_type && !v.winery_id && !v.place_name) return null;
+  return {
+    placeType: v.place_type || (v.winery_id ? 'winery' : 'other'),
+    placeName: v.place_name ?? v.wineries?.name ?? null,
+    wineryId: v.winery_id ?? null,
+    latitude: v.latitude != null ? Number(v.latitude) : null,
+    longitude: v.longitude != null ? Number(v.longitude) : null,
+  };
+};
+
+export default function LogSessionForm({
+  mode = 'wine',
+  winery = null,
+  initialSession = null,
+  onSave,
+  onCancel,
+}) {
   const insets = useSafeAreaInsets();
 
-  const [wines, setWines] = useState([]);
-  const [place, setPlace] = useState(
-    winery
+  const isEditing = !!initialSession;
+
+  const [wines, setWines] = useState(
+    initialSession ? (initialSession.wines || []).map(dbWineToApp) : []
+  );
+  const [place, setPlace] = useState(() => {
+    if (initialSession) return dbVisitToPlace(initialSession);
+    return winery
       ? {
           placeType: 'winery',
           placeName: winery.name,
@@ -62,10 +109,12 @@ export default function LogSessionForm({ mode = 'wine', winery = null, onSave, o
           latitude: winery.latitude != null ? Number(winery.latitude) : null,
           longitude: winery.longitude != null ? Number(winery.longitude) : null,
         }
-      : null
+      : null;
+  });
+  const [visitDate, setVisitDate] = useState(
+    initialSession?.visit_date ? initialSession.visit_date.slice(0, 10) : todayISO
   );
-  const [visitDate, setVisitDate] = useState(todayISO);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(initialSession?.notes || '');
   const [saving, setSaving] = useState(false);
 
   const [showWineForm, setShowWineForm] = useState(false);
@@ -73,8 +122,9 @@ export default function LogSessionForm({ mode = 'wine', winery = null, onSave, o
   const [showPlacePicker, setShowPlacePicker] = useState(false);
 
   // B-first: "Log a wine" drops you straight into the wine form.
+  // Skip this when editing an existing log — we land on the session overview.
   useEffect(() => {
-    if (mode === 'wine' && wines.length === 0) {
+    if (!isEditing && mode === 'wine' && wines.length === 0) {
       setCurrentWineIndex(null);
       setShowWineForm(true);
     }
@@ -141,7 +191,9 @@ export default function LogSessionForm({ mode = 'wine', winery = null, onSave, o
   };
 
   const handleSaveSession = async () => {
-    if (wines.length === 0) {
+    // When editing, removing every wine means the user wants the log gone —
+    // let the host confirm-and-delete instead of blocking on "add a wine".
+    if (wines.length === 0 && !isEditing) {
       Alert.alert('Add a wine', 'Log at least one wine before saving.');
       return;
     }
@@ -160,6 +212,10 @@ export default function LogSessionForm({ mode = 'wine', winery = null, onSave, o
         date: visitDate,
         notes,
         wines,
+        // Original ids let the edit orchestrator diff removed wines without a refetch.
+        originalWineIds: initialSession
+          ? (initialSession.wines || []).map((w) => w.id)
+          : undefined,
       });
     } finally {
       setSaving(false);
@@ -266,7 +322,9 @@ export default function LogSessionForm({ mode = 'wine', winery = null, onSave, o
           <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>{isSession ? 'Session' : 'Log a Wine'}</Text>
+          <Text style={styles.headerTitle}>
+            {isEditing ? 'Edit Log' : isSession ? 'Session' : 'Log a Wine'}
+          </Text>
           {wines.length > 0 && (
             <Text style={styles.headerSubtitle}>
               {wines.length} wine{wines.length !== 1 ? 's' : ''}
@@ -327,14 +385,23 @@ export default function LogSessionForm({ mode = 'wine', winery = null, onSave, o
       {/* Footer */}
       <View style={[styles.footer, { paddingBottom: spacing.md + (insets.bottom || 0) }]}>
         <TouchableOpacity
-          style={[styles.saveBtn, (wines.length === 0 || saving) && styles.saveBtnDisabled]}
+          style={[
+            styles.saveBtn,
+            ((wines.length === 0 && !isEditing) || saving) && styles.saveBtnDisabled,
+          ]}
           onPress={handleSaveSession}
           activeOpacity={0.85}
-          disabled={wines.length === 0 || saving}
+          disabled={(wines.length === 0 && !isEditing) || saving}
         >
           <Ionicons name="checkmark-circle" size={20} color={colors.neutral.cream} />
           <Text style={styles.saveBtnText}>
-            {saving ? 'Saving…' : isSession ? 'Save session' : 'Save wine'}
+            {saving
+              ? 'Saving…'
+              : isEditing
+              ? 'Save changes'
+              : isSession
+              ? 'Save session'
+              : 'Save wine'}
           </Text>
         </TouchableOpacity>
       </View>

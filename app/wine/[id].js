@@ -1,7 +1,7 @@
 // Updated app/wine/[id].js - Wine Detail Screen with Photo Gallery
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
     Image,
@@ -25,9 +25,14 @@ export default function WineDetail() {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
-  useEffect(() => {
-    loadWineDetails();
-  }, [id]);
+  // Reload whenever the screen regains focus so edits made on the
+  // log-session edit screen (#42) are reflected on return.
+  useFocusEffect(
+    useCallback(() => {
+      loadWineDetails();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id])
+  );
 
   const loadWineDetails = async () => {
     try {
@@ -94,6 +99,12 @@ export default function WineDetail() {
     setShowPhotoModal(true);
   };
 
+  // Open the saved log for editing (#42). On return, useFocusEffect reloads.
+  const handleEditLog = () => {
+    if (!visit?.id) return;
+    router.push(`/log-session?editVisitId=${visit.id}`);
+  };
+
   const renderPhotoGallery = () => {
     if (!wine.photos || wine.photos.length === 0) {
       return (
@@ -158,6 +169,13 @@ export default function WineDetail() {
             <Ionicons name="arrow-back" size={24} color="#333" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Wine Details</Text>
+          <TouchableOpacity
+            onPress={handleEditLog}
+            style={styles.editIcon}
+            accessibilityLabel="Edit log"
+          >
+            <Ionicons name="pencil" size={22} color="#8C1C13" />
+          </TouchableOpacity>
         </View>
 
         {/* Wine Basic Info */}
@@ -256,22 +274,53 @@ export default function WineDetail() {
 
         {/* Visit Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Visit Information</Text>
-          <TouchableOpacity 
-            style={styles.visitInfo}
-            onPress={() => router.push(`/winery/${visit.winery_id}`)}
-          >
-            <View style={styles.visitDetails}>
-              <Text style={styles.wineryName}>{visit.wineries?.name}</Text>
-              <Text style={styles.visitDate}>Visited on {formatDate(visit.visit_date)}</Text>
-              {visit.notes && (
-                <Text style={styles.visitNotes} numberOfLines={2}>
-                  {visit.notes}
+          <View style={styles.visitSectionHeader}>
+            <Text style={styles.sectionTitle}>Visit Information</Text>
+            <TouchableOpacity
+              style={styles.editLogLink}
+              onPress={handleEditLog}
+              accessibilityLabel="Edit log"
+            >
+              <Ionicons name="pencil-outline" size={16} color="#8C1C13" />
+              <Text style={styles.editLogLinkText}>Edit log</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* When the log has a linked winery, the card taps through to it.
+              Location-optional logs (no winery_id) just show the place name. */}
+          {visit.winery_id ? (
+            <TouchableOpacity
+              style={styles.visitInfo}
+              onPress={() => router.push(`/winery/${visit.winery_id}`)}
+            >
+              <View style={styles.visitDetails}>
+                <Text style={styles.wineryName}>
+                  {visit.wineries?.name || visit.place_name || 'Winery'}
                 </Text>
-              )}
+                <Text style={styles.visitDate}>Visited on {formatDate(visit.visit_date)}</Text>
+                {visit.notes && (
+                  <Text style={styles.visitNotes} numberOfLines={2}>
+                    {visit.notes}
+                  </Text>
+                )}
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#8C1C13" />
+            </TouchableOpacity>
+          ) : (
+            <View style={styles.visitInfo}>
+              <View style={styles.visitDetails}>
+                {visit.place_name ? (
+                  <Text style={styles.wineryName}>{visit.place_name}</Text>
+                ) : null}
+                <Text style={styles.visitDate}>Logged on {formatDate(visit.visit_date)}</Text>
+                {visit.notes && (
+                  <Text style={styles.visitNotes} numberOfLines={2}>
+                    {visit.notes}
+                  </Text>
+                )}
+              </View>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8C1C13" />
-          </TouchableOpacity>
+          )}
         </View>
 
         {/* Ask the Sommelier */}
@@ -347,9 +396,13 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   headerTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '600',
     color: '#3E3E3E',
+  },
+  editIcon: {
+    padding: 4,
   },
   section: {
     padding: 16,
@@ -454,6 +507,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#3E3E3E',
     marginBottom: 16,
+  },
+  visitSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  editLogLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 16,
+  },
+  editLogLinkText: {
+    fontSize: 14,
+    color: '#8C1C13',
+    fontWeight: '600',
   },
   ratingRow: {
     flexDirection: 'row',
