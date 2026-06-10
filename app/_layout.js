@@ -4,15 +4,21 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { createContext, useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { createContext, useEffect, useRef, useState } from 'react';
+import { AppState, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { checkAndReschedule, setNotificationHandler } from '../lib/notifications';
 import { supabase } from '../lib/supabase';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
+
+// Register how foreground notifications are presented. Guarded internally: this
+// is a no-op on web or when the native module / permission is absent, and never
+// throws — so it's safe to run at module load.
+setNotificationHandler();
 
 // Auth context
 export const AuthContext = createContext({
@@ -154,6 +160,31 @@ export default function RootLayout() {
       console.log('📍 User is in correct section, no navigation needed');
     }
   }, [isAuthenticated, isInitialized, isLoading, segments]);
+
+  // CELLAR REMINDERS - check & (re)schedule the restrained drink-soon / past-peak
+  // nudge when the app comes to the foreground (and once on first authenticated
+  // load). Fully guarded inside lib/notifications: no-ops on web, without the
+  // native module, when push is disabled, or when permission isn't granted, and
+  // never blocks boot. Only runs for a signed-in user (cellar is user-scoped).
+  const appState = useRef(AppState.currentState);
+  useEffect(() => {
+    if (!isAuthenticated) return undefined;
+
+    // Defer off the boot path so it never delays first paint.
+    const id = setTimeout(() => { checkAndReschedule(); }, 0);
+
+    const sub = AppState.addEventListener('change', (next) => {
+      const cameToForeground =
+        appState.current.match(/inactive|background/) && next === 'active';
+      appState.current = next;
+      if (cameToForeground) checkAndReschedule();
+    });
+
+    return () => {
+      clearTimeout(id);
+      sub.remove();
+    };
+  }, [isAuthenticated]);
 
   // YOUR EXISTING AUTH FUNCTIONS - Keep these the same
   const signIn = async (email, password) => {
@@ -302,6 +333,7 @@ export default function RootLayout() {
               <Stack.Screen name="register" />
               <Stack.Screen name="forgot-password" />
               <Stack.Screen name="profile/account-settings" />
+              <Stack.Screen name="profile/notifications" />
               <Stack.Screen name="profile/change-password" />
               <Stack.Screen name="profile/help-support" />
               <Stack.Screen name="profile/feedback" />
