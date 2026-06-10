@@ -12,6 +12,7 @@ import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
 import theme from '../styles/theme';
 import AutocompleteInput from './AutocompleteInput';
+import BottlePhotoPicker from './BottlePhotoPicker';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
@@ -41,6 +42,7 @@ export function toBottlePayload(form) {
     drink_by: form.drink_by ? parseInt(form.drink_by, 10) || null : null,
     rating: num(form.rating),
     notes: form.notes?.trim() || null,
+    photo_url: form.photo_url || null,
   };
 }
 
@@ -73,6 +75,7 @@ function initialState(initial = {}, { defaultPurchaseToday = false } = {}) {
     drink_by: s(initial.drink_by),
     rating: s(initial.rating),
     notes: s(initial.notes),
+    photo_url: initial.photo_url ?? null,
   };
 }
 
@@ -243,6 +246,16 @@ export default function CellarBottleForm({
           </View>
         </View>
       </Row>
+
+      {/* ---- Bottle / label photo (#58): single photo per bottle, uploaded to
+          the existing PUBLIC wine-photos bucket under a cellar/ prefix. Always
+          visible (not behind "More details") since a label shot is a fast,
+          high-value add. Fails soft — never blocks the save. ---- */}
+      <BottlePhotoPicker
+        value={form.photo_url}
+        onChange={set('photo_url')}
+        disabled={saving}
+      />
 
       {/* ---- Progressive disclosure: everything else ---- */}
       <TouchableOpacity

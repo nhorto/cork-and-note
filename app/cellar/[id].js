@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -220,6 +221,11 @@ export default function BottleDetailScreen() {
             />
           ) : (
             <>
+              {/* Bottle / label photo (#58): a tasteful hero image when set. */}
+              {bottle.photo_url ? (
+                <Image source={{ uri: bottle.photo_url }} style={styles.hero} resizeMode="cover" />
+              ) : null}
+
               {/* Title block */}
               <Text style={styles.wineName}>{bottle.wine_name}</Text>
               {producer ? <Text style={styles.producer}>{producer}</Text> : null}
@@ -498,6 +504,15 @@ const styles = StyleSheet.create({
   headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
 
+  hero: {
+    width: '100%',
+    height: 200,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.parchment,
+    marginBottom: spacing.lg,
+  },
   wineName: { ...typography.heading.h1, color: colors.neutral.charcoal, fontFamily: 'Georgia' },
   producer: { ...typography.body.large, color: colors.neutral.graphite, marginTop: 2 },
   badgeRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },

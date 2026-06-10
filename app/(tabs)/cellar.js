@@ -10,6 +10,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   ScrollView,
   SectionList,
   StyleSheet,
@@ -366,8 +367,14 @@ function BottleCard({ bottle, onPress }) {
 
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>
+      {/* Bottle / label photo thumbnail (#58) replaces the glass tile when set;
+          the quantity dot stays layered on top either way. */}
       <View style={styles.cardGlass}>
-        <Ionicons name="wine-outline" size={20} color={colors.primary.burgundy} />
+        {bottle.photo_url ? (
+          <Image source={{ uri: bottle.photo_url }} style={styles.cardThumb} />
+        ) : (
+          <Ionicons name="wine-outline" size={20} color={colors.primary.burgundy} />
+        )}
         {bottle.quantity > 1 && (
           <View style={styles.qtyDot}>
             <Text style={styles.qtyDotText}>{bottle.quantity}</Text>
@@ -713,6 +720,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gold.light,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  cardThumb: {
+    width: '100%',
+    height: '100%',
+    borderRadius: borderRadius.md,
   },
   qtyDot: {
     position: 'absolute',
