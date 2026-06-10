@@ -1035,7 +1035,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.overlay.dark,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.round,
   },
   photoModalText: {
     ...typography.body.regular,

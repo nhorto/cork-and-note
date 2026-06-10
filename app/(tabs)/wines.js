@@ -829,7 +829,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.parchment,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.round,
     marginRight: spacing.sm,
     marginBottom: spacing.sm,
     borderWidth: 1,

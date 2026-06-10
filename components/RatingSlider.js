@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: spacing.md,
     backgroundColor: colors.neutral.parchment,
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.round,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderWidth: 1,
