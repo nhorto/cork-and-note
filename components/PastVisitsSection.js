@@ -212,7 +212,17 @@ const PastVisitsSection = ({ wineryId }) => {
 
               {/* Wine List */}
               <View style={styles.winesSection}>
-                <Text style={styles.winesSectionTitle}>Wines Tasted</Text>
+                <View style={styles.winesSectionHeader}>
+                  <Text style={styles.winesSectionTitle}>Wines Tasted</Text>
+                  <TouchableOpacity
+                    style={styles.editLogLink}
+                    onPress={() => router.push(`/log-session?editVisitId=${visit.id}`)}
+                    accessibilityLabel="Edit log"
+                  >
+                    <Ionicons name="pencil-outline" size={15} color={colors.primary.burgundy} />
+                    <Text style={styles.editLogLinkText}>Edit log</Text>
+                  </TouchableOpacity>
+                </View>
                 {visit.wines && visit.wines.length > 0 ? (
                   visit.wines.map((wine, index) => (
                     <TouchableOpacity
@@ -514,11 +524,26 @@ const styles = StyleSheet.create({
   winesSection: {
     padding: spacing.md,
   },
+  winesSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
   winesSectionTitle: {
     ...typography.body.regular,
     fontWeight: '600',
     color: colors.neutral.charcoal,
-    marginBottom: spacing.md,
+  },
+  editLogLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  editLogLinkText: {
+    ...typography.body.small,
+    color: colors.primary.burgundy,
+    fontWeight: '600',
   },
   wineItem: {
     flexDirection: 'row',

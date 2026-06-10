@@ -355,6 +355,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
     // Create wine data object
     const wineData = {
+      // Preserve the id when editing an existing wine so the edit flow can
+      // diff/update it rather than treating it as a brand-new wine.
+      id: initialData?.id,
       winemaker: winemaker.trim(),
       name: wineName,
       type: wineType || null,
