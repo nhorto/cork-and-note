@@ -4,25 +4,84 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
-import ConversationList from '../../components/ConversationList';
+import TonightsPickCard from '../../components/TonightsPickCard';
 import { aiService } from '../../lib/ai';
 import { chatService } from '../../lib/chat';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
 
+// Compact relative date for the recent-chats list.
+function formatRelativeDate(dateString) {
+  const date = new Date(dateString);
+  const diffMs = Date.now() - date.getTime();
+  const mins = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMs / 3600000);
+  const days = Math.floor(diffMs / 86400000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+// A single recent-conversation row. Local to this screen so the list can live
+// inside the same ScrollView as the "Tonight's pick" hero without nesting a
+// FlatList in a ScrollView.
+function ConversationRow({ conversation, onPress, onDelete }) {
+  const contextIcon =
+    conversation.context_type === 'wine_entry' ? 'wine' : 'chatbubbles';
+  const handleLongPress = () => {
+    Alert.alert('Delete Conversation', `Delete "${conversation.title}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => onDelete(conversation.id),
+      },
+    ]);
+  };
+  return (
+    <TouchableOpacity
+      style={styles.convItem}
+      onPress={() => onPress(conversation)}
+      onLongPress={handleLongPress}
+      activeOpacity={0.7}
+    >
+      <View style={styles.convIcon}>
+        <Ionicons name={contextIcon} size={20} color={colors.primary.burgundy} />
+      </View>
+      <View style={styles.convContent}>
+        <Text style={styles.convTitle} numberOfLines={1}>
+          {conversation.title}
+        </Text>
+        <Text style={styles.convMeta}>
+          {conversation.context_type === 'wine_entry' ? 'Wine Entry' : 'Chat'}
+          {' · '}
+          {formatRelativeDate(conversation.updated_at)}
+        </Text>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color={colors.neutral.silver} />
+    </TouchableOpacity>
+  );
+}
+
 export default function SommelierScreen() {
+  const router = useRouter();
   // State
   const [view, setView] = useState('list'); // 'list' or 'chat'
   const [conversations, setConversations] = useState([]);
@@ -210,12 +269,50 @@ export default function SommelierScreen() {
             <ActivityIndicator size="large" color={colors.primary.burgundy} />
           </View>
         ) : (
-          <ConversationList
-            conversations={conversations}
-            onSelect={openConversation}
-            onDelete={handleDeleteConversation}
-            onNewChat={startNewChat}
-          />
+          // Single scroll surface: the cellar-grounded "Tonight's pick" hero on
+          // top, then past conversations. (#51 compact entry point.)
+          <ScrollView
+            contentContainerStyle={styles.listScroll}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.pickWrap}>
+              <TonightsPickCard
+                onRequireCellar={() => router.push('/cellar/add')}
+              />
+            </View>
+
+            {/* New conversation */}
+            <TouchableOpacity style={styles.newChatButton} onPress={startNewChat}>
+              <Ionicons name="add-circle" size={20} color={colors.neutral.cream} />
+              <Text style={styles.newChatText}>New Conversation</Text>
+            </TouchableOpacity>
+
+            {conversations.length === 0 ? (
+              <View style={styles.listEmptyState}>
+                <Ionicons
+                  name="chatbubbles-outline"
+                  size={40}
+                  color={colors.neutral.stone}
+                />
+                <Text style={styles.listEmptyTitle}>No conversations yet</Text>
+                <Text style={styles.listEmptySubtitle}>
+                  Ask your sommelier anything, or let it pick tonight&apos;s bottle above.
+                </Text>
+              </View>
+            ) : (
+              <>
+                <Text style={styles.recentLabel}>RECENT CHATS</Text>
+                {conversations.map((c) => (
+                  <ConversationRow
+                    key={c.id}
+                    conversation={c}
+                    onPress={openConversation}
+                    onDelete={handleDeleteConversation}
+                  />
+                ))}
+              </>
+            )}
+          </ScrollView>
         )}
       </SafeAreaView>
     );
@@ -254,7 +351,7 @@ export default function SommelierScreen() {
             </View>
             <Text style={styles.emptyChatTitle}>Bonjour!</Text>
             <Text style={styles.emptyChatSubtitle}>
-              I'm your personal wine sommelier. Ask me about wines, grape varieties, food pairings, or snap a photo of a wine label for identification.
+              I&apos;m your personal wine sommelier. Ask me about wines, grape varieties, food pairings, or snap a photo of a wine label for identification.
             </Text>
           </View>
         ) : (
@@ -314,6 +411,89 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.gold.muted,
   },
+
+  // List view (Tonight's pick + recent chats)
+  listScroll: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
+  pickWrap: {
+    marginBottom: spacing.md,
+  },
+  newChatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.primary.burgundy,
+    borderRadius: borderRadius.md,
+    ...shadows.soft,
+  },
+  newChatText: {
+    ...typography.body.regular,
+    color: colors.neutral.cream,
+    fontWeight: '600',
+  },
+  recentLabel: {
+    ...typography.body.caption,
+    color: colors.gold.shimmer,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  convItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+  },
+  convIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.neutral.cream,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  convContent: { flex: 1 },
+  convTitle: {
+    ...typography.body.regular,
+    fontWeight: '600',
+    color: colors.neutral.charcoal,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  convMeta: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginTop: 2,
+  },
+  listEmptyState: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
+  listEmptyTitle: {
+    ...typography.heading.h3,
+    color: colors.neutral.charcoal,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    marginTop: spacing.md,
+  },
+  listEmptySubtitle: {
+    ...typography.body.regular,
+    color: colors.neutral.pewter,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+  },
+
   centered: {
     flex: 1,
     alignItems: 'center',

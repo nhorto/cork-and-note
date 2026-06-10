@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import TonightsPickCard from '../../components/TonightsPickCard';
 import { cellarService } from '../../lib/cellar';
 import { visitsService } from '../../lib/visits';
 import { wishlistService } from '../../lib/wishlist';
@@ -122,6 +123,11 @@ export default function HomeScreen() {
           <Stat n={stats.wines} label="Wines" />
           <Stat n={stats.places} label="Places" />
           <Stat n={stats.wishlist} label="Wishlist" />
+        </View>
+
+        {/* Tonight's pick — AI sommelier grounded in the user's own cellar (#51) */}
+        <View style={styles.tonightsPick}>
+          <TonightsPickCard onRequireCellar={() => router.push('/cellar/add')} />
         </View>
 
         {/* Log a wine hero */}
@@ -294,6 +300,9 @@ const styles = StyleSheet.create({
 
   // Stat strip
   stats: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },
+
+  // Tonight's pick hero
+  tonightsPick: { marginTop: spacing.lg },
   stat: {
     flex: 1,
     backgroundColor: colors.neutral.parchment,
