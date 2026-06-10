@@ -54,7 +54,11 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showChatModal, setShowChatModal] = useState(false);
-  
+
+  // AI suggestion confirmation state
+  const [pendingFields, setPendingFields] = useState([]); // [{ key, label, current, suggested, apply, set }]
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+
   // Load initial data if editing an existing wine
   useEffect(() => {
     if (initialData) {
@@ -195,17 +199,146 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     setShowTypeModal(false);
   };
   
-  // Handle AI suggestions auto-fill
+  // Clamp a numeric rating into the 0–5 range; returns null if not a finite number
+  const clampRating = (value) => {
+    const num = Number(value);
+    if (!Number.isFinite(num)) return null;
+    return Math.max(0, Math.min(5, num));
+  };
+
+  // Handle AI suggestions — build a non-destructive confirmation list.
+  // Each field is pre-checked ONLY when the corresponding form field is empty,
+  // so user-entered values are never silently clobbered.
   const handleUseSuggestions = (suggestions) => {
-    if (suggestions.winemaker) setWinemaker(suggestions.winemaker);
-    if (suggestions.wine_name) setWineName(suggestions.wine_name);
-    if (suggestions.wine_type) setWineType(suggestions.wine_type);
-    if (suggestions.varietal) setWineVarietal(suggestions.varietal);
-    if (suggestions.year) setWineYear(suggestions.year);
-    if (suggestions.flavor_tags && Array.isArray(suggestions.flavor_tags)) {
-      setFlavorNotes(suggestions.flavor_tags);
+    if (!suggestions || typeof suggestions !== 'object') {
+      setShowChatModal(false);
+      return;
     }
+
+    const fields = [];
+
+    // --- Text / select fields ---
+    const addTextField = (key, label, suggested, current, setter) => {
+      if (suggested == null) return;
+      const suggestedStr = String(suggested).trim();
+      if (!suggestedStr) return;
+      const currentStr = (current ?? '').toString();
+      if (currentStr.trim() === suggestedStr) return; // no change
+      fields.push({
+        key,
+        label,
+        current: currentStr,
+        suggestedDisplay: suggestedStr,
+        apply: !currentStr.trim(), // pre-checked only when currently empty
+        applyValue: () => setter(suggestedStr),
+      });
+    };
+
+    addTextField('winemaker', 'Winemaker', suggestions.winemaker, winemaker, setWinemaker);
+    addTextField('wine_name', 'Wine Name', suggestions.wine_name, wineName, setWineName);
+    addTextField('wine_type', 'Type', suggestions.wine_type, wineType, setWineType);
+    addTextField('varietal', 'Varietal', suggestions.varietal, wineVarietal, setWineVarietal);
+    addTextField('year', 'Year', suggestions.year, wineYear, setWineYear);
+
+    // --- Flavor tags: MERGE with existing (dedup), never discard user's choices ---
+    if (Array.isArray(suggestions.flavor_tags) && suggestions.flavor_tags.length > 0) {
+      const incoming = suggestions.flavor_tags
+        .map(t => (t == null ? '' : String(t).trim()))
+        .filter(Boolean);
+      const merged = Array.from(new Set([...flavorNotes, ...incoming]));
+      const newOnes = incoming.filter(t => !flavorNotes.includes(t));
+      if (newOnes.length > 0) {
+        fields.push({
+          key: 'flavor_tags',
+          label: 'Flavor Notes',
+          current: flavorNotes.length ? flavorNotes.join(', ') : '(none)',
+          suggestedDisplay: `+ ${newOnes.join(', ')}`,
+          apply: true, // merge is additive, safe to pre-check
+          applyValue: () => setFlavorNotes(merged),
+        });
+      }
+    }
+
+    // --- Detailed characteristics → ratings state (keys must exist in ratings) ---
+    const chars = suggestions.characteristics;
+    if (chars && typeof chars === 'object') {
+      Object.keys(ratings).forEach((key) => {
+        if (!(key in chars)) return;
+        const clamped = clampRating(chars[key]);
+        if (clamped == null) return;
+        const currentVal = ratings[key];
+        if (currentVal === clamped) return;
+        fields.push({
+          key: `rating_${key}`,
+          label: key.charAt(0).toUpperCase() + key.slice(1),
+          current: `${currentVal}/5`,
+          suggestedDisplay: `${clamped}/5`,
+          apply: !currentVal, // pre-checked only when currently unset (0)
+          applyValue: () => updateRating(key, clamped),
+        });
+      });
+    }
+
+    // --- Overall rating ---
+    const overall = clampRating(suggestions.overall_rating);
+    if (overall != null && overall !== overallRating) {
+      fields.push({
+        key: 'overall_rating',
+        label: 'Overall Rating',
+        current: `${overallRating}/5`,
+        suggestedDisplay: `${overall}/5`,
+        apply: !overallRating,
+        applyValue: () => setOverallRating(overall),
+      });
+    }
+
+    // --- Additional notes ---
+    if (suggestions.additional_notes != null) {
+      const note = String(suggestions.additional_notes).trim();
+      if (note && note !== additionalNotes.trim()) {
+        fields.push({
+          key: 'additional_notes',
+          label: 'Additional Notes',
+          current: additionalNotes.trim() || '(empty)',
+          suggestedDisplay: note,
+          apply: !additionalNotes.trim(),
+          applyValue: () => setAdditionalNotes(note),
+        });
+      }
+    }
+
+    if (fields.length === 0) {
+      // Nothing new to apply
+      Alert.alert('Nothing to apply', "These suggestions already match what you've entered.");
+      setShowChatModal(false);
+      return;
+    }
+
+    setPendingFields(fields);
+    setShowConfirmModal(true);
+  };
+
+  // Toggle a single field's apply flag in the confirmation panel
+  const togglePendingField = (key) => {
+    setPendingFields((prev) =>
+      prev.map((f) => (f.key === key ? { ...f, apply: !f.apply } : f))
+    );
+  };
+
+  // Apply only the toggled-on suggestions, then close
+  const applyPendingSuggestions = () => {
+    pendingFields.forEach((f) => {
+      if (f.apply) f.applyValue();
+    });
+    setShowConfirmModal(false);
+    setPendingFields([]);
     setShowChatModal(false);
+  };
+
+  // Dismiss the confirmation without applying anything
+  const cancelPendingSuggestions = () => {
+    setShowConfirmModal(false);
+    setPendingFields([]);
   };
 
   // Handle form submission
@@ -486,6 +619,69 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         }}
       />
 
+      {/* AI Suggestions Confirmation Modal */}
+      <Modal
+        visible={showConfirmModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={cancelPendingSuggestions}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.confirmContent}>
+            <View style={styles.modalHeader}>
+              <View style={styles.confirmHeaderLeft}>
+                <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
+                <Text style={styles.modalTitle}>Review Suggestions</Text>
+              </View>
+              <TouchableOpacity onPress={cancelPendingSuggestions}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.confirmSubtitle}>
+              Choose which suggestions to apply. Fields you&apos;ve already filled in are left
+              unchecked so your input isn&apos;t overwritten.
+            </Text>
+
+            <ScrollView style={styles.confirmList}>
+              {pendingFields.map((field) => (
+                <TouchableOpacity
+                  key={field.key}
+                  style={styles.confirmRow}
+                  activeOpacity={0.7}
+                  onPress={() => togglePendingField(field.key)}
+                >
+                  <Ionicons
+                    name={field.apply ? 'checkbox' : 'square-outline'}
+                    size={22}
+                    color={field.apply ? colors.primary.burgundy : colors.neutral.silver}
+                    style={styles.confirmCheckbox}
+                  />
+                  <View style={styles.confirmRowBody}>
+                    <Text style={styles.confirmFieldLabel}>{field.label}</Text>
+                    <Text style={styles.confirmCurrent} numberOfLines={2}>
+                      Current: {field.current || '(empty)'}
+                    </Text>
+                    <Text style={styles.confirmSuggested} numberOfLines={3}>
+                      Suggested: {field.suggestedDisplay}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+
+            <View style={styles.confirmActions}>
+              <TouchableOpacity style={styles.cancelButton} onPress={cancelPendingSuggestions}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={applyPendingSuggestions}>
+                <Text style={styles.saveButtonText}>Apply selected</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       {/* Photo Viewer Modal */}
       <Modal
         visible={showPhotoModal}
@@ -742,6 +938,66 @@ const styles = StyleSheet.create({
   selectedTypeOptionText: {
     fontWeight: '600',
     color: colors.primary.burgundy,
+  },
+
+  // AI Suggestions Confirmation Modal
+  confirmContent: {
+    backgroundColor: colors.neutral.cream,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    maxHeight: '85%',
+    paddingBottom: spacing.lg,
+  },
+  confirmHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  confirmSubtitle: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    fontStyle: 'italic',
+  },
+  confirmList: {
+    paddingHorizontal: spacing.lg,
+  },
+  confirmRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.neutral.linen,
+  },
+  confirmCheckbox: {
+    marginTop: 2,
+    marginRight: spacing.md,
+  },
+  confirmRowBody: {
+    flex: 1,
+  },
+  confirmFieldLabel: {
+    ...typography.body.caption,
+    color: colors.gold.shimmer,
+    marginBottom: spacing.xs,
+  },
+  confirmCurrent: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+  },
+  confirmSuggested: {
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+    marginTop: 2,
+  },
+  confirmActions: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
   },
 
   // Photo Modal
