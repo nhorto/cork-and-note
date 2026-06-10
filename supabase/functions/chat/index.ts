@@ -61,13 +61,13 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Payload too large" }, 413);
     }
 
-    let parsed: { messages?: unknown; system_prompt?: unknown };
+    let parsed: { messages?: unknown; system_prompt?: unknown; task?: unknown };
     try {
       parsed = JSON.parse(raw);
     } catch {
       return json({ error: "Invalid JSON body" }, 400);
     }
-    const { messages, system_prompt } = parsed;
+    const { messages, system_prompt, task } = parsed;
 
     // ── Input validation ──────────────────────────────────────────────
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -191,6 +191,19 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // ── Model selection (server-side allowlist) ───────────────────────
+    // The client may pass a `task` hint; we map it to a model HERE. We never
+    // accept a raw model string from the client (cost/abuse safety): an unknown
+    // or absent task falls back to the default chat model.
+    const MODELS: Record<string, string> = {
+      chat: "claude-sonnet-4-6", // sommelier conversation (migrated off the deprecated claude-sonnet-4)
+      label_scan: "claude-haiku-4-5", // cheap, fast label read/prefill (#59)
+    };
+    const model =
+      typeof task === "string" && Object.prototype.hasOwnProperty.call(MODELS, task)
+        ? MODELS[task]
+        : MODELS.chat;
+
     // ── Call Claude ───────────────────────────────────────────────────
     const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -200,7 +213,7 @@ Deno.serve(async (req: Request) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model,
         max_tokens: 1024,
         system: (system_prompt as string) || "You are a helpful wine sommelier.",
         messages: claudeMessages,
