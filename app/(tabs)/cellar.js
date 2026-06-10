@@ -1,17 +1,34 @@
 // app/(tabs)/cellar.js - Wine Cellar (inventory) — Epic #6
 // Château Label Design - Elegant & Refined
+//
+// Real browsing (#52): search, a Ready now / Hold / All segment, a filter modal with
+// removable chips + clear-all + live counts, sort, and a Group-by pivot with per-group
+// subtotals. All slicing runs client-side over the already-fetched list via
+// lib/cellarBrowse.js (the enthusiast persona = dozens of bottles, not thousands).
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
+  SectionList,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { cellarService, READY_STATUSES } from '../../lib/cellar';
+import CellarFilterModal from '../../components/CellarFilterModal';
+import CellarOptionSheet from '../../components/CellarOptionSheet';
+import { cellarService } from '../../lib/cellar';
+import {
+  EMPTY_FILTERS,
+  GROUPS,
+  SEGMENTS,
+  SORTS,
+  UNKNOWN,
+  browseCellar,
+  hasActiveFilters,
+} from '../../lib/cellarBrowse';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
@@ -24,11 +41,32 @@ const DRINK_BADGE = {
   past_peak: { label: 'Past peak', color: colors.status.error },
 };
 
+const SORT_LABEL = Object.fromEntries(SORTS.map((s) => [s.key, s.label]));
+const GROUP_LABEL = Object.fromEntries(GROUPS.map((g) => [g.key, g.label]));
+const STATUS_CHIP_LABEL = {
+  too_young: 'Too young',
+  ready: 'Ready',
+  drink_up: 'Drink up',
+  past_peak: 'Past peak',
+  [UNKNOWN]: 'No window',
+};
+
 export default function CellarScreen() {
   const router = useRouter();
   const [bottles, setBottles] = useState([]);
   const [loaded, setLoaded] = useState(false);
-  const [filter, setFilter] = useState('all'); // 'all' | 'ready'
+
+  // Browse state.
+  const [query, setQuery] = useState('');
+  const [segment, setSegment] = useState('all'); // all | ready | hold
+  const [sort, setSort] = useState('readiness');
+  const [groupBy, setGroupBy] = useState('none');
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+
+  // Sheet visibility.
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [sortOpen, setSortOpen] = useState(false);
+  const [groupOpen, setGroupOpen] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -45,21 +83,39 @@ export default function CellarScreen() {
     }, [])
   );
 
-  const visible = useMemo(() => {
-    if (filter === 'ready') {
-      return bottles.filter((b) => READY_STATUSES.includes(b.drinkStatus));
-    }
-    return bottles;
-  }, [bottles, filter]);
+  // Whole pipeline (search -> segment -> filters -> sort -> group) in one memo.
+  const { sections, facets, counts } = useMemo(
+    () => browseCellar(bottles, { query, segment, filters, sort, groupBy }),
+    [bottles, query, segment, filters, sort, groupBy]
+  );
 
-  const readyCount = useMemo(
-    () => bottles.filter((b) => READY_STATUSES.includes(b.drinkStatus)).length,
-    [bottles]
+  // The segment+search-narrowed set the filter modal previews against.
+  const filterScope = useMemo(
+    () => browseCellar(bottles, { query, segment, filters: EMPTY_FILTERS, sort: 'readiness', groupBy: 'none' }).filtered,
+    [bottles, query, segment]
   );
-  const totalBottles = useMemo(
-    () => bottles.reduce((sum, b) => sum + (b.quantity || 0), 0),
-    [bottles]
-  );
+
+  const filtersActive = hasActiveFilters(filters);
+  const hasResults = counts.result > 0;
+  const grouped = groupBy !== 'none';
+
+  // Removable active-filter chips (facets + price + rating).
+  const activeChips = useMemo(() => buildActiveChips(filters), [filters]);
+
+  const removeChip = (chip) => {
+    setFilters((f) => {
+      if (chip.kind === 'list') {
+        return { ...f, [chip.key]: (f[chip.key] || []).filter((v) => v !== chip.value) };
+      }
+      return { ...f, [chip.key]: null };
+    });
+  };
+
+  const resetAll = () => {
+    setQuery('');
+    setSegment('all');
+    setFilters(EMPTY_FILTERS);
+  };
 
   return (
     <View style={styles.container}>
@@ -77,31 +133,128 @@ export default function CellarScreen() {
         <View style={styles.headerBorder} />
       </View>
 
-      {/* Summary + filter */}
+      {/* Browse controls (only once there's something to browse) */}
       {loaded && bottles.length > 0 && (
         <View style={styles.toolbar}>
-          <Text style={styles.summary}>
-            {totalBottles} bottle{totalBottles === 1 ? '' : 's'} · {readyCount} ready
-          </Text>
-          <View style={styles.filters}>
-            <Chip label="All" active={filter === 'all'} onPress={() => setFilter('all')} />
-            <Chip label="Ready to drink" active={filter === 'ready'} onPress={() => setFilter('ready')} />
+          {/* Search */}
+          <View style={styles.searchBox}>
+            <Ionicons name="search" size={16} color={colors.neutral.pewter} />
+            <TextInput
+              style={styles.searchInput}
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search name, producer, region, vintage"
+              placeholderTextColor={colors.neutral.silver}
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+            {query.length > 0 && (
+              <TouchableOpacity onPress={() => setQuery('')} hitSlop={8}>
+                <Ionicons name="close-circle" size={16} color={colors.neutral.silver} />
+              </TouchableOpacity>
+            )}
           </View>
+
+          {/* Segmented Ready now / Hold / All */}
+          <View style={styles.segment}>
+            {SEGMENTS.map((s) => (
+              <TouchableOpacity
+                key={s.key}
+                style={[styles.segmentBtn, segment === s.key && styles.segmentBtnActive]}
+                onPress={() => setSegment(s.key)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.segmentText, segment === s.key && styles.segmentTextActive]}>
+                  {s.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Sort / Group / Filter buttons */}
+          <View style={styles.controlRow}>
+            <ControlButton
+              icon="swap-vertical"
+              label={SORT_LABEL[sort]}
+              onPress={() => setSortOpen(true)}
+            />
+            <ControlButton
+              icon="albums-outline"
+              label={grouped ? GROUP_LABEL[groupBy] : 'Group'}
+              active={grouped}
+              onPress={() => setGroupOpen(true)}
+            />
+            <ControlButton
+              icon="options-outline"
+              label="Filters"
+              active={filtersActive}
+              badge={filtersActive ? activeChips.length : 0}
+              onPress={() => setFilterOpen(true)}
+            />
+          </View>
+
+          {/* Active filter chips (removable) */}
+          {activeChips.length > 0 && (
+            <View style={styles.chipsRow}>
+              {activeChips.map((chip) => (
+                <TouchableOpacity
+                  key={chip.id}
+                  style={styles.activeChip}
+                  onPress={() => removeChip(chip)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.activeChipText} numberOfLines={1}>
+                    {chip.label}
+                  </Text>
+                  <Ionicons name="close" size={13} color={colors.primary.burgundy} />
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={styles.clearChip}
+                onPress={() => setFilters(EMPTY_FILTERS)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.clearChipText}>Clear all</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Result summary */}
+          <Text style={styles.summary}>
+            {counts.result} {counts.result === 1 ? 'lot' : 'lots'} · {counts.resultBottles}{' '}
+            {counts.resultBottles === 1 ? 'bottle' : 'bottles'}
+          </Text>
         </View>
       )}
 
+      {/* Body */}
       {!loaded ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.primary.burgundy} />
         </View>
-      ) : visible.length === 0 ? (
-        <EmptyState filter={filter} onAdd={() => router.push('/cellar/add')} />
+      ) : bottles.length === 0 ? (
+        <EmptyCellar onAdd={() => router.push('/cellar/add')} />
+      ) : !hasResults ? (
+        <NoResults onReset={resetAll} />
       ) : (
-        <FlatList
-          data={visible}
+        <SectionList
+          sections={sections}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          stickySectionHeadersEnabled={false}
+          renderSectionHeader={({ section }) =>
+            section.title ? (
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle} numberOfLines={1}>
+                  {section.title}
+                </Text>
+                <Text style={styles.sectionCount}>
+                  {section.count} {section.count === 1 ? 'lot' : 'lots'} · {section.bottleCount}
+                </Text>
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (
             <BottleCard bottle={item} onPress={() => router.push(`/cellar/${item.id}`)} />
           )}
@@ -116,18 +269,90 @@ export default function CellarScreen() {
       >
         <Ionicons name="add" size={26} color={colors.neutral.cream} />
       </TouchableOpacity>
+
+      {/* Sheets */}
+      <CellarOptionSheet
+        visible={sortOpen}
+        title="Sort by"
+        options={SORTS}
+        selected={sort}
+        onSelect={(key) => {
+          setSort(key);
+          setSortOpen(false);
+        }}
+        onClose={() => setSortOpen(false)}
+      />
+      <CellarOptionSheet
+        visible={groupOpen}
+        title="Group by"
+        options={GROUPS}
+        selected={groupBy}
+        onSelect={(key) => {
+          setGroupBy(key);
+          setGroupOpen(false);
+        }}
+        onClose={() => setGroupOpen(false)}
+      />
+      <CellarFilterModal
+        visible={filterOpen}
+        bottles={filterScope}
+        facets={facets}
+        filters={filters}
+        onApply={(next) => {
+          setFilters(next);
+          setFilterOpen(false);
+        }}
+        onClose={() => setFilterOpen(false)}
+      />
     </View>
   );
 }
 
-function Chip({ label, active, onPress }) {
+// Build the removable-chip descriptors from the committed filters.
+function buildActiveChips(filters) {
+  const chips = [];
+  const pushList = (key, values, fmt) =>
+    (values || []).forEach((value) =>
+      chips.push({ id: `${key}:${value}`, kind: 'list', key, value, label: fmt(value) })
+    );
+
+  pushList('statuses', filters.statuses, (v) => STATUS_CHIP_LABEL[v] || v);
+  pushList('types', filters.types, (v) => v);
+  pushList('varietals', filters.varietals, (v) => v);
+  pushList('regions', filters.regions, (v) => v);
+
+  if (filters.minPrice != null || filters.maxPrice != null) {
+    const lo = filters.minPrice != null ? `$${filters.minPrice}` : '$0';
+    const hi = filters.maxPrice != null ? `$${filters.maxPrice}` : 'any';
+    // Two scalars share the price facet; remove both at once.
+    chips.push({ id: 'price', kind: 'scalar', key: 'minPrice', label: `${lo}–${hi}`, value: null });
+  }
+  if (filters.minRating != null) {
+    chips.push({ id: 'rating', kind: 'scalar', key: 'minRating', label: `${filters.minRating}+ rating`, value: null });
+  }
+  return chips;
+}
+
+function ControlButton({ icon, label, active, badge, onPress }) {
   return (
     <TouchableOpacity
-      style={[styles.chip, active && styles.chipActive]}
+      style={[styles.control, active && styles.controlActive]}
       onPress={onPress}
       activeOpacity={0.8}
     >
-      <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+      <Ionicons
+        name={icon}
+        size={15}
+        color={active ? colors.primary.burgundy : colors.neutral.graphite}
+      />
+      <Text style={[styles.controlText, active && styles.controlTextActive]} numberOfLines={1}>
+        {label}
+      </Text>
+      {badge > 0 && (
+        <View style={styles.controlBadge}>
+          <Text style={styles.controlBadgeText}>{badge}</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 }
@@ -176,21 +401,7 @@ function BottleCard({ bottle, onPress }) {
   );
 }
 
-function EmptyState({ filter, onAdd }) {
-  if (filter === 'ready') {
-    return (
-      <View style={styles.body}>
-        <View style={styles.iconRing}>
-          <Ionicons name="time-outline" size={36} color={colors.gold.shimmer} />
-        </View>
-        <Text style={styles.emptyTitle}>Nothing ready just yet</Text>
-        <Text style={styles.emptySub}>
-          No bottles are in their drinking window. Set a “drink from / by” year on a
-          bottle to track this.
-        </Text>
-      </View>
-    );
-  }
+function EmptyCellar({ onAdd }) {
   return (
     <View style={styles.body}>
       <View style={styles.iconRing}>
@@ -204,6 +415,24 @@ function EmptyState({ filter, onAdd }) {
       <TouchableOpacity style={styles.emptyCta} onPress={onAdd} activeOpacity={0.9}>
         <Ionicons name="add" size={18} color={colors.neutral.cream} />
         <Text style={styles.emptyCtaText}>Add a bottle</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function NoResults({ onReset }) {
+  return (
+    <View style={styles.body}>
+      <View style={styles.iconRing}>
+        <Ionicons name="search-outline" size={36} color={colors.gold.shimmer} />
+      </View>
+      <Text style={styles.emptyTitle}>No bottles match</Text>
+      <Text style={styles.emptySub}>
+        Nothing in your cellar fits the current search and filters. Try loosening them.
+      </Text>
+      <TouchableOpacity style={styles.emptyCta} onPress={onReset} activeOpacity={0.9}>
+        <Ionicons name="refresh" size={18} color={colors.neutral.cream} />
+        <Text style={styles.emptyCtaText}>Clear search & filters</Text>
       </TouchableOpacity>
     </View>
   );
@@ -239,21 +468,115 @@ const styles = StyleSheet.create({
   headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
 
   toolbar: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  summary: { ...typography.body.small, color: colors.neutral.pewter, marginBottom: spacing.sm },
-  filters: { flexDirection: 'row', gap: spacing.sm },
-  chip: {
-    paddingVertical: spacing.xs,
+
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: typography.body.regular.fontSize,
+    color: colors.neutral.charcoal,
+    paddingVertical: 0,
+  },
+
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    padding: 3,
+    marginTop: spacing.sm,
+  },
+  segmentBtn: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: spacing.xs + 2,
+    borderRadius: borderRadius.sm,
+  },
+  segmentBtnActive: { backgroundColor: colors.primary.burgundy },
+  segmentText: { ...typography.body.small, color: colors.neutral.graphite },
+  segmentTextActive: { color: colors.neutral.cream, fontWeight: '600' },
+
+  controlRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  control: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.round,
     borderWidth: 1,
     borderColor: colors.neutral.stone,
     backgroundColor: colors.neutral.parchment,
   },
-  chipActive: { backgroundColor: colors.primary.burgundy, borderColor: colors.primary.burgundy },
-  chipText: { ...typography.body.small, color: colors.neutral.graphite },
-  chipTextActive: { color: colors.neutral.cream },
+  controlActive: { borderColor: colors.primary.burgundy, backgroundColor: colors.gold.light },
+  controlText: { ...typography.body.small, color: colors.neutral.graphite, flexShrink: 1 },
+  controlTextActive: { color: colors.primary.burgundy, fontWeight: '600' },
+  controlBadge: {
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: colors.primary.burgundy,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  controlBadgeText: { color: colors.neutral.cream, fontSize: 10, fontWeight: '700' },
+
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
+  activeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.round,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    backgroundColor: colors.gold.light,
+    maxWidth: '100%',
+  },
+  activeChipText: { ...typography.body.small, color: colors.primary.burgundy, flexShrink: 1 },
+  clearChip: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.round,
+  },
+  clearChipText: { ...typography.body.small, color: colors.neutral.pewter, fontWeight: '600' },
+
+  summary: { ...typography.body.small, color: colors.neutral.pewter, marginTop: spacing.sm },
 
   listContent: { padding: spacing.lg, paddingBottom: 120 },
+
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.sm,
+    marginTop: spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.gold.muted,
+    marginBottom: spacing.sm,
+  },
+  sectionTitle: {
+    ...typography.heading.h3,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+    flexShrink: 1,
+    marginRight: spacing.sm,
+  },
+  sectionCount: { ...typography.body.small, color: colors.neutral.pewter },
 
   card: {
     flexDirection: 'row',
