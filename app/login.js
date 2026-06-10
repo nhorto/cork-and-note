@@ -61,13 +61,13 @@ export default function LoginScreen() {
         <View style={styles.logoContainer}>
           <View style={styles.logoImageWrapper}>
             <Image
-              source={require('../assets/images/VCN_red.jpg')}
+              source={require('../assets/images/cork_and_note_logo.png')}
               style={styles.logoImage}
               resizeMode="contain"
             />
           </View>
           <Text style={styles.appName}>Welcome to Cork & Note!</Text>
-          <Text style={styles.tagline}>Discover Virginia's finest vineyards</Text>
+          <Text style={styles.tagline}>Taste, note, and remember every wine</Text>
         </View>
 
         <View style={styles.formContainer}>
