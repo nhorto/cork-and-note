@@ -130,15 +130,33 @@ export default function BottleDetailScreen() {
       return;
     }
     await load();
-    const loggedNote = res.wineId ? ' A tasting was added to your journal.' : '';
+    const wroteTasting = Boolean(res.wineId && res.visitId);
+    const loggedNote = wroteTasting ? ' A tasting was added to your journal.' : '';
+    // #92: when a tasting was created, offer to flesh it out in the FULL logger
+    // (flavor notes, characteristics, photo) by deep-linking into the existing
+    // edit path (#42) on the just-created visit — not just the quick star + note.
+    const detailAction = wroteTasting
+      ? [{
+          text: 'Add tasting notes',
+          onPress: () => router.push(`/log-session?editVisitId=${res.visitId}`),
+        }]
+      : [];
+
     if (res.keptBottle) {
-      Alert.alert('Tasted', `The bottle stays in your cellar.${loggedNote}`);
+      Alert.alert('Tasted', `The bottle stays in your cellar.${loggedNote}`, [
+        ...detailAction,
+        { text: 'Done', style: 'cancel' },
+      ]);
     } else if (res.bottle.quantity <= 0) {
       Alert.alert('Bottle removed', `That was your last one.${loggedNote}`, [
-        { text: 'OK', onPress: () => router.back() },
+        ...detailAction,
+        { text: 'OK', style: 'cancel', onPress: () => router.back() },
       ]);
-    } else if (loggedNote) {
-      Alert.alert('Logged', loggedNote.trim());
+    } else if (wroteTasting) {
+      Alert.alert('Logged', 'A tasting was added to your journal.', [
+        ...detailAction,
+        { text: 'Done', style: 'cancel' },
+      ]);
     }
   };
 
@@ -417,7 +435,7 @@ export default function BottleDetailScreen() {
                     multiline
                   />
                   <Text style={styles.editHint}>
-                    Saved to your journal — open the tasting later to add flavor notes and more.
+                    Saved to your journal — you can add flavor notes, characteristics & a photo next.
                   </Text>
                 </>
               )}
