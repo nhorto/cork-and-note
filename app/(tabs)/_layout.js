@@ -5,7 +5,9 @@
 // (reached contextually / nested) per docs/design/information-architecture.md.
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { useState } from 'react';
 import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import HubMenu from '../../components/HubMenu';
 import theme from '../../styles/theme';
 
 const { colors } = theme;
@@ -87,7 +89,7 @@ const LogTabButton = ({ onPress, accessibilityState }) => (
       onPress={onPress}
       activeOpacity={0.85}
       accessibilityRole="button"
-      accessibilityLabel="Log a wine"
+      accessibilityLabel="Quick actions"
       accessibilityState={accessibilityState}
     >
       <Ionicons name="add" size={30} color={colors.neutral.cream} />
@@ -97,8 +99,11 @@ const LogTabButton = ({ onPress, accessibilityState }) => (
 
 export default function Layout() {
   const iconSize = getIconSize();
+  // The center "＋" opens the quick-actions hub instead of navigating.
+  const [hubOpen, setHubOpen] = useState(false);
 
   return (
+    <>
     <Tabs
       screenOptions={{
         ...tabBarStyles,
@@ -133,7 +138,11 @@ export default function Layout() {
         options={{
           title: 'Log',
           headerShown: false,
-          tabBarButton: (props) => <LogTabButton {...props} />,
+          // Intercept the press: open the quick-actions hub instead of
+          // navigating straight to the log chooser.
+          tabBarButton: (props) => (
+            <LogTabButton {...props} onPress={() => setHubOpen(true)} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -162,6 +171,8 @@ export default function Layout() {
       <Tabs.Screen name="wines" options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="sommelier" options={{ href: null, headerShown: false }} />
     </Tabs>
+    <HubMenu visible={hubOpen} onClose={() => setHubOpen(false)} />
+    </>
   );
 }
 

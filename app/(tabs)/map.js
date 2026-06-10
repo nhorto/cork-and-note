@@ -2,7 +2,7 @@
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -17,6 +17,7 @@ const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 export default function MapScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const mapRef = useRef(null);
 
   // Region state - falls back to a wide Virginia view until the user's
@@ -62,6 +63,17 @@ export default function MapScreen() {
   useEffect(() => {
     loadUserPins();
   }, []);
+
+  // Opened from the home hub's "Add to wishlist" (?quickAdd=wishlist): open the
+  // winery-entry modal in wishlist mode, then clear the param so a later visit
+  // to Explore doesn't reopen it.
+  useEffect(() => {
+    if (params.quickAdd === 'wishlist') {
+      setPendingAction('wishlist');
+      setShowManualModal(true);
+      router.setParams({ quickAdd: undefined });
+    }
+  }, [params.quickAdd]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadUserPins = async () => {
     try {
