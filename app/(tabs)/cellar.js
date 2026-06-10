@@ -10,6 +10,7 @@ import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  ScrollView,
   SectionList,
   StyleSheet,
   Text,
@@ -400,22 +401,138 @@ function BottleCard({ bottle, onPress }) {
   );
 }
 
+// Illustrative bottles used only to SHOW newcomers what a populated cellar looks
+// like. Each mirrors BottleCard's vocabulary (glass tile, quantity dot, name /
+// producer / subtitle, drink-window badge) and reuses real drinkWindowMeta labels
+// so the preview reads like the live list — just muted and non-interactive.
+const PREVIEW_BOTTLES = [
+  {
+    id: 'preview-ready',
+    wine_name: 'Estate Cabernet Sauvignon',
+    producer: 'Château Margaux',
+    subtitle: '2016 · Cabernet Sauvignon · Bordeaux',
+    quantity: 3,
+    status: 'ready',
+  },
+  {
+    id: 'preview-drink-up',
+    wine_name: 'Sancerre Blanc',
+    producer: 'Domaine Vacheron',
+    subtitle: '2021 · Sauvignon Blanc · Loire',
+    quantity: 1,
+    status: 'drink_up',
+  },
+  {
+    id: 'preview-too-young',
+    wine_name: 'Barolo Riserva',
+    producer: 'Giacomo Conterno',
+    subtitle: '2019 · Nebbiolo · Piedmont',
+    quantity: 6,
+    status: 'too_young',
+  },
+];
+
+// What the cellar earns you — kept to a tight, scannable line per item.
+const VALUE_POINTS = [
+  { icon: 'pricetags-outline', text: 'Track vintages & quantities' },
+  { icon: 'time-outline', text: 'Know when each bottle is ready to drink' },
+  { icon: 'sparkles-outline', text: 'Get sommelier pairings for what you own' },
+];
+
+// A muted, non-interactive twin of BottleCard for the preview strip.
+function PreviewCard({ bottle }) {
+  const badge = drinkWindowMeta(bottle.status);
+  return (
+    <View style={[styles.card, styles.previewCard]}>
+      <View style={[styles.cardGlass, styles.previewGlass]}>
+        <Ionicons name="wine-outline" size={20} color={colors.gold.shimmer} />
+        {bottle.quantity > 1 && (
+          <View style={[styles.qtyDot, styles.previewQtyDot]}>
+            <Text style={styles.qtyDotText}>{bottle.quantity}</Text>
+          </View>
+        )}
+      </View>
+      <View style={styles.cardMeta}>
+        <Text style={styles.cardName} numberOfLines={1}>
+          {bottle.wine_name}
+        </Text>
+        <Text style={styles.cardProducer} numberOfLines={1}>
+          {bottle.producer}
+        </Text>
+        <Text style={styles.cardSub} numberOfLines={1}>
+          {bottle.subtitle}
+        </Text>
+      </View>
+      <View style={styles.cardRight}>
+        <View style={[styles.badge, styles.previewBadge, { backgroundColor: badge.color }]}>
+          <Text style={styles.badgeText}>{badge.label}</Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// Onboarding empty state: shows what a populated cellar looks like, a tight value
+// line, and drives ONE primary action ("Add your first bottle").
 function EmptyCellar({ onAdd }) {
   return (
-    <View style={styles.body}>
-      <View style={styles.iconRing}>
-        <Ionicons name="file-tray-stacked-outline" size={36} color={colors.gold.shimmer} />
+    <ScrollView
+      style={styles.onboardScroll}
+      contentContainerStyle={styles.onboardContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.onboardHero}>
+        <View style={styles.iconRing}>
+          <Ionicons name="file-tray-stacked-outline" size={36} color={colors.gold.shimmer} />
+        </View>
+        <Text style={styles.emptyTitle}>Start your cellar</Text>
+        <Text style={styles.emptySub}>
+          Add the bottles you own and Cork & Note tracks their drinking windows for
+          you. Here is what it looks like once it fills up.
+        </Text>
       </View>
-      <Text style={styles.emptyTitle}>Your cellar is empty</Text>
-      <Text style={styles.emptySub}>
-        Track the bottles you own — vintages, quantities, and when they are ready to
-        drink.
-      </Text>
-      <TouchableOpacity style={styles.emptyCta} onPress={onAdd} activeOpacity={0.9}>
+
+      {/* Preview of a populated cellar — labelled so it reads as an example. */}
+      <View style={styles.previewHeaderRow}>
+        <Text style={styles.previewLabel}>Example cellar</Text>
+        <View style={styles.previewRule} />
+      </View>
+      <View style={styles.previewList} pointerEvents="none">
+        {PREVIEW_BOTTLES.map((bottle) => (
+          <PreviewCard key={bottle.id} bottle={bottle} />
+        ))}
+      </View>
+
+      {/* What the cellar earns you. */}
+      <View style={styles.valueList}>
+        {VALUE_POINTS.map((point) => (
+          <View key={point.text} style={styles.valueRow}>
+            <View style={styles.valueIcon}>
+              <Ionicons name={point.icon} size={15} color={colors.primary.burgundy} />
+            </View>
+            <Text style={styles.valueText}>{point.text}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Exactly one primary action. */}
+      <TouchableOpacity style={styles.onboardCta} onPress={onAdd} activeOpacity={0.9}>
         <Ionicons name="add" size={18} color={colors.neutral.cream} />
-        <Text style={styles.emptyCtaText}>Add a bottle</Text>
+        <Text style={styles.emptyCtaText}>Add your first bottle</Text>
       </TouchableOpacity>
-    </View>
+
+      {/* Subtle, subordinate secondary affordance. Routes to the same add screen,
+          which gains a label-scan entry point once #59 lands. */}
+      <TouchableOpacity
+        style={styles.onboardSecondary}
+        onPress={onAdd}
+        activeOpacity={0.7}
+        hitSlop={8}
+      >
+        <Ionicons name="camera-outline" size={15} color={colors.neutral.pewter} />
+        <Text style={styles.onboardSecondaryText}>or scan a label to add faster</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
@@ -425,9 +542,10 @@ function NoResults({ onReset }) {
       <View style={styles.iconRing}>
         <Ionicons name="search-outline" size={36} color={colors.gold.shimmer} />
       </View>
-      <Text style={styles.emptyTitle}>No bottles match</Text>
+      <Text style={styles.emptyTitle}>No matches</Text>
       <Text style={styles.emptySub}>
-        Nothing in your cellar fits the current search and filters. Try loosening them.
+        Your cellar has bottles, but none fit the current search and filters. Clear
+        them to see everything again.
       </Text>
       <TouchableOpacity style={styles.emptyCta} onPress={onReset} activeOpacity={0.9}>
         <Ionicons name="refresh" size={18} color={colors.neutral.cream} />
@@ -653,6 +771,61 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   emptyCtaText: { ...typography.body.regular, color: colors.neutral.cream, fontWeight: '600' },
+
+  // --- Onboarding empty state ---
+  onboardScroll: { flex: 1 },
+  onboardContent: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: 140,
+  },
+  onboardHero: { alignItems: 'center', marginBottom: spacing.xl },
+  // The preview strip's "Example cellar" caption with a gold rule beside it.
+  previewHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
+  previewLabel: { ...typography.body.caption, color: colors.neutral.pewter },
+  previewRule: { flex: 1, height: 1, backgroundColor: colors.gold.muted },
+  previewList: { opacity: 0.75 },
+  // Muted twin of `card` — softer surface, no shadow, so it reads as a sample.
+  previewCard: { backgroundColor: colors.neutral.cream, borderColor: colors.neutral.linen },
+  previewGlass: { backgroundColor: colors.neutral.parchment },
+  previewQtyDot: { backgroundColor: colors.gold.shimmer },
+  previewBadge: { opacity: 0.9 },
+
+  // Value list — three tight, scannable benefit lines.
+  valueList: { marginTop: spacing.lg, gap: spacing.md },
+  valueRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  valueIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.gold.light,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  valueText: { ...typography.body.regular, color: colors.neutral.graphite, flex: 1 },
+
+  onboardCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primary.burgundy,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.sm,
+    marginTop: spacing.xl,
+    ...shadows.soft,
+  },
+  // Plain, clearly subordinate secondary affordance (no fill / border).
+  onboardSecondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.md,
+    marginTop: spacing.xs,
+  },
+  onboardSecondaryText: { ...typography.body.small, color: colors.neutral.pewter },
 
   fab: {
     position: 'absolute',
