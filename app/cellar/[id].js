@@ -188,7 +188,7 @@ export default function BottleDetailScreen() {
               <View style={styles.qtyCard}>
                 <Text style={styles.qtyNum}>{bottle.quantity}</Text>
                 <Text style={styles.qtyLabel}>
-                  {bottle.bottle_size} · in cellar
+                  {bottle.bottle_size} · {bottle.status === 'in_cellar' ? 'in cellar' : bottle.status}
                 </Text>
               </View>
 
