@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import TonightsPickCard from '../../components/TonightsPickCard';
-import { cellarService } from '../../lib/cellar';
+import { DRINK_WINDOW_META, cellarService } from '../../lib/cellar';
 import { visitsService } from '../../lib/visits';
 import { wishlistService } from '../../lib/wishlist';
 import theme from '../../styles/theme';
@@ -25,7 +25,7 @@ export default function HomeScreen() {
   const { user } = useContext(AuthContext);
 
   const [stats, setStats] = useState({ wines: 0, places: 0, wishlist: 0 });
-  const [cellar, setCellar] = useState({ totalBottles: 0, readyToDrink: 0 });
+  const [cellar, setCellar] = useState({ totalBottles: 0, readyToDrink: 0, byStatus: null });
   const [recent, setRecent] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -53,6 +53,7 @@ export default function HomeScreen() {
           setCellar({
             totalBottles: cellarRes?.stats?.totalBottles ?? 0,
             readyToDrink: cellarRes?.stats?.readyToDrink ?? 0,
+            byStatus: cellarRes?.stats?.byStatus ?? null,
           });
 
           // Flatten the most recent wines across recent visits.
@@ -129,6 +130,15 @@ export default function HomeScreen() {
         <View style={styles.tonightsPick}>
           <TonightsPickCard onRequireCellar={() => router.push('/cellar/add')} />
         </View>
+
+        {/* Ready-to-Drink strip — first-class drink-window surface (R4 / #54).
+            Per-status counts tap through to the cellar pre-filtered to that status. */}
+        <ReadyToDrinkStrip
+          byStatus={cellar.byStatus}
+          onPressStatus={(status) =>
+            router.push({ pathname: '/(tabs)/cellar', params: { status } })
+          }
+        />
 
         {/* Log a wine hero */}
         <TouchableOpacity
@@ -257,6 +267,44 @@ function Stat({ n, label }) {
   );
 }
 
+// First-class drink-window surface: one tappable tile per status (R4 / #54).
+// Order = most-urgent-to-act first (Drink soon · Ready · Too young · Past peak).
+const READY_STRIP_ORDER = ['drink_up', 'ready', 'too_young', 'past_peak'];
+
+function ReadyToDrinkStrip({ byStatus, onPressStatus }) {
+  // Hide until we have counts and at least one bottle has a derived status.
+  if (!byStatus) return null;
+  const total = READY_STRIP_ORDER.reduce((sum, s) => sum + (byStatus[s] || 0), 0);
+  if (total === 0) return null;
+
+  return (
+    <>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionLabel}>READY TO DRINK</Text>
+      </View>
+      <View style={styles.rtdStrip}>
+        {READY_STRIP_ORDER.map((status) => {
+          const meta = DRINK_WINDOW_META[status];
+          const count = byStatus[status] || 0;
+          return (
+            <TouchableOpacity
+              key={status}
+              style={styles.rtdTile}
+              activeOpacity={count > 0 ? 0.85 : 1}
+              disabled={count === 0}
+              onPress={() => count > 0 && onPressStatus(status)}
+            >
+              <View style={[styles.rtdDot, { backgroundColor: meta.color }]} />
+              <Text style={[styles.rtdCount, count === 0 && styles.rtdCountMuted]}>{count}</Text>
+              <Text style={styles.rtdLabel} numberOfLines={1}>{meta.short}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.cream },
 
@@ -318,6 +366,29 @@ const styles = StyleSheet.create({
     color: colors.primary.burgundy,
   },
   statLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginTop: 4 },
+
+  // Ready-to-Drink strip (R4 / #54)
+  rtdStrip: { flexDirection: 'row', gap: spacing.sm },
+  rtdTile: {
+    flex: 1,
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xs,
+    alignItems: 'center',
+  },
+  rtdDot: { width: 8, height: 8, borderRadius: 4, marginBottom: spacing.xs },
+  rtdCount: { fontFamily: 'Georgia', fontSize: 22, color: colors.neutral.charcoal },
+  rtdCountMuted: { color: colors.neutral.silver },
+  rtdLabel: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginTop: 2,
+    fontSize: 11,
+    textAlign: 'center',
+  },
 
   // Hero CTA
   hero: {

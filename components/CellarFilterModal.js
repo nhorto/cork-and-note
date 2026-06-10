@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { drinkWindowMeta } from '../lib/cellar';
 import {
   EMPTY_FILTERS,
   UNKNOWN,
@@ -26,13 +27,14 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-// Drink-window statuses offered as filter chips (mirrors the badge taxonomy).
+// Drink-window statuses offered as filter chips — labels come from the canonical
+// taxonomy (lib/cellar.js) so they stay in sync with the badges everywhere.
 const STATUS_OPTIONS = [
-  { value: 'ready', label: 'Ready' },
-  { value: 'drink_up', label: 'Drink up' },
-  { value: 'too_young', label: 'Too young' },
-  { value: 'past_peak', label: 'Past peak' },
-  { value: UNKNOWN, label: 'No window' },
+  { value: 'ready', label: drinkWindowMeta('ready').label },
+  { value: 'drink_up', label: drinkWindowMeta('drink_up').label },
+  { value: 'too_young', label: drinkWindowMeta('too_young').label },
+  { value: 'past_peak', label: drinkWindowMeta('past_peak').label },
+  { value: UNKNOWN, label: drinkWindowMeta(UNKNOWN).label },
 ];
 
 const toNum = (v) => {

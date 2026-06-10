@@ -6,8 +6,8 @@
 // subtotals. All slicing runs client-side over the already-fetched list via
 // lib/cellarBrowse.js (the enthusiast persona = dozens of bottles, not thousands).
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   SectionList,
@@ -19,13 +19,12 @@ import {
 } from 'react-native';
 import CellarFilterModal from '../../components/CellarFilterModal';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
-import { cellarService } from '../../lib/cellar';
+import { cellarService, drinkWindowMeta } from '../../lib/cellar';
 import {
   EMPTY_FILTERS,
   GROUPS,
   SEGMENTS,
   SORTS,
-  UNKNOWN,
   browseCellar,
   hasActiveFilters,
 } from '../../lib/cellarBrowse';
@@ -33,26 +32,15 @@ import theme from '../../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-// Drink-window badge presentation.
-const DRINK_BADGE = {
-  too_young: { label: 'Too young', color: colors.status.wishlist },
-  ready: { label: 'Ready', color: colors.status.visited },
-  drink_up: { label: 'Drink up', color: colors.gold.shimmer },
-  past_peak: { label: 'Past peak', color: colors.status.error },
-};
-
 const SORT_LABEL = Object.fromEntries(SORTS.map((s) => [s.key, s.label]));
 const GROUP_LABEL = Object.fromEntries(GROUPS.map((g) => [g.key, g.label]));
-const STATUS_CHIP_LABEL = {
-  too_young: 'Too young',
-  ready: 'Ready',
-  drink_up: 'Drink up',
-  past_peak: 'Past peak',
-  [UNKNOWN]: 'No window',
-};
+
+// Statuses the Home "Ready to Drink" strip can deep-link into via ?status=.
+const DEEP_LINK_STATUSES = ['too_young', 'ready', 'drink_up', 'past_peak'];
 
 export default function CellarScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const [bottles, setBottles] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -82,6 +70,16 @@ export default function CellarScreen() {
       };
     }, [])
   );
+
+  // Deep-link from the Home "Ready to Drink" strip: ?status=ready pre-applies the
+  // matching drink-window filter (and resets the segment so the filter shows).
+  useEffect(() => {
+    const status = params?.status;
+    if (status && DEEP_LINK_STATUSES.includes(status)) {
+      setSegment('all');
+      setFilters({ ...EMPTY_FILTERS, statuses: [status] });
+    }
+  }, [params?.status]);
 
   // Whole pipeline (search -> segment -> filters -> sort -> group) in one memo.
   const { sections, facets, counts } = useMemo(
@@ -316,7 +314,7 @@ function buildActiveChips(filters) {
       chips.push({ id: `${key}:${value}`, kind: 'list', key, value, label: fmt(value) })
     );
 
-  pushList('statuses', filters.statuses, (v) => STATUS_CHIP_LABEL[v] || v);
+  pushList('statuses', filters.statuses, (v) => drinkWindowMeta(v).label);
   pushList('types', filters.types, (v) => v);
   pushList('varietals', filters.varietals, (v) => v);
   pushList('regions', filters.regions, (v) => v);
@@ -362,7 +360,7 @@ function BottleCard({ bottle, onPress }) {
   const subtitle = [bottle.vintage, bottle.varietal || bottle.wine_type, bottle.region]
     .filter(Boolean)
     .join(' · ');
-  const badge = bottle.drinkStatus ? DRINK_BADGE[bottle.drinkStatus] : null;
+  const badge = bottle.drinkStatus ? drinkWindowMeta(bottle.drinkStatus) : null;
 
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>
