@@ -63,7 +63,8 @@
       "expo-location",
       "expo-media-library",
       "expo-maps",
-      "./plugins/withFmtConstevalFix"
+      "./plugins/withFmtConstevalFix",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true

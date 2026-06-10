@@ -147,6 +147,21 @@ export default function ProfileScreen() {
 
             <TouchableOpacity
               style={styles.menuItem}
+              onPress={() => router.push('/profile/notifications')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name="notifications-outline" size={20} color={colors.primary.burgundy} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Cellar Reminders</Text>
+                <Text style={styles.menuSubtext}>Gentle nudges when bottles hit their peak</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
               onPress={() => router.push('/profile/help-support')}
               activeOpacity={0.7}
             >
