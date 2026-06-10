@@ -29,6 +29,7 @@ export default function HomeScreen() {
   const [cellar, setCellar] = useState({ totalBottles: 0, readyToDrink: 0, byStatus: null });
   const [insights, setInsights] = useState(null);
   const [recent, setRecent] = useState([]);
+  const [highlights, setHighlights] = useState(null);
   const [loaded, setLoaded] = useState(false);
 
   // Reload whenever the tab gains focus. All calls are defensive: if the
@@ -81,6 +82,10 @@ export default function HomeScreen() {
             if (items.length >= 4) break;
           }
           setRecent(items);
+
+          // "Where you've been" at-a-glance highlights (#95): most-recent place,
+          // most-visited winery, total places. Derived from the same visits.
+          setHighlights(visitsService.summarizeVisits(visits));
         } catch {
           // ignore — empty states will render
         } finally {
@@ -126,11 +131,11 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Stat strip */}
+        {/* Stat strip — each counter taps through to its list (#96). */}
         <View style={styles.stats}>
-          <Stat n={stats.wines} label="Wines" />
-          <Stat n={stats.places} label="Places" />
-          <Stat n={stats.wishlist} label="Wishlist" />
+          <Stat n={stats.wines} label="Wines" onPress={() => router.push('/wines')} />
+          <Stat n={stats.places} label="Places" onPress={() => router.push('/(tabs)/map')} />
+          <Stat n={stats.wishlist} label="Wishlist" onPress={() => router.push('/wishlist')} />
         </View>
 
         {/* Tonight's pick — AI sommelier grounded in the user's own cellar (#51) */}
@@ -211,7 +216,12 @@ export default function HomeScreen() {
 
         {recent.length > 0 ? (
           recent.map((w) => (
-            <View key={w.id} style={styles.wineCard}>
+            <TouchableOpacity
+              key={w.id}
+              style={styles.wineCard}
+              activeOpacity={0.85}
+              onPress={() => router.push(`/wine/${w.id}`)}
+            >
               <View style={styles.wineGlass}>
                 <Ionicons name="wine-outline" size={18} color={colors.primary.burgundy} />
               </View>
@@ -220,7 +230,8 @@ export default function HomeScreen() {
                 <Text style={styles.wineDetail}>{w.detail}</Text>
               </View>
               {w.rating ? <Text style={styles.wineScore}>{w.rating}</Text> : null}
-            </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.neutral.silver} />
+            </TouchableOpacity>
           ))
         ) : (
           <View style={styles.empty}>
@@ -232,25 +243,19 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* Map teaser → Explore */}
+        {/* Where you've been → Explore. Shows at-a-glance stats (most-recent
+            place, most-visited winery, total places) once there's a place to
+            describe, otherwise a simple map teaser (#95). */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionLabel}>WHERE YOU&apos;VE BEEN</Text>
           <TouchableOpacity onPress={() => router.push('/(tabs)/map')}>
             <Text style={styles.sectionAction}>Explore</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          style={styles.teaser}
-          activeOpacity={0.9}
+        <WhereYouveBeen
+          highlights={highlights}
           onPress={() => router.push('/(tabs)/map')}
-        >
-          <Ionicons name="map-outline" size={28} color={colors.primary.burgundy} />
-          <Text style={styles.teaserText}>
-            {stats.places > 0
-              ? `${stats.places} place${stats.places === 1 ? '' : 's'} on your map`
-              : 'Your map of places'}
-          </Text>
-        </TouchableOpacity>
+        />
 
         {/* Sommelier */}
         <View style={styles.sectionHeader}>
@@ -273,11 +278,98 @@ export default function HomeScreen() {
   );
 }
 
-function Stat({ n, label }) {
+function Stat({ n, label, onPress }) {
   return (
-    <View style={styles.stat}>
+    <TouchableOpacity
+      style={styles.stat}
+      activeOpacity={onPress ? 0.85 : 1}
+      onPress={onPress}
+      disabled={!onPress}
+    >
       <Text style={styles.statNum}>{n}</Text>
       <Text style={styles.statLabel}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
+// Compact relative date for the "where you've been" highlights.
+function timeAgo(dateString) {
+  if (!dateString) return '';
+  const then = new Date(dateString);
+  const days = Math.floor((Date.now() - then.getTime()) / 86400000);
+  if (Number.isNaN(days)) return '';
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  if (days < 30) {
+    const w = Math.floor(days / 7);
+    return `${w} week${w === 1 ? '' : 's'} ago`;
+  }
+  if (days < 365) {
+    const m = Math.floor(days / 30);
+    return `${m} month${m === 1 ? '' : 's'} ago`;
+  }
+  return then.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+}
+
+// "Where you've been" card. Renders at-a-glance stats when the user has visited
+// at least one real place, otherwise a simple map teaser. The whole card taps
+// through to the map (#95).
+function WhereYouveBeen({ highlights, onPress }) {
+  const hasPlaces = highlights && highlights.totalPlaces > 0;
+
+  return (
+    <TouchableOpacity
+      style={hasPlaces ? styles.whereCard : styles.teaser}
+      activeOpacity={0.9}
+      onPress={onPress}
+    >
+      {hasPlaces ? (
+        <>
+          {highlights.mostRecentPlace && (
+            <WhereRow
+              icon="time-outline"
+              label="Most recent"
+              value={`${highlights.mostRecentPlace.name} · ${timeAgo(highlights.mostRecentPlace.date)}`}
+            />
+          )}
+          {highlights.topWinery && highlights.topWinery.visits > 1 && (
+            <WhereRow
+              icon="star-outline"
+              label="Most visited"
+              value={`${highlights.topWinery.name} · ${highlights.topWinery.visits} visits`}
+            />
+          )}
+          <WhereRow
+            icon="map-outline"
+            label="On your map"
+            value={`${highlights.totalPlaces} place${highlights.totalPlaces === 1 ? '' : 's'} explored`}
+            showChevron
+          />
+        </>
+      ) : (
+        <>
+          <Ionicons name="map-outline" size={28} color={colors.primary.burgundy} />
+          <Text style={styles.teaserText}>Your map of places</Text>
+        </>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+function WhereRow({ icon, label, value, showChevron }) {
+  return (
+    <View style={styles.whereRow}>
+      <View style={styles.whereIcon}>
+        <Ionicons name={icon} size={18} color={colors.primary.burgundy} />
+      </View>
+      <View style={styles.whereText}>
+        <Text style={styles.whereLabel}>{label}</Text>
+        <Text style={styles.whereValue} numberOfLines={1}>{value}</Text>
+      </View>
+      {showChevron && (
+        <Ionicons name="chevron-forward" size={18} color={colors.neutral.silver} />
+      )}
     </View>
   );
 }
@@ -573,7 +665,7 @@ const styles = StyleSheet.create({
   },
   emptySub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
 
-  // Map teaser
+  // Map teaser (empty state for "where you've been")
   teaser: {
     height: 110,
     borderRadius: borderRadius.lg,
@@ -585,6 +677,38 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   teaserText: { ...typography.body.small, color: colors.neutral.graphite },
+
+  // Where you've been — at-a-glance stats card (#95)
+  whereCard: {
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  whereRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  whereIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gold.light,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  whereText: { flex: 1 },
+  whereLabel: { ...typography.body.caption, color: colors.neutral.pewter },
+  whereValue: {
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
+    fontWeight: '600',
+    marginTop: 1,
+  },
 
   // Sommelier
   somm: {
