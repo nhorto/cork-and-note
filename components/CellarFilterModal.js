@@ -126,6 +126,7 @@ export default function CellarFilterModal({
                 options={facets.varietals.map((o) => ({ value: o.value, label: o.value, count: o.count }))}
                 selected={draft.varietals}
                 onToggle={toggleIn('varietals')}
+                searchable
               />
             )}
 
@@ -135,6 +136,7 @@ export default function CellarFilterModal({
                 options={facets.regions.map((o) => ({ value: o.value, label: o.value, count: o.count }))}
                 selected={draft.regions}
                 onToggle={toggleIn('regions')}
+                searchable
               />
             )}
 
@@ -144,6 +146,7 @@ export default function CellarFilterModal({
                 options={facets.locations.map((o) => ({ value: o.value, label: o.value, count: o.count }))}
                 selected={draft.locations}
                 onToggle={toggleIn('locations')}
+                searchable
               />
             )}
 
@@ -208,12 +211,35 @@ export default function CellarFilterModal({
   );
 }
 
-function FacetSection({ title, options, selected = [], onToggle }) {
+function FacetSection({ title, options, selected = [], onToggle, searchable = false }) {
+  const [query, setQuery] = useState('');
+  // Only bother with a search box once the list is long enough to scroll past.
+  const showSearch = searchable && options.length > 6;
+  const needle = query.trim().toLowerCase();
+  // Narrow by query, but ALWAYS keep already-selected chips visible so a
+  // selection never silently disappears while the user is searching.
+  const shown = needle
+    ? options.filter(
+        (o) => selected.includes(o.value) || String(o.label).toLowerCase().includes(needle)
+      )
+    : options;
+
   return (
     <View>
       <Text style={styles.sectionTitle}>{title}</Text>
+      {showSearch && (
+        <TextInput
+          style={styles.facetSearch}
+          value={query}
+          onChangeText={setQuery}
+          placeholder={`Search ${title.toLowerCase()}…`}
+          placeholderTextColor={colors.neutral.silver}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+      )}
       <View style={styles.chipWrap}>
-        {options.map((o) => (
+        {shown.map((o) => (
           <Chip
             key={o.value}
             label={o.count != null ? `${o.label} (${o.count})` : o.label}
@@ -221,6 +247,9 @@ function FacetSection({ title, options, selected = [], onToggle }) {
             onPress={() => onToggle(o.value)}
           />
         ))}
+        {showSearch && shown.length === 0 && (
+          <Text style={styles.facetEmpty}>No matches</Text>
+        )}
       </View>
     </View>
   );
@@ -286,6 +315,23 @@ const styles = StyleSheet.create({
     color: colors.neutral.pewter,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
+  },
+
+  facetSearch: {
+    backgroundColor: colors.neutral.cream,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    fontSize: typography.body.small.fontSize,
+    color: colors.neutral.charcoal,
+    marginBottom: spacing.sm,
+  },
+  facetEmpty: {
+    ...typography.body.small,
+    color: colors.neutral.silver,
+    fontStyle: 'italic',
   },
 
   chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },

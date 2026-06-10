@@ -176,11 +176,11 @@ export default function LabelScanner({ onScanned }) {
             onPress={scanWithCamera}
             activeOpacity={0.9}
           >
-            <Ionicons name="camera" size={18} color={colors.neutral.cream} />
+            <Ionicons name="camera" size={16} color={colors.neutral.cream} />
             <Text style={styles.primaryBtnText}>Scan a label</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.secondaryBtn}
+            style={[styles.secondaryBtn, styles.secondaryBtnFlex]}
             onPress={scanFromLibrary}
             activeOpacity={0.85}
           >
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   // CTA row
   ctaRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     gap: spacing.sm,
     marginTop: spacing.md,
   },
@@ -243,15 +243,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
     backgroundColor: colors.primary.burgundy,
     borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.sm,
   },
   primaryBtnText: {
-    ...typography.heading.h3,
+    ...typography.body.regular,
     color: colors.neutral.cream,
-    fontFamily: SERIF,
+    fontWeight: '700',
   },
   secondaryBtn: {
     flexDirection: 'row',
