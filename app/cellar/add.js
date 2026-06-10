@@ -18,6 +18,7 @@ import {
   View,
 } from 'react-native';
 import CellarBottleForm from '../../components/CellarBottleForm';
+import LabelScanner from '../../components/LabelScanner';
 import { cellarService } from '../../lib/cellar';
 import { getEntrySuggestions } from '../../lib/cellarEntry';
 import { knownLocations } from '../../lib/cellarLocation';
@@ -38,6 +39,10 @@ export default function AddBottleScreen() {
   // Prefill + remount control for "add another like the last one".
   const [prefill, setPrefill] = useState(null);
   const [formKey, setFormKey] = useState(0);
+  // Whether the next form mount should default the purchase date to today. True
+  // for a fresh form and for a label scan (which carries no purchase_date), but
+  // false after "add another like the last" (which carries the prior date).
+  const [purchaseToday, setPurchaseToday] = useState(true);
   // A short confirmation after the previous save, so a quick second add feels acknowledged.
   const [justAdded, setJustAdded] = useState(null);
 
@@ -83,6 +88,31 @@ export default function AddBottleScreen() {
     quantity: 1,
   });
 
+  // #59 label-scan → prefill: the LabelScanner card above the form reads a wine
+  // label with the AI and hands back a whitelisted, normalized set of fields
+  // (wine_name / producer / vintage / wine_type / varietal / region — any may be
+  // null). We merge those onto the current prefill (so a scan composes with an
+  // "add another like the last" base) and bump formKey to remount the form with
+  // them as initialValues — the SAME remount path "add another" uses. The form
+  // is fully editable, so the user just confirms / tap-corrects any miss and
+  // saves; we never dump scanned values anywhere the user can't review them.
+  const handleScanned = (fields) => {
+    if (!fields) return;
+    setPrefill((prev) => {
+      const base = prev || {};
+      const merged = { ...base };
+      // Only overwrite with non-null scanned values so a scan never blanks out
+      // something the user already had from a prior "add another like it".
+      for (const key of ['wine_name', 'producer', 'vintage', 'wine_type', 'varietal', 'region']) {
+        if (fields[key] != null) merged[key] = fields[key];
+      }
+      return merged;
+    });
+    setJustAdded(null);
+    setPurchaseToday(true); // a scan carries no purchase date — keep today's default
+    setFormKey((k) => k + 1); // remount the form with the scanned prefill applied
+  };
+
   const handleSubmit = async (payload) => {
     setSaving(true);
     const res = await cellarService.addBottle(payload);
@@ -104,6 +134,7 @@ export default function AddBottleScreen() {
           onPress: () => {
             setPrefill(nextLikeLast(payload));
             setJustAdded(payload.wine_name);
+            setPurchaseToday(false); // carries the prior purchase date, don't override
             setFormKey((k) => k + 1); // remount the form with the new prefill
           },
         },
@@ -141,10 +172,15 @@ export default function AddBottleScreen() {
             </View>
           ) : null}
 
+          {/* #59: scan a wine label to prefill the form below. The form is
+              always present, so this card is a pure accelerator — a failed or
+              skipped scan just leaves manual entry untouched. */}
+          <LabelScanner onScanned={handleScanned} />
+
           <CellarBottleForm
             key={formKey}
             initialValues={prefill || undefined}
-            defaultPurchaseToday={!prefill}
+            defaultPurchaseToday={purchaseToday}
             producerOptions={producerOptions}
             wineOptions={wineOptions}
             locationOptions={locationOptions}
