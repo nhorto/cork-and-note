@@ -72,7 +72,13 @@ export default function Wines() {
             visit.wines.forEach((wine) => {
               allWines.push({
                 ...wine,
-                wineryName: visit.wineries?.name,
+                // Non-winery logs have no linked winery — fall back to the
+                // session's place name, then the wine's winemaker (#21).
+                wineryName:
+                  visit.wineries?.name ||
+                  visit.place_name ||
+                  wine.winemaker ||
+                  null,
                 wineryId: visit.winery_id,
                 visitDate: visit.visit_date,
                 visitId: visit.id,
