@@ -318,6 +318,7 @@ function buildActiveChips(filters) {
   pushList('types', filters.types, (v) => v);
   pushList('varietals', filters.varietals, (v) => v);
   pushList('regions', filters.regions, (v) => v);
+  pushList('locations', filters.locations, (v) => v);
 
   if (filters.minPrice != null || filters.maxPrice != null) {
     const lo = filters.minPrice != null ? `$${filters.minPrice}` : '$0';

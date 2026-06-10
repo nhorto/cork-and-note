@@ -20,6 +20,7 @@ import {
 import CellarBottleForm from '../../components/CellarBottleForm';
 import { cellarService } from '../../lib/cellar';
 import { getEntrySuggestions } from '../../lib/cellarEntry';
+import { knownLocations } from '../../lib/cellarLocation';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
@@ -31,6 +32,8 @@ export default function AddBottleScreen() {
   // Autocomplete data — loaded once; failures degrade gracefully to free-text entry.
   const [producerOptions, setProducerOptions] = useState([]);
   const [wineOptions, setWineOptions] = useState([]);
+  // #62: distinct storage locations the user has already typed, as { name } items.
+  const [locationOptions, setLocationOptions] = useState([]);
 
   // Prefill + remount control for "add another like the last one".
   const [prefill, setPrefill] = useState(null);
@@ -45,6 +48,15 @@ export default function AddBottleScreen() {
       setProducerOptions(producers);
       setWineOptions(wines);
     });
+    // Distinct storage locations come from the user's own cellar (degrades to free text).
+    cellarService
+      .getCellar()
+      .catch(() => ({ success: false }))
+      .then((res) => {
+        if (!active) return;
+        const locs = knownLocations(res?.success ? res.bottles : []);
+        setLocationOptions(locs.map((name) => ({ name })));
+      });
     return () => {
       active = false;
     };
@@ -62,6 +74,7 @@ export default function AddBottleScreen() {
     region: payload.region,
     bottle_size: payload.bottle_size,
     location: payload.location,
+    bin: payload.bin,
     store: payload.store,
     purchase_date: payload.purchase_date,
     purchase_price: payload.purchase_price,
@@ -134,6 +147,7 @@ export default function AddBottleScreen() {
             defaultPurchaseToday={!prefill}
             producerOptions={producerOptions}
             wineOptions={wineOptions}
+            locationOptions={locationOptions}
             onSubmit={handleSubmit}
             submitLabel="Add to cellar"
             saving={saving}

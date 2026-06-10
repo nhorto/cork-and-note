@@ -258,6 +258,7 @@ export default function BottleDetailScreen() {
                 <DetailRow label="Varietal" value={bottle.varietal} />
                 <DetailRow label="Region" value={bottle.region} />
                 <DetailRow label="Location" value={bottle.location} />
+                <DetailRow label="Bin" value={bottle.bin} />
                 <DetailRow
                   label="Drink window"
                   value={[bottle.drink_from, bottle.drink_by].some(Boolean)

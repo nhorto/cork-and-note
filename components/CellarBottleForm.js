@@ -33,6 +33,7 @@ export function toBottlePayload(form) {
     quantity: Math.max(0, parseInt(form.quantity, 10) || 0),
     bottle_size: form.bottle_size || '750ml',
     location: form.location?.trim() || null,
+    bin: form.bin?.trim() || null,
     store: form.store?.trim() || null,
     purchase_date: form.purchase_date?.trim() || null,
     purchase_price: num(form.purchase_price),
@@ -64,6 +65,7 @@ function initialState(initial = {}, { defaultPurchaseToday = false } = {}) {
     quantity: initial.quantity != null ? String(initial.quantity) : '1',
     bottle_size: initial.bottle_size || '750ml',
     location: s(initial.location),
+    bin: s(initial.bin),
     store: s(initial.store),
     purchase_date: purchaseDate,
     purchase_price: s(initial.purchase_price),
@@ -79,8 +81,8 @@ function initialState(initial = {}, { defaultPurchaseToday = false } = {}) {
 function hasDetails(state) {
   return Boolean(
     state.wine_type || state.varietal || state.region || state.location ||
-    state.store || state.purchase_price || state.drink_from || state.drink_by ||
-    state.rating || state.notes
+    state.bin || state.store || state.purchase_price || state.drink_from ||
+    state.drink_by || state.rating || state.notes
   );
 }
 
@@ -92,6 +94,9 @@ export default function CellarBottleForm({
   // #53 autocomplete data (optional; only the add screen supplies these).
   producerOptions = [],
   wineOptions = [],
+  // #62 location reuse: distinct storage locations the user has already typed, so
+  // "Wine fridge" isn't re-entered three slightly-different ways. [{ name }] shape.
+  locationOptions = [],
   // #53 smart default: prefill purchase date with today (add screen opts in).
   defaultPurchaseToday = false,
 }) {
@@ -276,7 +281,20 @@ export default function CellarBottleForm({
           </Row>
           <Field label="Region" value={form.region} onChangeText={set('region')} placeholder="Napa Valley…" />
 
-          <Field label="Location / bin" value={form.location} onChangeText={set('location')} placeholder="Rack A, shelf 2…" />
+          {/* Where the bottle physically lives (#62). Location reuses places already
+              typed (autocomplete) so the same spot isn't spelled three ways; bin is a
+              free-text shelf/slot within it. */}
+          <AutocompleteInput
+            label="Location"
+            value={form.location}
+            onChangeText={set('location')}
+            onSelect={(item) => set('location')(item.name)}
+            items={locationOptions}
+            getLabel={(l) => l.name}
+            placeholder="Wine fridge, cellar…"
+            autoCapitalize="sentences"
+          />
+          <Field label="Shelf / slot (bin)" value={form.bin} onChangeText={set('bin')} placeholder="Rack A3, shelf 2…" />
 
           <Row>
             <Field flex label="Drink from" value={form.drink_from} onChangeText={set('drink_from')} placeholder="2024" keyboardType="number-pad" />
