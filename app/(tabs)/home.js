@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import TonightsPickCard from '../../components/TonightsPickCard';
 import { DRINK_WINDOW_META, cellarService } from '../../lib/cellar';
+import { getCellarInsights } from '../../lib/cellarInsights';
 import { visitsService } from '../../lib/visits';
 import { wishlistService } from '../../lib/wishlist';
 import theme from '../../styles/theme';
@@ -26,6 +27,7 @@ export default function HomeScreen() {
 
   const [stats, setStats] = useState({ wines: 0, places: 0, wishlist: 0 });
   const [cellar, setCellar] = useState({ totalBottles: 0, readyToDrink: 0, byStatus: null });
+  const [insights, setInsights] = useState(null);
   const [recent, setRecent] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -36,11 +38,12 @@ export default function HomeScreen() {
       let active = true;
       (async () => {
         try {
-          const [statsRes, visitsRes, wishRes, cellarRes] = await Promise.all([
+          const [statsRes, visitsRes, wishRes, cellarRes, insightsRes] = await Promise.all([
             visitsService.getVisitStats().catch(() => ({ success: false })),
             visitsService.getUserVisits().catch(() => ({ success: false })),
             wishlistService.getUserWishlist().catch(() => ({ success: false })),
             cellarService.getCellarStats().catch(() => ({ success: false })),
+            getCellarInsights().catch(() => ({ success: false })),
           ]);
           if (!active) return;
 
@@ -55,6 +58,10 @@ export default function HomeScreen() {
             readyToDrink: cellarRes?.stats?.readyToDrink ?? 0,
             byStatus: cellarRes?.stats?.byStatus ?? null,
           });
+
+          // Insights highlight for the "at a glance" entry card (#56). Defensive:
+          // any failure simply hides the card.
+          setInsights(insightsRes?.success ? insightsRes.insights : null);
 
           // Flatten the most recent wines across recent visits.
           const visits = visitsRes?.visits ?? [];
@@ -186,6 +193,14 @@ export default function HomeScreen() {
           <Ionicons name="chevron-forward" size={20} color={colors.primary.burgundy} />
         </TouchableOpacity>
 
+        {/* Collection at a glance — compact insights entry (R6 / #56). Shows 1–2
+            highlights and taps through to the full dashboard. Hidden until there's
+            a cellar to summarize. */}
+        <InsightsEntryCard
+          insights={insights}
+          onPress={() => router.push('/cellar/insights')}
+        />
+
         {/* Recent */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionLabel}>RECENT</Text>
@@ -301,6 +316,55 @@ function ReadyToDrinkStrip({ byStatus, onPressStatus }) {
           );
         })}
       </View>
+    </>
+  );
+}
+
+// Compact "collection at a glance" entry card (R6 / #56). Summarizes 1–2 highlights
+// from the insights view-model and taps through to the full dashboard. Renders
+// nothing until there's a non-empty cellar to describe.
+function InsightsEntryCard({ insights, onPress }) {
+  if (!insights || insights.isEmpty) return null;
+
+  // Highlight 1: the dominant type/region (whichever is more concentrated), so the
+  // card says something specific rather than echoing the bottle count.
+  const topType = insights.byType?.[0];
+  const topRegion = insights.byRegion?.[0];
+  const lead =
+    topRegion && topType
+      ? (topRegion.pct >= topType.pct ? topRegion : topType)
+      : topRegion || topType;
+  const leadIsUnknown = !lead || lead.label === 'Unknown';
+
+  // Highlight 2: recent activity, when there is any.
+  const opened = insights.trend?.total ?? 0;
+
+  const highlight = !leadIsUnknown
+    ? `Mostly ${lead.label} (${Math.round(lead.pct)}%)`
+    : `${insights.summary.regions} region${insights.summary.regions === 1 ? '' : 's'} across your cellar`;
+  const sub =
+    opened > 0
+      ? `${opened} opened in the last 6 months · See the breakdown`
+      : 'See your collection broken down by type, region & vintage';
+
+  return (
+    <>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionLabel}>AT A GLANCE</Text>
+        <TouchableOpacity onPress={onPress}>
+          <Text style={styles.sectionAction}>View</Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity style={styles.insights} activeOpacity={0.9} onPress={onPress}>
+        <View style={styles.insightsIcon}>
+          <Ionicons name="analytics-outline" size={22} color={colors.gold.shimmer} />
+        </View>
+        <View style={styles.insightsMeta}>
+          <Text style={styles.insightsTitle}>{highlight}</Text>
+          <Text style={styles.insightsSub} numberOfLines={1}>{sub}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+      </TouchableOpacity>
     </>
   );
 }
@@ -431,6 +495,29 @@ const styles = StyleSheet.create({
   cellarMeta: { flex: 1 },
   cellarTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
   cellarSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
+
+  // At-a-glance insights entry (R6 / #56)
+  insights: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+  },
+  insightsIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gold.light,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  insightsMeta: { flex: 1 },
+  insightsTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
+  insightsSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
 
   // Section headers
   sectionHeader: {
