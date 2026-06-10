@@ -19,6 +19,7 @@ import {
 import CellarBottleForm from '../../components/CellarBottleForm';
 import ConsumptionHistory from '../../components/ConsumptionHistory';
 import MaturityTimeline from '../../components/MaturityTimeline';
+import BottlePairing from '../../components/BottlePairing';
 import { KEEP_BOTTLE_REASON, cellarService, drinkWindowMeta } from '../../lib/cellar';
 import theme from '../../styles/theme';
 
@@ -290,6 +291,10 @@ export default function BottleDetailScreen() {
 
               {/* Consumption history (date · reason · qty · note · tasting link) */}
               <ConsumptionHistory consumptions={consumptions} />
+
+              {/* Food pairing (R10 / #61): "what should I serve with this?" —
+                  bottle-aware dish suggestions, where the decision is made. */}
+              {!removed && <BottlePairing bottle={bottle} />}
 
               {/* Actions */}
               {!removed && bottle.quantity > 0 && (
