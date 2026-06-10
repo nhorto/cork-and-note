@@ -273,6 +273,18 @@ export default function WineDetail() {
             <Ionicons name="chevron-forward" size={20} color="#8C1C13" />
           </TouchableOpacity>
         </View>
+
+        {/* Ask the Sommelier */}
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.sommelierButton}
+            onPress={() => router.push('/(tabs)/sommelier')}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="sparkles" size={20} color="#fff" />
+            <Text style={styles.sommelierButtonText}>Ask about this wine</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* Photo Viewer Modal */}
@@ -499,6 +511,20 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
+  },
+  sommelierButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#8C1C13',
+    borderRadius: 12,
+    gap: 8,
+  },
+  sommelierButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   visitDetails: {
     flex: 1,
