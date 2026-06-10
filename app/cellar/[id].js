@@ -12,16 +12,19 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import CellarBottleForm from '../../components/CellarBottleForm';
+import ConsumptionHistory from '../../components/ConsumptionHistory';
 import MaturityTimeline from '../../components/MaturityTimeline';
-import { cellarService, drinkWindowMeta } from '../../lib/cellar';
+import { KEEP_BOTTLE_REASON, cellarService, drinkWindowMeta } from '../../lib/cellar';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
 
+// Draw-down reasons (everything but the keep-the-bottle sample).
 const REASONS = [
   { key: 'consumed', label: 'Drank it' },
   { key: 'gifted', label: 'Gifted' },
@@ -38,12 +41,33 @@ export default function BottleDetailScreen() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  // Open-bottle modal state
+  // Open-bottle modal state. `openMode` is 'open' (a draw-down: drank/gifted/…)
+  // or 'taste' (Coravin sample: log a tasting, keep the bottle in inventory).
   const [openVisible, setOpenVisible] = useState(false);
+  const [openMode, setOpenMode] = useState('open');
   const [openQty, setOpenQty] = useState(1);
   const [openReason, setOpenReason] = useState('consumed');
   const [logTasting, setLogTasting] = useState(true);
+  const [openRating, setOpenRating] = useState(0); // 0 = unrated (never forced)
+  const [openNote, setOpenNote] = useState('');
   const [opening, setOpening] = useState(false);
+
+  // Quantity-adjust modal state (inventory correction — no reason logged).
+  const [adjustVisible, setAdjustVisible] = useState(false);
+  const [adjustQty, setAdjustQty] = useState(1);
+  const [adjusting, setAdjusting] = useState(false);
+
+  const openOpenSheet = (mode) => {
+    setOpenMode(mode);
+    setOpenQty(1);
+    setOpenReason('consumed');
+    // Tasting on by default for a kept sample (its whole point is the note);
+    // for a draw-down it follows the previous "drank it → log" behavior.
+    setLogTasting(true);
+    setOpenRating(0);
+    setOpenNote('');
+    setOpenVisible(true);
+  };
 
   const load = useCallback(async () => {
     const res = await cellarService.getBottle(id).catch(() => ({ success: false }));
@@ -85,11 +109,17 @@ export default function BottleDetailScreen() {
   };
 
   const confirmOpen = async () => {
+    const taste = openMode === 'taste';
+    // A kept sample always logs a tasting (that's the point). A draw-down logs
+    // only when the user drank it and left the toggle on. Rating is optional.
+    const shouldLog = taste || (openReason === 'consumed' && logTasting);
     setOpening(true);
     const res = await cellarService.openBottle(id, {
-      quantity: openQty,
-      reason: openReason,
-      logTasting: openReason === 'consumed' && logTasting,
+      quantity: taste ? 1 : openQty,
+      reason: taste ? KEEP_BOTTLE_REASON : openReason,
+      note: openNote,
+      rating: shouldLog && openRating > 0 ? openRating : undefined,
+      logTasting: shouldLog,
     });
     setOpening(false);
     setOpenVisible(false);
@@ -99,12 +129,36 @@ export default function BottleDetailScreen() {
     }
     await load();
     const loggedNote = res.wineId ? ' A tasting was added to your journal.' : '';
-    if (res.bottle.quantity <= 0) {
+    if (res.keptBottle) {
+      Alert.alert('Tasted', `The bottle stays in your cellar.${loggedNote}`);
+    } else if (res.bottle.quantity <= 0) {
       Alert.alert('Bottle removed', `That was your last one.${loggedNote}`, [
         { text: 'OK', onPress: () => router.back() },
       ]);
     } else if (loggedNote) {
       Alert.alert('Logged', loggedNote.trim());
+    }
+  };
+
+  const openAdjustSheet = () => {
+    setAdjustQty(bottle?.quantity ?? 0);
+    setAdjustVisible(true);
+  };
+
+  const confirmAdjust = async () => {
+    setAdjusting(true);
+    const res = await cellarService.adjustQuantity(id, adjustQty);
+    setAdjusting(false);
+    setAdjustVisible(false);
+    if (!res.success) {
+      Alert.alert('Could not update', res.error || 'Please try again.');
+      return;
+    }
+    await load();
+    if (res.bottle.quantity <= 0) {
+      Alert.alert('Lot emptied', 'This lot now shows zero bottles.', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
     }
   };
 
@@ -130,7 +184,10 @@ export default function BottleDetailScreen() {
   const producer = bottle.producer || bottle.wineries?.name;
   const badge = bottle.drinkStatus ? drinkWindowMeta(bottle.drinkStatus) : null;
   const removed = bottle.status !== 'in_cellar';
-  const consumptions = (bottle.cellar_consumptions || []).length;
+  const consumptions = bottle.cellar_consumptions || [];
+  // Whether the open/taste sheet will write a tasting (drives the rating + note
+  // fields): always for a kept sample, else only when "drank it" + log toggle on.
+  const willLog = openMode === 'taste' || (openReason === 'consumed' && logTasting);
 
   return (
     <View style={styles.container}>
@@ -180,10 +237,18 @@ export default function BottleDetailScreen() {
 
               {/* Quantity */}
               <View style={styles.qtyCard}>
-                <Text style={styles.qtyNum}>{bottle.quantity}</Text>
-                <Text style={styles.qtyLabel}>
-                  {bottle.bottle_size} · {bottle.status === 'in_cellar' ? 'in cellar' : bottle.status}
-                </Text>
+                <View style={styles.qtyMain}>
+                  <Text style={styles.qtyNum}>{bottle.quantity}</Text>
+                  <Text style={styles.qtyLabel}>
+                    {bottle.bottle_size} · {bottle.status === 'in_cellar' ? 'in cellar' : bottle.status}
+                  </Text>
+                </View>
+                {!removed && (
+                  <TouchableOpacity style={styles.adjustBtn} onPress={openAdjustSheet} hitSlop={8}>
+                    <Ionicons name="create-outline" size={15} color={colors.primary.burgundy} />
+                    <Text style={styles.adjustBtnText}>Adjust</Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               {/* Details */}
@@ -205,8 +270,7 @@ export default function BottleDetailScreen() {
                   value={bottle.purchase_price != null ? `$${Number(bottle.purchase_price).toFixed(2)}` : null}
                 />
                 <DetailRow label="Store" value={bottle.store} />
-                <DetailRow label="Your rating" value={bottle.rating != null ? `${bottle.rating} / 5` : null} />
-                <DetailRow label="Times opened" value={consumptions > 0 ? String(consumptions) : null} last />
+                <DetailRow label="Your rating" value={bottle.rating != null ? `${bottle.rating} / 5` : null} last />
               </View>
 
               {/* Maturity timeline (R4 / #54): open → peak → decline with the
@@ -224,12 +288,21 @@ export default function BottleDetailScreen() {
                 </View>
               ) : null}
 
+              {/* Consumption history (date · reason · qty · note · tasting link) */}
+              <ConsumptionHistory consumptions={consumptions} />
+
               {/* Actions */}
               {!removed && bottle.quantity > 0 && (
-                <TouchableOpacity style={styles.openBtn} activeOpacity={0.9} onPress={() => { setOpenQty(1); setOpenReason('consumed'); setLogTasting(true); setOpenVisible(true); }}>
-                  <Ionicons name="wine" size={20} color={colors.neutral.cream} />
-                  <Text style={styles.openBtnText}>Open a bottle</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity style={styles.openBtn} activeOpacity={0.9} onPress={() => openOpenSheet('open')}>
+                    <Ionicons name="wine" size={20} color={colors.neutral.cream} />
+                    <Text style={styles.openBtnText}>Open a bottle</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.tasteBtn} activeOpacity={0.9} onPress={() => openOpenSheet('taste')}>
+                    <Ionicons name="wine-outline" size={18} color={colors.primary.burgundy} />
+                    <Text style={styles.tasteBtnText}>Tasted, keep the bottle</Text>
+                  </TouchableOpacity>
+                </>
               )}
               <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
                 <Ionicons name="trash-outline" size={18} color={colors.status.error} />
@@ -240,57 +313,146 @@ export default function BottleDetailScreen() {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* Open-bottle sheet */}
+      {/* Open-bottle / taste sheet */}
       <Modal visible={openVisible} transparent animationType="slide" onRequestClose={() => setOpenVisible(false)}>
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View style={styles.sheet}>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+              {openMode === 'taste' ? (
+                <>
+                  <Text style={styles.sheetTitle}>Tasted, keep the bottle</Text>
+                  <Text style={styles.sheetIntro}>
+                    Logs a tasting (a Coravin pour, or a sample). The bottle stays in your cellar.
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.sheetTitle}>Open a bottle</Text>
+
+                  <Text style={styles.sheetLabel}>How many?</Text>
+                  <View style={styles.stepper}>
+                    <TouchableOpacity style={styles.stepBtn} onPress={() => setOpenQty((q) => Math.max(1, q - 1))}>
+                      <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
+                    </TouchableOpacity>
+                    <Text style={styles.stepValue}>{openQty}</Text>
+                    <TouchableOpacity style={styles.stepBtn} onPress={() => setOpenQty((q) => Math.min(bottle.quantity, q + 1))}>
+                      <Ionicons name="add" size={20} color={colors.primary.burgundy} />
+                    </TouchableOpacity>
+                  </View>
+
+                  <Text style={styles.sheetLabel}>What happened?</Text>
+                  <View style={styles.reasonRow}>
+                    {REASONS.map((r) => (
+                      <TouchableOpacity
+                        key={r.key}
+                        style={[styles.reasonChip, openReason === r.key && styles.reasonChipActive]}
+                        onPress={() => setOpenReason(r.key)}
+                      >
+                        <Text style={[styles.reasonText, openReason === r.key && styles.reasonTextActive]}>{r.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  {openReason === 'consumed' && (
+                    <View style={styles.tastingRow}>
+                      <View style={styles.flex}>
+                        <Text style={styles.tastingTitle}>Log a tasting</Text>
+                        <Text style={styles.tastingSub}>Add it to your journal, prefilled from this bottle.</Text>
+                      </View>
+                      <Switch
+                        value={logTasting}
+                        onValueChange={setLogTasting}
+                        trackColor={{ true: colors.primary.burgundy, false: colors.neutral.stone }}
+                        thumbColor={colors.neutral.cream}
+                      />
+                    </View>
+                  )}
+                </>
+              )}
+
+              {/* Optional rating + inline note. Shown whenever a tasting will be
+                  logged (always for a kept sample; for a draw-down when "drank
+                  it" + the log toggle is on). Rating is never required. */}
+              {willLog && (
+                <>
+                  <View style={styles.ratingHeader}>
+                    <Text style={styles.sheetLabel}>Rating (optional)</Text>
+                    {openRating > 0 && (
+                      <TouchableOpacity onPress={() => setOpenRating(0)} hitSlop={8}>
+                        <Text style={styles.clearRating}>Clear</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                  <View style={styles.starsRow}>
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <TouchableOpacity key={n} onPress={() => setOpenRating(n)} hitSlop={6} style={styles.starBtn}>
+                        <Ionicons
+                          name={n <= openRating ? 'star' : 'star-outline'}
+                          size={28}
+                          color={n <= openRating ? colors.gold.rich : colors.neutral.stone}
+                        />
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  <Text style={styles.sheetLabel}>Note (optional)</Text>
+                  <TextInput
+                    style={styles.noteInput}
+                    value={openNote}
+                    onChangeText={setOpenNote}
+                    placeholder="How was it? With whom, where…"
+                    placeholderTextColor={colors.neutral.pewter}
+                    multiline
+                  />
+                  <Text style={styles.editHint}>
+                    Saved to your journal — open the tasting later to add flavor notes and more.
+                  </Text>
+                </>
+              )}
+
+              <View style={styles.sheetActions}>
+                <TouchableOpacity style={styles.sheetCancel} onPress={() => setOpenVisible(false)} disabled={opening}>
+                  <Text style={styles.sheetCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.sheetConfirm, opening && styles.submitDisabled]} onPress={confirmOpen} disabled={opening}>
+                  <Text style={styles.sheetConfirmText}>
+                    {opening ? 'Saving…' : openMode === 'taste' ? 'Log tasting' : 'Confirm'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Quantity-adjust sheet — inventory correction, no reason recorded */}
+      <Modal visible={adjustVisible} transparent animationType="slide" onRequestClose={() => setAdjustVisible(false)}>
         <View style={styles.modalBackdrop}>
           <View style={styles.sheet}>
-            <Text style={styles.sheetTitle}>Open a bottle</Text>
+            <Text style={styles.sheetTitle}>Adjust quantity</Text>
+            <Text style={styles.sheetIntro}>
+              Correct a miscount. This won’t record a consumption or log a tasting.
+            </Text>
 
-            <Text style={styles.sheetLabel}>How many?</Text>
-            <View style={styles.stepper}>
-              <TouchableOpacity style={styles.stepBtn} onPress={() => setOpenQty((q) => Math.max(1, q - 1))}>
+            <View style={[styles.stepper, styles.adjustStepper]}>
+              <TouchableOpacity style={styles.stepBtn} onPress={() => setAdjustQty((q) => Math.max(0, q - 1))}>
                 <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
               </TouchableOpacity>
-              <Text style={styles.stepValue}>{openQty}</Text>
-              <TouchableOpacity style={styles.stepBtn} onPress={() => setOpenQty((q) => Math.min(bottle.quantity, q + 1))}>
+              <Text style={styles.stepValue}>{adjustQty}</Text>
+              <TouchableOpacity style={styles.stepBtn} onPress={() => setAdjustQty((q) => q + 1)}>
                 <Ionicons name="add" size={20} color={colors.primary.burgundy} />
               </TouchableOpacity>
             </View>
-
-            <Text style={styles.sheetLabel}>What happened?</Text>
-            <View style={styles.reasonRow}>
-              {REASONS.map((r) => (
-                <TouchableOpacity
-                  key={r.key}
-                  style={[styles.reasonChip, openReason === r.key && styles.reasonChipActive]}
-                  onPress={() => setOpenReason(r.key)}
-                >
-                  <Text style={[styles.reasonText, openReason === r.key && styles.reasonTextActive]}>{r.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {openReason === 'consumed' && (
-              <View style={styles.tastingRow}>
-                <View style={styles.flex}>
-                  <Text style={styles.tastingTitle}>Log a tasting</Text>
-                  <Text style={styles.tastingSub}>Add it to your journal, prefilled from this bottle.</Text>
-                </View>
-                <Switch
-                  value={logTasting}
-                  onValueChange={setLogTasting}
-                  trackColor={{ true: colors.primary.burgundy, false: colors.neutral.stone }}
-                  thumbColor={colors.neutral.cream}
-                />
-              </View>
+            {adjustQty <= 0 && (
+              <Text style={styles.editHint}>Setting this to 0 removes the lot from your cellar.</Text>
             )}
 
             <View style={styles.sheetActions}>
-              <TouchableOpacity style={styles.sheetCancel} onPress={() => setOpenVisible(false)} disabled={opening}>
+              <TouchableOpacity style={styles.sheetCancel} onPress={() => setAdjustVisible(false)} disabled={adjusting}>
                 <Text style={styles.sheetCancelText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.sheetConfirm, opening && styles.submitDisabled]} onPress={confirmOpen} disabled={opening}>
-                <Text style={styles.sheetConfirmText}>{opening ? 'Saving…' : 'Confirm'}</Text>
+              <TouchableOpacity style={[styles.sheetConfirm, adjusting && styles.submitDisabled]} onPress={confirmAdjust} disabled={adjusting}>
+                <Text style={styles.sheetConfirmText}>{adjusting ? 'Saving…' : 'Save'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -338,8 +500,8 @@ const styles = StyleSheet.create({
 
   qtyCard: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: colors.gold.light,
     borderWidth: 1,
     borderColor: colors.gold.muted,
@@ -347,8 +509,21 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: spacing.lg,
   },
+  qtyMain: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm, flexShrink: 1 },
   qtyNum: { fontFamily: 'Georgia', fontSize: 32, color: colors.primary.burgundy },
   qtyLabel: { ...typography.body.regular, color: colors.neutral.graphite },
+  adjustBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.round,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    backgroundColor: colors.neutral.cream,
+  },
+  adjustBtnText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
 
   detailCard: {
     backgroundColor: colors.neutral.parchment,
@@ -385,6 +560,19 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   openBtnText: { ...typography.body.large, color: colors.neutral.cream, fontWeight: '600' },
+  tasteBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.neutral.cream,
+    borderWidth: 1,
+    borderColor: colors.primary.burgundy,
+    paddingVertical: spacing.md,
+    borderRadius: borderRadius.sm,
+    marginTop: spacing.sm,
+  },
+  tasteBtnText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.md, marginTop: spacing.sm },
   deleteText: { ...typography.body.regular, color: colors.status.error },
 
@@ -398,8 +586,31 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
     ...shadows.strong,
   },
-  sheetTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: 'Georgia', marginBottom: spacing.md },
-  sheetLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginBottom: spacing.sm, marginTop: spacing.sm },
+  sheetTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: 'Georgia', marginBottom: spacing.sm },
+  sheetIntro: { ...typography.body.small, color: colors.neutral.graphite, marginBottom: spacing.sm, lineHeight: 19 },
+  sheetLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginBottom: spacing.sm, marginTop: spacing.md },
+
+  ratingHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  clearRating: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600', marginTop: spacing.md },
+  starsRow: { flexDirection: 'row', gap: spacing.xs, alignSelf: 'flex-start' },
+  starBtn: { padding: 2 },
+
+  noteInput: {
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.sm,
+    minHeight: 72,
+    textAlignVertical: 'top',
+  },
+  editHint: { ...typography.body.small, color: colors.neutral.pewter, marginTop: spacing.sm, lineHeight: 18 },
+
+  adjustStepper: { marginTop: spacing.sm },
 
   stepper: {
     flexDirection: 'row',
