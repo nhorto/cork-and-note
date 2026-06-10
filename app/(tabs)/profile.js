@@ -99,6 +99,30 @@ export default function ProfileScreen() {
           <VisitStatsCard />
         </View>
 
+        {/* Sommelier Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>SOMMELIER</Text>
+          </View>
+
+          <View style={styles.menuContainer}>
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemLast]}
+              onPress={() => router.push('/(tabs)/sommelier')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name="sparkles" size={20} color={colors.primary.burgundy} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Ask the Sommelier</Text>
+                <Text style={styles.menuSubtext}>Personalized to the wines you&apos;ve rated</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Settings Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

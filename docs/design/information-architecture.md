@@ -70,3 +70,20 @@ A vertical scroll of restrained "wine-label" cards (Château theme — serif hea
 1. **Wines vs. Cellar both nested-or-tab?** Cellar is a tab; Wines (tasted) is nested under Profile. Confirm that's the right split (own = tab, tasted = nested).
 2. **Center ＋ Log styling** — a raised/centered FAB-style button, or a normal center tab? (Mockup shows a raised burgundy ＋.)
 3. Anything you want surfaced on Home that's not listed above?
+
+---
+
+## Decided: Sommelier stays contextual (Issue #12)
+
+**Date:** 2026-06-09 · **Status:** DECIDED
+
+The AI Sommelier does **not** get its own tab. It remains a contextual surface, consistent with the 5-tab decision above and the home-centric redesign (keeps the bar at 5 tabs, in line with Vivino/CellarTracker, and reserves the center slot for the primary log action).
+
+The `sommelier` route stays registered in `app/(tabs)/_layout.js` with `href: null` so it's reachable by navigation but hidden from the tab bar.
+
+**Entry points:**
+- **Home** — the "Ask your Sommelier" card (already wired; `app/(tabs)/home.js`).
+- **Profile** — an "Ask the Sommelier" row in the menu (`app/(tabs)/profile.js`).
+- **Wine detail** — an "Ask about this wine" action (`app/wine/[id].js`).
+
+All three push to `/(tabs)/sommelier`, which opens the conversation list by default. Seeding per-wine context from the wine-detail entry is deferred — the standalone sommelier route takes no wine param today, and wiring one is out of scope for this placement decision.
