@@ -10,6 +10,10 @@
 -- prevents duplicates. We grant INSERT only (not UPDATE/DELETE), so users can
 -- extend the catalog but cannot modify or remove existing notes.
 
+-- Idempotent: safe to apply via `supabase db push` or the dashboard SQL editor,
+-- and safe to re-run (the drop-if-exists guards against "policy already exists").
+drop policy if exists "Authenticated users can add flavor notes" on public.flavor_notes;
+
 create policy "Authenticated users can add flavor notes"
   on public.flavor_notes
   for insert
