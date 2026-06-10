@@ -2,9 +2,10 @@
 // Château Label Design - Elegant & Refined
 //
 // A bottom-sheet modal that edits a draft copy of the filter state and only commits on
-// "Apply". Facet chips (type / region / varietal) come from the live set so they show
-// real result counts; ready-status, price and rating round out the facets. Pure
-// filter logic lives in lib/cellarBrowse.js — this component is presentation + draft state.
+// "Apply". Facet chips (type / region / varietal / storage location) come from the live
+// set so they show real result counts; ready-status, price and rating round out the
+// facets. Pure filter logic lives in lib/cellarBrowse.js — this component is presentation
+// + draft state.
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -46,7 +47,7 @@ const toNum = (v) => {
 export default function CellarFilterModal({
   visible,
   bottles, // the segment+search-narrowed set the filters will run against
-  facets, // { types, regions, varietals } each [{ value, count }]
+  facets, // { types, regions, varietals, locations } each [{ value, count }]
   filters, // the currently-committed filters
   onApply,
   onClose,
@@ -134,6 +135,15 @@ export default function CellarFilterModal({
                 options={facets.regions.map((o) => ({ value: o.value, label: o.value, count: o.count }))}
                 selected={draft.regions}
                 onToggle={toggleIn('regions')}
+              />
+            )}
+
+            {facets?.locations?.length > 0 && (
+              <FacetSection
+                title="Storage location"
+                options={facets.locations.map((o) => ({ value: o.value, label: o.value, count: o.count }))}
+                selected={draft.locations}
+                onToggle={toggleIn('locations')}
               />
             )}
 
