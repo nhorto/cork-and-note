@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
+import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal } from '../lib/varietals';
 import theme from '../styles/theme';
 import AutocompleteInput from './AutocompleteInput';
 import BottlePhotoPicker from './BottlePhotoPicker';
@@ -17,6 +18,9 @@ import BottlePhotoPicker from './BottlePhotoPicker';
 const { colors, typography, spacing, borderRadius } = theme;
 
 const BOTTLE_SIZES = ['375ml', '750ml', '1.5L', '3L'];
+
+// Varietal picker options (#86): the canonical grape list as autocomplete items.
+const VARIETAL_ITEMS = WINE_VARIETALS.map((name) => ({ name }));
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -164,7 +168,44 @@ export default function CellarBottleForm({
   };
   const onWineText = (value) => {
     setWineLinked(false);
-    setForm((f) => ({ ...f, wine_name: value }));
+    // #87: if the name is JUST a grape (e.g. "Merlot"), prefill the varietal and
+    // infer the type — but only when those are still empty, so we never clobber
+    // a value the user set. Exact match only, so "Barrel Oak Cabernet" won't fire.
+    const grape = matchVarietal(value);
+    const fillVarietal = Boolean(grape) && !form.varietal?.trim();
+    setForm((f) => {
+      const next = { ...f, wine_name: value };
+      if (grape && !f.varietal?.trim()) {
+        next.varietal = grape;
+        if (!f.wine_type?.trim()) {
+          const t = inferTypeFromVarietal(grape);
+          if (t) next.wine_type = t;
+        }
+      }
+      return next;
+    });
+    // Surface the prefilled varietal/type so the user can see what we filled.
+    if (fillVarietal) setShowMore(true);
+  };
+
+  // Varietal picker (#86) — free-typing infers the type when we recognise the
+  // grape; picking from the list does the same. Type is only auto-set when empty.
+  const onVarietalText = (value) => {
+    const inferred = !form.wine_type?.trim() ? inferTypeFromVarietal(value) : null;
+    setForm((f) => ({
+      ...f,
+      varietal: value,
+      wine_type: inferred && !f.wine_type?.trim() ? inferred : f.wine_type,
+    }));
+  };
+  const onPickVarietal = (item) => {
+    const name = item?.name || '';
+    const inferred = !form.wine_type?.trim() ? inferTypeFromVarietal(name) : null;
+    setForm((f) => ({
+      ...f,
+      varietal: name,
+      wine_type: inferred && !f.wine_type?.trim() ? inferred : f.wine_type,
+    }));
   };
 
   // Pick an existing producer → link winery_id (dedupe).
@@ -288,11 +329,21 @@ export default function CellarBottleForm({
             </View>
           </View>
 
+          {/* Varietal picker (#86): reuse the canonical grape list, like the
+              tasting flow. Picking (or typing a known grape) infers the type. */}
+          <AutocompleteInput
+            label="Varietal"
+            value={form.varietal}
+            onChangeText={onVarietalText}
+            onSelect={onPickVarietal}
+            items={VARIETAL_ITEMS}
+            getLabel={(v) => v.name}
+            placeholder="Cabernet Sauvignon…"
+          />
           <Row>
             <Field flex label="Type" value={form.wine_type} onChangeText={set('wine_type')} placeholder="Red, White…" />
-            <Field flex label="Varietal" value={form.varietal} onChangeText={set('varietal')} placeholder="Cabernet…" />
+            <Field flex label="Region" value={form.region} onChangeText={set('region')} placeholder="Napa Valley…" />
           </Row>
-          <Field label="Region" value={form.region} onChangeText={set('region')} placeholder="Napa Valley…" />
 
           {/* Where the bottle physically lives (#62). Location reuses places already
               typed (autocomplete) so the same spot isn't spelled three ways; bin is a
