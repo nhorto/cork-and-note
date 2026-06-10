@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
-  Modal,
   Platform,
   SafeAreaView,
   ScrollView,
@@ -16,12 +15,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import PastVisitsSection from '../../components/PastVisitsSection';
-import VisitLogForm from '../../components/VisitLogForm';
 import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
-import { visitsService } from '../../lib/visits';
 import { wineriesService } from '../../lib/wineries';
 import { wineryStatusService } from '../../lib/wineryStatus';
 import theme from '../../styles/theme';
@@ -37,7 +33,6 @@ export default function WineryDetail() {
 
   const [winery, setWinery] = useState(null);
   const [wineryLoading, setWineryLoading] = useState(true);
-  const [showLogForm, setShowLogForm] = useState(false);
   const [wineryStatus, setWineryStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(true);
 
@@ -83,40 +78,20 @@ export default function WineryDetail() {
     }
   };
 
-  const handleSaveVisit = async (visitData) => {
-    try {
-      const result = await visitsService.createVisit(visitData);
-      if (result.success) {
-        Alert.alert(
-          'Visit Logged',
-          `Your visit to ${winery.name} has been saved.`,
-          [{
-            text: 'OK',
-            onPress: () => {
-              setShowLogForm(false);
-              loadWineryStatus();
-              navigation.setParams({ refresh: Date.now() });
-            }
-          }]
-        );
-      } else {
-        Alert.alert('Error', `Failed to save: ${result.error}`);
-      }
-    } catch (error) {
-      console.error('Error saving visit:', error);
-      Alert.alert('Error', 'An unexpected error occurred.');
-    }
-  };
-
-  const handleExitLogForm = () => {
-    Alert.alert(
-      'Discard Changes?',
-      'Any unsaved changes will be lost.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Discard', style: 'destructive', onPress: () => setShowLogForm(false) }
-      ]
-    );
+  // "Log Visit" now routes into the shared location-optional session flow
+  // (#21), pre-filled with this winery so its place/pin seeds the session.
+  const handleLogVisit = () => {
+    router.push({
+      pathname: '/log-session',
+      params: {
+        mode: 'winery',
+        wineryId: winery.id,
+        wineryName: winery.name,
+        ...(winery.latitude != null && winery.longitude != null
+          ? { lat: String(winery.latitude), lng: String(winery.longitude) }
+          : {}),
+      },
+    });
   };
 
   const handleStatusChange = (newStatus) => {
@@ -230,7 +205,7 @@ export default function WineryDetail() {
           <View style={styles.quickActions}>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => setShowLogForm(true)}
+              onPress={handleLogVisit}
               activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: colors.primary.burgundy }]}>
@@ -286,22 +261,6 @@ export default function WineryDetail() {
           </View>
         )}
       </ScrollView>
-
-      {/* Visit Log Form Modal */}
-      <Modal
-        visible={showLogForm}
-        animationType="slide"
-        presentationStyle="fullScreen"
-        onRequestClose={handleExitLogForm}
-      >
-        <SafeAreaProvider>
-          <VisitLogForm
-            winery={winery}
-            onSave={handleSaveVisit}
-            onCancel={handleExitLogForm}
-          />
-        </SafeAreaProvider>
-      </Modal>
     </SafeAreaView>
   );
 }

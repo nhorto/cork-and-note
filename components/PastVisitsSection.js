@@ -37,9 +37,10 @@ const PastVisitsSection = ({ wineryId }) => {
         const { success, visits } = await visitsService.getUserVisits();
         
         if (success && visits) {
-          // Filter visits to this winery
-          const wineryVisits = visits.filter(visit => 
-            visit.winery_id.toString() === wineryId.toString()
+          // Filter visits to this winery (winery_id can be null for
+          // location-optional logs, so guard the toString()).
+          const wineryVisits = visits.filter(visit =>
+            visit.winery_id?.toString() === wineryId?.toString()
           );
           setVisits(wineryVisits);
         }
