@@ -8,7 +8,8 @@
 // form ships with smart defaults (qty 1, 750ml, purchase date = today).
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
 import theme from '../styles/theme';
 import AutocompleteInput from './AutocompleteInput';
 
@@ -105,7 +106,45 @@ export default function CellarBottleForm({
   const [wineLinked, setWineLinked] = useState(false);
   const [producerLinked, setProducerLinked] = useState(Boolean(initialValues?.winery_id));
 
+  // AI drink-window suggestion (R4 / #54). Fails soft: any error just clears the
+  // loading state and the fields stay manually editable — never blocks the save.
+  const [windowSuggesting, setWindowSuggesting] = useState(false);
+  const [windowProposal, setWindowProposal] = useState(null); // { drink_from, drink_by, peak, rationale }
+  const [windowError, setWindowError] = useState(null);
+
   const set = (key) => (value) => setForm((f) => ({ ...f, [key]: value }));
+
+  // Ask the sommelier to propose a window from the current form fields.
+  const suggestWindow = async () => {
+    setWindowSuggesting(true);
+    setWindowError(null);
+    setWindowProposal(null);
+    const res = await drinkWindowAI.suggest({
+      wine_name: form.wine_name,
+      producer: form.producer,
+      vintage: form.vintage,
+      wine_type: form.wine_type,
+      varietal: form.varietal,
+      region: form.region,
+    });
+    setWindowSuggesting(false);
+    if (res.success) {
+      setWindowProposal(res.window);
+    } else {
+      setWindowError('Could not suggest a window — enter it manually.');
+    }
+  };
+
+  // Accept the proposal: fill the drink-from / drink-by fields.
+  const acceptWindow = () => {
+    if (!windowProposal) return;
+    setForm((f) => ({
+      ...f,
+      drink_from: windowProposal.drink_from != null ? String(windowProposal.drink_from) : f.drink_from,
+      drink_by: windowProposal.drink_by != null ? String(windowProposal.drink_by) : f.drink_by,
+    }));
+    setWindowProposal(null);
+  };
 
   const qty = parseInt(form.quantity, 10) || 0;
   const step = (delta) => set('quantity')(String(Math.max(0, qty + delta)));
@@ -244,6 +283,52 @@ export default function CellarBottleForm({
             <Field flex label="Drink by" value={form.drink_by} onChangeText={set('drink_by')} placeholder="2030" keyboardType="number-pad" />
           </Row>
 
+          {/* AI-seeded drink window (R4 / #54): propose a window from grape /
+              region / vintage; the user accepts (fills the fields) or edits. */}
+          <TouchableOpacity
+            style={[styles.suggestBtn, windowSuggesting && styles.submitDisabled]}
+            onPress={suggestWindow}
+            disabled={windowSuggesting || !hasEnoughForWindow(form)}
+            activeOpacity={0.85}
+          >
+            {windowSuggesting ? (
+              <ActivityIndicator size="small" color={colors.primary.burgundy} />
+            ) : (
+              <Ionicons name="sparkles" size={16} color={colors.primary.burgundy} />
+            )}
+            <Text style={styles.suggestBtnText}>
+              {windowSuggesting ? 'Asking the sommelier…' : 'Suggest a window'}
+            </Text>
+          </TouchableOpacity>
+          {!hasEnoughForWindow(form) && !windowSuggesting ? (
+            <Text style={styles.suggestHint}>
+              Add a grape, region, type, or vintage and the sommelier can propose a window.
+            </Text>
+          ) : null}
+          {windowError ? <Text style={styles.suggestError}>{windowError}</Text> : null}
+
+          {windowProposal ? (
+            <View style={styles.proposalCard}>
+              <Text style={styles.proposalRange}>
+                Drink {windowProposal.drink_from}–{windowProposal.drink_by}
+                {windowProposal.peak != null ? ` · peak ~${windowProposal.peak}` : ''}
+              </Text>
+              {windowProposal.rationale ? (
+                <Text style={styles.proposalWhy}>{windowProposal.rationale}</Text>
+              ) : null}
+              <View style={styles.proposalActions}>
+                <TouchableOpacity style={styles.proposalAccept} onPress={acceptWindow} activeOpacity={0.85}>
+                  <Ionicons name="checkmark" size={16} color={colors.neutral.cream} />
+                  <Text style={styles.proposalAcceptText}>Use it</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.proposalDismiss} onPress={() => setWindowProposal(null)} activeOpacity={0.85}>
+                  <Text style={styles.proposalDismissText}>I&apos;ll edit manually</Text>
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.proposalNote}>An estimate from the grape, region & vintage — adjust as you like.</Text>
+            </View>
+          ) : null}
+
           <Row>
             <Field flex label="Purchase date" value={form.purchase_date} onChangeText={set('purchase_date')} placeholder="YYYY-MM-DD" />
             <Field flex label="Price" value={form.purchase_price} onChangeText={set('purchase_price')} placeholder="45.00" keyboardType="decimal-pad" />
@@ -357,6 +442,48 @@ const styles = StyleSheet.create({
   },
 
   error: { ...typography.body.small, color: colors.status.error, marginBottom: spacing.md },
+
+  // AI "Suggest a window"
+  suggestBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    backgroundColor: colors.gold.light,
+    marginBottom: spacing.sm,
+  },
+  suggestBtnText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
+  suggestHint: { ...typography.body.small, color: colors.neutral.pewter, marginBottom: spacing.md, marginTop: -spacing.xs },
+  suggestError: { ...typography.body.small, color: colors.status.error, marginBottom: spacing.md },
+
+  proposalCard: {
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  proposalRange: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
+  proposalWhy: { ...typography.body.small, color: colors.neutral.graphite, marginTop: spacing.xs, lineHeight: 18 },
+  proposalActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md },
+  proposalAccept: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.primary.burgundy,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.sm,
+  },
+  proposalAcceptText: { ...typography.body.small, color: colors.neutral.cream, fontWeight: '600' },
+  proposalDismiss: { paddingVertical: spacing.sm, paddingHorizontal: spacing.sm },
+  proposalDismissText: { ...typography.body.small, color: colors.primary.burgundy },
+  proposalNote: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic', marginTop: spacing.sm },
 
   submit: {
     backgroundColor: colors.primary.burgundy,

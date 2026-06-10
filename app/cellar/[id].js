@@ -16,17 +16,11 @@ import {
   View,
 } from 'react-native';
 import CellarBottleForm from '../../components/CellarBottleForm';
-import { cellarService } from '../../lib/cellar';
+import MaturityTimeline from '../../components/MaturityTimeline';
+import { cellarService, drinkWindowMeta } from '../../lib/cellar';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
-
-const DRINK_BADGE = {
-  too_young: { label: 'Too young', color: colors.status.wishlist },
-  ready: { label: 'Ready to drink', color: colors.status.visited },
-  drink_up: { label: 'Drink up', color: colors.gold.shimmer },
-  past_peak: { label: 'Past peak', color: colors.status.error },
-};
 
 const REASONS = [
   { key: 'consumed', label: 'Drank it' },
@@ -134,7 +128,7 @@ export default function BottleDetailScreen() {
   }
 
   const producer = bottle.producer || bottle.wineries?.name;
-  const badge = bottle.drinkStatus ? DRINK_BADGE[bottle.drinkStatus] : null;
+  const badge = bottle.drinkStatus ? drinkWindowMeta(bottle.drinkStatus) : null;
   const removed = bottle.status !== 'in_cellar';
   const consumptions = (bottle.cellar_consumptions || []).length;
 
@@ -214,6 +208,14 @@ export default function BottleDetailScreen() {
                 <DetailRow label="Your rating" value={bottle.rating != null ? `${bottle.rating} / 5` : null} />
                 <DetailRow label="Times opened" value={consumptions > 0 ? String(consumptions) : null} last />
               </View>
+
+              {/* Maturity timeline (R4 / #54): open → peak → decline with the
+                  bottle's current position, derived from drink_from/drink_by. */}
+              <MaturityTimeline
+                drinkFrom={bottle.drink_from}
+                drinkBy={bottle.drink_by}
+                onAddWindow={!removed ? () => setEditing(true) : undefined}
+              />
 
               {bottle.notes ? (
                 <View style={styles.notesCard}>
