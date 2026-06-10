@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { cellarService } from '../../lib/cellar';
 import { visitsService } from '../../lib/visits';
 import { wishlistService } from '../../lib/wishlist';
 import theme from '../../styles/theme';
@@ -23,6 +24,7 @@ export default function HomeScreen() {
   const { user } = useContext(AuthContext);
 
   const [stats, setStats] = useState({ wines: 0, places: 0, wishlist: 0 });
+  const [cellar, setCellar] = useState({ totalBottles: 0, readyToDrink: 0 });
   const [recent, setRecent] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -33,10 +35,11 @@ export default function HomeScreen() {
       let active = true;
       (async () => {
         try {
-          const [statsRes, visitsRes, wishRes] = await Promise.all([
+          const [statsRes, visitsRes, wishRes, cellarRes] = await Promise.all([
             visitsService.getVisitStats().catch(() => ({ success: false })),
             visitsService.getUserVisits().catch(() => ({ success: false })),
             wishlistService.getUserWishlist().catch(() => ({ success: false })),
+            cellarService.getCellarStats().catch(() => ({ success: false })),
           ]);
           if (!active) return;
 
@@ -44,6 +47,11 @@ export default function HomeScreen() {
             wines: statsRes?.stats?.totalWines ?? 0,
             places: statsRes?.stats?.totalWineries ?? 0,
             wishlist: wishRes?.wishlist?.length ?? wishRes?.items?.length ?? 0,
+          });
+
+          setCellar({
+            totalBottles: cellarRes?.stats?.totalBottles ?? 0,
+            readyToDrink: cellarRes?.stats?.readyToDrink ?? 0,
           });
 
           // Flatten the most recent wines across recent visits.
@@ -128,6 +136,38 @@ export default function HomeScreen() {
             <Text style={styles.heroSub}>Had something good? Capture it.</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.gold.rich} />
+        </TouchableOpacity>
+
+        {/* Cellar summary */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionLabel}>YOUR CELLAR</Text>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/cellar')}>
+            <Text style={styles.sectionAction}>Open</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          style={styles.cellar}
+          activeOpacity={0.9}
+          onPress={() => router.push('/(tabs)/cellar')}
+        >
+          <View style={styles.cellarIcon}>
+            <Ionicons name="file-tray-stacked-outline" size={22} color={colors.primary.burgundy} />
+          </View>
+          <View style={styles.cellarMeta}>
+            <Text style={styles.cellarTitle}>
+              {cellar.totalBottles > 0
+                ? `${cellar.totalBottles} bottle${cellar.totalBottles === 1 ? '' : 's'} in your cellar`
+                : 'Start your cellar'}
+            </Text>
+            <Text style={styles.cellarSub}>
+              {cellar.totalBottles > 0
+                ? cellar.readyToDrink > 0
+                  ? `${cellar.readyToDrink} ready to drink`
+                  : 'Track bottles & drink windows'
+                : 'Track the bottles you own'}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={20} color={colors.primary.burgundy} />
         </TouchableOpacity>
 
         {/* Recent */}
@@ -288,6 +328,29 @@ const styles = StyleSheet.create({
     fontFamily: 'Georgia',
   },
   heroSub: { ...typography.body.small, color: colors.primary.rosé, marginTop: 2 },
+
+  // Cellar summary
+  cellar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+  },
+  cellarIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gold.light,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cellarMeta: { flex: 1 },
+  cellarTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
+  cellarSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
 
   // Section headers
   sectionHeader: {
