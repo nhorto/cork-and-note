@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import PinActionModal from '../../components/PinActionModal';
@@ -38,6 +38,26 @@ export default function MapScreen() {
   const [showFabMenu, setShowFabMenu] = useState(false);
   const [showManualModal, setShowManualModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+
+  // Searchable list of places you've visited (#101).
+  const [showPlacesList, setShowPlacesList] = useState(false);
+  const [placeSearch, setPlaceSearch] = useState('');
+
+  // Places you've actually been (visited pins), newest names first-ish.
+  const visitedPlaces = userPins.filter(p => p.hasVisit);
+  const filteredPlaces = placeSearch.trim()
+    ? visitedPlaces.filter(p =>
+        `${p.name || ''} ${p.address || ''}`
+          .toLowerCase()
+          .includes(placeSearch.trim().toLowerCase())
+      )
+    : visitedPlaces;
+
+  const openPlace = (place) => {
+    setShowPlacesList(false);
+    setPlaceSearch('');
+    router.push(`/winery/${place.id}`);
+  };
 
   useEffect(() => {
     loadUserPins();
@@ -316,6 +336,22 @@ export default function MapScreen() {
         )}
       </MapView>
 
+      {/* Search your visited places (#101). Shown once there's at least one
+          place to search; sits where the welcome hint would otherwise be. */}
+      {visitedPlaces.length > 0 && (
+        <TouchableOpacity
+          style={styles.searchPill}
+          activeOpacity={0.85}
+          onPress={() => setShowPlacesList(true)}
+        >
+          <Ionicons name="search" size={18} color={colors.neutral.pewter} />
+          <Text style={styles.searchPillText} numberOfLines={1}>
+            Search your {visitedPlaces.length} place{visitedPlaces.length === 1 ? '' : 's'}
+          </Text>
+          <Ionicons name="list" size={18} color={colors.primary.burgundy} />
+        </TouchableOpacity>
+      )}
+
       {/* FAB Button */}
       <TouchableOpacity
         style={styles.fabButton}
@@ -447,6 +483,84 @@ export default function MapScreen() {
         }}
         onSave={handleManualEntry}
       />
+
+      {/* Searchable list of visited places (#101) */}
+      <Modal
+        visible={showPlacesList}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowPlacesList(false)}
+      >
+        <View style={styles.listOverlay}>
+          <TouchableOpacity
+            style={styles.listBackdrop}
+            activeOpacity={1}
+            onPress={() => setShowPlacesList(false)}
+          />
+          <View style={styles.listSheet}>
+            <View style={styles.handle} />
+            <View style={styles.listHeader}>
+              <Text style={styles.listTitle}>Your Places</Text>
+              <TouchableOpacity onPress={() => setShowPlacesList(false)}>
+                <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.searchBox}>
+              <Ionicons name="search" size={18} color={colors.neutral.pewter} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search wineries you've visited"
+                placeholderTextColor={colors.neutral.silver}
+                value={placeSearch}
+                onChangeText={setPlaceSearch}
+                autoCorrect={false}
+                returnKeyType="search"
+                selectionColor={colors.primary.burgundy}
+              />
+              {placeSearch.length > 0 && (
+                <TouchableOpacity onPress={() => setPlaceSearch('')}>
+                  <Ionicons name="close-circle" size={18} color={colors.neutral.silver} />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <FlatList
+              data={filteredPlaces}
+              keyExtractor={(item) => String(item.id)}
+              keyboardShouldPersistTaps="handled"
+              style={styles.listScroll}
+              ItemSeparatorComponent={() => <View style={styles.listSeparator} />}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.placeRow}
+                  activeOpacity={0.7}
+                  onPress={() => openPlace(item)}
+                >
+                  <View style={styles.placeIcon}>
+                    <Ionicons name="location" size={18} color={colors.primary.burgundy} />
+                  </View>
+                  <View style={styles.placeMeta}>
+                    <Text style={styles.placeName} numberOfLines={1}>{item.name}</Text>
+                    {item.address ? (
+                      <Text style={styles.placeAddress} numberOfLines={1}>{item.address}</Text>
+                    ) : null}
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+                </TouchableOpacity>
+              )}
+              ListEmptyComponent={
+                <View style={styles.listEmpty}>
+                  <Ionicons name="wine-outline" size={28} color={colors.gold.muted} />
+                  <Text style={styles.listEmptyText}>
+                    {placeSearch.trim() ? 'No places match your search' : 'No visited places yet'}
+                  </Text>
+                </View>
+              }
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -540,7 +654,8 @@ const styles = StyleSheet.create({
   fabMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
   },
   fabMenuIcon: {
@@ -564,10 +679,13 @@ const styles = StyleSheet.create({
     color: colors.neutral.pewter,
     marginTop: 1,
   },
+  // Inset separator so it doesn't run into the menu's rounded corners and the
+  // "Drop Pin Here" action below sits evenly with the others (#107).
   fabMenuDivider: {
     height: 1,
     backgroundColor: colors.neutral.linen,
     marginVertical: spacing.xs,
+    marginHorizontal: spacing.md,
   },
 
   // Location Button
@@ -584,6 +702,126 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gold.muted,
     ...shadows.soft,
+  },
+
+  // Search-your-places pill (#101)
+  searchPill: {
+    position: 'absolute',
+    top: 60,
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.neutral.cream,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    ...shadows.medium,
+  },
+  searchPillText: {
+    flex: 1,
+    ...typography.body.regular,
+    color: colors.neutral.pewter,
+  },
+
+  // Places list sheet (#101)
+  listOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay.dark,
+    justifyContent: 'flex-end',
+  },
+  listBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  listSheet: {
+    backgroundColor: colors.neutral.cream,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.xl,
+    maxHeight: '75%',
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    backgroundColor: colors.neutral.stone,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: spacing.md,
+  },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+  },
+  listTitle: {
+    ...typography.heading.h2,
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
+  },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
+    padding: 0,
+  },
+  listScroll: {
+    marginTop: spacing.xs,
+  },
+  listSeparator: {
+    height: 1,
+    backgroundColor: colors.neutral.linen,
+  },
+  placeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  placeIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.gold.light,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  placeMeta: { flex: 1 },
+  placeName: {
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
+    fontWeight: '600',
+  },
+  placeAddress: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginTop: 1,
+  },
+  listEmpty: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+    gap: spacing.sm,
+  },
+  listEmptyText: {
+    ...typography.body.regular,
+    color: colors.neutral.pewter,
   },
 
   // Hint Container

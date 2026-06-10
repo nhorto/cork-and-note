@@ -5,7 +5,6 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Linking,
   Platform,
   SafeAreaView,
@@ -223,17 +222,6 @@ export default function WineryDetail() {
                 <Ionicons name="navigate" size={22} color={colors.neutral.cream} />
               </View>
               <Text style={styles.actionLabel}>Directions</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => Alert.alert('Website', `Opening ${winery.name} website...`)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: colors.status.wishlist }]}>
-                <Ionicons name="globe" size={22} color={colors.neutral.cream} />
-              </View>
-              <Text style={styles.actionLabel}>Website</Text>
             </TouchableOpacity>
           </View>
 

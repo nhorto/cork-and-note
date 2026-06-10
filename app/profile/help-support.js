@@ -17,104 +17,228 @@ const HelpSupportModal = () => {
   // Help guides data
   const guides = [
     {
-      id: 'wine-statistics',
-      title: 'Understanding Wine Statistics',
-      icon: 'analytics',
+      id: 'getting-started',
+      title: 'Getting Around Cork & Note',
+      icon: 'home',
       content: [
         {
           type: 'text',
-          value: 'Your profile page shows statistics about your wine journey:'
+          value: 'Cork & Note is built around five quick destinations along the bottom bar:'
         },
         {
           type: 'attributes',
           value: [
             {
-              name: 'Wineries Visited',
-              description: "The total number of unique wineries you've logged visits to"
+              name: 'Home',
+              description: "Your landing page — recent tastings, your cellar at a glance, Tonight's Pick, and where you've been"
             },
             {
-              name: 'Total Visits',
-              description: 'The number of winery visits you\'ve recorded'
+              name: 'Cellar',
+              description: 'The bottles you own, with drink-window tracking and gentle reminders'
             },
             {
-              name: 'Wines Tasted',
-              description: 'The total number of individual wines you\'ve logged'
+              name: '＋ (center)',
+              description: 'Log a wine you tasted — anywhere, with or without a place'
+            },
+            {
+              name: 'Explore',
+              description: "A map of the places you've visited and wishlisted, with search"
+            },
+            {
+              name: 'Profile',
+              description: 'Your journey stats, the Sommelier, settings, and this help'
             }
           ]
         },
         {
-          type: 'text',
-          value: "You'll also see your recent visits and wines, allowing you to quickly access your recent experiences."
-        },
-        {
           type: 'tip',
-          value: 'Log all your winery visits to build a comprehensive wine tasting history and see your wine journey evolve over time.'
+          value: 'New here? Log a wine with the center ＋ button, or add a bottle to your Cellar to get started.'
         }
       ]
     },
     {
-      id: 'badges-wishlist',
-      title: 'Badges & Wishlist',
-      icon: 'bookmarks',
-      content: [
-        {
-          type: 'text',
-          value: 'Cork & Note offers features to organize your wine adventures:'
-        },
-        {
-          type: 'attributes',
-          value: [
-            {
-              name: 'Visited Badge',
-              description: "Shows you've been to this winery (green checkmark)"
-            },
-            {
-              name: 'Favorite',
-              description: 'Mark wineries you especially enjoyed with the heart icon'
-            },
-            {
-              name: 'Want to Visit',
-              description: 'Add wineries to your wishlist to remember places you want to explore'
-            }
-          ]
-        },
-        {
-          type: 'text',
-          value: 'You can use the "Want to Visit" tab to view all wineries on your wishlist, making it easy to plan your next wine adventure.'
-        },
-        {
-          type: 'tip',
-          value: 'Use the map view to see wineries you\'ve visited and those on your wishlist, helping you discover new regions to explore.'
-        }
-      ]
-    },
-    {
-      id: 'logging-visit',
-      title: 'Logging Your First Visit',
+      id: 'logging-wine',
+      title: 'Logging a Wine',
       icon: 'wine',
       content: [
         {
           type: 'text',
-          value: "Logging your winery visits is easy and helps you keep track of your wine tasting experiences. Here's how to get started:"
+          value: 'Logging is location-optional — capture a wine whether or not you remember where you had it.'
         },
         {
           type: 'steps',
           value: [
-            'Navigate to any winery detail page through the Map or Wineries tab',
-            'Tap the "Log Your Visit" button',
-            'Enter the date of your visit',
-            'Add wines you tasted during your visit',
-            'Include notes and photos to remember your experience',
-            'Tap "Save Visit" to complete'
+            'Tap the center ＋ button in the bottom bar',
+            'Add each wine you tasted — name, type, vintage, and your ratings',
+            'Optionally tag a place (a winery, a restaurant, or home) — or skip it',
+            'Add flavor notes, written notes, and photos',
+            'Save — it appears in your Home recents and your stats'
           ]
         },
         {
           type: 'text',
-          value: 'You can view all your past visits on the winery detail page or by going to the Wines tab to see all wines you\'ve tasted.'
+          value: 'Tap any wine in Home → Recent to reopen its tasting and see exactly how you rated it.'
         },
         {
           type: 'tip',
-          value: "Take photos of wines and winery views while you're there to enhance your tasting journal!"
+          value: "No place? No problem. A wine logged without a location still counts and stays fully searchable."
+        }
+      ]
+    },
+    {
+      id: 'cellar',
+      title: 'Your Cellar & Drink Windows',
+      icon: 'file-tray-stacked',
+      content: [
+        {
+          type: 'text',
+          value: 'The Cellar tracks the bottles you own and helps you drink them at their best.'
+        },
+        {
+          type: 'attributes',
+          value: [
+            {
+              name: 'Drink window',
+              description: "A 'drink from' and 'drink by' year, so each bottle shows as too young, ready, drink soon, or past peak"
+            },
+            {
+              name: 'Ready to drink',
+              description: 'Home surfaces how many bottles are ready so nothing gets forgotten'
+            },
+            {
+              name: "Tonight's Pick",
+              description: 'Let the Sommelier choose a bottle from your own cellar for the occasion'
+            },
+            {
+              name: 'Reminders',
+              description: 'Optional, restrained nudges when bottles approach their peak'
+            }
+          ]
+        },
+        {
+          type: 'steps',
+          value: [
+            'Open the Cellar tab and tap Add a bottle',
+            'Enter the wine and, if you like, a location and shelf/slot',
+            "Set a drink window, or tap 'Suggest a window' to have the app propose one",
+            'When you open it, log a quick note or a full tasting'
+          ]
+        },
+        {
+          type: 'tip',
+          value: "Not sure how long to age a bottle? Tap 'Suggest a window' and the app proposes a range."
+        }
+      ]
+    },
+    {
+      id: 'sommelier',
+      title: 'The AI Sommelier',
+      icon: 'sparkles',
+      content: [
+        {
+          type: 'text',
+          value: "Your Sommelier gives personalized recommendations grounded in the wines you've rated and the bottles in your cellar."
+        },
+        {
+          type: 'attributes',
+          value: [
+            {
+              name: "Tonight's Pick",
+              description: 'A bottle from your own cellar matched to the occasion'
+            },
+            {
+              name: 'Ask anything',
+              description: 'Pairings, what to open tonight, or what you might enjoy next'
+            },
+            {
+              name: 'Personalized',
+              description: 'It learns from your ratings and flavor notes over time'
+            }
+          ]
+        },
+        {
+          type: 'text',
+          value: "Find it on Home, on any wine's detail page ('Ask about this wine'), or from your Profile."
+        },
+        {
+          type: 'tip',
+          value: 'The more wines you rate, the sharper its suggestions become.'
+        }
+      ]
+    },
+    {
+      id: 'map-places',
+      title: 'Map, Places & Wishlist',
+      icon: 'map',
+      content: [
+        {
+          type: 'text',
+          value: 'The Explore tab maps every place you have logged or saved.'
+        },
+        {
+          type: 'attributes',
+          value: [
+            {
+              name: 'Visited places',
+              description: "Pins for wineries and spots where you've logged a wine"
+            },
+            {
+              name: 'Wishlist',
+              description: 'Places you want to visit, saved for later'
+            },
+            {
+              name: 'Search your places',
+              description: "Tap the search bar at the top of the map to find any place you've visited"
+            }
+          ]
+        },
+        {
+          type: 'steps',
+          value: [
+            'Long-press the map to drop a pin, or tap ＋ for quick actions',
+            'Tap a pin to log a visit, add it to your wishlist, or view details',
+            'Tap a place to see its past visits and the wines you logged there'
+          ]
+        },
+        {
+          type: 'tip',
+          value: "Use the search bar to jump straight to a winery you've already visited."
+        }
+      ]
+    },
+    {
+      id: 'wine-statistics',
+      title: 'Your Stats & Journey',
+      icon: 'analytics',
+      content: [
+        {
+          type: 'text',
+          value: 'Cork & Note keeps a running picture of your wine journey across Home and Profile:'
+        },
+        {
+          type: 'attributes',
+          value: [
+            {
+              name: 'Home counters',
+              description: 'Wines, Places and Wishlist totals — tap any one to open its list'
+            },
+            {
+              name: 'Your Journey (Profile)',
+              description: "Châteaux visited, total visits, and wines tasted"
+            },
+            {
+              name: "Where you've been",
+              description: 'Your most-recent place, most-visited winery, and how many places you have explored'
+            }
+          ]
+        },
+        {
+          type: 'text',
+          value: 'Tap a recent wine on Home to reopen that tasting, or a counter to jump to the full list.'
+        },
+        {
+          type: 'tip',
+          value: 'Only logs with a tagged place count toward Places — a wine logged without a location still counts as a wine.'
         }
       ]
     },
@@ -319,7 +443,7 @@ const HelpSupportModal = () => {
             {/* App version info */}
             <View style={styles.versionInfo}>
               <Text style={styles.versionText}>Cork & Note v1.0.0</Text>
-              <Text style={styles.copyrightText}>© 2025 Cork & Note. All rights reserved.</Text>
+              <Text style={styles.copyrightText}>© 2026 Cork & Note. All rights reserved.</Text>
             </View>
           </View>
         )}

@@ -83,6 +83,14 @@ const ManualWineryEntryModal = ({
     return actionType === 'visit' ? 'Log a Visit' : 'Add to Wishlist';
   };
 
+  // Subtitle must match the action — previously hard-coded to the wishlist
+  // copy for both modes (#106).
+  const getSubtitle = () => {
+    return actionType === 'visit'
+      ? 'Record a winery you visited'
+      : "Save a winery you'd like to visit";
+  };
+
   const getIcon = () => {
     return actionType === 'visit' ? 'wine' : 'bookmark';
   };
@@ -103,19 +111,20 @@ const ManualWineryEntryModal = ({
       animationType="fade"
       onRequestClose={handleClose}
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.overlay}
-      >
+      {/* Full-screen dimming scrim, independent of the keyboard so it always
+          covers the whole screen (previously a partial dark box — #106). The
+          scrim itself closes the modal on tap. */}
+      <View style={styles.root}>
         <TouchableOpacity
-          style={styles.overlay}
+          style={styles.scrim}
           activeOpacity={1}
           onPress={handleClose}
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.centerWrap}
+          pointerEvents="box-none"
         >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-          >
             <View style={styles.container}>
               {/* Header */}
               <View style={styles.header}>
@@ -124,7 +133,7 @@ const ManualWineryEntryModal = ({
                 </View>
                 <View style={styles.headerText}>
                   <Text style={styles.title}>{getTitle()}</Text>
-                  <Text style={styles.subtitle}>Add a new winery to your collection</Text>
+                  <Text style={styles.subtitle}>{getSubtitle()}</Text>
                 </View>
               </View>
 
@@ -157,7 +166,7 @@ const ManualWineryEntryModal = ({
                     <View style={styles.locationIconContainer}>
                       <Ionicons name="location" size={18} color={colors.primary.burgundy} />
                     </View>
-                    <View>
+                    <View style={styles.locationTextWrap}>
                       <Text style={styles.locationLabel}>Use Current Location</Text>
                       <Text style={styles.locationSubtext}>
                         {useCurrentLocation ? 'GPS coordinates will be saved' : 'Will use a default location'}
@@ -205,17 +214,25 @@ const ManualWineryEntryModal = ({
                 </TouchableOpacity>
               </View>
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  root: {
     flex: 1,
+  },
+  // Full-bleed dimming scrim (also the tap-to-close target).
+  scrim: {
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: colors.overlay.dark,
+  },
+  // Centers the card and lifts it above the keyboard; box-none lets taps in the
+  // empty area fall through to the scrim.
+  centerWrap: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -308,10 +325,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: spacing.sm,
   },
   locationInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
+  },
+  // Constrain the label/subtext so they wrap instead of overlapping the Switch.
+  locationTextWrap: {
     flex: 1,
   },
   locationIconContainer: {

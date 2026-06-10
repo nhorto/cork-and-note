@@ -34,8 +34,11 @@ const VisitStatsCard = () => {
 
       if (success && visits) {
         const totalVisits = visits.length;
-        const uniqueWineries = new Set();
-        visits.forEach(visit => uniqueWineries.add(visit.winery_id));
+        // "Châteaux" = distinct real wineries. Location-optional logs have a
+        // null winery_id and must not be counted as a place.
+        const uniqueWineries = new Set(
+          visits.map(v => v.winery_id).filter(Boolean)
+        );
         const totalWineries = uniqueWineries.size;
 
         let totalWines = 0;
@@ -43,7 +46,12 @@ const VisitStatsCard = () => {
           totalWines += visit.wines?.length || 0;
         });
 
+        // Only surface logs that actually have a tagged place as "visits" —
+        // place-less logs would render as blank, nameless rows (#99) and tapping
+        // one would crash on a null winery_id (#98). They still appear under
+        // Recent Wines below.
         const recentVisits = [...visits]
+          .filter(visit => visit.winery_id && visit.wineries?.name)
           .sort((a, b) => new Date(b.visit_date) - new Date(a.visit_date))
           .slice(0, 3);
 
@@ -82,7 +90,11 @@ const VisitStatsCard = () => {
     });
   };
 
-  const goToWinery = (wineryId) => router.push(`/winery/${wineryId}`);
+  // Never route to a winery detail without a real id (place-less logs) — see #98.
+  const goToWinery = (wineryId) => {
+    if (!wineryId) return;
+    router.push(`/winery/${wineryId}`);
+  };
   const goToWine = (wineId) => router.push(`/wine/${wineId}`);
 
   // Get wine color based on type
@@ -157,7 +169,7 @@ const VisitStatsCard = () => {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Visits</Text>
             <TouchableOpacity
-              onPress={() => router.push('/wines')}
+              onPress={() => router.push('/(tabs)/map')}
               style={styles.seeAllButton}
             >
               <Text style={styles.seeAllText}>View All</Text>
@@ -236,7 +248,7 @@ const VisitStatsCard = () => {
                     {wine.wine_name || wine.wine_varietal || wine.wine_type || 'Unnamed Wine'}
                   </Text>
                   <Text style={styles.listItemSubtitle} numberOfLines={1}>
-                    {wine.wineryName} · {formatDate(wine.visitDate)}
+                    {wine.wineryName ? `${wine.wineryName} · ` : ''}{formatDate(wine.visitDate)}
                   </Text>
                 </View>
                 <View style={styles.listItemArrow}>
