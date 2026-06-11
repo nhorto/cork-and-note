@@ -12,7 +12,10 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
+
+const { colors } = theme;
 
 export default function AccountSettingsScreen() {
   const router = useRouter();
@@ -96,7 +99,7 @@ export default function AccountSettingsScreen() {
           style={styles.backButton} 
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#8C1C13" />
+          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Account Settings</Text>
         <View style={styles.headerSpacer} />
@@ -117,8 +120,8 @@ export default function AccountSettingsScreen() {
             <Switch
               value={notifications}
               onValueChange={handleNotificationsToggle}
-              trackColor={{ false: '#ccc', true: '#8C1C13' }}
-              thumbColor="#fff"
+              trackColor={{ false: colors.neutral.stone, true: colors.primary.burgundy }}
+              thumbColor={colors.neutral.cream}
             />
           </View>
 
@@ -131,7 +134,7 @@ export default function AccountSettingsScreen() {
               {locationPermissionStatus && (
                 <Text style={[
                   styles.permissionStatus, 
-                  { color: locationPermissionStatus === 'granted' ? '#4CAF50' : '#FF5722' }
+                  { color: locationPermissionStatus === 'granted' ? colors.status.success : colors.status.error }
                 ]}>
                   Status: {locationPermissionStatus === 'granted' ? 'Enabled' : 'Disabled'}
                 </Text>
@@ -140,8 +143,8 @@ export default function AccountSettingsScreen() {
             <Switch
               value={locationEnabled}
               onValueChange={handleLocationToggle}
-              trackColor={{ false: '#ccc', true: '#8C1C13' }}
-              thumbColor="#fff"
+              trackColor={{ false: colors.neutral.stone, true: colors.primary.burgundy }}
+              thumbColor={colors.neutral.cream}
             />
           </View>
         </View>
@@ -154,9 +157,9 @@ export default function AccountSettingsScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/profile/change-password')}
           >
-            <Ionicons name="key" size={20} color="#8C1C13" />
+            <Ionicons name="key" size={20} color={colors.primary.burgundy} />
             <Text style={styles.actionButtonText}>Change Password</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -179,9 +182,9 @@ export default function AccountSettingsScreen() {
               );
             }}
           >
-            <Ionicons name="trash" size={20} color="#d32f2f" />
+            <Ionicons name="trash" size={20} color={colors.status.error} />
             <Text style={[styles.actionButtonText, styles.dangerText]}>Delete Account</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ccc" />
+            <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
           </TouchableOpacity>
         </View>
 
@@ -208,7 +211,7 @@ export default function AccountSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E7E3E2',
+    backgroundColor: colors.neutral.cream,
   },
   header: {
     flexDirection: 'row',
@@ -216,9 +219,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: 'white',
+    backgroundColor: colors.neutral.cream,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.gold.muted,
     paddingTop: 50,
   },
   backButton: {
@@ -227,7 +230,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
   },
   headerSpacer: {
     width: 34,
@@ -236,16 +240,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    backgroundColor: 'white',
+    backgroundColor: colors.neutral.parchment,
     marginHorizontal: 20,
     marginVertical: 10,
     borderRadius: 10,
     padding: 20,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
     marginBottom: 15,
   },
   settingRow: {
@@ -260,12 +267,12 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#333',
+    color: colors.neutral.charcoal,
     marginBottom: 5,
   },
   settingDescription: {
     fontSize: 14,
-    color: '#666',
+    color: colors.neutral.pewter,
     lineHeight: 20,
   },
   permissionStatus: {
@@ -278,19 +285,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: colors.neutral.linen,
   },
   actionButtonText: {
     flex: 1,
     fontSize: 16,
-    color: '#333',
+    color: colors.neutral.charcoal,
     marginLeft: 15,
   },
   dangerButton: {
     borderBottomWidth: 0,
   },
   dangerText: {
-    color: '#d32f2f',
+    color: colors.status.error,
   },
   infoRow: {
     flexDirection: 'row',
@@ -299,18 +306,18 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: '#666',
+    color: colors.neutral.pewter,
     width: 60,
     fontWeight: '500',
   },
   infoValue: {
     fontSize: 14,
-    color: '#333',
+    color: colors.neutral.charcoal,
     flex: 1,
   },
   infoNote: {
     fontSize: 12,
-    color: '#999',
+    color: colors.neutral.silver,
     fontStyle: 'italic',
     marginTop: 10,
     lineHeight: 16,
