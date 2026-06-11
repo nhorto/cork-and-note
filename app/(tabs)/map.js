@@ -43,16 +43,19 @@ export default function MapScreen() {
   // Searchable list of places you've visited (#101).
   const [showPlacesList, setShowPlacesList] = useState(false);
   const [placeSearch, setPlaceSearch] = useState('');
+  const [listTab, setListTab] = useState('visited'); // 'visited' | 'wishlist' (#97)
 
-  // Places you've actually been (visited pins), newest names first-ish.
+  // Places you've actually been (visited) and wineries you've saved (wishlist).
   const visitedPlaces = userPins.filter(p => p.hasVisit);
+  const wishlistPlaces = userPins.filter(p => p.inWishlist);
+  const baseList = listTab === 'wishlist' ? wishlistPlaces : visitedPlaces;
   const filteredPlaces = placeSearch.trim()
-    ? visitedPlaces.filter(p =>
+    ? baseList.filter(p =>
         `${p.name || ''} ${p.address || ''}`
           .toLowerCase()
           .includes(placeSearch.trim().toLowerCase())
       )
-    : visitedPlaces;
+    : baseList;
 
   const openPlace = (place) => {
     setShowPlacesList(false);
@@ -350,15 +353,19 @@ export default function MapScreen() {
 
       {/* Search your visited places (#101). Shown once there's at least one
           place to search; sits where the welcome hint would otherwise be. */}
-      {visitedPlaces.length > 0 && (
+      {(visitedPlaces.length > 0 || wishlistPlaces.length > 0) && (
         <TouchableOpacity
           style={styles.searchPill}
           activeOpacity={0.85}
-          onPress={() => setShowPlacesList(true)}
+          onPress={() => {
+            // Open to whichever list has something to show.
+            setListTab(visitedPlaces.length === 0 && wishlistPlaces.length > 0 ? 'wishlist' : 'visited');
+            setShowPlacesList(true);
+          }}
         >
           <Ionicons name="search" size={18} color={colors.neutral.pewter} />
           <Text style={styles.searchPillText} numberOfLines={1}>
-            Search your {visitedPlaces.length} place{visitedPlaces.length === 1 ? '' : 's'}
+            Your places &amp; wishlist
           </Text>
           <Ionicons name="list" size={18} color={colors.primary.burgundy} />
         </TouchableOpacity>
@@ -518,11 +525,33 @@ export default function MapScreen() {
               </TouchableOpacity>
             </View>
 
+            {/* Visited / Wishlist segments (#97) */}
+            <View style={styles.segment}>
+              <TouchableOpacity
+                style={[styles.segmentBtn, listTab === 'visited' && styles.segmentBtnActive]}
+                activeOpacity={0.8}
+                onPress={() => setListTab('visited')}
+              >
+                <Text style={[styles.segmentText, listTab === 'visited' && styles.segmentTextActive]}>
+                  Visited ({visitedPlaces.length})
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.segmentBtn, listTab === 'wishlist' && styles.segmentBtnActive]}
+                activeOpacity={0.8}
+                onPress={() => setListTab('wishlist')}
+              >
+                <Text style={[styles.segmentText, listTab === 'wishlist' && styles.segmentTextActive]}>
+                  Wishlist ({wishlistPlaces.length})
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <View style={styles.searchBox}>
               <Ionicons name="search" size={18} color={colors.neutral.pewter} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search wineries you've visited"
+                placeholder={listTab === 'wishlist' ? 'Search your wishlist' : "Search wineries you've visited"}
                 placeholderTextColor={colors.neutral.silver}
                 value={placeSearch}
                 onChangeText={setPlaceSearch}
@@ -550,7 +579,11 @@ export default function MapScreen() {
                   onPress={() => openPlace(item)}
                 >
                   <View style={styles.placeIcon}>
-                    <Ionicons name="location" size={18} color={colors.primary.burgundy} />
+                    <Ionicons
+                      name={listTab === 'wishlist' ? 'bookmark' : 'location'}
+                      size={18}
+                      color={listTab === 'wishlist' ? colors.status.wishlist : colors.primary.burgundy}
+                    />
                   </View>
                   <View style={styles.placeMeta}>
                     <Text style={styles.placeName} numberOfLines={1}>{item.name}</Text>
@@ -565,7 +598,11 @@ export default function MapScreen() {
                 <View style={styles.listEmpty}>
                   <Ionicons name="wine-outline" size={28} color={colors.gold.muted} />
                   <Text style={styles.listEmptyText}>
-                    {placeSearch.trim() ? 'No places match your search' : 'No visited places yet'}
+                    {placeSearch.trim()
+                      ? 'No matches for your search'
+                      : listTab === 'wishlist'
+                      ? 'No saved wineries yet — add some from the map or the ＋ menu'
+                      : 'No visited places yet'}
                   </Text>
                 </View>
               }
@@ -775,6 +812,33 @@ const styles = StyleSheet.create({
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
     fontFamily: 'Georgia',
+  },
+  // Visited / Wishlist segmented control (#97)
+  segment: {
+    flexDirection: 'row',
+    backgroundColor: colors.neutral.parchment,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    padding: 3,
+    marginBottom: spacing.md,
+  },
+  segmentBtn: {
+    flex: 1,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+    alignItems: 'center',
+  },
+  segmentBtnActive: {
+    backgroundColor: colors.primary.burgundy,
+  },
+  segmentText: {
+    ...typography.body.small,
+    color: colors.neutral.graphite,
+    fontWeight: '600',
+  },
+  segmentTextActive: {
+    color: colors.neutral.cream,
   },
   searchBox: {
     flexDirection: 'row',
