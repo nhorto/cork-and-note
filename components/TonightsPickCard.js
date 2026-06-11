@@ -5,6 +5,7 @@
 //
 // Self-contained: fetches its own cellar context and talks to the AI via
 // lib/cellarSommelier.js. Drop it on Home (or anywhere) with no required props.
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
@@ -27,6 +28,9 @@ import {
 import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
+
+// Persist the user's collapse choice so the card stays how they left it.
+const COLLAPSE_KEY = 'tonightsPick.collapsed';
 
 // A horizontal row of single-select pill choices.
 function PickerRow({ label, options, value, onChange }) {
@@ -69,6 +73,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
   const [mood, setMood] = useState(null);
   const [freeText, setFreeText] = useState('');
   const [showPickers, setShowPickers] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const [thinking, setThinking] = useState(false);
   const [recommendation, setRecommendation] = useState(null);
@@ -88,6 +93,27 @@ export default function TonightsPickCard({ onRequireCellar }) {
     return () => {
       active = false;
     };
+  }, []);
+
+  // Restore the saved collapse preference once on mount (fails soft → expanded).
+  useEffect(() => {
+    let active = true;
+    AsyncStorage.getItem(COLLAPSE_KEY)
+      .then((v) => {
+        if (active && v != null) setCollapsed(v === '1');
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((c) => {
+      const next = !c;
+      AsyncStorage.setItem(COLLAPSE_KEY, next ? '1' : '0').catch(() => {});
+      return next;
+    });
   }, []);
 
   const hasCellar = Array.isArray(bottles) && bottles.length > 0;
@@ -158,26 +184,59 @@ export default function TonightsPickCard({ onRequireCellar }) {
   // ── Populated cellar ─────────────────────────────────────
   return (
     <View style={styles.card}>
-      <View style={styles.headerRow}>
+      {/* Header — tap anywhere to collapse / expand; the chevron shows state. */}
+      <TouchableOpacity
+        style={styles.headerRow}
+        activeOpacity={0.7}
+        onPress={toggleCollapsed}
+        accessibilityRole="button"
+        accessibilityLabel={collapsed ? "Expand Tonight's Pick" : "Collapse Tonight's Pick"}
+      >
         <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
         <Text style={styles.eyebrow}>TONIGHT&apos;S PICK</Text>
-        <View style={styles.flexSpacer} />
-        <TouchableOpacity
-          onPress={() => setShowPickers((s) => !s)}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Text style={styles.tuneLink}>
-            {showPickers ? 'Hide' : 'Tune'}
+        {collapsed ? (
+          <Text style={styles.collapsedTeaser} numberOfLines={1}>
+            What should I drink tonight?
           </Text>
-        </TouchableOpacity>
-      </View>
+        ) : null}
+        <View style={styles.flexSpacer} />
+        <Ionicons
+          name={collapsed ? 'chevron-down' : 'chevron-up'}
+          size={18}
+          color={colors.primary.burgundy}
+        />
+      </TouchableOpacity>
 
+      {!collapsed && (
+        <>
       <Text style={styles.title}>What should I drink tonight?</Text>
       <Text style={styles.subtitle}>
         From the {bottles.length} lot{bottles.length === 1 ? '' : 's'} in your cellar.
       </Text>
 
-      {/* Tap-first pickers (collapsible) */}
+      {/* Discoverable context control (replaces the easy-to-miss corner "Tune"). */}
+      <TouchableOpacity
+        style={styles.tuneBtn}
+        activeOpacity={0.8}
+        onPress={() => setShowPickers((s) => !s)}
+      >
+        <Ionicons name="options-outline" size={16} color={colors.primary.burgundy} />
+        <View style={styles.tuneBtnTextWrap}>
+          <Text style={styles.tuneBtnText}>
+            {showPickers ? 'Hide options' : 'Tune your pick'}
+          </Text>
+          {!showPickers ? (
+            <Text style={styles.tuneBtnHint}>Set the occasion, food &amp; mood</Text>
+          ) : null}
+        </View>
+        <Ionicons
+          name={showPickers ? 'chevron-up' : 'chevron-down'}
+          size={16}
+          color={colors.primary.burgundy}
+        />
+      </TouchableOpacity>
+
+      {/* Tap-first pickers */}
       {showPickers && (
         <View style={styles.pickers}>
           <PickerRow
@@ -328,6 +387,8 @@ export default function TonightsPickCard({ onRequireCellar }) {
           </Text>
         </View>
       )}
+        </>
+      )}
     </View>
   );
 }
@@ -359,10 +420,36 @@ const styles = StyleSheet.create({
     color: colors.gold.shimmer,
   },
   flexSpacer: { flex: 1 },
-  tuneLink: {
+  collapsedTeaser: {
     ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginLeft: spacing.sm,
+    flexShrink: 1,
+  },
+
+  // Discoverable "Tune your pick" control (replaces the corner "Tune" link).
+  tuneBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.gold.light,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.md,
+  },
+  tuneBtnTextWrap: { flex: 1 },
+  tuneBtnText: {
+    ...typography.body.regular,
     color: colors.primary.burgundy,
     fontWeight: '600',
+  },
+  tuneBtnHint: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginTop: 1,
   },
 
   title: {
