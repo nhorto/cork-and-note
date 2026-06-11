@@ -13,6 +13,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { cellarService } from '../../lib/cellar';
+import { matchWineToCellar } from '../../lib/cellarMatch';
 import { visitsService } from '../../lib/visits';
 import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
@@ -65,7 +67,13 @@ export default function Wines() {
     try {
       isRefresh ? setRefreshing(true) : setLoading(true);
 
-      const { success, visits } = await visitsService.getUserVisits();
+      // Both reads are cached (#83), so cross-referencing tasted wines against
+      // the cellar to badge owned wines (#117) costs no extra DB round-trips.
+      const [{ success, visits }, cellarRes] = await Promise.all([
+        visitsService.getUserVisits(),
+        cellarService.getCellar(),
+      ]);
+      const cellarBottles = cellarRes?.success ? cellarRes.bottles : [];
       if (success && visits) {
         const allWines = [];
         visits.forEach((visit) => {
@@ -86,6 +94,8 @@ export default function Wines() {
                 flavorNotes:
                   wine.wine_flavor_notes?.map((fn) => fn.flavor_notes?.name) ||
                   [],
+                // null when not owned; otherwise { primary, count, relation, ... }
+                cellarMatch: matchWineToCellar(wine, cellarBottles),
               });
             });
           }
@@ -213,6 +223,16 @@ export default function Wines() {
           <Text style={styles.visitDate}>
             {new Date(item.visitDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </Text>
+
+          {/* Badge: this tasted wine is also in the cellar (#117). */}
+          {item.cellarMatch ? (
+            <View style={styles.cellarBadge}>
+              <Ionicons name="file-tray-stacked" size={11} color={colors.gold.rich} />
+              <Text style={styles.cellarBadgeText}>
+                {item.cellarMatch.relation === 'same' ? 'In your cellar' : 'In cellar · other vintage'}
+              </Text>
+            </View>
+          ) : null}
 
           <View style={styles.ratingContainer}>
             <View style={styles.ratingStars}>
@@ -691,6 +711,24 @@ const styles = StyleSheet.create({
     ...typography.body.caption,
     color: colors.neutral.silver,
     marginBottom: spacing.xs,
+  },
+  cellarBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    backgroundColor: colors.gold.light,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 2,
+    marginBottom: spacing.xs,
+  },
+  cellarBadgeText: {
+    ...typography.body.caption,
+    color: colors.gold.rich,
+    fontWeight: '600',
   },
   ratingContainer: {
     flexDirection: 'row',

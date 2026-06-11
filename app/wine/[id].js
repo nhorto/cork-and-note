@@ -14,6 +14,8 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import { cellarService } from '../../lib/cellar';
+import { matchWineToCellar } from '../../lib/cellarMatch';
 import { visitsService } from '../../lib/visits';
 import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
@@ -29,6 +31,9 @@ export default function WineDetail() {
   const [loading, setLoading] = useState(true);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  // If this same wine is also a bottle in the cellar, surface a tap-through
+  // card (#117). null = no match / not yet checked.
+  const [cellarMatch, setCellarMatch] = useState(null);
 
   // Reload whenever the screen regains focus so edits made on the
   // log-session edit screen (#42) are reflected on return.
@@ -72,6 +77,15 @@ export default function WineDetail() {
           navigation.setOptions({
             title: wineDisplayName(foundWine)
           });
+
+          // Cross-reference the cellar (cached — see #83, so this is cheap) to
+          // see if the user also owns this wine, and link to that bottle (#117).
+          cellarService
+            .getCellar()
+            .then((res) => {
+              setCellarMatch(res?.success ? matchWineToCellar(foundWine, res.bottles) : null);
+            })
+            .catch(() => setCellarMatch(null));
         } else {
           router.back();
         }
@@ -213,6 +227,32 @@ export default function WineDetail() {
             ))}
           </View>
         </View>
+
+        {/* "In your cellar" link (#117) — shown when this same wine is also a
+            bottle the user owns; taps through to that bottle. */}
+        {cellarMatch ? (
+          <TouchableOpacity
+            style={styles.cellarCard}
+            activeOpacity={0.85}
+            onPress={() => router.push(`/cellar/${cellarMatch.primary.id}`)}
+            accessibilityLabel="View this wine in your cellar"
+          >
+            <View style={styles.cellarIcon}>
+              <Ionicons name="file-tray-stacked" size={20} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.cellarText}>
+              <Text style={styles.cellarTitle}>
+                {cellarMatch.relation === 'same' ? 'In your cellar' : 'You have this wine'}
+              </Text>
+              <Text style={styles.cellarSub}>
+                {cellarMatch.relation === 'same'
+                  ? `${cellarMatch.count} bottle${cellarMatch.count === 1 ? '' : 's'} · tap to view`
+                  : `A different vintage${cellarMatch.differentVintage ? ` (${cellarMatch.differentVintage})` : ''} · tap to view`}
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.gold.rich} />
+          </TouchableOpacity>
+        ) : null}
 
         {/* Photo Gallery */}
         {renderPhotoGallery()}
@@ -379,6 +419,39 @@ const styles = StyleSheet.create({
   wineMeta: { ...typography.body.regular, color: colors.neutral.pewter, marginLeft: spacing.xs },
   wineryRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
   wineryText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
+
+  // "In your cellar" link card (#117)
+  cellarCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.gold.light,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginTop: spacing.md,
+  },
+  cellarIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.gold.rich,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cellarText: { flex: 1 },
+  cellarTitle: {
+    ...typography.body.regular,
+    color: colors.neutral.charcoal,
+    fontWeight: '700',
+  },
+  cellarSub: {
+    ...typography.body.small,
+    color: colors.neutral.pewter,
+    marginTop: 1,
+  },
 
   // Overall rating
   ratingCard: {
