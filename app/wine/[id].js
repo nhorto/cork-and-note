@@ -15,6 +15,7 @@ import {
     View
 } from 'react-native';
 import { visitsService } from '../../lib/visits';
+import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
@@ -69,7 +70,7 @@ export default function WineDetail() {
 
           // Set navigation title
           navigation.setOptions({
-            title: foundWine.wine_name || `${foundWine.wine_type} Wine`
+            title: wineDisplayName(foundWine)
           });
         } else {
           router.back();
@@ -154,6 +155,15 @@ export default function WineDetail() {
     );
   }
 
+  // Where the wine came from — surfaced right under the name. Prefer the
+  // winemaker/producer, then the winery (or free-text place) it was tasted at;
+  // join with "·" and skip whichever is missing or duplicated.
+  const producer = wine.winemaker?.trim();
+  const tastedAt = visit?.wineries?.name || visit?.place_name;
+  const originLabel = [producer, tastedAt && tastedAt !== producer ? tastedAt : null]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -171,13 +181,21 @@ export default function WineDetail() {
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Wine Basic Info */}
         <Text style={styles.wineName}>
-          {wine.wine_name || `${wine.wine_type} Wine`}
+          {wineDisplayName(wine)}
         </Text>
         <View style={styles.wineTypeContainer}>
           {wine.wine_type ? <Text style={styles.wineType}>{wine.wine_type}</Text> : null}
-          {wine.wine_varietal ? <Text style={styles.wineMeta}>· {wine.wine_varietal}</Text> : null}
+          {/* Show the varietal here only when it isn't already serving as the
+              title (i.e. the wine has its own name) — avoids "Prosecco · Prosecco". */}
+          {wine.wine_varietal && wine.wine_name ? <Text style={styles.wineMeta}>· {wine.wine_varietal}</Text> : null}
           {wine.wine_year ? <Text style={styles.wineMeta}>· {wine.wine_year}</Text> : null}
         </View>
+        {originLabel ? (
+          <View style={styles.wineryRow}>
+            <Ionicons name="business-outline" size={15} color={colors.primary.burgundy} />
+            <Text style={styles.wineryText}>{originLabel}</Text>
+          </View>
+        ) : null}
 
         {/* Overall Rating */}
         <View style={styles.ratingCard}>
@@ -359,6 +377,8 @@ const styles = StyleSheet.create({
   wineTypeContainer: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: spacing.xs },
   wineType: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
   wineMeta: { ...typography.body.regular, color: colors.neutral.pewter, marginLeft: spacing.xs },
+  wineryRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
+  wineryText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
 
   // Overall rating
   ratingCard: {
