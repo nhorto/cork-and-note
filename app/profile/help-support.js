@@ -9,6 +9,9 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import theme from '../../styles/theme';
+
+const { colors } = theme;
 
 const HelpSupportModal = () => {
   const router = useRouter();
@@ -385,7 +388,7 @@ const HelpSupportModal = () => {
       case 'tip':
         return (
           <View style={styles.tipContainer}>
-            <Ionicons name="bulb" size={24} color="#B08442" style={styles.tipIcon} />
+            <Ionicons name="bulb" size={24} color={colors.gold.shimmer} style={styles.tipIcon} />
             <Text style={styles.tipText}>{item.value}</Text>
           </View>
         );
@@ -403,7 +406,7 @@ const HelpSupportModal = () => {
           style={styles.backButton} 
           onPress={handleBack}
         >
-          <Ionicons name="arrow-back" size={24} color="#8C1C13" />
+          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Help & Support</Text>
         {/* Empty view to balance the layout and center the title */}
@@ -430,13 +433,13 @@ const HelpSupportModal = () => {
                 onPress={() => setActiveGuide(guide.id)}
               >
                 <View style={styles.guideIcon}>
-                  <Ionicons name={guide.icon} size={24} color="#8C1C13" />
+                  <Ionicons name={guide.icon} size={24} color={colors.primary.burgundy} />
                 </View>
                 <View style={styles.guideInfo}>
                   <Text style={styles.guideTitle}>{guide.title}</Text>
                   <Text style={styles.guideSubtitle}>Learn more</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
               </TouchableOpacity>
             ))}
 
@@ -455,7 +458,7 @@ const HelpSupportModal = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E7E3E2',
+    backgroundColor: colors.neutral.cream,
   },
   header: {
     flexDirection: 'row',
@@ -463,9 +466,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.neutral.cream,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.gold.muted,
   },
   backButton: {
     padding: 8,
@@ -473,7 +476,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
     flex: 1,
     textAlign: 'center',
   },
@@ -491,17 +494,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.neutral.parchment,
     borderRadius: 8,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
   },
   guideIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: 'rgba(140, 28, 19, 0.1)',
+    backgroundColor: colors.gold.light,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -512,12 +515,12 @@ const styles = StyleSheet.create({
   guideTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
     marginBottom: 4,
   },
   guideSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: colors.neutral.pewter,
   },
   guideContent: {
     padding: 16,
@@ -528,7 +531,7 @@ const styles = StyleSheet.create({
   contentText: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
     marginBottom: 12,
   },
   stepsList: {
@@ -542,14 +545,14 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#8C1C13',
+    backgroundColor: colors.primary.burgundy,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
     marginTop: 2,
   },
   stepNumberText: {
-    color: '#fff',
+    color: colors.neutral.cream,
     fontWeight: 'bold',
     fontSize: 14,
   },
@@ -557,7 +560,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     lineHeight: 22,
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
   },
   bulletList: {
     marginVertical: 12,
@@ -568,7 +571,7 @@ const styles = StyleSheet.create({
   },
   bulletPoint: {
     fontSize: 18,
-    color: '#8C1C13',
+    color: colors.primary.burgundy,
     marginRight: 10,
     marginTop: -2,
   },
@@ -576,15 +579,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     lineHeight: 22,
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
   },
   attributesList: {
     marginVertical: 12,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.neutral.parchment,
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: colors.neutral.stone,
   },
   attributeItem: {
     marginBottom: 12,
@@ -592,22 +595,22 @@ const styles = StyleSheet.create({
   attributeName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#8C1C13',
+    color: colors.primary.burgundy,
     marginBottom: 4,
   },
   attributeDescription: {
     fontSize: 14,
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
     lineHeight: 20,
   },
   tipContainer: {
-    backgroundColor: 'rgba(176, 132, 66, 0.1)',
+    backgroundColor: colors.gold.light,
     borderRadius: 8,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'flex-start',
     borderLeftWidth: 3,
-    borderLeftColor: '#B08442',
+    borderLeftColor: colors.gold.shimmer,
   },
   tipIcon: {
     marginRight: 12,
@@ -617,7 +620,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontStyle: 'italic',
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
     lineHeight: 22,
   },
   versionInfo: {
@@ -626,12 +629,12 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 14,
-    color: '#666',
+    color: colors.neutral.pewter,
     marginBottom: 4,
   },
   copyrightText: {
     fontSize: 12,
-    color: '#999',
+    color: colors.neutral.silver,
   },
 });
 

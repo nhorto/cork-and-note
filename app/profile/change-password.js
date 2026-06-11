@@ -15,7 +15,10 @@ import {
   View,
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
+import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
+
+const { colors } = theme;
 
 export default function ChangePasswordScreen() {
   const router = useRouter();
@@ -159,7 +162,7 @@ export default function ChangePasswordScreen() {
           style={styles.backButton} 
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#8C1C13" />
+          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Change Password</Text>
         <View style={styles.headerSpacer} />
@@ -178,7 +181,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Enter your current password"
                 secureTextEntry={!showCurrentPassword}
                 autoCapitalize="none"
-                placeholderTextColor='#8a8484'
+                placeholderTextColor={colors.neutral.silver}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -187,7 +190,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showCurrentPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color="#8C1C13"
+                  color={colors.primary.burgundy}
                 />
               </TouchableOpacity>
             </View>
@@ -204,7 +207,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Enter your new password"
                 secureTextEntry={!showNewPassword}
                 autoCapitalize="none"
-                placeholderTextColor='#8a8484'
+                placeholderTextColor={colors.neutral.silver}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -213,7 +216,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showNewPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color="#8C1C13"
+                  color={colors.primary.burgundy}
                 />
               </TouchableOpacity>
             </View>
@@ -228,11 +231,11 @@ export default function ChangePasswordScreen() {
                   <Ionicons
                     name={req.met ? 'checkmark-circle' : 'close-circle'}
                     size={16}
-                    color={req.met ? '#4CAF50' : '#FF5722'}
+                    color={req.met ? colors.status.success : colors.status.error}
                   />
                   <Text style={[
                     styles.requirementText,
-                    { color: req.met ? '#4CAF50' : '#FF5722' }
+                    { color: req.met ? colors.status.success : colors.status.error }
                   ]}>
                     {req.text}
                   </Text>
@@ -252,7 +255,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Confirm your new password"
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
-                placeholderTextColor="#8a8484"
+                placeholderTextColor={colors.neutral.silver}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -261,7 +264,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color="#8C1C13"
+                  color={colors.primary.burgundy}
                 />
               </TouchableOpacity>
             </View>
@@ -280,7 +283,7 @@ export default function ChangePasswordScreen() {
             disabled={isLoading || !currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
           >
             {isLoading ? (
-              <ActivityIndicator color="white" />
+              <ActivityIndicator color={colors.neutral.cream} />
             ) : (
               <Text style={styles.updateButtonText}>Update Password</Text>
             )}
@@ -288,7 +291,7 @@ export default function ChangePasswordScreen() {
 
           {/* Security Note */}
           <View style={styles.securityNote}>
-            <Ionicons name="shield-checkmark" size={20} color="#4CAF50" />
+            <Ionicons name="shield-checkmark" size={20} color={colors.status.success} />
             <Text style={styles.securityNoteText}>
               Your password is encrypted and secure. You will remain signed in on this device after changing your password.
             </Text>
@@ -302,7 +305,7 @@ export default function ChangePasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.neutral.cream,
   },
   header: {
     flexDirection: 'row',
@@ -310,9 +313,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: 'white',
+    backgroundColor: colors.neutral.cream,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.gold.muted,
     paddingTop: 50, // Account for status bar
   },
   backButton: {
@@ -321,7 +324,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
   },
   headerSpacer: {
     width: 34, // Same width as back button to center title
@@ -338,37 +342,39 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: colors.neutral.charcoal,
     marginBottom: 8,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: colors.neutral.parchment,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
   },
   passwordInput: {
     flex: 1,
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#333',
+    color: colors.neutral.charcoal,
   },
   eyeButton: {
     padding: 15,
   },
   requirementsContainer: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.neutral.parchment,
     padding: 15,
     borderRadius: 8,
     marginTop: 10,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
   },
   requirementsTitle: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: colors.neutral.charcoal,
     marginBottom: 10,
   },
   requirementRow: {
@@ -382,35 +388,37 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 12,
-    color: '#FF5722',
+    color: colors.status.error,
     marginTop: 5,
   },
   updateButton: {
-    backgroundColor: '#8C1C13',
+    backgroundColor: colors.primary.burgundy,
     paddingVertical: 15,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
   },
   updateButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: colors.neutral.stone,
   },
   updateButtonText: {
-    color: 'white',
+    color: colors.neutral.cream,
     fontSize: 16,
     fontWeight: '600',
   },
   securityNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: '#f0f8f0',
+    backgroundColor: colors.gold.light,
     padding: 15,
     borderRadius: 8,
     marginTop: 20,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
   },
   securityNoteText: {
     fontSize: 13,
-    color: '#4CAF50',
+    color: colors.neutral.graphite,
     marginLeft: 10,
     flex: 1,
     lineHeight: 18,
