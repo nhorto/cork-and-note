@@ -16,7 +16,10 @@ import {
   View
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
+import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
+
+const { colors } = theme;
 
 export default function FeedbackScreen() {
   const router = useRouter();
@@ -197,7 +200,7 @@ export default function FeedbackScreen() {
             <Ionicons
               name={star <= rating ? 'star' : 'star-outline'}
               size={36}
-              color={star <= rating ? '#FFD700' : '#ccc'}
+              color={star <= rating ? colors.gold.rich : colors.neutral.stone}
               style={styles.starIcon}
             />
           </TouchableOpacity>
@@ -214,7 +217,7 @@ export default function FeedbackScreen() {
           style={styles.backButton} 
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={24} color="#8C1C13" />
+          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Feedback</Text>
         <View style={styles.headerSpacer} />
@@ -232,13 +235,13 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('feedback')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="chatbubble" size={22} color="#8C1C13" style={styles.sectionIcon} />
+                <Ionicons name="chatbubble" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Share Feedback</Text>
               </View>
               <Ionicons
                 name={activeSection === 'feedback' ? 'chevron-up' : 'chevron-down'}
                 size={22}
-                color="#666"
+                color={colors.neutral.pewter}
               />
             </TouchableOpacity>
             
@@ -321,7 +324,7 @@ export default function FeedbackScreen() {
                   disabled={loading}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color={colors.neutral.cream} />
                   ) : (
                     <Text style={styles.actionButtonText}>Submit Feedback</Text>
                   )}
@@ -337,13 +340,13 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('bug')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="bug" size={22} color="#8C1C13" style={styles.sectionIcon} />
+                <Ionicons name="bug" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Report a Bug</Text>
               </View>
               <Ionicons
                 name={activeSection === 'bug' ? 'chevron-up' : 'chevron-down'}
                 size={22}
-                color="#666"
+                color={colors.neutral.pewter}
               />
             </TouchableOpacity>
             
@@ -358,7 +361,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={4}
                   textAlignVertical="top"
-                  placeholderTextColor='#8a8484'
+                  placeholderTextColor={colors.neutral.silver}
                 />
                 
                 <Text style={styles.label}>Steps to Reproduce</Text>
@@ -370,7 +373,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={4}
                   textAlignVertical="top"
-                  placeholderTextColor='#8a8484'
+                  placeholderTextColor={colors.neutral.silver}
                 />
                 
                 <Text style={styles.label}>Device</Text>
@@ -379,7 +382,7 @@ export default function FeedbackScreen() {
                   value={bugDevice}
                   onChangeText={setBugDevice}
                   placeholder="What device are you using? (e.g., iPhone 13, Samsung Galaxy S21)"
-                  placeholderTextColor='#8a8484'
+                  placeholderTextColor={colors.neutral.silver}
                 />
                 
                 <TouchableOpacity
@@ -388,7 +391,7 @@ export default function FeedbackScreen() {
                   disabled={loading}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color={colors.neutral.cream} />
                   ) : (
                     <Text style={styles.actionButtonText}>Submit Bug Report</Text>
                   )}
@@ -404,13 +407,13 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('contact')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="mail" size={22} color="#8C1C13" style={styles.sectionIcon} />
+                <Ionicons name="mail" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Contact Support</Text>
               </View>
               <Ionicons
                 name={activeSection === 'contact' ? 'chevron-up' : 'chevron-down'}
                 size={22}
-                color="#666"
+                color={colors.neutral.pewter}
               />
             </TouchableOpacity>
             
@@ -424,7 +427,7 @@ export default function FeedbackScreen() {
                   placeholder="Enter your email address"
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  placeholderTextColor='#8a8484'
+                  placeholderTextColor={colors.neutral.silver}
                 />
                 
                 <Text style={styles.label}>Subject</Text>
@@ -433,7 +436,7 @@ export default function FeedbackScreen() {
                   value={contactSubject}
                   onChangeText={setContactSubject}
                   placeholder="What is your message about?"
-                  placeholderTextColor='#8a8484'
+                  placeholderTextColor={colors.neutral.silver}
                 />
                 
                 <Text style={styles.label}>Message</Text>
@@ -445,7 +448,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={6}
                   textAlignVertical="top"
-                  placeholderTextColor='#8a8484'
+                  placeholderTextColor={colors.neutral.silver}
                 />
                 
                 <TouchableOpacity
@@ -454,7 +457,7 @@ export default function FeedbackScreen() {
                   disabled={loading}
                 >
                   {loading ? (
-                    <ActivityIndicator color="#fff" />
+                    <ActivityIndicator color={colors.neutral.cream} />
                   ) : (
                     <Text style={styles.actionButtonText}>Send Message</Text>
                   )}
@@ -470,10 +473,10 @@ export default function FeedbackScreen() {
               onPress={rateApp}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="star" size={22} color="#8C1C13" style={styles.sectionIcon} />
+                <Ionicons name="star" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Rate Cork & Note</Text>
               </View>
-              <Ionicons name="open-outline" size={22} color="#666" />
+              <Ionicons name="open-outline" size={22} color={colors.neutral.pewter} />
             </TouchableOpacity>
           </View>
 
@@ -485,21 +488,21 @@ export default function FeedbackScreen() {
                 style={styles.socialButton}
                 onPress={() => Linking.openURL('https://instagram.com/corkandnote')}
               >
-                <Ionicons name="logo-instagram" size={24} color="#fff" />
+                <Ionicons name="logo-instagram" size={24} color={colors.neutral.cream} />
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.socialButton}
                 onPress={() => Linking.openURL('https://facebook.com/corkandnote')}
               >
-                <Ionicons name="logo-facebook" size={24} color="#fff" />
+                <Ionicons name="logo-facebook" size={24} color={colors.neutral.cream} />
               </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.socialButton}
                 onPress={() => Linking.openURL('https://twitter.com/corkandnote')}
               >
-                <Ionicons name="logo-twitter" size={24} color="#fff" />
+                <Ionicons name="logo-twitter" size={24} color={colors.neutral.cream} />
               </TouchableOpacity>
             </View>
             
@@ -516,7 +519,7 @@ export default function FeedbackScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E7E3E2',
+    backgroundColor: colors.neutral.cream,
   },
   keyboardAvoid: {
     flex: 1,
@@ -528,9 +531,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 50,
     paddingBottom: 16,
-    backgroundColor: '#fff',
+    backgroundColor: colors.neutral.cream,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.gold.muted,
   },
   headerSpacer: {
     width: 40, // Same width as back button to maintain balance
@@ -546,7 +549,8 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
+    fontFamily: 'Georgia',
     flex: 1,
     textAlign: 'center',
   },
@@ -555,12 +559,12 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   section: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.neutral.parchment,
     borderRadius: 8,
     marginBottom: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -578,27 +582,28 @@ const styles = StyleSheet.create({
   sectionTitleText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
   },
   sectionContent: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: colors.neutral.linen,
   },
   label: {
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 8,
-    color: '#666',
+    color: colors.neutral.pewter,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
-    backgroundColor: '#fff',
+    backgroundColor: colors.neutral.cream,
     marginBottom: 16,
+    color: colors.neutral.charcoal,
   },
   textArea: {
     minHeight: 120,
@@ -609,24 +614,24 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.neutral.stone,
     overflow: 'hidden',
   },
   segmentButton: {
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.neutral.cream,
   },
   segmentButtonActive: {
-    backgroundColor: '#8C1C13',
+    backgroundColor: colors.primary.burgundy,
   },
   segmentButtonText: {
     fontSize: 14,
-    color: '#666',
+    color: colors.neutral.pewter,
   },
   segmentButtonTextActive: {
-    color: '#fff',
+    color: colors.neutral.cream,
     fontWeight: '500',
   },
   ratingContainer: {
@@ -638,13 +643,13 @@ const styles = StyleSheet.create({
     margin: 4,
   },
   actionButton: {
-    backgroundColor: '#8C1C13',
+    backgroundColor: colors.primary.burgundy,
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
   },
   actionButtonText: {
-    color: '#fff',
+    color: colors.neutral.cream,
     fontSize: 16,
     fontWeight: '500',
   },
@@ -656,7 +661,7 @@ const styles = StyleSheet.create({
   socialTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#3E3E3E',
+    color: colors.neutral.charcoal,
     marginBottom: 16,
   },
   socialButtons: {
@@ -667,13 +672,13 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#8C1C13',
+    backgroundColor: colors.primary.burgundy,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: 8,
   },
   emailContact: {
     fontSize: 14,
-    color: '#666',
+    color: colors.neutral.pewter,
   }
 });
