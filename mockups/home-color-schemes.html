@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cork &amp; Note — Home color scheme mockups</title>
+<style>
+  :root {
+    --gallery-bg: #1b1b1f;
+    --gallery-panel: #26262c;
+    --gallery-text: #e8e6e1;
+    --gallery-text-2: #9b9aa3;
+  }
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  body {
+    margin: 0;
+    background: var(--gallery-bg);
+    color: var(--gallery-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 40px 24px 80px;
+  }
+  .page-head { max-width: 1200px; margin: 0 auto 36px; }
+  .page-head h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: 0.5px; font-size: 30px; margin: 0 0 8px; }
+  .page-head p { color: var(--gallery-text-2); font-size: 15px; line-height: 1.55; margin: 0; max-width: 760px; }
+  .legend { display:flex; gap:18px; flex-wrap:wrap; margin-top:18px; font-size:13px; color:var(--gallery-text-2); }
+  .legend b { color: var(--gallery-text); font-weight:600; }
+
+  .gallery {
+    display: flex; flex-wrap: wrap; gap: 40px 32px;
+    justify-content: center; align-items: flex-start;
+    max-width: 1400px; margin: 0 auto;
+  }
+  .scheme { width: 320px; }
+  .scheme-name { font-family: Georgia, serif; font-size: 20px; margin: 0 0 2px; }
+  .scheme-tag { display:inline-block; font-size:10.5px; letter-spacing:.8px; text-transform:uppercase; font-weight:700;
+                padding:2px 8px; border-radius:999px; margin-bottom:8px; }
+  .tag-keep { background:#3a2a1c; color:#e6c47e; }
+  .tag-new  { background:#1f3338; color:#7fd0d8; }
+  .scheme-desc { color: var(--gallery-text-2); font-size: 13px; line-height: 1.5; margin: 0 0 12px; min-height: 38px; }
+  .swatches { display:flex; gap:6px; margin: 12px 0 0; flex-wrap: wrap; }
+  .swatch { width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.14); }
+
+  /* ---- Device frame ---- */
+  .device {
+    width: 320px; height: 660px; border-radius: 42px; padding: 11px;
+    background: #0c0c0e;
+    box-shadow: 0 20px 50px rgba(0,0,0,.5), inset 0 0 0 2px #2a2a30;
+    position: relative;
+  }
+  .device .notch {
+    position:absolute; top:11px; left:50%; transform:translateX(-50%);
+    width:120px; height:24px; background:#0c0c0e; border-radius:0 0 16px 16px; z-index:5;
+  }
+  .screen {
+    width:100%; height:100%; border-radius:32px; overflow:hidden; position:relative;
+    background: var(--bg);
+  }
+  .scroll { height:100%; overflow-y:auto; overflow-x:hidden; }
+  .scroll::-webkit-scrollbar { width:0; height:0; }
+
+  /* ---- App content (driven entirely by per-scheme CSS vars) ---- */
+  .app { color: var(--text); font-size: 13px; }
+  .serif { font-family: Georgia, "Times New Roman", serif; }
+  .pad { padding: 0 18px; }
+
+  .hdr { padding: 46px 18px 0; }
+  .hdr-row { display:flex; align-items:flex-end; justify-content:space-between; padding: 8px 0; }
+  .welcome { font-size:10px; letter-spacing:1.1px; text-transform:uppercase; font-weight:600; color:var(--text2); }
+  .name { font-family:Georgia,serif; font-size:24px; color:var(--text); margin-top:2px; }
+  .avatar { width:40px;height:40px;border-radius:50%; background:var(--gold-chip); border:1px solid var(--gold-border);
+            display:flex;align-items:center;justify-content:center; font-family:Georgia,serif; font-size:17px; color:var(--accent); }
+  .hdr-border { height:1px; background:var(--gold-border); margin-top:6px; }
+
+  .stats { display:flex; gap:8px; margin-top:20px; }
+  .stat { flex:1; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 4px; text-align:center; }
+  .stat .n { font-family:Georgia,serif; font-size:23px; color:var(--accent); }
+  .stat .l { font-size:9.5px; letter-spacing:.9px; text-transform:uppercase; font-weight:600; color:var(--text2); margin-top:3px; }
+
+  /* Tonight's pick */
+  .pick { margin-top:18px; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; position:relative; overflow:hidden; }
+  .pick:before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--accent); }
+  .pick .cap { font-size:9.5px; letter-spacing:1px; text-transform:uppercase; font-weight:700; color:var(--gold-deep); display:flex; align-items:center; gap:6px; }
+  .pick .ptitle { font-family:Georgia,serif; font-size:17px; color:var(--text); margin-top:7px; }
+  .pick .psub { font-size:12px; color:var(--text2); margin-top:3px; line-height:1.45; }
+  .pick .pcta { margin-top:11px; display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--accent); }
+
+  .sec { display:flex; align-items:center; justify-content:space-between; margin-top:24px; margin-bottom:8px; }
+  .sec .lab { font-size:10px; letter-spacing:1.1px; text-transform:uppercase; font-weight:700; color:var(--gold-deep); }
+  .sec .act { font-size:12px; color:var(--accent); }
+
+  /* Ready to drink */
+  .rtd { display:flex; gap:8px; }
+  .tile { flex:1; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:11px 2px; text-align:center; }
+  .tile .dot { width:8px;height:8px;border-radius:50%; margin:0 auto 6px; }
+  .tile .c { font-family:Georgia,serif; font-size:20px; color:var(--text); }
+  .tile .t { font-size:9px; color:var(--text2); margin-top:2px; }
+
+  /* Hero */
+  .hero { display:flex; align-items:center; gap:12px; background:var(--hero-bg); border-radius:14px; padding:14px; margin-top:18px;
+          box-shadow: 0 6px 16px rgba(0,0,0,.14); }
+  .hero .ht { flex:1; }
+  .hero .htitle { font-family:Georgia,serif; font-size:16px; color:var(--hero-text); }
+  .hero .hsub { font-size:11.5px; color:var(--hero-sub); margin-top:2px; }
+
+  /* Row card (cellar / insights / wine / where) */
+  .row { display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin-top:4px; }
+  .chip { width:38px;height:38px;border-radius:9px; background:var(--gold-chip); display:flex;align-items:center;justify-content:center; flex-shrink:0; }
+  .chip.sm { width:34px;height:34px;border-radius:8px; }
+  .rmeta { flex:1; min-width:0; }
+  .rtitle { font-size:13px; font-weight:600; color:var(--text); }
+  .rsub { font-size:11.5px; color:var(--text2); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .score { font-family:Georgia,serif; font-size:15px; color:var(--accent); }
+
+  .wine + .wine { margin-top:8px; }
+
+  /* Where you've been */
+  .where { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:2px 12px; }
+  .wrow { display:flex; align-items:center; gap:12px; padding:9px 0; }
+  .wrow + .wrow { border-top:1px solid var(--border); }
+  .wlab { font-size:9.5px; letter-spacing:.8px; text-transform:uppercase; font-weight:600; color:var(--text2); }
+  .wval { font-size:12.5px; font-weight:600; color:var(--text); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* Sommelier */
+  .somm { display:flex; align-items:center; gap:12px; background:var(--somm-bg); border:1px solid var(--somm-border); border-radius:14px; padding:14px; margin-top:4px; margin-bottom: 26px; }
+  .somm .st { flex:1; }
+  .somm .stitle { font-family:Georgia,serif; font-size:16px; color:var(--somm-text); }
+  .somm .ssub { font-size:11.5px; color:var(--somm-text); opacity:.85; margin-top:2px; }
+
+  svg { display:block; }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <h1>Cork &amp; Note — Home screen color schemes</h1>
+    <p>Five takes on the home tab, rendered from the real layout (stat strip, Tonight's Pick, Ready-to-Drink, Log-a-wine hero, cellar &amp; insights cards, recent wines, Where-you've-been, and the Sommelier). The first is your current “Château Label” look as a reference. The rest are every color sampled straight from wine — Bordeaux and garnet, oak barrels and cork, rosé, harvest vines, champagne and gold, a glass of red by candlelight.</p>
+    <div class="legend">
+      <span><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#e6c47e;vertical-align:-1px;margin-right:6px;"></span><b>Keeps red + gold accent</b> — only neutrals/background change</span>
+      <span><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#7fd0d8;vertical-align:-1px;margin-right:6px;"></span><b>New palette</b> — different accent family</span>
+    </div>
+  </div>
+
+  <div class="gallery" id="gallery"></div>
+
+<script>
+const ICON = {
+  chevron: (c,s=16)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>`,
+  wine: (c,s=24)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${c}"><path d="M8 2h8c0 3.5-.5 6-1.6 7.4-.8 1-1.9 1.6-2.4 1.7v7.9h3a1 1 0 0 1 0 2H9a1 1 0 0 1 0-2h3v-7.9c-.5-.1-1.6-.7-2.4-1.7C8.5 8 8 5.5 8 2z"/></svg>`,
+  wineOutline:(c,s=18)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8c0 4-.7 6.5-2 7.6-.6.5-1.3.8-2 .9v7.5"/><path d="M12 19h-3m3 0h3"/><path d="M8 3c0 4 .7 6.5 2 7.6"/></svg>`,
+  sparkles:(c,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${c}"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/><path d="M18 13l.8 2.2L21 16l-2.2.8L18 19l-.8-2.2L15 16l2.2-.8z"/></svg>`,
+  tray:(c,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13l2.2 3.5a1 1 0 0 0 .9.5h9.8a1 1 0 0 0 .9-.5L20 13"/><path d="M4 13h4l1 1.5h6L16 13h4"/><path d="M4 13V8a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v5"/></svg>`,
+  analytics:(c,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="13"/><line x1="12" y1="20" x2="12" y2="7"/><line x1="18" y1="20" x2="18" y2="11"/></svg>`,
+  clock:(c,s=17)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><polyline points="12 7.5 12 12 15 13.5"/></svg>`,
+  star:(c,s=17)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 14.6 8.6 20.5 9.3 16 13.3 17.3 19 12 16 6.7 19 8 13.3 3.5 9.3 9.4 8.6"/></svg>`,
+  map:(c,s=17)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 4 15 6 21 4 21 18 15 20 9 18 3 20"/><line x1="9" y1="4" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="20"/></svg>`,
+};
+
+const SCHEMES = [
+  {
+    name: "Château Classic", kind:"keep", current:true,
+    desc: "Your current look — deep Bordeaux burgundy + estate gold on warm cream paper.",
+    vars: {
+      bg:"#FAF8F5", card:"#F5F2ED", border:"#D8D2C8",
+      text:"#2C2C2C", text2:"#7A7A7A", text3:"#A8A8A8",
+      accent:"#722F37", "accent-soft":"#D4A5A5",
+      gold:"#C9A962", "gold-deep":"#B8976A", "gold-chip":"#E8DCC8", "gold-border":"#D4C4A8",
+      "hero-bg":"#722F37", "hero-text":"#FAF8F5", "hero-sub":"#D4A5A5",
+      "somm-bg":"#E8DCC8", "somm-text":"#9A7B3D", "somm-border":"#D4C4A8",
+    },
+    dots:{drink_up:"#B8976A", ready:"#5B7B5B", too_young:"#6B7B8B", past_peak:"#9B3B3B"},
+    swatches:["#722F37","#C9A962","#FAF8F5","#F5F2ED","#2C2C2C"],
+  },
+  {
+    name: "Midnight Cellar", kind:"keep",
+    desc: "Same red + gold, but a dark espresso room. Moody, premium, candle-lit cellar at night.",
+    vars: {
+      bg:"#15100E", card:"#211915", border:"#352A22",
+      text:"#F3ECE3", text2:"#B3A89D", text3:"#7E7468",
+      accent:"#B0454D", "accent-soft":"#C98A8A",
+      gold:"#D8BC7E", "gold-deep":"#D8BC7E", "gold-chip":"#2C2618", "gold-border":"#4A3F2A",
+      "hero-bg":"#7E2A33", "hero-text":"#F7EFE6", "hero-sub":"#D69BA0",
+      "somm-bg":"#2A2417", "somm-text":"#D8BC7E", "somm-border":"#4A3F2A",
+    },
+    dots:{drink_up:"#D8BC7E", ready:"#7FA37F", too_young:"#8FA0B0", past_peak:"#C25C5C"},
+    swatches:["#B0454D","#D8BC7E","#15100E","#211915","#F3ECE3"],
+  },
+  {
+    name: "Estate Sage", kind:"keep",
+    desc: "Red + gold kept, set against cool sage-grey neutrals — calmer, garden-estate, less warm.",
+    vars: {
+      bg:"#EEF1EB", card:"#E5EAE0", border:"#CDD6C5",
+      text:"#2A2F28", text2:"#5F665B", text3:"#9AA295",
+      accent:"#722F37", "accent-soft":"#C99A9A",
+      gold:"#B2954F", "gold-deep":"#9A8039", "gold-chip":"#E3E2CB", "gold-border":"#CFC9A6",
+      "hero-bg":"#722F37", "hero-text":"#F3F5EF", "hero-sub":"#D4A5A5",
+      "somm-bg":"#E3E2CB", "somm-text":"#857132", "somm-border":"#CFC9A6",
+    },
+    dots:{drink_up:"#B0904F", ready:"#5B7B5B", too_young:"#6B7B8B", past_peak:"#9B3B3B"},
+    swatches:["#722F37","#B2954F","#EEF1EB","#E5EAE0","#2A2F28"],
+  },
+  {
+    name: "Champagne Noir", kind:"new",
+    desc: "Luxe charcoal-black lead with rich gold on soft champagne paper. Editorial, monochrome, high-end.",
+    vars: {
+      bg:"#F4F0E9", card:"#EDE7DC", border:"#D9CFBD",
+      text:"#1E1B17", text2:"#6E665A", text3:"#A39A8A",
+      accent:"#1E1B17", "accent-soft":"#BEB6A6",
+      gold:"#C2A24E", "gold-deep":"#A2842F", "gold-chip":"#E8DEC6", "gold-border":"#D7C8A4",
+      "hero-bg":"#1E1B17", "hero-text":"#F4F0E9", "hero-sub":"#C2A24E",
+      "somm-bg":"#1E1B17", "somm-text":"#C2A24E", "somm-border":"#3A352C",
+    },
+    dots:{drink_up:"#C2A24E", ready:"#5B7B5B", too_young:"#6B7B8B", past_peak:"#9B3B3B"},
+    swatches:["#1E1B17","#C2A24E","#F4F0E9","#EDE7DC","#6E665A"],
+  },
+  {
+    name: "Barrel Room", kind:"new",
+    desc: "Sampled from the cellar — oak-barrel browns, cork and toasted caramel, anchored by an oxblood red. Warm, tactile, aged in oak.",
+    vars: {
+      bg:"#F4EBDC", card:"#ECE0CC", border:"#D6C3A2",
+      text:"#2C2117", text2:"#6B5944", text3:"#9E8A6E",
+      accent:"#7C2E2A", "accent-soft":"#C99A8C",
+      gold:"#B0822F", "gold-deep":"#8E641F", "gold-chip":"#E6D2AE", "gold-border":"#D2BA8E",
+      "hero-bg":"#5A3A22", "hero-text":"#F4EBDC", "hero-sub":"#D6B286",
+      "somm-bg":"#E6D2AE", "somm-text":"#855418", "somm-border":"#D2BA8E",
+    },
+    dots:{drink_up:"#B0822F", ready:"#6E7A4C", too_young:"#6B7B8B", past_peak:"#9B3B3B"},
+    swatches:["#5A3A22","#7C2E2A","#B0822F","#F4EBDC","#2C2117"],
+  },
+  {
+    name: "Provence Rosé", kind:"new",
+    desc: "A chilled glass of rosé — dusty blush and soft peach with a deep garnet anchor and gentle gold. Elegant, warm, summer-on-the-terrace.",
+    vars: {
+      bg:"#FBF1EC", card:"#F6E7E0", border:"#E8CDC2",
+      text:"#3A2826", text2:"#80645E", text3:"#B69A92",
+      accent:"#8E2C3E", "accent-soft":"#DCA6A6",
+      gold:"#C5A256", "gold-deep":"#A6843A", "gold-chip":"#F1DACC", "gold-border":"#E5C8B4",
+      "hero-bg":"#8E2C3E", "hero-text":"#FBF1EC", "hero-sub":"#E3B2B2",
+      "somm-bg":"#F1DACC", "somm-text":"#9A6A3A", "somm-border":"#E5C8B4",
+    },
+    dots:{drink_up:"#C5A256", ready:"#6E8A6A", too_young:"#7E8CA0", past_peak:"#A24A52"},
+    swatches:["#8E2C3E","#C5A256","#FBF1EC","#F6E7E0","#3A2826"],
+  },
+  {
+    name: "Harvest Vine", kind:"new",
+    desc: "Autumn in the vineyard — burgundy with burnt-sienna and olive vine-leaf on warm parchment. Earthy, layered, harvest-season.",
+    vars: {
+      bg:"#F6EEDF", card:"#EEE2CC", border:"#DAC7A1",
+      text:"#2B2218", text2:"#645741", text3:"#9A896B",
+      accent:"#762A2D", "accent-soft":"#C79A84",
+      gold:"#C2762B", "gold-deep":"#9E561A", "gold-chip":"#E9D5AF", "gold-border":"#D8C091",
+      "hero-bg":"#762A2D", "hero-text":"#F6EEDF", "hero-sub":"#D6A488",
+      "somm-bg":"#E9D5AF", "somm-text":"#8A4C18", "somm-border":"#D8C091",
+    },
+    dots:{drink_up:"#C2762B", ready:"#6E7A42", too_young:"#6B7B8B", past_peak:"#8E3030"},
+    swatches:["#762A2D","#C2762B","#F6EEDF","#EEE2CC","#2B2218"],
+  },
+  {
+    name: "Cabernet Noir", kind:"new",
+    desc: "A glass of Bordeaux by candlelight — a wine-stained near-black glowing with garnet and warm gold. Deep, saturated, dramatic.",
+    vars: {
+      bg:"#18100F", card:"#231618", border:"#39252B",
+      text:"#F1E7E4", text2:"#B6A29D", text3:"#806E6A",
+      accent:"#B23A47", "accent-soft":"#D89AA0",
+      gold:"#D8B978", "gold-deep":"#D8B978", "gold-chip":"#2C1B1E", "gold-border":"#4A2F36",
+      "hero-bg":"#8A2733", "hero-text":"#F7EAE7", "hero-sub":"#DDA0A6",
+      "somm-bg":"#2A1C16", "somm-text":"#D8B978", "somm-border":"#4A3A28",
+    },
+    dots:{drink_up:"#D8B978", ready:"#7FA37F", too_young:"#8FA0B0", past_peak:"#D06B6B"},
+    swatches:["#B23A47","#D8B978","#18100F","#231618","#F1E7E4"],
+  },
+  {
+    name: "Golden Hour", kind:"new",
+    desc: "Late-harvest dessert wine at sunset — luminous Sauternes gold leading, anchored by a deep wine red. Honeyed and glowing.",
+    vars: {
+      bg:"#FBF4E4", card:"#F4E9CF", border:"#E2CFA2",
+      text:"#2F2615", text2:"#6B5C38", text3:"#A29162",
+      accent:"#8A2E2A", "accent-soft":"#D4A68E",
+      gold:"#C99A2E", "gold-deep":"#A87A18", "gold-chip":"#F0E0B4", "gold-border":"#E0C98E",
+      "hero-bg":"#8A2E2A", "hero-text":"#FBF4E4", "hero-sub":"#E0B49E",
+      "somm-bg":"#F0E0B4", "somm-text":"#936A14", "somm-border":"#E0C98E",
+    },
+    dots:{drink_up:"#C99A2E", ready:"#6E8A5C", too_young:"#7E8AA0", past_peak:"#9B3B3B"},
+    swatches:["#C99A2E","#8A2E2A","#FBF4E4","#F4E9CF","#2F2615"],
+  },
+];
+
+function screenHTML(s){
+  const v = s.vars;
+  return `
+  <div class="app">
+    <div class="hdr">
+      <div class="hdr-row">
+        <div>
+          <div class="welcome">Welcome back</div>
+          <div class="name">Nicholas</div>
+        </div>
+        <div class="avatar">N</div>
+      </div>
+      <div class="hdr-border"></div>
+    </div>
+
+    <div class="pad">
+      <div class="stats">
+        <div class="stat"><div class="n">47</div><div class="l">Wines</div></div>
+        <div class="stat"><div class="n">12</div><div class="l">Places</div></div>
+        <div class="stat"><div class="n">8</div><div class="l">Wishlist</div></div>
+      </div>
+
+      <div class="pick">
+        <div class="cap">${ICON.sparkles(v["gold-deep"],13)} Tonight's Pick</div>
+        <div class="ptitle serif">2018 Château Margaux</div>
+        <div class="psub">Ready now and the standout for tonight's roast lamb — one of two bottles in your cellar.</div>
+        <div class="pcta">See why ${ICON.chevron(v.accent,14)}</div>
+      </div>
+
+      <div class="sec"><div class="lab">Ready to drink</div></div>
+      <div class="rtd">
+        <div class="tile"><div class="dot" style="background:${s.dots.drink_up}"></div><div class="c">3</div><div class="t">Drink soon</div></div>
+        <div class="tile"><div class="dot" style="background:${s.dots.ready}"></div><div class="c">6</div><div class="t">Ready</div></div>
+        <div class="tile"><div class="dot" style="background:${s.dots.too_young}"></div><div class="c">9</div><div class="t">Too young</div></div>
+        <div class="tile"><div class="dot" style="background:${s.dots.past_peak}"></div><div class="c">1</div><div class="t">Past peak</div></div>
+      </div>
+
+      <div class="hero">
+        ${ICON.wine(v.gold,24)}
+        <div class="ht">
+          <div class="htitle">Log a wine</div>
+          <div class="hsub">Had something good? Capture it.</div>
+        </div>
+        ${ICON.chevron(v.gold,18)}
+      </div>
+
+      <div class="sec"><div class="lab">Your cellar</div><div class="act">Open</div></div>
+      <div class="row">
+        <div class="chip">${ICON.tray(v.accent,20)}</div>
+        <div class="rmeta">
+          <div class="rtitle">24 bottles in your cellar</div>
+          <div class="rsub">6 ready to drink</div>
+        </div>
+        ${ICON.chevron(v.accent,18)}
+      </div>
+
+      <div class="sec"><div class="lab">At a glance</div><div class="act">View</div></div>
+      <div class="row">
+        <div class="chip">${ICON.analytics(v["gold-deep"],20)}</div>
+        <div class="rmeta">
+          <div class="rtitle">Mostly Red (62%)</div>
+          <div class="rsub">4 opened in the last 6 months · See the breakdown</div>
+        </div>
+        ${ICON.chevron(v["gold-deep"],18)}
+      </div>
+
+      <div class="sec"><div class="lab">Recent</div><div class="act">See all</div></div>
+      ${[
+        ["Côte-Rôtie La Mouline","Guigal · 2017","5"],
+        ["Sancerre Les Monts Damnés","Cotat · 2021","4"],
+        ["Barolo Cannubi","Brezza · 2016","4"],
+      ].map(([n,d,r])=>`
+      <div class="row wine">
+        <div class="chip sm">${ICON.wineOutline(v.accent,17)}</div>
+        <div class="rmeta">
+          <div class="rtitle">${n}</div>
+          <div class="rsub">${d}</div>
+        </div>
+        <div class="score">${r}</div>
+        ${ICON.chevron(v.text3,16)}
+      </div>`).join("")}
+
+      <div class="sec"><div class="lab">Where you've been</div><div class="act">Explore</div></div>
+      <div class="where">
+        <div class="wrow">
+          <div class="chip sm">${ICON.clock(v.accent,17)}</div>
+          <div class="rmeta"><div class="wlab">Most recent</div><div class="wval">Domaine Serene · 3 days ago</div></div>
+        </div>
+        <div class="wrow">
+          <div class="chip sm">${ICON.star(v.accent,17)}</div>
+          <div class="rmeta"><div class="wlab">Most visited</div><div class="wval">Stoller Family Estate · 4 visits</div></div>
+        </div>
+        <div class="wrow">
+          <div class="chip sm">${ICON.map(v.accent,17)}</div>
+          <div class="rmeta"><div class="wlab">On your map</div><div class="wval">12 places explored</div></div>
+          ${ICON.chevron(v.text3,16)}
+        </div>
+      </div>
+
+      <div class="sec"><div class="lab">Sommelier</div></div>
+      <div class="somm">
+        ${ICON.sparkles(v["somm-text"],22)}
+        <div class="st">
+          <div class="stitle">Ask your Sommelier</div>
+          <div class="ssub">Personalized to the wines you've rated</div>
+        </div>
+        ${ICON.chevron(v["somm-text"],18)}
+      </div>
+    </div>
+  </div>`;
+}
+
+const gallery = document.getElementById("gallery");
+SCHEMES.forEach(s=>{
+  const styleVars = Object.entries(s.vars).map(([k,val])=>`--${k}:${val}`).join(";");
+  const tagClass = s.kind==="keep" ? "tag-keep" : "tag-new";
+  const tagText  = s.kind==="keep" ? "Keeps red + gold" : "New palette";
+  const el = document.createElement("div");
+  el.className = "scheme";
+  el.innerHTML = `
+    <div class="scheme-name serif">${s.name}${s.current?' <span style="font-size:12px;color:#8b8a93">(current)</span>':''}</div>
+    <span class="scheme-tag ${tagClass}">${tagText}</span>
+    <div class="scheme-desc">${s.desc}</div>
+    <div class="device" style="${styleVars}">
+      <div class="notch"></div>
+      <div class="screen"><div class="scroll">${screenHTML(s)}</div></div>
+    </div>
+    <div class="swatches">${s.swatches.map(c=>`<div class="swatch" title="${c}" style="background:${c}"></div>`).join("")}</div>`;
+  gallery.appendChild(el);
+});
+</script>
+</body>
+</html>
