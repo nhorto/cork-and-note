@@ -14,6 +14,7 @@ import {
   View
 } from 'react-native';
 import { visitsService } from '../../lib/visits';
+import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
 
@@ -182,8 +183,7 @@ export default function Wines() {
   };
 
   const renderWineItem = ({ item }) => {
-    const primaryName =
-      item.wine_name || item.wine_varietal || item.wine_type || 'Unnamed Wine';
+    const primaryName = wineDisplayName(item);
     const showVarietal = item.wine_varietal && item.wine_name;
     const wineColor = getWineTypeColor(item.wine_type);
 
