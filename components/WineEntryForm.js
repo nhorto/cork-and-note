@@ -4,11 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Image,
   Modal,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -54,10 +55,18 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [showChatModal, setShowChatModal] = useState(false);
+  // Conversation id for the in-form sommelier chat. Tracked here so closing and
+  // reopening "Ask the Sommelier" during a single logging session resumes the
+  // SAME thread instead of starting over (#121). Resets when the form remounts.
+  const [chatConversationId, setChatConversationId] = useState(null);
 
   // AI suggestion confirmation state
   const [pendingFields, setPendingFields] = useState([]); // [{ key, label, current, suggested, apply, set }]
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // iOS can't present the confirm modal while the chat modal is still up, so we
+  // close the chat first and open confirm from its onDismiss. This flag marks
+  // that a confirm is pending for that dismissal (vs. a plain chat close) (#120).
+  const pendingConfirmRef = useRef(false);
 
   // Load initial data if editing an existing wine
   useEffect(() => {
@@ -315,7 +324,25 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     }
 
     setPendingFields(fields);
-    setShowConfirmModal(true);
+    // Don't nest modals (#120): close the chat sheet first, then present the
+    // confirm sheet. On iOS you can't present a 2nd modal while the 1st is still
+    // dismissing — so we wait for the chat modal's onDismiss. Android has no such
+    // restriction, so we can open the confirm immediately.
+    setShowChatModal(false);
+    if (Platform.OS === 'ios') {
+      pendingConfirmRef.current = true; // opened in handleChatDismissed()
+    } else {
+      setShowConfirmModal(true);
+    }
+  };
+
+  // Fired after the chat modal has fully dismissed (iOS). If we closed it to show
+  // the suggestions confirmation, open that now — never while the chat is still up.
+  const handleChatDismissed = () => {
+    if (pendingConfirmRef.current) {
+      pendingConfirmRef.current = false;
+      setShowConfirmModal(true);
+    }
   };
 
   // Toggle a single field's apply flag in the confirmation panel
@@ -325,14 +352,14 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     );
   };
 
-  // Apply only the toggled-on suggestions, then close
+  // Apply only the toggled-on suggestions, then close. (The chat modal was
+  // already closed before this confirm modal opened — see handleUseSuggestions.)
   const applyPendingSuggestions = () => {
     pendingFields.forEach((f) => {
       if (f.apply) f.applyValue();
     });
     setShowConfirmModal(false);
     setPendingFields([]);
-    setShowChatModal(false);
   };
 
   // Dismiss the confirmation without applying anything
@@ -607,7 +634,10 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       <WineChatModal
         visible={showChatModal}
         onClose={() => setShowChatModal(false)}
+        onDismiss={handleChatDismissed}
         onUseSuggestions={handleUseSuggestions}
+        existingConversationId={chatConversationId}
+        onConversationStarted={setChatConversationId}
         currentWineData={{
           winemaker: winemaker,
           name: wineName,

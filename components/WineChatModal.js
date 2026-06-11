@@ -24,7 +24,7 @@ const { colors, typography, spacing, borderRadius, shadows } = theme;
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.65;
 
-export default function WineChatModal({ visible, onClose, onUseSuggestions, existingConversationId, currentWineData }) {
+export default function WineChatModal({ visible, onClose, onUseSuggestions, onConversationStarted, onDismiss, existingConversationId, currentWineData }) {
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [sending, setSending] = useState(false);
@@ -106,6 +106,9 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, exis
       if (!activeConv) {
         activeConv = await chatService.createConversation('wine_entry');
         setConversation(activeConv);
+        // Report the new conversation id up so the parent can resume THIS same
+        // thread if the user closes and reopens the chat during logging (#121).
+        onConversationStarted?.(activeConv.id);
       }
 
       // Convert photos to base64 for AI
@@ -170,7 +173,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, exis
     } finally {
       setSending(false);
     }
-  }, [conversation, messages, systemPrompt]);
+  }, [conversation, messages, systemPrompt, onConversationStarted]);
 
   const handleUseSuggestions = useCallback((suggestions) => {
     if (onUseSuggestions) {
@@ -191,6 +194,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, exis
       animationType="slide"
       transparent
       onRequestClose={onClose}
+      onDismiss={onDismiss}
     >
       <View style={styles.overlay}>
         <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
@@ -224,7 +228,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, exis
           ) : messages.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyText}>
-                Snap a photo of a wine label or describe what you're tasting — I'll help identify it and fill in the details.
+                Snap a photo of a wine label or describe what you&apos;re tasting — I&apos;ll help identify it and fill in the details.
               </Text>
             </View>
           ) : (
