@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 5.2.0"
+    "version": ">= 5.2.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -25,7 +26,10 @@
       "distribution": "internal",
       "channel": "production"
     },
-    "production": {},
+    "production": {
+      "autoIncrement": true,
+      "environment": "production"
+    },
     "development-simulator": {
       "developmentClient": true,
       "distribution": "internal",
