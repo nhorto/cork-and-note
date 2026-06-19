@@ -13,7 +13,9 @@
 -- re-adds it WITH ON DELETE CASCADE. Idempotent / safe to re-run: if the constraint
 -- is already ON DELETE CASCADE we still just re-create it identically.
 --
--- NOTE: this file is committed but intentionally NOT applied to any database yet.
+-- NOTE: applied to the production DB (ixecayqpogkiawempzgc) on 2026-06-19. Required
+-- by deleteVisit (lib/visits.js), which deletes a visit directly and depends on the
+-- cascade to remove its wines + flavor notes.
 
 -- 1. wines.visit_id → visits.id  (ON DELETE CASCADE)
 do $$
