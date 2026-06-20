@@ -2,7 +2,7 @@
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
@@ -63,9 +63,13 @@ export default function MapScreen() {
     router.push(`/winery/${place.id}`);
   };
 
-  useEffect(() => {
-    loadUserPins();
-  }, []);
+  // Reload pins whenever the map regains focus, so a winery added elsewhere
+  // (drop-pin, manual entry, or a logged session) shows up without a restart.
+  useFocusEffect(
+    useCallback(() => {
+      loadUserPins();
+    }, [])
+  );
 
   // Opened from the home hub's "Add to wishlist" (?quickAdd=wishlist): open the
   // winery-entry modal in wishlist mode, then clear the param so a later visit
@@ -341,7 +345,9 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={false}
       >
-        {userPins.map(pin => renderPinMarker(pin))}
+        {userPins
+          .filter(pin => pin.latitude != null && pin.longitude != null)
+          .map(pin => renderPinMarker(pin))}
 
         {tempPin && (
           <Marker
