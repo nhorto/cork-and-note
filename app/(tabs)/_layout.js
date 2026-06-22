@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { useState } from 'react';
 import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HubMenu from '../../components/HubMenu';
 import theme from '../../styles/theme';
 
@@ -102,11 +103,24 @@ export default function Layout() {
   // The center "＋" opens the quick-actions hub instead of navigating.
   const [hubOpen, setHubOpen] = useState(false);
 
+  // With Android edge-to-edge (app.json `edgeToEdgeEnabled`), the system
+  // navigation bar draws over the app, overlapping the tab bar (#130). Reserve
+  // its height with the bottom safe-area inset so every tab stays fully tappable.
+  // iOS already bakes the home-indicator space into the static padding above.
+  const insets = useSafeAreaInsets();
+  const androidNavInset = Platform.OS === 'android' ? insets.bottom : 0;
+  const tabBarStyle = {
+    ...tabBarStyles.tabBarStyle,
+    height: tabBarStyles.tabBarStyle.height + androidNavInset,
+    paddingBottom: tabBarStyles.tabBarStyle.paddingBottom + androidNavInset,
+  };
+
   return (
     <>
     <Tabs
       screenOptions={{
         ...tabBarStyles,
+        tabBarStyle,
         ...headerStyles,
         tabBarActiveTintColor: colors.primary.burgundy,
         tabBarInactiveTintColor: colors.neutral.pewter,

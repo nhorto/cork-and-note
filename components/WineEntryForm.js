@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Image,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   ScrollView,
@@ -59,6 +60,11 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
   // reopening "Ask the Sommelier" during a single logging session resumes the
   // SAME thread instead of starting over (#121). Resets when the form remounts.
   const [chatConversationId, setChatConversationId] = useState(null);
+
+  // Scroll handle so focusing the bottom-most field ("Additional notes") can pull
+  // it above the keyboard — the form is a plain ScrollView that otherwise leaves
+  // the field hidden behind the keyboard (#129).
+  const scrollRef = useRef(null);
 
   // AI suggestion confirmation state
   const [pendingFields, setPendingFields] = useState([]); // [{ key, label, current, suggested, apply, set }]
@@ -435,7 +441,18 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+    <ScrollView
+      ref={scrollRef}
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
+    >
       {/* Wine Basic Info */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Wine Information</Text>
@@ -575,6 +592,11 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
           placeholderTextColor="#999"
           multiline
           textAlignVertical="top"
+          // This field sits at the bottom of the form; scroll it into view once
+          // the keyboard has animated in so it isn't hidden behind it (#129).
+          onFocus={() => {
+            setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
+          }}
         />
       </View>
 
@@ -752,14 +774,23 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         </View>
       </Modal>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
     padding: spacing.lg,
+  },
+  // Extra bottom room so the keyboard-driven scroll can lift the last field
+  // (Additional notes) clear of the keyboard (#129).
+  scrollContent: {
+    paddingBottom: spacing.xxl,
   },
   section: {
     marginBottom: spacing.xl,
