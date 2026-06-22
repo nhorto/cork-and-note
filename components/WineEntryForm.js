@@ -23,6 +23,7 @@ import theme from '../styles/theme';
 import { parseVarietals } from '../lib/varietals';
 import AutocompleteVarietal from './AutocompleteVarietal';
 import FlavorTagSelector from './FlavorTagSelector';
+import LabelScanner from './LabelScanner';
 import RatingSlider from './RatingSlider';
 import WineChatModal from './WineChatModal';
 
@@ -216,6 +217,29 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
   const handleWineTypeSelect = (type) => {
     setWineType(type);
     setShowTypeModal(false);
+  };
+
+  // Label scan → prefill (#138). Reuses the cellar's LabelScanner; we map the
+  // whitelisted, normalized fields onto the form's state. Only non-null values
+  // are applied (a scan never blanks a field), and varietals MERGE into the chip
+  // list. Prefill-only: the user reviews/edits everything before saving.
+  const applyScan = (fields) => {
+    if (!fields) return;
+    if (fields.producer != null) setWinemaker(fields.producer);
+    if (fields.wine_name != null) setWineName(fields.wine_name);
+    if (fields.wine_type != null) setWineType(fields.wine_type);
+    if (fields.vintage != null) setWineYear(String(fields.vintage));
+    if (fields.varietal != null) {
+      const incoming = parseVarietals(fields.varietal);
+      setWineVarietals((prev) => {
+        const merged = [...prev];
+        incoming.forEach((g) => {
+          if (!merged.some((x) => x.toLowerCase() === g.toLowerCase())) merged.push(g);
+        });
+        return merged;
+      });
+    }
+    // region: the tasting form has no region field — ignored.
   };
 
   // Add / remove a varietal chip (#135). Case-insensitive de-dupe; trims blanks.
@@ -492,6 +516,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
     >
+      {/* Scan a bottle label to prefill the fields below (#138) */}
+      <LabelScanner onScanned={applyScan} />
+
       {/* Wine Basic Info */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Wine Information</Text>
