@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
 
@@ -236,7 +237,7 @@ const PastVisitsSection = ({ wineryId }) => {
                         </Text>
                         <Text style={styles.wineDetails}>
                           {wine.wine_type}
-                          {wine.wine_varietal && ` • ${wine.wine_varietal}`}
+                          {varietalText(wine.wine_varietal) && ` • ${varietalText(wine.wine_varietal)}`}
                           {wine.wine_year && ` • ${wine.wine_year}`}
                         </Text>
                         

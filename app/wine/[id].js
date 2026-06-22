@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { cellarService } from '../../lib/cellar';
 import { matchWineToCellar } from '../../lib/cellarMatch';
+import { varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
 import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
@@ -201,7 +202,7 @@ export default function WineDetail() {
           {wine.wine_type ? <Text style={styles.wineType}>{wine.wine_type}</Text> : null}
           {/* Show the varietal here only when it isn't already serving as the
               title (i.e. the wine has its own name) — avoids "Prosecco · Prosecco". */}
-          {wine.wine_varietal && wine.wine_name ? <Text style={styles.wineMeta}>· {wine.wine_varietal}</Text> : null}
+          {varietalText(wine.wine_varietal) && wine.wine_name ? <Text style={styles.wineMeta}>· {varietalText(wine.wine_varietal)}</Text> : null}
           {wine.wine_year ? <Text style={styles.wineMeta}>· {wine.wine_year}</Text> : null}
         </View>
         {originLabel ? (

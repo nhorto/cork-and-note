@@ -5,6 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
 
@@ -245,7 +246,7 @@ const VisitStatsCard = () => {
                 </View>
                 <View style={styles.listItemContent}>
                   <Text style={styles.listItemTitle} numberOfLines={1}>
-                    {wine.wine_name || wine.wine_varietal || wine.wine_type || 'Unnamed Wine'}
+                    {wine.wine_name || varietalText(wine.wine_varietal) || wine.wine_type || 'Unnamed Wine'}
                   </Text>
                   <Text style={styles.listItemSubtitle} numberOfLines={1}>
                     {wine.wineryName ? `${wine.wineryName} · ` : ''}{formatDate(wine.visitDate)}

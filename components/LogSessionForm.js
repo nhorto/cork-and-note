@@ -17,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { parseVarietals, varietalText } from '../lib/varietals';
 import theme from '../styles/theme';
 import PlacePicker from './PlacePicker';
 import WineEntryForm from './WineEntryForm';
@@ -57,7 +58,8 @@ const dbWineToApp = (w) => ({
   winemaker: w.winemaker || '',
   name: w.wine_name || '',
   type: w.wine_type || '',
-  varietal: w.wine_varietal || '',
+  // Varietals are a list now (#135); WineEntryForm/createVisit accept arrays.
+  varietal: parseVarietals(w.wine_varietal),
   year: w.wine_year != null ? String(w.wine_year) : '',
   overallRating: w.overall_rating || 0,
   ratings: {
@@ -235,7 +237,7 @@ export default function LogSessionForm({
           <View style={[styles.wineTypeBar, { backgroundColor: typeColor }]} />
           <View style={styles.wineInfo}>
             <Text style={styles.wineName} numberOfLines={1}>
-              {wine.name || wine.varietal || 'Wine'}
+              {wine.name || varietalText(wine.varietal) || 'Wine'}
             </Text>
             <Text style={styles.wineMeta} numberOfLines={1}>
               {[wine.winemaker, wine.year, wine.type].filter(Boolean).join(' · ')}
