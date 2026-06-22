@@ -14,28 +14,42 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
-// Predefined flavor categories and notes
+// Predefined flavor categories and notes (#136). Custom descriptors can still be
+// typed in via the "add custom" field; this is just the quick-pick palette.
 const FLAVOR_CATEGORIES = {
   'Fruit': [
-    'Apple', 'Pear', 'Peach', 'Apricot', 'Cherry', 'Plum', 'Strawberry', 
-    'Raspberry', 'Blackberry', 'Blueberry', 'Lemon', 'Orange', 'Grapefruit',
-    'Pineapple', 'Mango', 'Banana', 'Melon', 'Fig', 'Date', 'Raisin'
+    'Green Apple', 'Red Apple', 'Baked Apple', 'Pear', 'Quince', 'Peach',
+    'White Peach', 'Apricot', 'Nectarine', 'Red Cherry', 'Black Cherry',
+    'Sour Cherry', 'Plum', 'Black Plum', 'Strawberry', 'Raspberry', 'Blackberry',
+    'Blueberry', 'Boysenberry', 'Cranberry', 'Red Currant', 'Blackcurrant (Cassis)',
+    'Lemon', 'Lime', 'Orange', 'Orange Peel', 'Grapefruit', 'Tangerine',
+    'Pineapple', 'Mango', 'Passion Fruit', 'Lychee', 'Guava', 'Banana', 'Melon',
+    'Watermelon', 'Fig', 'Date', 'Raisin', 'Prune', 'Dried Cherry', 'Pomegranate',
+    'Jam', 'Stewed Fruit',
   ],
   'Floral & Herbal': [
-    'Rose', 'Violet', 'Lavender', 'Honeysuckle', 'Jasmine', 'Thyme', 
-    'Rosemary', 'Mint', 'Eucalyptus', 'Sage', 'Basil', 'Oregano'
+    'Rose', 'Violet', 'Lavender', 'Honeysuckle', 'Jasmine', 'Elderflower',
+    'Orange Blossom', 'Acacia', 'Potpourri', 'Geranium', 'Thyme', 'Rosemary',
+    'Mint', 'Eucalyptus', 'Sage', 'Basil', 'Oregano', 'Fennel', 'Dill',
+    'Green Bell Pepper', 'Jalapeño', 'Tomato Leaf', 'Fresh Cut Grass', 'Hay',
+    'Dried Herbs', 'Black Tea', 'Green Tea',
   ],
   'Spice & Wood': [
-    'Cinnamon', 'Vanilla', 'Clove', 'Nutmeg', 'Black Pepper', 'White Pepper', 
-    'Licorice', 'Cedar', 'Oak', 'Sandalwood', 'Tobacco', 'Leather'
+    'Cinnamon', 'Vanilla', 'Clove', 'Nutmeg', 'Allspice', 'Anise', 'Star Anise',
+    'Black Pepper', 'White Pepper', 'Licorice', 'Ginger', 'Cardamom', 'Cedar',
+    'Oak', 'Toasted Oak', 'Coconut', 'Sandalwood', 'Tobacco', 'Cigar Box',
+    'Leather', 'Pencil Shavings',
   ],
   'Earth & Mineral': [
-    'Forest Floor', 'Mushroom', 'Truffle', 'Wet Stone', 'Chalk', 'Slate', 
-    'Graphite', 'Flint', 'Clay', 'Petrol'
+    'Forest Floor', 'Mushroom', 'Truffle', 'Wet Stone', 'Chalk', 'Slate',
+    'Graphite', 'Flint', 'Clay', 'Petrol', 'Wet Leaves', 'Barnyard', 'Game',
+    'Iron/Blood', 'Saline', 'Sea Spray', 'Crushed Rock', 'Tar', 'Dust',
   ],
   'Other': [
-    'Honey', 'Caramel', 'Butterscotch', 'Toffee', 'Chocolate', 'Coffee', 
-    'Smoke', 'Toast', 'Butter', 'Cream', 'Bread', 'Yeast', 'Biscuit'
+    'Honey', 'Caramel', 'Butterscotch', 'Toffee', 'Chocolate', 'Dark Chocolate',
+    'Cocoa', 'Coffee', 'Espresso', 'Mocha', 'Smoke', 'Toast', 'Butter', 'Cream',
+    'Bread', 'Yeast', 'Biscuit', 'Brioche', 'Sourdough', 'Almond', 'Hazelnut',
+    'Walnut', 'Marzipan', 'Molasses', 'Brown Sugar', 'Cola', 'Beeswax', 'Rubber',
   ]
 };
 

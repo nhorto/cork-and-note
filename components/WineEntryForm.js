@@ -376,13 +376,11 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
   // Handle form submission
   const handleSave = () => {
-    // Required = winemaker + varietal (everything else is optional)
+    // Required = winemaker only. Everything else (incl. varietal) is optional —
+    // blends and unknowns shouldn't block a save (#133). Display falls back to
+    // name → varietal → type via lib/wineDisplay.js.
     if (!winemaker.trim()) {
       Alert.alert('Missing Information', 'Please enter the winemaker (a winery or producer).');
-      return;
-    }
-    if (!wineVarietal.trim()) {
-      Alert.alert('Missing Information', 'Please enter the varietal.');
       return;
     }
 
@@ -469,12 +467,12 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Varietal *</Text>
+          <Text style={styles.label}>Varietal</Text>
           <AutocompleteVarietal
             value={wineVarietal}
             onChangeText={setWineVarietal}
             wineType={wineType}
-            placeholder="Grape — e.g. Cabernet, Viognier"
+            placeholder="Grape — e.g. Cabernet, Viognier (optional)"
           />
         </View>
 
