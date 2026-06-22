@@ -20,6 +20,15 @@ import theme from '../styles/theme';
 
 const { colors } = theme;
 
+// Build a trailing sentence when some photos couldn't be uploaded, so a dropped
+// photo surfaces to the user instead of vanishing silently (#128). Empty string
+// when nothing failed.
+const photoFailureNote = (failed) => {
+  if (!failed || failed < 1) return '';
+  const plural = failed > 1;
+  return ` However, ${failed} photo${plural ? 's' : ''} couldn't be uploaded — open the wine to add ${plural ? 'them' : 'it'} again.`;
+};
+
 export default function LogSessionScreen() {
   const router = useRouter();
   const { mode, wineryId, wineryName, lat, lng, editVisitId } = useLocalSearchParams();
@@ -114,7 +123,7 @@ export default function LogSessionScreen() {
           return;
         }
         goBack();
-        Alert.alert('Log updated', 'Your changes were saved.');
+        Alert.alert('Log updated', `Your changes were saved.${photoFailureNote(result.photosFailed)}`);
         return;
       }
 
@@ -125,10 +134,8 @@ export default function LogSessionScreen() {
       }
       const count = visitData.wines?.length || 0;
       router.replace('/(tabs)/home');
-      Alert.alert(
-        'Logged',
-        count > 1 ? `Your session of ${count} wines was saved.` : 'Your wine was saved.'
-      );
+      const savedMsg = count > 1 ? `Your session of ${count} wines was saved.` : 'Your wine was saved.';
+      Alert.alert('Logged', `${savedMsg}${photoFailureNote(result.photosFailed)}`);
     } catch (e) {
       Alert.alert('Could not save', e.message || 'Something went wrong. Please try again.');
     } finally {
