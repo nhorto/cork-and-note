@@ -1,0 +1,15 @@
+-- Backstop: default wineries.user_id to the current auth user.
+--
+-- The per-user RLS (20260619020000) requires user_id = auth.uid() on INSERT, and
+-- user_id is NOT NULL. App builds shipped BEFORE the createWinery code that sends
+-- user_id insert wineries without it and hit:
+--   "new row violates row-level security policy for table wineries"
+-- (or a NOT NULL violation). Defaulting user_id to auth.uid() lets those inserts
+-- succeed — the default is applied before the RLS WITH CHECK and NOT NULL are
+-- evaluated — while keeping every winery owned by its creator.
+--
+-- New builds that pass user_id explicitly are unaffected (same value). A service-role
+-- or unauthenticated insert would default to NULL and still fail NOT NULL — intended.
+--
+-- Applied to the production DB (ixecayqpogkiawempzgc) on 2026-06-20.
+alter table public.wineries alter column user_id set default auth.uid();
