@@ -10,49 +10,11 @@ import {
   View,
 } from 'react-native';
 import theme from '../styles/theme';
+// Single source of truth for the varietal list (shared with the cellar form) —
+// see lib/varietals.js (#134).
+import { WINE_VARIETALS } from '../lib/varietals';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
-
-// Common wine varietals for autocomplete suggestions
-const WINE_VARIETALS = [
-  'Cabernet Sauvignon',
-  'Merlot',
-  'Pinot Noir',
-  'Syrah/Shiraz',
-  'Malbec',
-  'Chardonnay',
-  'Sauvignon Blanc',
-  'Pinot Grigio',
-  'Pinot Gris',
-  'Riesling',
-  'Moscato',
-  'Cabernet Franc',
-  'Sangiovese',
-  'Tempranillo',
-  'Grenache',
-  'Petit Verdot',
-  'Zinfandel',
-  'Barbera',
-  'Nebbiolo',
-  'Petite Sirah',
-  'Mourvedre',
-  'Gewürztraminer',
-  'Viognier',
-  'Albariño',
-  'Chenin Blanc',
-  'Sémillon',
-  'Marsanne',
-  'Roussanne',
-  'Vermentino',
-  'Grüner Veltliner',
-  'Muscadet',
-  'Champagne',
-  'Prosecco',
-  'Cava',
-  'Port',
-  'Sherry',
-  'Madeira'
-];
 
 const AutocompleteVarietal = ({
   value,

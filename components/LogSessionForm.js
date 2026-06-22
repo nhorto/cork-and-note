@@ -235,7 +235,7 @@ export default function LogSessionForm({
           <View style={[styles.wineTypeBar, { backgroundColor: typeColor }]} />
           <View style={styles.wineInfo}>
             <Text style={styles.wineName} numberOfLines={1}>
-              {wine.varietal || wine.name || 'Wine'}
+              {wine.name || wine.varietal || 'Wine'}
             </Text>
             <Text style={styles.wineMeta} numberOfLines={1}>
               {[wine.winemaker, wine.year, wine.type].filter(Boolean).join(' · ')}
