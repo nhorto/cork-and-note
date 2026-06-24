@@ -23,6 +23,7 @@ import { parseVarietals, varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
 import PlacePicker from './PlacePicker';
+import TastingMenuScanner from './TastingMenuScanner';
 import WineEntryForm from './WineEntryForm';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
@@ -178,6 +179,31 @@ export default function LogSessionForm({
     });
     setShowWineForm(false);
     setCurrentWineIndex(null);
+  };
+
+  // Append wines read from a tasting card (#139). Each scanned field-set becomes
+  // an unrated DRAFT wine (prefilled name/producer/type/varietal/year, no
+  // ratings yet); the user then opens each one to rate it and add notes. When
+  // the card omits a producer but the place is a winery, fall back to its name.
+  const applyMenuScan = (scanned) => {
+    if (!Array.isArray(scanned) || scanned.length === 0) return;
+    const drafts = scanned.map((f) => ({
+      winemaker: f.producer || winemakerDefault || '',
+      name: f.wine_name || '',
+      type: f.wine_type || '',
+      varietal: parseVarietals(f.varietal),
+      year: f.vintage || '',
+      overallRating: 0,
+      ratings: { sweetness: 0, tannins: 0, acidity: 0, body: 0, alcohol: 0 },
+      flavorNotes: [],
+      additionalNotes: '',
+      photos: [],
+    }));
+    setWines((prev) => [...prev, ...drafts]);
+    Alert.alert(
+      'Wines added',
+      `Added ${drafts.length} wine${drafts.length !== 1 ? 's' : ''} from the card. Open each one to rate it and add your notes.`
+    );
   };
 
   const handleExitWineForm = () => {
@@ -392,6 +418,9 @@ export default function LogSessionForm({
       </View>
 
       <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
+        {/* Scan a tasting card → add one draft wine per listing (#139). */}
+        <TastingMenuScanner onScanned={applyMenuScan} />
+
         {/* Wines */}
         {wines.length === 0 ? (
           <View style={styles.emptyWines}>
