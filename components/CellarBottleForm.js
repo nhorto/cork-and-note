@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
-import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal } from '../lib/varietals';
+import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal, varietalText } from '../lib/varietals';
 import theme from '../styles/theme';
 import AutocompleteInput from './AutocompleteInput';
 import BottlePhotoPicker from './BottlePhotoPicker';
@@ -224,10 +224,12 @@ export default function CellarBottleForm({
       producer: wine.producer || f.producer,
       winery_id: wine.winery_id ?? f.winery_id ?? null,
       wine_type: wine.wine_type || f.wine_type,
-      varietal: wine.varietal || f.varietal,
+      // A picked wine's varietal may be a text[] (#135); the cellar field is a
+      // single string, so flatten it. varietalText also guards against [] (truthy).
+      varietal: varietalText(wine.varietal) || f.varietal,
     }));
     // Surface the prefilled details so the user can see what was filled in.
-    if (wine.wine_type || wine.varietal) setShowMore(true);
+    if (wine.wine_type || varietalText(wine.varietal)) setShowMore(true);
   };
 
   const handleSubmit = () => {

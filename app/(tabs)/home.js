@@ -14,6 +14,7 @@ import {
 import TonightsPickCard from '../../components/TonightsPickCard';
 import { DRINK_WINDOW_META, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
+import { varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
 import { wishlistService } from '../../lib/wishlist';
 import theme from '../../styles/theme';
@@ -71,7 +72,7 @@ export default function HomeScreen() {
             for (const wine of visit.wines ?? []) {
               items.push({
                 id: wine.id,
-                name: wine.wine_name || wine.wine_varietal || 'Wine',
+                name: wine.wine_name || varietalText(wine.wine_varietal) || 'Wine',
                 detail: [visit.wineries?.name, wine.wine_year]
                   .filter(Boolean)
                   .join(' · ') || 'No location',

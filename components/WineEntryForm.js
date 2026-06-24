@@ -20,8 +20,10 @@ import {
 } from 'react-native';
 import theme from '../styles/theme';
 
+import { parseVarietals } from '../lib/varietals';
 import AutocompleteVarietal from './AutocompleteVarietal';
 import FlavorTagSelector from './FlavorTagSelector';
+import LabelScanner from './LabelScanner';
 import RatingSlider from './RatingSlider';
 import WineChatModal from './WineChatModal';
 
@@ -37,7 +39,10 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
   const [winemaker, setWinemaker] = useState(defaultWinemaker);
   const [wineName, setWineName] = useState('');
   const [wineType, setWineType] = useState(''); // optional — no longer defaults to "Red"
-  const [wineVarietal, setWineVarietal] = useState('');
+  // Varietals are now a list (a blend can have several grapes, #135). The text
+  // box feeds `varietalInput`; confirmed grapes live in `wineVarietals`.
+  const [wineVarietals, setWineVarietals] = useState([]);
+  const [varietalInput, setVarietalInput] = useState('');
   const [wineYear, setWineYear] = useState('');
   const [overallRating, setOverallRating] = useState(0);
   const [ratings, setRatings] = useState({
@@ -80,7 +85,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       setWinemaker(initialData.winemaker || defaultWinemaker || '');
       setWineName(initialData.name || '');
       setWineType(initialData.type || '');
-      setWineVarietal(initialData.varietal || '');
+      setWineVarietals(parseVarietals(initialData.varietal));
       setWineYear(initialData.year || '');
       setOverallRating(initialData.overallRating || 0);
       setRatings(initialData.ratings || {
@@ -213,6 +218,41 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     setWineType(type);
     setShowTypeModal(false);
   };
+
+  // Label scan → prefill (#138). Reuses the cellar's LabelScanner; we map the
+  // whitelisted, normalized fields onto the form's state. Only non-null values
+  // are applied (a scan never blanks a field), and varietals MERGE into the chip
+  // list. Prefill-only: the user reviews/edits everything before saving.
+  const applyScan = (fields) => {
+    if (!fields) return;
+    if (fields.producer != null) setWinemaker(fields.producer);
+    if (fields.wine_name != null) setWineName(fields.wine_name);
+    if (fields.wine_type != null) setWineType(fields.wine_type);
+    if (fields.vintage != null) setWineYear(String(fields.vintage));
+    if (fields.varietal != null) {
+      const incoming = parseVarietals(fields.varietal);
+      setWineVarietals((prev) => {
+        const merged = [...prev];
+        incoming.forEach((g) => {
+          if (!merged.some((x) => x.toLowerCase() === g.toLowerCase())) merged.push(g);
+        });
+        return merged;
+      });
+    }
+    // region: the tasting form has no region field — ignored.
+  };
+
+  // Add / remove a varietal chip (#135). Case-insensitive de-dupe; trims blanks.
+  const addVarietal = (raw) => {
+    const g = (raw || '').trim();
+    if (!g) return;
+    setWineVarietals((prev) =>
+      prev.some((x) => x.toLowerCase() === g.toLowerCase()) ? prev : [...prev, g]
+    );
+    setVarietalInput('');
+  };
+  const removeVarietal = (g) =>
+    setWineVarietals((prev) => prev.filter((x) => x !== g));
   
   // Clamp a numeric rating into the 0–5 range; returns null if not a finite number
   const clampRating = (value) => {
@@ -252,8 +292,33 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     addTextField('winemaker', 'Winemaker', suggestions.winemaker, winemaker, setWinemaker);
     addTextField('wine_name', 'Wine Name', suggestions.wine_name, wineName, setWineName);
     addTextField('wine_type', 'Type', suggestions.wine_type, wineType, setWineType);
-    addTextField('varietal', 'Varietal', suggestions.varietal, wineVarietal, setWineVarietal);
     addTextField('year', 'Year', suggestions.year, wineYear, setWineYear);
+
+    // Varietal(s): MERGE into the chip list (multi-varietal, #135) — never discard
+    // grapes the user already added.
+    if (suggestions.varietal != null) {
+      const incoming = parseVarietals(suggestions.varietal);
+      const newOnes = incoming.filter(
+        (g) => !wineVarietals.some((x) => x.toLowerCase() === g.toLowerCase())
+      );
+      if (newOnes.length > 0) {
+        fields.push({
+          key: 'varietal',
+          label: 'Varietal',
+          current: wineVarietals.length ? wineVarietals.join(', ') : '(none)',
+          suggestedDisplay: `+ ${newOnes.join(', ')}`,
+          apply: wineVarietals.length === 0, // pre-check only when none added yet
+          applyValue: () =>
+            setWineVarietals((prev) => {
+              const merged = [...prev];
+              newOnes.forEach((g) => {
+                if (!merged.some((x) => x.toLowerCase() === g.toLowerCase())) merged.push(g);
+              });
+              return merged;
+            }),
+        });
+      }
+    }
 
     // --- Flavor tags: MERGE with existing (dedup), never discard user's choices ---
     if (Array.isArray(suggestions.flavor_tags) && suggestions.flavor_tags.length > 0) {
@@ -392,7 +457,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       winemaker: winemaker.trim(),
       name: wineName,
       type: wineType || null,
-      varietal: wineVarietal,
+      varietal: wineVarietals,
       year: wineYear,
       overallRating: overallRating,
       ratings: ratings,
@@ -451,6 +516,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode="on-drag"
     >
+      {/* Scan a bottle label to prefill the fields below (#138) */}
+      <LabelScanner onScanned={applyScan} />
+
       {/* Wine Basic Info */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Wine Information</Text>
@@ -467,13 +535,47 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Varietal</Text>
-          <AutocompleteVarietal
-            value={wineVarietal}
-            onChangeText={setWineVarietal}
-            wineType={wineType}
-            placeholder="Grape — e.g. Cabernet, Viognier (optional)"
-          />
+          <Text style={styles.label}>
+            Varietal{wineVarietals.length ? ` (${wineVarietals.length})` : ''}
+          </Text>
+
+          {/* Selected grapes as removable chips (#135) */}
+          {wineVarietals.length > 0 && (
+            <View style={styles.varietalChips}>
+              {wineVarietals.map((g) => (
+                <TouchableOpacity
+                  key={g}
+                  style={styles.varietalChip}
+                  onPress={() => removeVarietal(g)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.varietalChipText}>{g}</Text>
+                  <Ionicons name="close" size={14} color={colors.primary.burgundy} />
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Type a grape (autocomplete) and add it; repeat for blends. */}
+          <View style={styles.varietalAddRow}>
+            <View style={styles.varietalAddInput}>
+              <AutocompleteVarietal
+                value={varietalInput}
+                onChangeText={setVarietalInput}
+                onSelect={addVarietal}
+                wineType={wineType}
+                placeholder="Add a grape — e.g. Cabernet (optional)"
+              />
+            </View>
+            <TouchableOpacity
+              style={[styles.varietalAddButton, !varietalInput.trim() && styles.varietalAddButtonDisabled]}
+              onPress={() => addVarietal(varietalInput)}
+              disabled={!varietalInput.trim()}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="add" size={22} color={colors.neutral.cream} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.inputGroup}>
@@ -662,7 +764,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
           winemaker: winemaker,
           name: wineName,
           type: wineType,
-          varietal: wineVarietal,
+          varietal: wineVarietals.join(', '),
           year: wineYear,
           overallRating,
           ratings,
@@ -837,6 +939,49 @@ const styles = StyleSheet.create({
   },
   selectorPlaceholder: {
     color: colors.neutral.silver,
+  },
+
+  // Multi-varietal chips + add row (#135)
+  varietalChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  varietalChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+  },
+  varietalChipText: {
+    ...typography.body.small,
+    color: colors.primary.burgundy,
+    fontWeight: '600',
+  },
+  varietalAddRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
+  varietalAddInput: {
+    flex: 1,
+  },
+  varietalAddButton: {
+    width: 50,
+    height: 50,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary.burgundy,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  varietalAddButtonDisabled: {
+    opacity: 0.4,
   },
 
   // Sommelier button

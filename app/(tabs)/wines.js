@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { cellarService } from '../../lib/cellar';
 import { matchWineToCellar } from '../../lib/cellarMatch';
+import { parseVarietals, varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
 import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
@@ -119,7 +120,8 @@ export default function Wines() {
     ];
     const varietals = [
       'All',
-      ...new Set(wines.map((w) => w.wine_varietal).filter(Boolean)),
+      // A wine can have several grapes (#135) — list each grape as its own facet.
+      ...new Set(wines.flatMap((w) => parseVarietals(w.wine_varietal))),
     ];
 
     setFilterOptions({
@@ -136,13 +138,14 @@ export default function Wines() {
         (wine.wine_name?.toLowerCase().includes(search.toLowerCase()) || '') ||
         (wine.wineryName?.toLowerCase().includes(search.toLowerCase()) || '') ||
         (wine.wine_type?.toLowerCase().includes(search.toLowerCase()) || '') ||
-        (wine.wine_varietal?.toLowerCase().includes(search.toLowerCase()) || '');
+        (varietalText(wine.wine_varietal).toLowerCase().includes(search.toLowerCase()) || '');
 
       const matchesType = filters.type === 'All' || wine.wine_type === filters.type;
       const matchesWinery =
         filters.winery === 'All' || wine.wineryName === filters.winery;
       const matchesVarietal =
-        filters.varietal === 'All' || wine.wine_varietal === filters.varietal;
+        filters.varietal === 'All' ||
+        parseVarietals(wine.wine_varietal).some((g) => g === filters.varietal);
 
       return matchesSearch && matchesType && matchesWinery && matchesVarietal;
     });
@@ -194,7 +197,8 @@ export default function Wines() {
 
   const renderWineItem = ({ item }) => {
     const primaryName = wineDisplayName(item);
-    const showVarietal = item.wine_varietal && item.wine_name;
+    const varietalLabel = varietalText(item.wine_varietal);
+    const showVarietal = varietalLabel && item.wine_name;
     const wineColor = getWineTypeColor(item.wine_type);
 
     return (
@@ -216,7 +220,7 @@ export default function Wines() {
           </Text>
 
           {showVarietal && (
-            <Text style={styles.wineVarietal}>{item.wine_varietal}</Text>
+            <Text style={styles.wineVarietal}>{varietalLabel}</Text>
           )}
 
           <Text style={styles.wineryName}>{item.wineryName}</Text>

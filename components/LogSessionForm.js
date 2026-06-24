@@ -5,9 +5,11 @@
 // quick entry (the "B" feel); add another and it becomes a winery-trip recap
 // (the "A" feel) — same underlying data, two experiences.
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import {
   Alert,
+  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -17,6 +19,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { parseVarietals, varietalText } from '../lib/varietals';
+import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
 import PlacePicker from './PlacePicker';
 import WineEntryForm from './WineEntryForm';
@@ -57,7 +61,8 @@ const dbWineToApp = (w) => ({
   winemaker: w.winemaker || '',
   name: w.wine_name || '',
   type: w.wine_type || '',
-  varietal: w.wine_varietal || '',
+  // Varietals are a list now (#135); WineEntryForm/createVisit accept arrays.
+  varietal: parseVarietals(w.wine_varietal),
   year: w.wine_year != null ? String(w.wine_year) : '',
   overallRating: w.overall_rating || 0,
   ratings: {
@@ -115,6 +120,12 @@ export default function LogSessionForm({
     initialSession?.visit_date ? initialSession.visit_date.slice(0, 10) : todayISO
   );
   const [notes, setNotes] = useState(initialSession?.notes || '');
+  // Visit-level photos for the whole visit (#137) — e.g. the tasting card or a
+  // shot at the winery. Stored on the visit (photo_url) and shown in winery
+  // history. On edit, hydrate the existing photo URLs.
+  const [visitPhotos, setVisitPhotos] = useState(
+    initialSession ? visitsService.parsePhotoUrls(initialSession.photo_url) : []
+  );
   const [saving, setSaving] = useState(false);
 
   const [showWineForm, setShowWineForm] = useState(false);
@@ -179,8 +190,53 @@ export default function LogSessionForm({
     setShowPlacePicker(false);
   };
 
+  // Visit photos (#137). Camera + library (multi-select); thumbnails with remove.
+  // The save path uploads new local URIs and keeps existing https URLs as-is.
+  const addVisitPhotoFromCamera = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Camera access is needed to add a photo.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.7,
+      });
+      if (!result.canceled && result.assets?.[0]) {
+        setVisitPhotos((prev) => [...prev, result.assets[0].uri]);
+      }
+    } catch {
+      Alert.alert('Camera unavailable', 'Could not open the camera. Try choosing from your library.');
+    }
+  };
+
+  const addVisitPhotosFromLibrary = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Photo library access is needed to add photos.');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 0.7,
+      });
+      if (!result.canceled && result.assets?.length) {
+        setVisitPhotos((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
+      }
+    } catch {
+      Alert.alert('Library unavailable', 'Could not open your photo library. Try the camera instead.');
+    }
+  };
+
+  const removeVisitPhoto = (index) =>
+    setVisitPhotos((prev) => prev.filter((_, i) => i !== index));
+
   const handleCancel = () => {
-    if (wines.length === 0 && !place && !notes) {
+    if (wines.length === 0 && !place && !notes && visitPhotos.length === 0) {
       onCancel();
       return;
     }
@@ -211,6 +267,7 @@ export default function LogSessionForm({
         longitude: place?.longitude ?? null,
         date: visitDate,
         notes,
+        wineryPhotos: visitPhotos, // visit-level photos (#137)
         wines,
         // Original ids let the edit orchestrator diff removed wines without a refetch.
         originalWineIds: initialSession
@@ -235,7 +292,7 @@ export default function LogSessionForm({
           <View style={[styles.wineTypeBar, { backgroundColor: typeColor }]} />
           <View style={styles.wineInfo}>
             <Text style={styles.wineName} numberOfLines={1}>
-              {wine.name || wine.varietal || 'Wine'}
+              {wine.name || varietalText(wine.varietal) || 'Wine'}
             </Text>
             <Text style={styles.wineMeta} numberOfLines={1}>
               {[wine.winemaker, wine.year, wine.type].filter(Boolean).join(' · ')}
@@ -380,6 +437,47 @@ export default function LogSessionForm({
           textAlignVertical="top"
           selectionColor={colors.primary.burgundy}
         />
+
+        {/* Visit photos (#137) — a shot of the tasting card or the visit itself. */}
+        <Text style={styles.sectionLabel}>PHOTOS</Text>
+        {visitPhotos.length > 0 && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.visitPhotoRow}
+          >
+            {visitPhotos.map((uri, index) => (
+              <View key={`${uri}-${index}`} style={styles.visitPhotoWrap}>
+                <Image source={{ uri }} style={styles.visitPhoto} />
+                <TouchableOpacity
+                  style={styles.visitPhotoRemove}
+                  onPress={() => removeVisitPhoto(index)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="close-circle" size={22} color={colors.status.error} />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        )}
+        <View style={styles.visitPhotoButtons}>
+          <TouchableOpacity
+            style={styles.visitPhotoBtn}
+            onPress={addVisitPhotoFromCamera}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="camera-outline" size={18} color={colors.primary.burgundy} />
+            <Text style={styles.visitPhotoBtnText}>Take photo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.visitPhotoBtn}
+            onPress={addVisitPhotosFromLibrary}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="images-outline" size={18} color={colors.primary.burgundy} />
+            <Text style={styles.visitPhotoBtnText}>Choose photos</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* Footer */}
@@ -612,6 +710,51 @@ const styles = StyleSheet.create({
     color: colors.neutral.pewter,
     fontStyle: 'italic',
     marginTop: spacing.xs,
+  },
+
+  // Visit photos (#137)
+  visitPhotoRow: {
+    marginTop: spacing.sm,
+  },
+  visitPhotoWrap: {
+    position: 'relative',
+    marginRight: spacing.sm,
+  },
+  visitPhoto: {
+    width: 84,
+    height: 84,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+  },
+  visitPhotoRemove: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: colors.neutral.cream,
+    borderRadius: 12,
+  },
+  visitPhotoButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  visitPhotoBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm + 2,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    backgroundColor: colors.neutral.parchment,
+  },
+  visitPhotoBtnText: {
+    ...typography.body.small,
+    color: colors.primary.burgundy,
+    fontWeight: '600',
   },
 
   footer: {

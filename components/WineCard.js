@@ -2,6 +2,7 @@
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { varietalText } from '../lib/varietals';
 import theme from '../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
@@ -120,8 +121,9 @@ const WineCard = ({ wine, expanded = false, onPress }) => {
   // Get wine name with fallback
   const wineName = wine.wineName || wine.wine_name || 'Unnamed Wine';
   
-  // Get wine varietal with fallback
-  const wineVarietal = wine.wineVarietal || wine.wine_varietal;
+  // Get wine varietal with fallback — wine_varietal is a text[] (#135); varietalText
+  // accepts arrays and legacy strings and yields "Cabernet Sauvignon, Merlot".
+  const wineVarietal = varietalText(wine.wineVarietal || wine.wine_varietal);
   
   // Get wine year with fallback
   const wineYear = wine.wineYear || wine.wine_year;

@@ -20,7 +20,10 @@ const AutocompleteVarietal = ({
   value,
   onChangeText,
   placeholder = "Enter wine varietal (optional)",
-  style
+  style,
+  // Optional: when provided, picking a suggestion calls this (e.g. to add the
+  // grape as a chip and clear the box) instead of just filling the input (#135).
+  onSelect,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -52,7 +55,11 @@ const AutocompleteVarietal = ({
   };
 
   const handleSuggestionPress = (suggestion) => {
-    onChangeText(suggestion);
+    if (onSelect) {
+      onSelect(suggestion);
+    } else {
+      onChangeText(suggestion);
+    }
     setShowSuggestions(false);
     setIsFocused(false);
     inputRef.current?.blur();
