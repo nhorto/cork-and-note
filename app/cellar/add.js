@@ -123,10 +123,13 @@ export default function AddBottleScreen() {
       return;
     }
 
+    // If we auto-linked the new bottle to an existing tasting (#140), say so.
+    const linkedNote = res.linkedWine ? ' Linked to a matching tasting in your journal.' : '';
+
     // Offer "add another like the last one" for case / repeat purchases.
     Alert.alert(
       'Added to cellar',
-      `${payload.wine_name} saved. Add another like it?`,
+      `${payload.wine_name} saved.${linkedNote} Add another like it?`,
       [
         { text: 'Done', style: 'cancel', onPress: () => router.back() },
         {

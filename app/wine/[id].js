@@ -84,7 +84,26 @@ export default function WineDetail() {
           cellarService
             .getCellar()
             .then((res) => {
-              setCellarMatch(res?.success ? matchWineToCellar(foundWine, res.bottles) : null);
+              if (!res?.success) {
+                setCellarMatch(null);
+                return;
+              }
+              const fuzzy = matchWineToCellar(foundWine, res.bottles);
+              // Honor an explicit manual link too (#140): a bottle the user linked
+              // to this tasting should surface here even if the fuzzy matcher
+              // (producer + name/varietal) wouldn't have caught it.
+              const linked = res.bottles.find((b) => b.tasting_wine_id === foundWine.id);
+              setCellarMatch(
+                fuzzy ||
+                  (linked
+                    ? {
+                        primary: linked,
+                        count: Number(linked.quantity) || 1,
+                        relation: 'same',
+                        differentVintage: null,
+                      }
+                    : null)
+              );
             })
             .catch(() => setCellarMatch(null));
         } else {

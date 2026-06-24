@@ -21,7 +21,10 @@ import CellarBottleForm from '../../components/CellarBottleForm';
 import ConsumptionHistory from '../../components/ConsumptionHistory';
 import MaturityTimeline from '../../components/MaturityTimeline';
 import BottlePairing from '../../components/BottlePairing';
+import TastingLinkCard from '../../components/TastingLinkCard';
 import { KEEP_BOTTLE_REASON, cellarService, drinkWindowMeta } from '../../lib/cellar';
+import { flattenTastedWines } from '../../lib/cellarMatch';
+import { visitsService } from '../../lib/visits';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
@@ -42,6 +45,10 @@ export default function BottleDetailScreen() {
   const [loaded, setLoaded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // The user's tasted wines, for the "From a tasting" link card (#140).
+  const [tastedWines, setTastedWines] = useState([]);
+  const [linking, setLinking] = useState(false);
 
   // Open-bottle modal state. `openMode` is 'open' (a draw-down: drank/gifted/…)
   // or 'taste' (Coravin sample: log a tasting, keep the bottle in inventory).
@@ -72,8 +79,12 @@ export default function BottleDetailScreen() {
   };
 
   const load = useCallback(async () => {
-    const res = await cellarService.getBottle(id).catch(() => ({ success: false }));
+    const [res, visitsRes] = await Promise.all([
+      cellarService.getBottle(id).catch(() => ({ success: false })),
+      visitsService.getUserVisits().catch(() => ({ success: false })),
+    ]);
     setBottle(res?.success ? res.bottle : null);
+    setTastedWines(visitsRes?.success ? flattenTastedWines(visitsRes.visits) : []);
     setLoaded(true);
   }, [id]);
 
@@ -94,6 +105,17 @@ export default function BottleDetailScreen() {
       Alert.alert('Could not save', res.error || 'Please try again.');
     }
   };
+
+  // Link / unlink this bottle to a prior tasting (#140). Pass a wineId to link
+  // or null to clear; on success we refresh the bottle in place.
+  const handleLinkTasting = async (wineId) => {
+    setLinking(true);
+    const res = await cellarService.linkTasting(id, wineId);
+    setLinking(false);
+    if (res.success) setBottle(res.bottle);
+    else Alert.alert('Could not link', res.error || 'Please try again.');
+  };
+  const handleUnlinkTasting = () => handleLinkTasting(null);
 
   const handleDelete = () => {
     Alert.alert('Remove bottle', 'Delete this bottle from your cellar? This cannot be undone.', [
@@ -313,6 +335,16 @@ export default function BottleDetailScreen() {
                   <Text style={styles.notesText}>{bottle.notes}</Text>
                 </View>
               ) : null}
+
+              {/* From a tasting (#140): the linked tasting, a suggested match, or
+                  a manual link picker. Renders nothing if there's nothing to link. */}
+              <TastingLinkCard
+                bottle={bottle}
+                tastedWines={tastedWines}
+                onLink={handleLinkTasting}
+                onUnlink={handleUnlinkTasting}
+                linking={linking}
+              />
 
               {/* Consumption history (date · reason · qty · note · tasting link) */}
               <ConsumptionHistory consumptions={consumptions} />
