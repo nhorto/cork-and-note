@@ -22,6 +22,7 @@ import ScreenHeader from '../../components/ScreenHeader';
 import { cellarService } from '../../lib/cellar';
 import { getEntrySuggestions } from '../../lib/cellarEntry';
 import { knownLocations } from '../../lib/cellarLocation';
+import { notifySuccess } from '../../lib/haptics';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
@@ -122,6 +123,8 @@ export default function AddBottleScreen() {
       Alert.alert('Could not save', res.error || 'Something went wrong. Please try again.');
       return;
     }
+
+    notifySuccess();
 
     // If we auto-linked the new bottle to an existing tasting (#140), say so.
     const linkedNote = res.linkedWine ? ' Linked to a matching tasting in your journal.' : '';

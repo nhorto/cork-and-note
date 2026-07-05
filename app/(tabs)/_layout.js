@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HubMenu from '../../components/HubMenu';
+import { tapMedium } from '../../lib/haptics';
 import theme from '../../styles/theme';
 
 const { colors } = theme;
@@ -155,7 +156,13 @@ export default function Layout() {
           // Intercept the press: open the quick-actions hub instead of
           // navigating straight to the log chooser.
           tabBarButton: (props) => (
-            <LogTabButton {...props} onPress={() => setHubOpen(true)} />
+            <LogTabButton
+              {...props}
+              onPress={() => {
+                tapMedium();
+                setHubOpen(true);
+              }}
+            />
           ),
         }}
       />

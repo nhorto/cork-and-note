@@ -15,6 +15,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import LogSessionForm from '../components/LogSessionForm';
+import { notifySuccess } from '../lib/haptics';
 import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
 
@@ -130,6 +131,7 @@ export default function LogSessionScreen() {
           );
           return;
         }
+        notifySuccess();
         goBack();
         Alert.alert('Log updated', `Your changes were saved.${photoFailureNote(result.photosFailed)}${noteFailureNote(result.notesFailed)}`);
         return;
@@ -140,6 +142,7 @@ export default function LogSessionScreen() {
         Alert.alert('Could not save', result?.error || 'Something went wrong. Please try again.');
         return;
       }
+      notifySuccess();
       const count = visitData.wines?.length || 0;
       router.replace('/(tabs)/home');
       const savedMsg = count > 1 ? `Your session of ${count} wines was saved.` : 'Your wine was saved.';
