@@ -28,9 +28,7 @@
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
+        "ACCESS_COARSE_LOCATION"
       ],
       "config": {
         "googleMaps": {
@@ -58,11 +56,21 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-camera",
+      [
+        "expo-camera",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
       "expo-image-picker",
       "expo-location",
-      "expo-media-library",
-      "expo-maps",
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Cork & Note saves your wine photos to your photo library."
+        }
+      ],
       "./plugins/withFmtConstevalFix",
       "expo-notifications"
     ],
