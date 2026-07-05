@@ -23,6 +23,7 @@ import theme from '../styles/theme';
 
 import { parseVarietals } from '../lib/varietals';
 import AutocompleteVarietal from './AutocompleteVarietal';
+import Button from './Button';
 import FlavorTagSelector from './FlavorTagSelector';
 import LabelScanner from './LabelScanner';
 import RatingSlider from './RatingSlider';
@@ -723,13 +724,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save wine</Text>
-        </TouchableOpacity>
+        <Button variant="secondary" title="Cancel" onPress={onCancel} style={{ flex: 1 }} />
+        <Button variant="primary" title="Save wine" onPress={handleSave} style={{ flex: 1 }} />
       </View>
 
       {/* Wine Type Modal */}
@@ -857,12 +853,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
             </ScrollView>
 
             <View style={styles.confirmActions}>
-              <TouchableOpacity style={styles.cancelButton} onPress={cancelPendingSuggestions}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={applyPendingSuggestions}>
-                <Text style={styles.saveButtonText}>Apply selected</Text>
-              </TouchableOpacity>
+              <Button variant="secondary" title="Cancel" onPress={cancelPendingSuggestions} style={{ flex: 1 }} />
+              <Button variant="primary" title="Apply selected" onPress={applyPendingSuggestions} style={{ flex: 1 }} />
             </View>
           </View>
         </View>
@@ -1112,32 +1104,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginTop: spacing.xl,
     marginBottom: spacing.xxl,
-  },
-  cancelButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
-  },
-  cancelButtonText: {
-    ...typography.body.regular,
-    color: colors.neutral.graphite,
-    fontWeight: '600',
-  },
-  saveButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary.burgundy,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
   },
 
   // Wine Type Modal

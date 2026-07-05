@@ -3,6 +3,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import theme from '../styles/theme';
+import Button from './Button';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
@@ -121,13 +122,7 @@ const PinActionModal = ({
             </View>
 
             {/* Cancel Button */}
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={onClose}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.cancelText}>Cancel</Text>
-            </TouchableOpacity>
+            <Button variant="secondary" title="Cancel" onPress={onClose} />
           </View>
         </TouchableOpacity>
       </TouchableOpacity>
@@ -251,21 +246,6 @@ const styles = StyleSheet.create({
   },
   destructiveText: {
     color: colors.status.error,
-  },
-
-  // Cancel Button
-  cancelButton: {
-    padding: spacing.md,
-    backgroundColor: colors.neutral.parchment,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    alignItems: 'center',
-  },
-  cancelText: {
-    ...typography.body.regular,
-    color: colors.neutral.graphite,
-    fontWeight: '500',
   },
 });
 

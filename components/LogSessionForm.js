@@ -22,6 +22,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { parseVarietals, varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
+import Button from './Button';
 import PlacePicker from './PlacePicker';
 import TastingMenuScanner from './TastingMenuScanner';
 import WineEntryForm from './WineEntryForm';
@@ -552,26 +553,16 @@ export default function LogSessionForm({
 
       {/* Footer */}
       <View style={[styles.footer, { paddingBottom: spacing.md + (insets.bottom || 0) }]}>
-        <TouchableOpacity
-          style={[
-            styles.saveBtn,
-            ((wines.length === 0 && !isEditing) || saving) && styles.saveBtnDisabled,
-          ]}
+        <Button
+          variant="primary"
+          title={
+            isEditing ? 'Save changes' : isSession ? 'Save session' : 'Save wine'
+          }
+          icon="checkmark-circle"
+          loading={saving}
+          disabled={wines.length === 0 && !isEditing}
           onPress={handleSaveSession}
-          activeOpacity={0.85}
-          disabled={(wines.length === 0 && !isEditing) || saving}
-        >
-          <Ionicons name="checkmark-circle" size={20} color={colors.neutral.cream} />
-          <Text style={styles.saveBtnText}>
-            {saving
-              ? 'Saving…'
-              : isEditing
-              ? 'Save changes'
-              : isSession
-              ? 'Save session'
-              : 'Save wine'}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
 
       {/* Wine form modal */}
@@ -838,22 +829,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.neutral.linen,
     backgroundColor: colors.neutral.cream,
-  },
-  saveBtn: {
-    flexDirection: 'row',
-    backgroundColor: colors.primary.burgundy,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  saveBtnDisabled: { opacity: 0.5 },
-  saveBtnText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
-    fontFamily: 'Georgia',
   },
 
   modalContainer: { flex: 1, backgroundColor: colors.neutral.cream },

@@ -25,8 +25,9 @@ import {
   hasActiveFilters,
 } from '../lib/cellarBrowse';
 import theme from '../styles/theme';
+import Button from './Button';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
+const { colors, typography, spacing, borderRadius } = theme;
 
 // Drink-window statuses offered as filter chips — labels come from the canonical
 // taxonomy (lib/cellar.js) so they stay in sync with the badges everywhere.
@@ -211,17 +212,16 @@ export default function CellarFilterModal({
           </ScrollView>
 
           {/* Apply */}
-          <TouchableOpacity
-            style={styles.applyBtn}
-            activeOpacity={0.9}
-            onPress={() => onApply?.(draft)}
-          >
-            <Text style={styles.applyText}>
-              {previewCount === (bottles?.length || 0) && !hasActiveFilters(draft)
+          <Button
+            variant="primary"
+            title={
+              previewCount === (bottles?.length || 0) && !hasActiveFilters(draft)
                 ? 'Show all'
-                : `Show ${previewCount} ${previewCount === 1 ? 'lot' : 'lots'}`}
-            </Text>
-          </TouchableOpacity>
+                : `Show ${previewCount} ${previewCount === 1 ? 'lot' : 'lots'}`
+            }
+            onPress={() => onApply?.(draft)}
+            style={{ marginTop: spacing.md }}
+          />
         </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
@@ -381,14 +381,4 @@ const styles = StyleSheet.create({
     fontSize: typography.body.regular.fontSize,
     color: colors.neutral.charcoal,
   },
-
-  applyBtn: {
-    backgroundColor: colors.primary.burgundy,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-    marginTop: spacing.md,
-    ...shadows.soft,
-  },
-  applyText: { ...typography.body.large, color: colors.neutral.cream, fontWeight: '600' },
 });

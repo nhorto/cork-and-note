@@ -14,6 +14,7 @@ import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal, varietalText } fr
 import theme from '../styles/theme';
 import AutocompleteInput from './AutocompleteInput';
 import BottlePhotoPicker from './BottlePhotoPicker';
+import Button from './Button';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
@@ -441,14 +442,13 @@ export default function CellarBottleForm({
 
       {error && <Text style={styles.error}>{error}</Text>}
 
-      <TouchableOpacity
-        style={[styles.submit, saving && styles.submitDisabled]}
+      <Button
+        variant="primary"
+        title={submitLabel}
+        loading={saving}
         onPress={handleSubmit}
-        disabled={saving}
-        activeOpacity={0.9}
-      >
-        <Text style={styles.submitText}>{saving ? 'Saving…' : submitLabel}</Text>
-      </TouchableOpacity>
+        style={{ marginTop: spacing.sm }}
+      />
     </View>
   );
 }
@@ -585,13 +585,7 @@ const styles = StyleSheet.create({
   proposalDismissText: { ...typography.body.small, color: colors.primary.burgundy },
   proposalNote: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic', marginTop: spacing.sm },
 
-  submit: {
-    backgroundColor: colors.primary.burgundy,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.sm,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
+  // Still used by the AI "Suggest a window" button (suggestBtn), which is not a
+  // primary/secondary CTA and is intentionally left as a hand-rolled touchable.
   submitDisabled: { opacity: 0.6 },
-  submitText: { ...typography.body.large, color: colors.neutral.cream, fontWeight: '600' },
 });

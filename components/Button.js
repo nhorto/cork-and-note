@@ -1,14 +1,24 @@
 // components/Button.js
 // Canonical button for the app. Replaces the three drifted primary-button
 // recipes (radius 4 + sans / radius 8 + Georgia / radius 8 + h3 serif) and the
-// three cancel-button recipes with one set of variants:
+// three cancel recipes with one set of variants:
 //   primary   — burgundy fill, cream label (the main CTA)
-//   secondary — burgundy outline, burgundy label
+//   secondary — parchment fill, stone border, graphite label (Cancel / muted,
+//               subordinate to a primary it sits beside)
+//   outline   — burgundy outline + label (a branded secondary action)
 //   ghost     — text-only, burgundy label
 // Labels are sans (System) weight 600; serif is reserved for headings/titles.
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { borderRadius, colors, spacing } from '../styles/theme';
+
+// Ink (label + icon + spinner) color per variant.
+const INK = {
+  primary: colors.neutral.cream,
+  secondary: colors.neutral.graphite,
+  outline: colors.primary.burgundy,
+  ghost: colors.primary.burgundy,
+};
 
 export default function Button({
   title,
@@ -23,7 +33,7 @@ export default function Button({
   ...rest
 }) {
   const isDisabled = disabled || loading;
-  const spinnerColor = variant === 'primary' ? colors.neutral.cream : colors.primary.burgundy;
+  const ink = INK[variant] || INK.primary;
 
   return (
     <TouchableOpacity
@@ -42,18 +52,13 @@ export default function Button({
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator color={spinnerColor} />
+        <ActivityIndicator color={ink} />
       ) : (
         <View style={styles.content}>
           {icon ? (
-            <Ionicons
-              name={icon}
-              size={18}
-              color={variant === 'primary' ? colors.neutral.cream : colors.primary.burgundy}
-              style={styles.icon}
-            />
+            <Ionicons name={icon} size={18} color={ink} style={styles.icon} />
           ) : null}
-          <Text style={[styles.label, styles[`${variant}Label`], textStyle]} numberOfLines={1}>
+          <Text style={[styles.label, { color: ink }, textStyle]} numberOfLines={1}>
             {title}
           </Text>
         </View>
@@ -87,26 +92,20 @@ const styles = StyleSheet.create({
   primary: {
     backgroundColor: colors.primary.burgundy,
   },
-  primaryLabel: {
-    color: colors.neutral.cream,
-  },
-
   secondary: {
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+  },
+  outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: colors.primary.burgundy,
   },
-  secondaryLabel: {
-    color: colors.primary.burgundy,
-  },
-
   ghost: {
     backgroundColor: 'transparent',
     minHeight: 0,
     paddingVertical: spacing.sm,
-  },
-  ghostLabel: {
-    color: colors.primary.burgundy,
   },
 
   disabled: {

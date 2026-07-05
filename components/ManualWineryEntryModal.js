@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Modal,
@@ -17,6 +16,7 @@ import {
   View
 } from 'react-native';
 import theme from '../styles/theme';
+import Button from './Button';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
@@ -121,11 +121,6 @@ const ManualWineryEntryModal = ({
     return actionType === 'visit' ? colors.primary.burgundy : colors.status.wishlist;
   };
 
-  const getButtonText = () => {
-    if (loading) return 'Saving...';
-    return actionType === 'visit' ? 'Continue to visit' : 'Add to wishlist';
-  };
-
   return (
     <Modal
       visible={visible}
@@ -207,33 +202,20 @@ const ManualWineryEntryModal = ({
 
               {/* Buttons */}
               <View style={styles.buttons}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
+                <Button
+                  variant="secondary"
+                  title="Cancel"
                   onPress={handleClose}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.cancelText}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.saveButton,
-                    { backgroundColor: getIconColor() },
-                    loading && styles.disabled
-                  ]}
+                  style={{ flex: 0.4 }}
+                />
+                <Button
+                  variant="primary"
+                  title={actionType === 'visit' ? 'Continue to visit' : 'Add to wishlist'}
+                  icon="arrow-forward"
+                  loading={loading}
                   onPress={handleSave}
-                  disabled={loading}
-                  activeOpacity={0.7}
-                >
-                  {loading ? (
-                    <ActivityIndicator size="small" color={colors.neutral.cream} />
-                  ) : (
-                    <>
-                      <Text style={styles.saveText}>{getButtonText()}</Text>
-                      <Ionicons name="arrow-forward" size={18} color={colors.neutral.cream} />
-                    </>
-                  )}
-                </TouchableOpacity>
+                  style={{ flex: 0.6, backgroundColor: getIconColor() }}
+                />
               </View>
             </View>
         </KeyboardAvoidingView>
@@ -384,37 +366,6 @@ const styles = StyleSheet.create({
   buttons: {
     flexDirection: 'row',
     gap: spacing.md,
-  },
-  cancelButton: {
-    flex: 0.4,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
-  },
-  cancelText: {
-    ...typography.body.regular,
-    color: colors.neutral.graphite,
-    fontWeight: '500',
-  },
-  saveButton: {
-    flex: 0.6,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  saveText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
-  },
-  disabled: {
-    opacity: 0.6,
   },
 });
 
