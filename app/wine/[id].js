@@ -15,6 +15,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 import { cellarService } from '../../lib/cellar';
 import { matchWineToCellar } from '../../lib/cellarMatch';
 import { varietalText } from '../../lib/varietals';
@@ -210,18 +211,20 @@ export default function WineDetail() {
     .join(' · ');
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Wine Details</Text>
-        <TouchableOpacity onPress={handleEditLog} style={styles.iconBtn} accessibilityLabel="Edit log">
-          <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.headerBorder} />
+    <View style={styles.container}>
+      <ScreenHeader
+        title="Wine Details"
+        right={
+          <TouchableOpacity
+            onPress={handleEditLog}
+            style={styles.iconBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Edit log"
+          >
+            <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Wine Basic Info */}
@@ -415,7 +418,7 @@ export default function WineDetail() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -425,22 +428,7 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   scrollContent: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
   iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: {
-    ...typography.heading.h2,
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-    flex: 1,
-    textAlign: 'center',
-  },
-  headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
 
   wineName: {
     ...typography.heading.h1,

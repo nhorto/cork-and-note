@@ -21,6 +21,7 @@ import CellarBottleForm from '../../components/CellarBottleForm';
 import ConsumptionHistory from '../../components/ConsumptionHistory';
 import MaturityTimeline from '../../components/MaturityTimeline';
 import BottlePairing from '../../components/BottlePairing';
+import ScreenHeader from '../../components/ScreenHeader';
 import TastingLinkCard from '../../components/TastingLinkCard';
 import { KEEP_BOTTLE_REASON, cellarService, drinkWindowMeta } from '../../lib/cellar';
 import { flattenTastedWines } from '../../lib/cellarMatch';
@@ -233,22 +234,17 @@ export default function BottleDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconBtn} onPress={() => (editing ? setEditing(false) : router.back())}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {editing ? 'Edit bottle' : 'Bottle'}
-        </Text>
-        {!editing && !removed ? (
-          <TouchableOpacity style={styles.iconBtn} onPress={() => setEditing(true)}>
-            <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.iconBtn} />
-        )}
-      </View>
-      <View style={styles.headerBorder} />
+      <ScreenHeader
+        title={editing ? 'Edit bottle' : 'Bottle'}
+        onBack={() => (editing ? setEditing(false) : router.back())}
+        right={
+          !editing && !removed ? (
+            <TouchableOpacity style={styles.iconBtn} onPress={() => setEditing(true)}>
+              <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
+            </TouchableOpacity>
+          ) : null
+        }
+      />
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -541,17 +537,7 @@ const styles = StyleSheet.create({
   missing: { ...typography.body.regular, color: colors.neutral.graphite },
   link: { ...typography.body.regular, color: colors.primary.burgundy },
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingTop: 60,
-    paddingBottom: spacing.sm,
-  },
   iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: 'Georgia', flex: 1, textAlign: 'center' },
-  headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
 
   hero: {

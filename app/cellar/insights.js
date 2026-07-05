@@ -20,6 +20,7 @@ import {
   View,
 } from 'react-native';
 import { CompositionBars, TrendBars } from '../../components/CompositionBars';
+import ScreenHeader from '../../components/ScreenHeader';
 import { getCellarInsights } from '../../lib/cellarInsights';
 import theme from '../../styles/theme';
 
@@ -51,14 +52,7 @@ export default function CellarInsightsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>At a glance</Text>
-        <View style={styles.backBtn} />
-      </View>
-      <View style={styles.headerBorder} />
+      <ScreenHeader title="At a glance" />
 
       {!loaded ? (
         <View style={styles.center}>
@@ -159,22 +153,6 @@ function EmptyState({ onAdd }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.cream },
-
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingTop: 60,
-    paddingBottom: spacing.sm,
-  },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: {
-    ...typography.heading.h2,
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
-  headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
 
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },

@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 import { supabase } from '../../lib/supabase';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
@@ -156,17 +157,7 @@ export default function ChangePasswordScreen() {
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Change Password</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Change Password" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.formContainer}>
@@ -306,29 +297,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-    paddingTop: 50, // Account for status bar
-  },
-  backButton: {
-    padding: 5,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
-  headerSpacer: {
-    width: 34, // Same width as back button to center title
   },
   content: {
     flex: 1,

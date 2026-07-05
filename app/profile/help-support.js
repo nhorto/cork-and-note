@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 import theme from '../../styles/theme';
 
 const { colors } = theme;
@@ -401,18 +402,7 @@ const HelpSupportModal = () => {
 
   return (
     <View style={styles.container}>
-      {/* Custom Header - FIXED: Proper centering without save button */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={handleBack}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Help & Support</Text>
-        {/* Empty view to balance the layout and center the title */}
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Help & Support" onBack={handleBack} />
 
       <ScrollView style={styles.content}>
         {activeGuide ? (
@@ -462,30 +452,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    flex: 1,
-    textAlign: 'center',
-  },
-  // FIXED: Added spacer to balance the layout and center the title
-  headerSpacer: {
-    width: 40, // Same width as back button to maintain balance
   },
   content: {
     flex: 1,

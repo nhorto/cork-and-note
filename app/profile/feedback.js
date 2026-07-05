@@ -1,7 +1,6 @@
 // components/FeedbackModal.js
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
-import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
 import {
   ActivityIndicator,
@@ -16,6 +15,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 import { supabase } from '../../lib/supabase';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
@@ -23,7 +23,6 @@ import { AuthContext } from '../_layout';
 const { colors } = theme;
 
 export default function FeedbackScreen() {
-  const router = useRouter();
   const { user } = useContext(AuthContext);
 
   const [activeSection, setActiveSection] = useState(null);
@@ -197,17 +196,7 @@ export default function FeedbackScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Feedback</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Feedback" />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -499,35 +488,9 @@ const styles = StyleSheet.create({
   keyboardAvoid: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-  },
-  headerSpacer: {
-    width: 40, // Same width as back button to maintain balance
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 8,
-  },
   closeButton: {
     padding: 8,
     marginLeft: 'auto',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-    flex: 1,
-    textAlign: 'center',
   },
   content: {
     flex: 1,

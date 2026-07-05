@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
 
@@ -82,17 +83,7 @@ export default function AccountSettingsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Account Settings</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Account Settings" />
 
       <ScrollView style={styles.content}>
         {/* Privacy & Permissions Section */}
@@ -186,29 +177,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-    paddingTop: 50,
-  },
-  backButton: {
-    padding: 5,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
-  headerSpacer: {
-    width: 34,
   },
   content: {
     flex: 1,
