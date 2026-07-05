@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
-  sectionLabel: { ...typography.body.caption, color: colors.gold.shimmer },
+  sectionLabel: { ...typography.body.caption, color: colors.gold.text },
   sectionAction: { ...typography.body.small, color: colors.primary.burgundy },
 
   // Wine card
@@ -769,8 +769,8 @@ const styles = StyleSheet.create({
   sommText: { flex: 1 },
   sommTitle: {
     ...typography.heading.h3,
-    color: colors.gold.shimmer,
+    color: colors.neutral.charcoal,
     fontFamily: 'Georgia',
   },
-  sommSub: { ...typography.body.small, color: colors.gold.shimmer, marginTop: 2 },
+  sommSub: { ...typography.body.small, color: colors.neutral.charcoal, marginTop: 2 },
 });

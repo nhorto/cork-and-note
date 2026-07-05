@@ -737,7 +737,7 @@ const styles = StyleSheet.create({
   },
   visitDate: {
     ...typography.body.caption,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     marginBottom: spacing.xs,
   },
   cellarBadge: {
@@ -755,7 +755,7 @@ const styles = StyleSheet.create({
   },
   cellarBadgeText: {
     ...typography.body.caption,
-    color: colors.gold.rich,
+    color: colors.neutral.charcoal,
     fontWeight: '600',
   },
   ratingContainer: {
@@ -896,7 +896,7 @@ const styles = StyleSheet.create({
   },
   filterSectionTitle: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   filterOptions: {

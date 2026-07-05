@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginHorizontal: spacing.md,
   },
   visitCount: {
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
   },
   noWinesText: {
     ...typography.body.regular,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     fontStyle: 'italic',
     textAlign: 'center',
     padding: spacing.lg,

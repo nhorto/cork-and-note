@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   input: {
@@ -1020,7 +1020,7 @@ const styles = StyleSheet.create({
   },
   sommelierButtonText: {
     ...typography.body.regular,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     fontWeight: '600',
     fontFamily: 'Georgia',
     flex: 1,
@@ -1060,7 +1060,7 @@ const styles = StyleSheet.create({
   noPhotosText: {
     ...typography.body.small,
     marginTop: spacing.sm,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
   },
   photoGallery: {
     backgroundColor: colors.neutral.parchment,
@@ -1207,7 +1207,7 @@ const styles = StyleSheet.create({
   },
   confirmFieldLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.xs,
   },
   confirmCurrent: {

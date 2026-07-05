@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
   },
   infoNote: {
     fontSize: 12,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     fontStyle: 'italic',
     marginTop: 10,
     lineHeight: 16,

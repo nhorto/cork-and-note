@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  title: { ...typography.body.caption, color: colors.gold.shimmer },
+  title: { ...typography.body.caption, color: colors.gold.text },
 
   statusBadge: {
     paddingVertical: 2,

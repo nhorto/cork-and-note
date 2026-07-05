@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  heading: { ...typography.body.caption, color: colors.gold.shimmer, marginBottom: spacing.sm },
+  heading: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.sm },
   empty: { ...typography.body.small, color: colors.neutral.pewter, lineHeight: 19 },
 
   row: { flexDirection: 'row', gap: spacing.sm, paddingVertical: spacing.sm },
@@ -129,5 +129,5 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: spacing.xs,
   },
-  tastingLinkText: { ...typography.body.small, color: colors.gold.shimmer, fontWeight: '600' },
+  tastingLinkText: { ...typography.body.small, color: colors.gold.text, fontWeight: '600' },
 });

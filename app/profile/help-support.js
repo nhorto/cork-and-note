@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   },
   copyrightText: {
     fontSize: 12,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
   },
 });
 

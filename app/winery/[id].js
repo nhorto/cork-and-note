@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   aboutText: {

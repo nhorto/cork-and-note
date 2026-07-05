@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     ...shadows.soft,
   },
-  sectionLabel: { ...typography.body.caption, color: colors.gold.shimmer, marginBottom: spacing.md },
+  sectionLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.md },
 
   // Photos
   photoScroll: { marginHorizontal: -spacing.xs },

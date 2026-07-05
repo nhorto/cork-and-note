@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
 
   // Menu Container
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
   },
   footerVersion: {
     ...typography.body.caption,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     marginTop: spacing.xs,
   },
 });

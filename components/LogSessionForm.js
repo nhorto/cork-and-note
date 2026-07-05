@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
     borderColor: colors.neutral.stone,
     borderStyle: 'dashed',
   },
-  emptyWinesText: { ...typography.body.small, color: colors.neutral.silver, marginTop: spacing.sm },
+  emptyWinesText: { ...typography.body.small, color: colors.neutral.pewter, marginTop: spacing.sm },
 
   wineCard: {
     backgroundColor: colors.neutral.parchment,
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
 
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
@@ -702,7 +702,7 @@ const styles = StyleSheet.create({
   addPlaceText: { flex: 1 },
   addPlaceTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
   addPlaceSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
-  optTag: { ...typography.body.small, color: colors.neutral.silver, fontWeight: '400' },
+  optTag: { ...typography.body.small, color: colors.neutral.pewter, fontWeight: '400' },
 
   placeCard: {
     flexDirection: 'row',

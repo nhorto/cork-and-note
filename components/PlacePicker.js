@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
 
   label: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
     marginTop: spacing.md,
   },
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   suggestionText: { ...typography.body.regular, color: colors.neutral.charcoal, flex: 1 },
 
   pinHeader: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
-  optTag: { ...typography.body.small, color: colors.neutral.silver, fontStyle: 'italic' },
+  optTag: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic' },
 
   mapWrap: {
     height: 150,

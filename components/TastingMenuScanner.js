@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
 
   title: {
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
 
   disclaimer: {
     ...typography.body.small,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     fontStyle: 'italic',
     marginTop: spacing.md,
     textAlign: 'center',

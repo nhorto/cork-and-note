@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  notesLabel: { ...typography.body.caption, color: colors.gold.shimmer, marginBottom: spacing.xs },
+  notesLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.xs },
   notesText: { ...typography.body.regular, color: colors.neutral.charcoal, lineHeight: 22 },
 
   openBtn: {

@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     ...typography.body.small,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     fontStyle: 'italic',
     marginTop: 2,
   },
@@ -451,7 +451,7 @@ const styles = StyleSheet.create({
   },
   recentLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },

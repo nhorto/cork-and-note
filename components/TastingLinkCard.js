@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  cardLabel: { ...typography.body.caption, color: colors.gold.shimmer, marginBottom: spacing.sm },
+  cardLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.sm },
   prompt: { ...typography.body.small, color: colors.neutral.graphite, marginBottom: spacing.sm, lineHeight: 19 },
 
   row: {

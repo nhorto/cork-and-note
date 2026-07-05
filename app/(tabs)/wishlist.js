@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginHorizontal: spacing.md,
   },
   headerCount: {

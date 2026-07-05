@@ -726,7 +726,7 @@ const styles = StyleSheet.create({
   },
   fabMenuTitle: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
   fabMenuItem: {
     flexDirection: 'row',

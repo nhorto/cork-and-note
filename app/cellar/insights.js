@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
 
   // Sections
   section: { marginTop: spacing.xl },
-  sectionLabel: { ...typography.body.caption, color: colors.gold.shimmer },
+  sectionLabel: { ...typography.body.caption, color: colors.gold.text },
   sectionCaption: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
   sectionBody: {
     marginTop: spacing.md,

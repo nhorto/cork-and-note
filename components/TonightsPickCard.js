@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
   flexSpacer: { flex: 1 },
   collapsedTeaser: {
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
   },
   pickLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
   pickName: {
     ...typography.heading.h2,
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
   },
   flavorChipText: {
     ...typography.body.small,
-    color: colors.gold.shimmer,
+    color: colors.neutral.charcoal,
     fontSize: 12,
   },
 
@@ -650,7 +650,7 @@ const styles = StyleSheet.create({
 
   disclaimer: {
     ...typography.body.small,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     fontStyle: 'italic',
     marginTop: spacing.md,
     textAlign: 'center',

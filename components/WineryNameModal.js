@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   input: {
