@@ -16,6 +16,7 @@ import {
     View
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
+import StarRating from '../../components/StarRating';
 import { cellarService } from '../../lib/cellar';
 import { matchWineToCellar } from '../../lib/cellarMatch';
 import { varietalText } from '../../lib/varietals';
@@ -250,16 +251,12 @@ export default function WineDetail() {
           <Text style={styles.ratingValue}>
             {wine.overall_rating ? wine.overall_rating.toFixed(1) : '0.0'}
           </Text>
-          <View style={styles.starsContainer}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Ionicons
-                key={star}
-                name={star <= Math.round(wine.overall_rating || 0) ? 'star' : 'star-outline'}
-                size={20}
-                color={colors.gold.rich}
-              />
-            ))}
-          </View>
+          <StarRating
+            value={wine.overall_rating || 0}
+            size={20}
+            showValue={false}
+            style={styles.starsContainer}
+          />
         </View>
 
         {/* "In your cellar" link (#117) — shown when this same wine is also a
