@@ -1,8 +1,8 @@
 // app/(tabs)/wishlist.js
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useContext, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -27,9 +27,14 @@ export default function WishlistScreen() {
   const router = useRouter();
   const { user } = useContext(AuthContext);
 
-  useEffect(() => {
-    loadWishlist();
-  }, [user]);
+  // Reload whenever the tab gains focus so wineries saved elsewhere show up
+  // without a manual refresh.
+  useFocusEffect(
+    useCallback(() => {
+      loadWishlist();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user])
+  );
 
   const loadWishlist = async () => {
     if (!user) {
@@ -200,7 +205,7 @@ export default function WishlistScreen() {
             </View>
             <Text style={styles.emptyTitle}>Your Wishlist is Empty</Text>
             <Text style={styles.emptyText}>
-              Add wineries you'd like to visit to keep track of them here
+              Add wineries you’d like to visit to keep track of them here
             </Text>
 
             <TouchableOpacity

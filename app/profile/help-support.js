@@ -1,5 +1,6 @@
 // components/HelpSupportModal.js
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -445,7 +446,9 @@ const HelpSupportModal = () => {
 
             {/* App version info */}
             <View style={styles.versionInfo}>
-              <Text style={styles.versionText}>Cork & Note v1.0.0</Text>
+              <Text style={styles.versionText}>
+                Cork & Note v{Constants.expoConfig?.version ?? 'unknown'}
+              </Text>
               <Text style={styles.copyrightText}>© 2026 Cork & Note. All rights reserved.</Text>
             </View>
           </View>

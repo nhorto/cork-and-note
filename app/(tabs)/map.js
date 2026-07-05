@@ -32,6 +32,7 @@ export default function MapScreen() {
   const [userLocation, setUserLocation] = useState(null);
   const [userPins, setUserPins] = useState([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
+  const [pinsError, setPinsError] = useState(false);
   const [tempPin, setTempPin] = useState(null);
   const [showNameModal, setShowNameModal] = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
@@ -87,9 +88,13 @@ export default function MapScreen() {
       const { success, wineries } = await wineriesService.getUserWineries();
       if (success) {
         setUserPins(wineries);
+        setPinsError(false);
+      } else {
+        setPinsError(true);
       }
     } catch (error) {
       console.error('Error loading user pins:', error);
+      setPinsError(true);
     } finally {
       setPinsLoaded(true);
     }
@@ -460,19 +465,36 @@ export default function MapScreen() {
         <Ionicons name="locate" size={22} color={colors.primary.burgundy} />
       </TouchableOpacity>
 
-      {/* Hint text for first-time users */}
+      {/* Hint text for first-time users — or an error banner when the pins
+          failed to load, so we don't show onboarding over a wrongly-empty map. */}
       {pinsLoaded && userPins.length === 0 && (
-        <View style={styles.hintContainer}>
-          <View style={styles.hintIcon}>
-            <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+        pinsError ? (
+          <TouchableOpacity
+            style={styles.hintContainer}
+            activeOpacity={0.85}
+            onPress={loadUserPins}
+          >
+            <View style={styles.hintIcon}>
+              <Ionicons name="cloud-offline-outline" size={20} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.hintContent}>
+              <Text style={styles.hintTitle}>Couldn&apos;t load your places</Text>
+              <Text style={styles.hintText}>Tap to try again</Text>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.hintContainer}>
+            <View style={styles.hintIcon}>
+              <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.hintContent}>
+              <Text style={styles.hintTitle}>Welcome</Text>
+              <Text style={styles.hintText}>
+                Long-press on the map to drop a pin, or tap + to get started
+              </Text>
+            </View>
           </View>
-          <View style={styles.hintContent}>
-            <Text style={styles.hintTitle}>Welcome</Text>
-            <Text style={styles.hintText}>
-              Long-press on the map to drop a pin, or tap + to get started
-            </Text>
-          </View>
-        </View>
+        )
       )}
 
       {/* Modals */}

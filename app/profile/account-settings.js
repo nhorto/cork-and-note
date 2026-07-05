@@ -22,7 +22,6 @@ export default function AccountSettingsScreen() {
   const { user } = useContext(AuthContext);
   
   // Local state for settings
-  const [notifications, setNotifications] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locationPermissionStatus, setLocationPermissionStatus] = useState(null);
 
@@ -81,16 +80,6 @@ export default function AccountSettingsScreen() {
     }
   };
 
-  const handleNotificationsToggle = (value) => {
-    setNotifications(value);
-    // You can add actual notification preference saving logic here
-    if (value) {
-      Alert.alert('Notifications Enabled', 'You will receive notifications about new features and updates.');
-    } else {
-      Alert.alert('Notifications Disabled', 'You will not receive notifications from the app.');
-    }
-  };
-
   return (
     <View style={styles.container}>
       {/* Custom Header */}
@@ -109,21 +98,6 @@ export default function AccountSettingsScreen() {
         {/* Privacy & Permissions Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Privacy & Permissions</Text>
-          
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Push Notifications</Text>
-              <Text style={styles.settingDescription}>
-                Receive notifications about new features and updates
-              </Text>
-            </View>
-            <Switch
-              value={notifications}
-              onValueChange={handleNotificationsToggle}
-              trackColor={{ false: colors.neutral.stone, true: colors.primary.burgundy }}
-              thumbColor={colors.neutral.cream}
-            />
-          </View>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>

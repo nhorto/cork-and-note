@@ -45,6 +45,9 @@ export default function CellarScreen() {
   const params = useLocalSearchParams();
   const [bottles, setBottles] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  // Bumped by the error view's retry action to re-run the focus load below.
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Browse state.
   const [query, setQuery] = useState('');
@@ -64,14 +67,26 @@ export default function CellarScreen() {
       (async () => {
         const res = await cellarService.getCellar().catch(() => ({ success: false }));
         if (!active) return;
-        setBottles(res?.success ? res.bottles : []);
+        if (res?.success) {
+          setBottles(res.bottles);
+          setLoadError(false);
+        } else {
+          // Don't map failures to an empty cellar — that would show the
+          // "Start your cellar" onboarding to users who own bottles.
+          setLoadError(true);
+        }
         setLoaded(true);
       })();
       return () => {
         active = false;
       };
-    }, [])
+    }, [reloadKey])
   );
+
+  const retryLoad = () => {
+    setLoaded(false);
+    setReloadKey((k) => k + 1);
+  };
 
   // Deep-link from the Home "Ready to Drink" strip: ?status=ready pre-applies the
   // matching drink-window filter (and resets the segment so the filter shows).
@@ -80,8 +95,11 @@ export default function CellarScreen() {
     if (status && DEEP_LINK_STATUSES.includes(status)) {
       setSegment('all');
       setFilters({ ...EMPTY_FILTERS, statuses: [status] });
+      // Clear the param so re-tapping the same Home tile after clearing the
+      // chip applies the filter again.
+      router.setParams({ status: undefined });
     }
-  }, [params?.status]);
+  }, [params?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Whole pipeline (search -> segment -> filters -> sort -> group) in one memo.
   const { sections, facets, counts } = useMemo(
@@ -233,7 +251,11 @@ export default function CellarScreen() {
           <ActivityIndicator color={colors.primary.burgundy} />
         </View>
       ) : bottles.length === 0 ? (
-        <EmptyCellar onAdd={() => router.push('/cellar/add')} />
+        loadError ? (
+          <LoadError onRetry={retryLoad} />
+        ) : (
+          <EmptyCellar onAdd={() => router.push('/cellar/add')} />
+        )
       ) : !hasResults ? (
         <NoResults onReset={resetAll} />
       ) : (
@@ -540,6 +562,27 @@ function EmptyCellar({ onAdd }) {
         <Text style={styles.onboardSecondaryText}>or scan a label to add faster</Text>
       </TouchableOpacity>
     </ScrollView>
+  );
+}
+
+// Load-failure state: shown instead of the onboarding when the cellar fetch
+// fails, so owners of bottles aren't told to "start" their cellar.
+function LoadError({ onRetry }) {
+  return (
+    <View style={styles.body}>
+      <View style={styles.iconRing}>
+        <Ionicons name="cloud-offline-outline" size={36} color={colors.gold.shimmer} />
+      </View>
+      <Text style={styles.emptyTitle}>Couldn&apos;t load your cellar</Text>
+      <Text style={styles.emptySub}>
+        Something went wrong while fetching your bottles. Check your connection
+        and try again.
+      </Text>
+      <TouchableOpacity style={styles.emptyCta} onPress={onRetry} activeOpacity={0.9}>
+        <Ionicons name="refresh" size={18} color={colors.neutral.cream} />
+        <Text style={styles.emptyCtaText}>Try again</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 

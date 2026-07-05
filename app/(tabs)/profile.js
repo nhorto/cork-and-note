@@ -1,6 +1,7 @@
 // app/(tabs)/profile.js
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useContext } from 'react';
 import {
@@ -211,7 +212,9 @@ export default function ProfileScreen() {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>Cork & Note</Text>
-          <Text style={styles.footerVersion}>Version 1.0.0</Text>
+          <Text style={styles.footerVersion}>
+            Version {Constants.expoConfig?.version ?? 'unknown'}
+          </Text>
         </View>
       </ScrollView>
     </View>

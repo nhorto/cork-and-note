@@ -90,6 +90,10 @@ export default function SommelierScreen() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(null);
+  // True only when the active conversation genuinely has no messages (a new
+  // chat, or one whose history loaded empty). Gates the auto-title on first
+  // send so a failed history load can't re-title an existing conversation.
+  const [loadedEmpty, setLoadedEmpty] = useState(false);
   const flatListRef = useRef(null);
 
   // Load conversations on mount
@@ -124,8 +128,13 @@ export default function SommelierScreen() {
         displayText: m.role === 'assistant' ? aiService.getDisplayText(m.content) : m.content,
       }));
       setMessages(processed);
+      setLoadedEmpty(processed.length === 0);
     } catch (err) {
       console.error('Failed to load messages:', err);
+      Alert.alert('Error', 'Could not load this conversation. Please try again.');
+      setView('list');
+      setActiveConversation(null);
+      setMessages([]);
     } finally {
       setLoading(false);
     }
@@ -136,9 +145,11 @@ export default function SommelierScreen() {
       const conversation = await chatService.createConversation('general');
       setActiveConversation(conversation);
       setMessages([]);
+      setLoadedEmpty(true);
       setView('chat');
     } catch (err) {
       console.error('Failed to create conversation:', err);
+      Alert.alert('Error', 'Could not start a new conversation. Please try again.');
     }
   }, []);
 
@@ -187,11 +198,13 @@ export default function SommelierScreen() {
       const displayUserMsg = { ...userMsg, displayText: text };
       setMessages(prev => [...prev, displayUserMsg]);
 
-      // Auto-title on first message
-      if (messages.length === 0 && text) {
+      // Auto-title on first message — only when the conversation genuinely
+      // started empty, not when its history simply failed to load.
+      if (loadedEmpty && messages.length === 0 && text) {
         const title = chatService.generateTitle(text);
         await chatService.updateConversationTitle(activeConversation.id, title);
         setActiveConversation(prev => ({ ...prev, title }));
+        setLoadedEmpty(false);
       }
 
       // Build messages array for AI — send base64 images directly, not URLs
@@ -241,7 +254,7 @@ export default function SommelierScreen() {
     } finally {
       setSending(false);
     }
-  }, [activeConversation, messages, systemPrompt]);
+  }, [activeConversation, messages, systemPrompt, loadedEmpty]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {

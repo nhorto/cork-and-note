@@ -32,6 +32,11 @@ export default function HomeScreen() {
   const [recent, setRecent] = useState([]);
   const [highlights, setHighlights] = useState(null);
   const [loaded, setLoaded] = useState(false);
+  // True when every critical fetch failed — the account isn't empty, the
+  // backend is unreachable. Drives the inline error banner below.
+  const [loadFailed, setLoadFailed] = useState(false);
+  // Bumped by the banner's Retry action to re-run the focus load below.
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Reload whenever the tab gains focus. All calls are defensive: if the
   // backend is unavailable, we simply show zeros and an empty state.
@@ -48,6 +53,12 @@ export default function HomeScreen() {
             getCellarInsights().catch(() => ({ success: false })),
           ]);
           if (!active) return;
+
+          // If every critical load failed, surface the error banner instead of
+          // pretending the account is empty.
+          setLoadFailed(
+            [statsRes, visitsRes, wishRes, cellarRes].every((r) => !r?.success)
+          );
 
           setStats({
             wines: statsRes?.stats?.totalWines ?? 0,
@@ -96,7 +107,7 @@ export default function HomeScreen() {
       return () => {
         active = false;
       };
-    }, [])
+    }, [reloadKey])
   );
 
   const firstName =
@@ -132,6 +143,19 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+        {/* Load-failure banner — shown when every critical fetch failed. */}
+        {loadFailed && (
+          <TouchableOpacity
+            style={styles.errorBanner}
+            activeOpacity={0.85}
+            onPress={() => setReloadKey((k) => k + 1)}
+          >
+            <Ionicons name="cloud-offline-outline" size={18} color={colors.primary.burgundy} />
+            <Text style={styles.errorBannerText}>Couldn&apos;t load your data</Text>
+            <Text style={styles.errorBannerAction}>Retry</Text>
+          </TouchableOpacity>
+        )}
+
         {/* Stat strip — each counter taps through to its list (#96). */}
         <View style={styles.stats}>
           <Stat n={stats.wines} label="Wines" onPress={() => router.push('/wines')} />
@@ -502,6 +526,26 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
+
+  // Load-failure banner
+  errorBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.gold.light,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.md,
+  },
+  errorBannerText: { ...typography.body.small, color: colors.neutral.graphite, flex: 1 },
+  errorBannerAction: {
+    ...typography.body.small,
+    color: colors.primary.burgundy,
+    fontWeight: '600',
+  },
 
   // Stat strip
   stats: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },

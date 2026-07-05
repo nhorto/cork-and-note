@@ -5,6 +5,7 @@ import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from '
 import { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
+    Dimensions,
     Image,
     Modal,
     SafeAreaView,
@@ -22,6 +23,10 @@ import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
+
+// pagingEnabled snaps to the screen width, so the photo-viewer pages must
+// match it exactly for the offset math and "n of N" indicator to line up.
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function WineDetail() {
   const { id } = useLocalSearchParams();
@@ -107,12 +112,17 @@ export default function WineDetail() {
             })
             .catch(() => setCellarMatch(null));
         } else {
-          router.back();
+          // Not found — clear state so the "Wine not found" view renders.
+          setWine(null);
+          setVisit(null);
         }
       }
     } catch (error) {
       console.error('Error loading wine details:', error);
-      router.back();
+      // Load failed — render the "Wine not found" view instead of silently
+      // navigating away.
+      setWine(null);
+      setVisit(null);
     } finally {
       setLoading(false);
     }
@@ -123,7 +133,8 @@ export default function WineDetail() {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC'
     });
   };
 
@@ -384,7 +395,10 @@ export default function WineDetail() {
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              contentOffset={{ x: selectedPhotoIndex * 400, y: 0 }}
+              contentOffset={{ x: selectedPhotoIndex * SCREEN_WIDTH, y: 0 }}
+              onMomentumScrollEnd={(e) =>
+                setSelectedPhotoIndex(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH))
+              }
             >
               {wine.photos.map((photo, index) => (
                 <View key={index} style={styles.photoModalContainer}>
@@ -602,7 +616,7 @@ const styles = StyleSheet.create({
   // Photo modal (dark overlay intentional)
   photoModalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)', justifyContent: 'center', alignItems: 'center' },
   photoModalClose: { position: 'absolute', top: 50, right: 20, zIndex: 1, padding: spacing.sm },
-  photoModalContainer: { width: 400, height: 400, justifyContent: 'center', alignItems: 'center' },
+  photoModalContainer: { width: SCREEN_WIDTH, height: 400, justifyContent: 'center', alignItems: 'center' },
   photoModalImage: { width: '90%', height: '90%', resizeMode: 'contain' },
   photoModalIndicator: {
     position: 'absolute',

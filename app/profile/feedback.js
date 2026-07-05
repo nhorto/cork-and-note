@@ -1,5 +1,6 @@
 // components/FeedbackModal.js
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
 import {
@@ -115,7 +116,7 @@ export default function FeedbackScreen() {
           steps_to_reproduce: bugSteps.trim(),
           device: bugDevice,
           platform: Platform.OS,
-          version: '1.0.0' // App version
+          version: Constants.expoConfig?.version ?? 'unknown'
         });
 
       if (error) throw error;
@@ -171,21 +172,6 @@ export default function FeedbackScreen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Rate the app (open app store)
-  const rateApp = () => {
-    const appStoreUrl = Platform.OS === 'ios' 
-      ? 'https://apps.apple.com/app/idXXXXXXXXXX' // Replace with actual App Store URL
-      : 'https://play.google.com/store/apps/details?id=com.yourcompany.corkandnote'; // Replace with actual Play Store URL
-    
-    Linking.canOpenURL(appStoreUrl).then(supported => {
-      if (supported) {
-        Linking.openURL(appStoreUrl);
-      } else {
-        Alert.alert('Error', 'Could not open app store');
-      }
-    });
   };
 
   // Render star rating selector
@@ -466,19 +452,8 @@ export default function FeedbackScreen() {
             )}
           </View>
 
-          {/* Rate App Section */}
-          <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.sectionHeader}
-              onPress={rateApp}
-            >
-              <View style={styles.sectionTitle}>
-                <Ionicons name="star" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
-                <Text style={styles.sectionTitleText}>Rate Cork & Note</Text>
-              </View>
-              <Ionicons name="open-outline" size={22} color={colors.neutral.pewter} />
-            </TouchableOpacity>
-          </View>
+          {/* "Rate Cork & Note" section removed until the app has real App
+              Store / Play Store IDs to link to. */}
 
           {/* Social Links */}
           <View style={styles.socialLinks}>
