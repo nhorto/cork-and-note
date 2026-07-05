@@ -123,28 +123,10 @@ export default function LoginScreen() {
               <Text style={styles.loginButtonText}>Log In</Text>
             )}
           </TouchableOpacity>
-
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
-              <Ionicons name="logo-google" size={20} color="#00000" />
-              <Text style={styles.socialButtonTextGoogle}>Google</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={[styles.socialButton, styles.appleButton]}>
-              <Ionicons name="logo-apple" size={20} color="#fff" />
-              <Text style={styles.socialButtonTextApple}>Apple</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>Don't have an account? </Text>
+          <Text style={styles.registerText}>Don’t have an account? </Text>
           <Link href="/register" asChild>
             <TouchableOpacity>
               <Text style={styles.registerLink}>Sign Up</Text>
@@ -238,53 +220,6 @@ const styles = StyleSheet.create({
     color: '#b08442',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  loginButtonTextApple: {
-    color: '#ffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  loginButtonTextGoogle: {
-    color: '#0000',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#3E3E3E',
-  },
-  dividerText: {
-    paddingHorizontal: 10,
-    color: '#000',
-  },
-  socialButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 50,
-    borderRadius: 8,
-    width: '48%',
-  },
-  googleButton: {
-    backgroundColor: '#ffff',
-  },
-  appleButton: {
-    backgroundColor: '#000',
-  },
-  socialButtonTextApple: {
-    color: '#fff',
-    marginLeft: 8,
-    fontWeight: '500',
   },
   registerContainer: {
     flexDirection: 'row',

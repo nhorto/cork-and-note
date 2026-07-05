@@ -62,7 +62,7 @@ export default function ForgotPasswordScreen() {
             <Ionicons name="checkmark-circle" size={80} color="#8E2DE2" />
             <Text style={styles.successTitle}>Check Your Email</Text>
             <Text style={styles.successText}>
-              We've sent password reset instructions to {email}
+              We’ve sent password reset instructions to {email}
             </Text>
             <TouchableOpacity 
               style={styles.backToLoginButton}
@@ -83,7 +83,7 @@ export default function ForgotPasswordScreen() {
             
             <Text style={styles.title}>Forgot Password</Text>
             <Text style={styles.subtitle}>
-              Enter your email address and we'll send you instructions to reset your password.
+              Enter your email address and we’ll send you instructions to reset your password.
             </Text>
 
             <View style={styles.inputContainer}>

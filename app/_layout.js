@@ -1,4 +1,4 @@
-// app/_layout.js - WITH NAVIGATION LOGIC
+// app/_layout.js — root layout: auth context, navigation guard, cellar reminders
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -45,48 +45,35 @@ export default function RootLayout() {
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Navigation hooks - ADD THESE
   const router = useRouter();
   const segments = useSegments();
 
   // Derived state for cleaner checks
   const isAuthenticated = !!(user && session);
 
-  // AUTH INITIALIZATION - Same as before
   useEffect(() => {
     let mounted = true;
 
     const initializeAuth = async () => {
       try {
-        //console.log('🔐 Initializing authentication...');
-        
         // Get initial session
         const { data: { session }, error } = await supabase.auth.getSession();
-        
-        console.log('📊 Session result:', {
-          hasSession: !!session,
-          hasUser: !!session?.user,
-          userId: session?.user?.id,
-          userEmail: session?.user?.email,
-          error: error?.message
-        });
-        
+
         if (mounted) {
           if (error) {
-            console.error('❌ Session check error:', error);
+            console.error('Session check error:', error.message);
             setSession(null);
             setUser(null);
           } else {
-            console.log('✅ Session check result:', session ? 'Found session' : 'No session');
             setSession(session);
             setUser(session?.user ?? null);
           }
-          
+
           setIsInitialized(true);
           setIsLoading(false);
         }
       } catch (error) {
-        console.error('❌ Auth initialization error:', error);
+        console.error('Auth initialization error:', error.message);
         if (mounted) {
           setSession(null);
           setUser(null);
@@ -96,23 +83,14 @@ export default function RootLayout() {
       }
     };
 
-    // Initialize auth
     initializeAuth();
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (mounted) {  // ← REMOVE isInitialized condition
-        console.log('🔄 Auth state changed:', {
-          event,
-          hasSession: !!session,
-          hasUser: !!session?.user,
-          userId: session?.user?.id,
-          userEmail: session?.user?.email,
-          isInitialized
-        });
+      if (mounted) {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // If this is a sign-in event, make sure loading is false
         if (event === 'SIGNED_IN' && session) {
           setIsLoading(false);
@@ -126,38 +104,26 @@ export default function RootLayout() {
     };
   }, []);
 
-  // NAVIGATION LOGIC - ADD THIS NEW EFFECT
+  // Navigation guard: keep unauthenticated users in the auth flow and move
+  // authenticated users out of it.
   useEffect(() => {
-    if (!isInitialized || isLoading) {
-      console.log('⏳ Auth not ready yet, skipping navigation');
-      return;
-    }
+    if (!isInitialized || isLoading) return;
 
-    console.log('🚀 Auth ready, checking navigation...', {
-      isAuthenticated,
-      currentSegments: segments,
-      user: user?.email
-    });
+    // The password-recovery deep link manages its own navigation: the user
+    // arrives unauthenticated (tokens still in the URL) and becomes
+    // authenticated mid-screen once the recovery session is set — neither
+    // state should yank them off the screen.
+    if (segments[0] === 'reset-password') return;
 
-    const inAuthGroup = segments[0] === '(tabs)';
     const inAuthFlow = ['login', 'register', 'forgot-password'].includes(segments[0]);
-    const inProtectedRoute = ['winery', 'wine', 'profile'].includes(segments[0]) || inAuthGroup;
-    const onIndexPage = segments.length === 0; // ← ADD THIS CHECK
+    const onIndexPage = segments.length === 0;
 
     if (isAuthenticated && (inAuthFlow || onIndexPage)) {
-      // User is authenticated but on login/register page OR index page
-      console.log('✅ User authenticated, navigating from auth flow/index to main app');
+      // Authenticated but on an auth screen or the index page → main app.
       router.replace('/(tabs)/home');
-    } else if (!isAuthenticated && !inAuthFlow && !onIndexPage) {
-      // User is not authenticated but trying to access protected content (not index)
-      console.log('❌ User not authenticated, navigating to login');
+    } else if (!isAuthenticated && !inAuthFlow) {
+      // Not authenticated and outside the auth flow (incl. index) → login.
       router.replace('/login');
-    } else if (!isAuthenticated && onIndexPage) {
-      // User is not authenticated and on index page
-      console.log('❌ User not authenticated on index, navigating to login');
-      router.replace('/login');
-    } else {
-      console.log('📍 User is in correct section, no navigation needed');
     }
   }, [isAuthenticated, isInitialized, isLoading, segments]);
 
@@ -186,7 +152,6 @@ export default function RootLayout() {
     };
   }, [isAuthenticated]);
 
-  // YOUR EXISTING AUTH FUNCTIONS - Keep these the same
   const signIn = async (email, password) => {
     try {
       setIsLoading(true);
@@ -230,8 +195,14 @@ export default function RootLayout() {
         setIsLoading(false);
         throw error;
       }
-      
-      // Don't set isLoading to false here - let the auth state change handle it
+
+      // With email confirmation enabled, signUp returns NO session and no
+      // SIGNED_IN event ever fires — without this, isLoading stayed true and
+      // the navigation guard was disabled until the next auth event.
+      if (!data?.session) {
+        setIsLoading(false);
+      }
+      // Otherwise let the SIGNED_IN auth state change clear it.
       return { error: null, data };
     } catch (error) {
       setIsLoading(false);
@@ -332,6 +303,7 @@ export default function RootLayout() {
               <Stack.Screen name="login" />
               <Stack.Screen name="register" />
               <Stack.Screen name="forgot-password" />
+              <Stack.Screen name="reset-password" />
               <Stack.Screen name="profile/account-settings" />
               <Stack.Screen name="profile/notifications" />
               <Stack.Screen name="profile/change-password" />

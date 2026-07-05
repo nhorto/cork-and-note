@@ -107,8 +107,19 @@ export default function RegisterScreen() {
           Alert.alert('Error', error.message);
         }
       } else {
-          // Check if user is immediately signed in (no email confirmation)
-          if (data.session && data.user) {
+          // With email confirmation enabled, Supabase returns NO error when the
+          // email is already registered — the giveaway is an empty identities
+          // array on the returned user.
+          if (data?.user && (data.user.identities?.length ?? 0) === 0) {
+            Alert.alert(
+              'Account Already Exists',
+              'An account with this email already exists. Would you like to sign in instead?',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Sign In', onPress: () => router.replace('/login') }
+              ]
+            );
+          } else if (data.session && data.user) {
             // ← REMOVE THIS MANUAL NAVIGATION
             // setTimeout(() => {
             //   router.replace('/(tabs)/map');
@@ -239,24 +250,6 @@ export default function RegisterScreen() {
               <Text style={styles.registerButtonText}>Sign Up</Text>
             )}
           </TouchableOpacity>
-
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>OR</Text>
-            <View style={styles.divider} />
-          </View>
-
-          <View style={styles.socialButtonsContainer}>
-            <TouchableOpacity style={[styles.socialButton, styles.googleButton]}>
-              <Ionicons name="logo-google" size={20} color="#000" />
-              <Text style={styles.socialButtonText}>Google</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={[styles.socialButton, styles.appleButton]}>
-              <Ionicons name="logo-apple" size={20} color="#fff" />
-              <Text style={styles.socialButtonText}>Apple</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         <View style={styles.loginContainer}>
@@ -370,43 +363,6 @@ const styles = StyleSheet.create({
     color: '#b08442', // gold text
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  divider: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#3E3E3E',
-  },
-  dividerText: {
-    paddingHorizontal: 10,
-    color: '#3E3E3E',
-  },
-  socialButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 50,
-    borderRadius: 8,
-    width: '48%',
-  },
-  googleButton: {
-    backgroundColor: '#ffff',
-  },
-  appleButton: {
-    backgroundColor: '#000',
-  },
-  socialButtonText: {
-    color: '#3E3E3E',
-    marginLeft: 8,
-    fontWeight: '500',
   },
   loginContainer: {
     flexDirection: 'row',
