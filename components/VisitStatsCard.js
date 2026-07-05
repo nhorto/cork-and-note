@@ -82,12 +82,15 @@ const VisitStatsCard = () => {
     }
   };
 
+  // visit_date is a date-only value parsed as UTC midnight, so format in UTC
+  // too — otherwise it renders a day early west of UTC.
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'UTC'
     });
   };
 
@@ -419,8 +422,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.primary.rosé,
-    opacity: 0.3,
+    // rosé (#D4A5A5) at 30% alpha — container opacity would fade the icon too.
+    backgroundColor: 'rgba(212, 165, 165, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,

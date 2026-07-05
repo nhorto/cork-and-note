@@ -54,6 +54,14 @@ const formatDate = (s) => {
   });
 };
 
+// Strict YYYY-MM-DD check: format + real-calendar round-trip, so junk like
+// "2024-13-45" never reaches Postgres and fails with a raw DB error.
+const isValidISODate = (s) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(s + 'T00:00:00Z');
+  return !isNaN(d) && d.toISOString().slice(0, 10) === s;
+};
+
 // Map a DB wine row (snake_case, singular ratings) to the in-app wine shape
 // WineEntryForm / the wine cards expect. Preserves the row id so the edit flow
 // can diff existing wines from new ones.
@@ -283,6 +291,10 @@ export default function LogSessionForm({
       Alert.alert('Add a date', 'Please enter a date for this log.');
       return;
     }
+    if (!isValidISODate(visitDate)) {
+      Alert.alert('Check the date', 'Please enter the date as YYYY-MM-DD.');
+      return;
+    }
     setSaving(true);
     try {
       await onSave({
@@ -313,7 +325,8 @@ export default function LogSessionForm({
         ? colors.gold.rich
         : colors.primary.rosé;
     return (
-      <View key={index} style={styles.wineCard}>
+      // Wines are removable, so an index key would misalign rows after a delete.
+      <View key={wine.id ?? `draft-${index}-${wine.name ?? ''}`} style={styles.wineCard}>
         <View style={styles.wineCardHeader}>
           <View style={[styles.wineTypeBar, { backgroundColor: typeColor }]} />
           <View style={styles.wineInfo}>
@@ -452,7 +465,15 @@ export default function LogSessionForm({
           placeholderTextColor={colors.neutral.silver}
           selectionColor={colors.primary.burgundy}
         />
-        <Text style={styles.datePreview}>{formatDate(visitDate)}</Text>
+        <Text
+          style={[
+            styles.datePreview,
+            // Surface a bad date before save: non-empty but unparseable → error color.
+            !!visitDate && !isValidISODate(visitDate) && { color: colors.status.error },
+          ]}
+        >
+          {formatDate(visitDate)}
+        </Text>
 
         {/* Notes */}
         <Text style={styles.sectionLabel}>NOTES</Text>

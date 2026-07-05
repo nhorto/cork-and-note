@@ -55,9 +55,21 @@ export default function CellarFilterModal({
   // Draft state — edits don't take effect until Apply.
   const [draft, setDraft] = useState(filters || EMPTY_FILTERS);
 
+  // Price min/max are edited as raw strings so partial input like "12." isn't
+  // swallowed by a Number round-trip ("12." → 12 → "12"); toNum converts them
+  // into the draft as the user types (for the live preview) and on Apply.
+  const priceStr = (v) => (v == null ? '' : String(v));
+  const [minPriceStr, setMinPriceStr] = useState(priceStr((filters || EMPTY_FILTERS).minPrice));
+  const [maxPriceStr, setMaxPriceStr] = useState(priceStr((filters || EMPTY_FILTERS).maxPrice));
+
   // Re-seed the draft whenever the sheet (re)opens with the committed filters.
   useEffect(() => {
-    if (visible) setDraft(filters || EMPTY_FILTERS);
+    if (visible) {
+      const committed = filters || EMPTY_FILTERS;
+      setDraft(committed);
+      setMinPriceStr(priceStr(committed.minPrice));
+      setMaxPriceStr(priceStr(committed.maxPrice));
+    }
   }, [visible, filters]);
 
   const toggleIn = (key) => (value) =>
@@ -69,15 +81,16 @@ export default function CellarFilterModal({
       return { ...d, [key]: next };
     });
 
-  const setNum = (key) => (text) => setDraft((d) => ({ ...d, [key]: toNum(text) }));
+  const setPrice = (key, setStr) => (text) => {
+    setStr(text);
+    setDraft((d) => ({ ...d, [key]: toNum(text) }));
+  };
 
   // Live preview of how many lots the draft would show.
   const previewCount = useMemo(
     () => applyFilters(bottles || [], draft).length,
     [bottles, draft]
   );
-
-  const numStr = (v) => (v == null ? '' : String(v));
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -89,7 +102,11 @@ export default function CellarFilterModal({
           <View style={styles.headerRow}>
             <Text style={styles.title}>Filters</Text>
             <TouchableOpacity
-              onPress={() => setDraft(EMPTY_FILTERS)}
+              onPress={() => {
+                setDraft(EMPTY_FILTERS);
+                setMinPriceStr('');
+                setMaxPriceStr('');
+              }}
               disabled={!hasActiveFilters(draft)}
               hitSlop={8}
             >
@@ -157,8 +174,8 @@ export default function CellarFilterModal({
                 <Text style={styles.rangeLabel}>Min</Text>
                 <TextInput
                   style={styles.rangeInput}
-                  value={numStr(draft.minPrice)}
-                  onChangeText={setNum('minPrice')}
+                  value={minPriceStr}
+                  onChangeText={setPrice('minPrice', setMinPriceStr)}
                   placeholder="$0"
                   placeholderTextColor={colors.neutral.silver}
                   keyboardType="decimal-pad"
@@ -168,8 +185,8 @@ export default function CellarFilterModal({
                 <Text style={styles.rangeLabel}>Max</Text>
                 <TextInput
                   style={styles.rangeInput}
-                  value={numStr(draft.maxPrice)}
-                  onChangeText={setNum('maxPrice')}
+                  value={maxPriceStr}
+                  onChangeText={setPrice('maxPrice', setMaxPriceStr)}
                   placeholder="Any"
                   placeholderTextColor={colors.neutral.silver}
                   keyboardType="decimal-pad"

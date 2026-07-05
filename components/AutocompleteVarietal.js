@@ -54,6 +54,16 @@ const AutocompleteVarietal = ({
     }
   };
 
+  const handleBlur = () => {
+    // Small delay so a tap on a suggestion row lands before the dropdown
+    // unmounts (mirrors AutocompleteInput's blur handling).
+    setTimeout(() => {
+      setIsFocused(false);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }, 150);
+  };
+
   const handleSuggestionPress = (suggestion) => {
     if (onSelect) {
       onSelect(suggestion);
@@ -85,6 +95,7 @@ const AutocompleteVarietal = ({
           value={value}
           onChangeText={onChangeText}
           onFocus={handleFocus}
+          onBlur={handleBlur}
           placeholder={placeholder}
           placeholderTextColor={colors.neutral.silver}
           selectionColor={colors.primary.burgundy}

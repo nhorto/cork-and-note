@@ -26,7 +26,13 @@ const todayISO = () => new Date().toISOString().slice(0, 10);
 
 // Map a raw form state object to the column shape the cellar service expects.
 export function toBottlePayload(form) {
-  const num = (v) => (v === '' || v == null ? null : Number(v));
+  // NaN would be JSON-serialized to null silently — return null explicitly.
+  const num = (v) => {
+    if (v === '' || v == null) return null;
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
+  const rating = num(form.rating);
   return {
     winery_id: form.winery_id ?? null,
     wine_name: form.wine_name?.trim() || '',
@@ -44,7 +50,7 @@ export function toBottlePayload(form) {
     purchase_price: num(form.purchase_price),
     drink_from: form.drink_from ? parseInt(form.drink_from, 10) || null : null,
     drink_by: form.drink_by ? parseInt(form.drink_by, 10) || null : null,
-    rating: num(form.rating),
+    rating: rating == null ? null : Math.min(5, Math.max(0, rating)),
     notes: form.notes?.trim() || null,
     photo_url: form.photo_url || null,
   };

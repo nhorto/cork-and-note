@@ -31,11 +31,19 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
   const [loading, setLoading] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(null);
   const flatListRef = useRef(null);
+  // Re-entry guard for handleSend: `sending` state updates async, so two rapid
+  // taps could both see conversation === null and create two conversations.
+  const sendingRef = useRef(false);
 
-  // Initialize when modal opens
+  // Initialize when modal opens. The cleanup flag cancels a stale init so a
+  // rapid close/reopen can't land old setState calls after the reset.
   useEffect(() => {
     if (visible) {
-      init();
+      let active = true;
+      init(() => active);
+      return () => {
+        active = false;
+      };
     } else {
       // Reset when closed
       setConversation(null);
@@ -43,9 +51,9 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
     }
   }, [visible]);
 
-  const init = async () => {
+  const init = async (isActive) => {
     try {
-      setLoading(true);
+      if (isActive()) setLoading(true);
 
       // Build system prompt with current wine form context
       let prompt = await aiService.buildSystemPrompt();
@@ -53,8 +61,9 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
       if (currentWineData) {
         let formContext = '\n\nThe user is currently logging a wine. Here is what they have filled in so far on the form:';
         const d = currentWineData;
+        if (d.winemaker) formContext += `\n- Winemaker: ${d.winemaker}`;
         if (d.name) formContext += `\n- Wine Name: ${d.name}`;
-        formContext += `\n- Wine Type: ${d.type || 'Red (default)'}`;
+        formContext += `\n- Wine Type: ${d.type || '(not set)'}`;
         if (d.varietal) formContext += `\n- Varietal: ${d.varietal}`;
         if (d.year) formContext += `\n- Year: ${d.year}`;
         if (d.overallRating > 0) formContext += `\n- Overall Rating: ${d.overallRating}/5`;
@@ -66,7 +75,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
         if (d.additionalNotes) formContext += `\n- Notes: "${d.additionalNotes}"`;
         if (d.photoCount > 0) formContext += `\n- Photos: ${d.photoCount} photo(s) attached to the wine entry`;
 
-        const hasAnyData = d.name || d.varietal || d.year || d.overallRating > 0 || nonZeroRatings.length > 0 || d.flavorNotes?.length > 0 || d.additionalNotes;
+        const hasAnyData = d.winemaker || d.name || d.varietal || d.year || d.overallRating > 0 || nonZeroRatings.length > 0 || d.flavorNotes?.length > 0 || d.additionalNotes;
         if (!hasAnyData) {
           formContext += '\n- (Nothing filled in yet — the form is mostly blank)';
         }
@@ -75,18 +84,20 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
         prompt += formContext;
       }
 
-      setSystemPrompt(prompt);
+      if (isActive()) setSystemPrompt(prompt);
 
       if (existingConversationId) {
         // Resume existing conversation
         const conv = await chatService.getConversation(existingConversationId);
-        setConversation(conv);
+        if (isActive()) setConversation(conv);
         const msgs = await chatService.getMessages(existingConversationId);
-        setMessages(msgs.map(m => ({
-          ...m,
-          displayText: m.role === 'assistant' ? aiService.getDisplayText(m.content) : m.content,
-        })));
-      } else {
+        if (isActive()) {
+          setMessages(msgs.map(m => ({
+            ...m,
+            displayText: m.role === 'assistant' ? aiService.getDisplayText(m.content) : m.content,
+          })));
+        }
+      } else if (isActive()) {
         // Don't create conversation yet — wait until first message is sent
         setConversation(null);
         setMessages([]);
@@ -94,11 +105,13 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
     } catch (err) {
       console.error('WineChatModal init error:', err);
     } finally {
-      setLoading(false);
+      if (isActive()) setLoading(false);
     }
   };
 
   const handleSend = useCallback(async (text, photos = []) => {
+    if (sendingRef.current) return;
+    sendingRef.current = true;
     setSending(true);
     try {
       // Create conversation on first message (lazy creation)
@@ -142,10 +155,13 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
         content: text,
         images: base64Images,
       };
-      const previousMsgs = messages.map(m => ({
-        role: m.role,
-        content: m.content,
-      }));
+      // Local error bubbles are UI-only — never replay them to the AI as history.
+      const previousMsgs = messages
+        .filter(m => !m.isLocalError)
+        .map(m => ({
+          role: m.role,
+          content: m.content,
+        }));
       const aiMessages = [...previousMsgs, currentMsg];
 
       // Call AI
@@ -165,12 +181,16 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
       setMessages(prev => [...prev, {
         id: `error-${Date.now()}`,
         role: 'assistant',
+        // Synthetic, client-only bubble — flagged so it's filtered out of the
+        // history sent to the AI on the next message.
+        isLocalError: true,
         content: `Sorry, something went wrong: ${err.message}`,
         displayText: `Sorry, something went wrong: ${err.message}`,
         image_urls: [],
         created_at: new Date().toISOString(),
       }]);
     } finally {
+      sendingRef.current = false;
       setSending(false);
     }
   }, [conversation, messages, systemPrompt, onConversationStarted]);

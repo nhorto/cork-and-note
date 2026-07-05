@@ -124,6 +124,7 @@ export const borderRadius = {
   lg: 12,
   xl: 16,
   round: 999,
+  full: 999, // alias — several components reference borderRadius.full
 };
 
 export const shadows = {

@@ -54,13 +54,35 @@ const ManualWineryEntryModal = ({
       } catch (error) {
         console.error('Location error:', error);
       }
+
+      // The user asked for their real location but we couldn't get a fix
+      // (permission denied or GPS failure) — never silently substitute the
+      // default coordinates. Let them retry or explicitly opt into the default.
+      if (!location) {
+        setLoading(false);
+        Alert.alert(
+          "Couldn't get your location",
+          'We could not get a GPS fix. You can try again, or save without a precise location.',
+          [
+            { text: 'Retry', onPress: handleSave },
+            { text: 'Save without precise location', onPress: () => saveWinery(null) },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        return;
+      }
     }
 
+    await saveWinery(location);
+  };
+
+  const saveWinery = async (location) => {
+    setLoading(true);
     try {
       await onSave({
         name: name.trim(),
-        latitude: location?.latitude || 37.4316,
-        longitude: location?.longitude || -78.6569,
+        latitude: location?.latitude ?? 37.4316,
+        longitude: location?.longitude ?? -78.6569,
       }, actionType);
 
       setName('');

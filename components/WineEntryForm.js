@@ -7,6 +7,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Dimensions,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -28,6 +29,9 @@ import RatingSlider from './RatingSlider';
 import WineChatModal from './WineChatModal';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
+// pagingEnabled snaps to the screen width, so the photo pages must match it —
+// a hardcoded 400 desyncs the pager and the "N of M" indicator.
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const WINE_TYPES = [
   'Red', 'White', 'Rosé', 'Sparkling', 'Dessert',
@@ -79,8 +83,15 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
   // that a confirm is pending for that dismissal (vs. a plain chat close) (#120).
   const pendingConfirmRef = useRef(false);
 
+  // Double-tap guard for "Save Wine": two rapid presses would call onSave twice
+  // and append the wine to the session twice. Resets when the form remounts
+  // (the wine-form modal unmounts its children when hidden) or when new
+  // initialData loads.
+  const submittedRef = useRef(false);
+
   // Load initial data if editing an existing wine
   useEffect(() => {
+    submittedRef.current = false;
     if (initialData) {
       setWinemaker(initialData.winemaker || defaultWinemaker || '');
       setWineName(initialData.name || '');
@@ -441,6 +452,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
   // Handle form submission
   const handleSave = () => {
+    // Ignore a second rapid tap — the first one already saved this wine.
+    if (submittedRef.current) return;
+
     // Required = winemaker only. Everything else (incl. varietal) is optional —
     // blends and unknowns shouldn't block a save (#133). Display falls back to
     // name → varietal → type via lib/wineDisplay.js.
@@ -448,6 +462,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       Alert.alert('Missing Information', 'Please enter the winemaker (a winery or producer).');
       return;
     }
+
+    submittedRef.current = true;
 
     // Create wine data object
     const wineData = {
@@ -856,7 +872,11 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              contentOffset={{ x: selectedPhotoIndex * 400, y: 0 }}
+              contentOffset={{ x: selectedPhotoIndex * SCREEN_WIDTH, y: 0 }}
+              onMomentumScrollEnd={(event) => {
+                const newIndex = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+                setSelectedPhotoIndex(newIndex);
+              }}
             >
               {photos.map((photo, index) => (
                 <View key={index} style={styles.photoModalContainer}>
@@ -1222,7 +1242,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   photoModalContainer: {
-    width: 400,
+    width: SCREEN_WIDTH,
     height: 400,
     justifyContent: 'center',
     alignItems: 'center',

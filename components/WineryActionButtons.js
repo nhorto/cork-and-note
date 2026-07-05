@@ -152,7 +152,7 @@ const WineryActionButtons = ({
             status.isWantToVisit && styles.activeButtonText
           ]}
         >
-          {status.isWantToVisit ? "Want to Visit" : "Want to Visit"}
+          {status.isWantToVisit ? "On Your List" : "Want to Visit"}
         </Text>
       </TouchableOpacity>
     </View>
