@@ -1,19 +1,21 @@
 import { Link, Stack } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Text, TextStyle, View } from 'react-native';
 
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { colors, spacing, typography } from '../styles/theme';
 
 export default function NotFoundScreen() {
   return (
     <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
-      <ThemedView style={styles.container}>
-        <ThemedText type="title">This screen doesn't exist.</ThemedText>
-        <Link href="/" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
+      <Stack.Screen options={{ title: 'Not Found' }} />
+      <View style={styles.container}>
+        <Text style={styles.title}>Page not found</Text>
+        <Text style={styles.subtitle}>
+          This page seems to have been uncorked and poured elsewhere.
+        </Text>
+        <Link href="/(tabs)/home" style={styles.link}>
+          Back to home
         </Link>
-      </ThemedView>
+      </View>
     </>
   );
 }
@@ -23,10 +25,26 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    backgroundColor: colors.neutral.cream,
+    padding: spacing.lg,
+  },
+  title: {
+    ...(typography.heading.h1 as TextStyle),
+    fontFamily: typography.fonts.serif,
+    color: colors.neutral.charcoal,
+    textAlign: 'center',
+  },
+  subtitle: {
+    ...(typography.body.regular as TextStyle),
+    color: colors.neutral.graphite,
+    textAlign: 'center',
+    marginTop: spacing.sm,
   },
   link: {
-    marginTop: 15,
-    paddingVertical: 15,
+    ...(typography.body.regular as TextStyle),
+    marginTop: spacing.lg,
+    paddingVertical: spacing.md,
+    fontWeight: '600',
+    color: colors.primary.burgundy,
   },
 });
