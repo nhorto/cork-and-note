@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Auth Retheme Preview — Cork &amp; Note</title>
+<style>
+  :root{
+    --cream:#FAF8F5; --parchment:#F5F2ED; --linen:#EDE8E0; --stone:#D8D2C8;
+    --charcoal:#2C2C2C; --graphite:#4A4A4A; --pewter:#6E6E6E; --silver:#A8A8A8;
+    --burgundy:#722F37; --wine:#8B1A1A; --sage:#5B7B5B; --gold:#C9A962; --goldtext:#7E6430;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#e6e1da;color:var(--charcoal);font-family:var(--sans);padding:32px 20px 64px;line-height:1.5}
+  .wrap{max-width:1180px;margin:0 auto}
+  header.page{text-align:center;margin-bottom:28px}
+  header.page h1{font-family:var(--serif);font-weight:600;font-size:28px;color:var(--burgundy);letter-spacing:.3px}
+  header.page p{color:var(--graphite);font-size:15px;margin-top:6px}
+  .fixes{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px auto 0;max-width:860px}
+  .chip{background:var(--parchment);border:1px solid var(--stone);border-radius:999px;padding:5px 12px;font-size:12px;color:var(--graphite)}
+  .chip b{color:var(--burgundy);font-weight:600}
+  .frames{display:flex;flex-wrap:wrap;gap:26px;justify-content:center;margin-top:32px}
+  .phone{width:288px;background:var(--cream);border-radius:34px;padding:18px 16px 26px;
+    box-shadow:0 18px 40px rgba(44,44,44,.18);border:1px solid #d7d1c8;position:relative;min-height:560px;display:flex;flex-direction:column}
+  .phone .label{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--charcoal);color:var(--cream);
+    font-size:11px;letter-spacing:.6px;text-transform:uppercase;padding:3px 12px;border-radius:999px;white-space:nowrap}
+  .notch{width:120px;height:5px;border-radius:999px;background:#d7d1c8;margin:2px auto 20px}
+  .back{position:absolute;top:22px;left:18px;font-size:20px;color:var(--charcoal);line-height:1}
+  .logo{width:150px;height:70px;margin:0 auto;display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:26px;color:var(--burgundy);font-weight:600}
+  .logo.big{height:96px;font-size:30px}
+  .appname{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--burgundy);text-align:center;margin-top:8px;letter-spacing:.3px}
+  .screentitle{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--charcoal);text-align:center;margin-top:6px;letter-spacing:.3px}
+  .tagline,.subtitle{font-size:13px;color:var(--graphite);text-align:center;margin-top:8px;padding:0 6px}
+  .form{margin-top:22px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .field{display:flex;align-items:center;gap:9px;background:var(--parchment);border:1px solid var(--stone);
+    border-radius:8px;height:46px;padding:0 12px}
+  .field .ico{color:var(--burgundy);font-size:15px;width:16px;text-align:center}
+  .field .ph{color:var(--silver);font-size:14px;flex:1}
+  .field .val{color:var(--charcoal);font-size:14px;flex:1}
+  .field .eye{color:var(--burgundy);font-size:14px}
+  .forgot{align-self:flex-end;color:var(--burgundy);font-size:13px;font-weight:500;margin-top:-2px}
+  .btn{background:var(--burgundy);color:var(--cream);height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:600;letter-spacing:.3px;margin-top:4px}
+  .btn.block{width:100%}
+  .foot{display:flex;justify-content:center;gap:5px;font-size:13px;color:var(--graphite);margin-top:16px}
+  .foot a{color:var(--burgundy);font-weight:700;text-decoration:none}
+  .reqs{background:var(--parchment);border:1px solid var(--stone);border-radius:8px;padding:12px}
+  .reqs h4{font-size:13px;color:var(--charcoal);font-weight:600;margin-bottom:8px}
+  .reqrow{display:flex;align-items:center;gap:8px;font-size:12.5px;margin-bottom:4px}
+  .reqrow.met{color:var(--sage)}
+  .reqrow.unmet{color:var(--pewter)}
+  .reqrow .dot{width:15px;text-align:center}
+  .reqrow.met .dot{color:var(--sage)}
+  .reqrow.unmet .dot{color:var(--silver)}
+  .success{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:0 8px}
+  .success .check{font-size:66px;color:var(--sage);line-height:1}
+  .success h3{font-family:var(--serif);font-size:21px;font-weight:600;color:var(--charcoal);margin-top:10px}
+  .success p{font-size:13px;color:var(--graphite);margin-bottom:14px}
+  .cancel{text-align:center;color:var(--pewter);font-size:14px;margin-top:12px}
+  footer.note{max-width:760px;margin:40px auto 0;text-align:center;color:var(--graphite);font-size:13px;line-height:1.7}
+  footer.note code{background:var(--parchment);border:1px solid var(--stone);border-radius:5px;padding:1px 6px;font-size:12px;color:var(--goldtext)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="page">
+    <h1>Pre-login screens — rethemed</h1>
+    <p>The four guest screens now render on the Château Label system. Faithful to the shipped token values.</p>
+    <div class="fixes">
+      <span class="chip">Killed the purple <b>#8E2DE2</b> &amp; near-miss red <b>#8C1C13</b></span>
+      <span class="chip">CTA labels now <b>cream on burgundy</b> (9.1:1) — was gold-on-red 2.72:1</span>
+      <span class="chip">Serif headings via the theme token (Android-safe)</span>
+      <span class="chip">Cream ground, parchment fields, stone borders</span>
+      <span class="chip">Logo sized sanely (was 680px wide, radius 900)</span>
+      <span class="chip">Password checklist → <b>sage</b> / pewter</span>
+    </div>
+  </header>
+
+  <div class="frames">
+
+    <!-- LOGIN -->
+    <section class="phone">
+      <div class="label">Log in</div>
+      <div class="notch"></div>
+      <div class="logo big">Cork &amp; Note</div>
+      <div class="appname">Welcome to Cork &amp; Note</div>
+      <div class="tagline">Taste, note, and remember every wine</div>
+      <div class="form">
+        <div class="field"><span class="ico">✉</span><span class="ph">Email address</span></div>
+        <div class="field"><span class="ico">🔒</span><span class="val">••••••••</span><span class="eye">👁</span></div>
+        <div class="forgot">Forgot password?</div>
+        <div class="btn">Log In</div>
+        <div class="foot"><span>Don’t have an account?</span><a href="#">Sign Up</a></div>
+      </div>
+    </section>
+
+    <!-- REGISTER -->
+    <section class="phone">
+      <div class="label">Create account</div>
+      <div class="notch"></div>
+      <div class="back">‹</div>
+      <div class="screentitle">Create account</div>
+      <div class="subtitle">Join Cork &amp; Note to track your wine adventures</div>
+      <div class="form">
+        <div class="field"><span class="ico">👤</span><span class="ph">Full name</span></div>
+        <div class="field"><span class="ico">✉</span><span class="ph">Email address</span></div>
+        <div class="field"><span class="ico">🔒</span><span class="val">••••••</span><span class="eye">👁</span></div>
+        <div class="reqs">
+          <h4>Password requirements</h4>
+          <div class="reqrow met"><span class="dot">✔</span> At least 8 characters</div>
+          <div class="reqrow met"><span class="dot">✔</span> One lowercase letter</div>
+          <div class="reqrow unmet"><span class="dot">○</span> One uppercase letter</div>
+          <div class="reqrow unmet"><span class="dot">○</span> One number</div>
+        </div>
+        <div class="btn">Sign Up</div>
+        <div class="foot"><span>Already have an account?</span><a href="#">Log In</a></div>
+      </div>
+    </section>
+
+    <!-- FORGOT -->
+    <section class="phone">
+      <div class="label">Forgot password</div>
+      <div class="notch"></div>
+      <div class="back">‹</div>
+      <div class="logo big" style="margin-top:26px">Cork &amp; Note</div>
+      <div class="screentitle">Forgot password</div>
+      <div class="subtitle">Enter your email address and we’ll send you instructions to reset your password.</div>
+      <div class="form">
+        <div class="field"><span class="ico">✉</span><span class="ph">Email address</span></div>
+        <div class="btn block">Send reset link</div>
+        <div class="cancel">Cancel</div>
+      </div>
+    </section>
+
+    <!-- SUCCESS -->
+    <section class="phone">
+      <div class="label">Reset — sent</div>
+      <div class="notch"></div>
+      <div class="back">‹</div>
+      <div class="success">
+        <div class="check">✔</div>
+        <h3>Check your email</h3>
+        <p>We’ve sent password reset instructions to you@example.com</p>
+        <div class="btn block">Back to login</div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="note">
+    Rendered from the actual shipped values in <code>styles/theme.js</code> and the four screen files.
+    New tokens this pass: <code>gold.text #7E6430</code>, <code>pewter #6E6E6E</code>, and a Platform-guarded
+    <code>typography.fonts.serif</code>. Emoji stand in for the Ionicons; the real app uses line icons in burgundy.
+  </footer>
+</div>
+</body>
+</html>

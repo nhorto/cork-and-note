@@ -14,7 +14,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { borderRadius, colors, spacing, typography } from '../styles/theme';
 import { AuthContext } from './_layout';
+
+const SERIF = typography.fonts.serif;
 
 export default function ForgotPasswordScreen() {
   const router = useRouter();
@@ -34,7 +37,7 @@ export default function ForgotPasswordScreen() {
 
     try {
       const { error } = await resetPassword(email);
-      
+
       if (error) {
         Alert.alert('Error', error.message);
       } else {
@@ -52,23 +55,29 @@ export default function ForgotPasswordScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="#333" />
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => router.back()}
+        accessibilityRole="button"
+        accessibilityLabel="Go back"
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Ionicons name="arrow-back" size={24} color={colors.neutral.charcoal} />
       </TouchableOpacity>
 
       <View style={styles.contentContainer}>
         {resetSent ? (
           <View style={styles.successContainer}>
-            <Ionicons name="checkmark-circle" size={80} color="#8E2DE2" />
-            <Text style={styles.successTitle}>Check Your Email</Text>
+            <Ionicons name="checkmark-circle" size={80} color={colors.status.success} />
+            <Text style={styles.successTitle}>Check your email</Text>
             <Text style={styles.successText}>
               We’ve sent password reset instructions to {email}
             </Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.backToLoginButton}
               onPress={() => router.replace('/login')}
             >
-              <Text style={styles.backToLoginText}>Back to Login</Text>
+              <Text style={styles.backToLoginText}>Back to login</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -80,38 +89,38 @@ export default function ForgotPasswordScreen() {
                 resizeMode="contain"
               />
             </View>
-            
-            <Text style={styles.title}>Forgot Password</Text>
+
+            <Text style={styles.title}>Forgot password</Text>
             <Text style={styles.subtitle}>
               Enter your email address and we’ll send you instructions to reset your password.
             </Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="mail" size={20} color="#8E2DE2" style={styles.inputIcon} />
+              <Ionicons name="mail" size={20} color={colors.primary.burgundy} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Email Address"
+                placeholder="Email address"
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
-                placeholderTextColor='#8a8484'
+                placeholderTextColor={colors.neutral.silver}
               />
             </View>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.resetButton}
               onPress={handleResetPassword}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.neutral.cream} />
               ) : (
-                <Text style={styles.resetButtonText}>Reset Password</Text>
+                <Text style={styles.resetButtonText}>Send reset link</Text>
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => router.back()}
             >
@@ -127,20 +136,22 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.neutral.cream,
   },
   backButton: {
     position: 'absolute',
     top: 50,
     left: 20,
     zIndex: 10,
+    padding: 8,
   },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.lg,
     paddingTop: 100,
-    paddingBottom: 40,
+    paddingBottom: spacing.xl,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   logoContainer: {
     alignItems: 'center',
@@ -151,15 +162,17 @@ const styles = StyleSheet.create({
     height: 150,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
+    fontFamily: SERIF,
+    fontSize: 26,
+    fontWeight: '600',
+    color: colors.neutral.charcoal,
+    marginBottom: spacing.sm,
     textAlign: 'center',
+    letterSpacing: 0.3,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: colors.neutral.graphite,
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -168,12 +181,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
     paddingHorizontal: 12,
-    marginBottom: 20,
-    backgroundColor: '#f9f9f9',
-    height: 50,
+    marginBottom: spacing.lg,
+    backgroundColor: colors.neutral.parchment,
+    height: 52,
   },
   inputIcon: {
     marginRight: 10,
@@ -181,57 +194,60 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: '#333'
+    color: colors.neutral.charcoal,
   },
   resetButton: {
-    backgroundColor: '#8E2DE2',
-    borderRadius: 8,
-    height: 50,
+    backgroundColor: colors.primary.burgundy,
+    borderRadius: borderRadius.md,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
-    marginBottom: 15,
+    marginBottom: spacing.md,
   },
   resetButtonText: {
-    color: '#fff',
+    color: colors.neutral.cream,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
   cancelButton: {
-    padding: 10,
+    padding: spacing.sm,
   },
   cancelText: {
-    color: '#666',
+    color: colors.neutral.pewter,
     fontSize: 16,
   },
   successContainer: {
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.lg,
   },
   successTitle: {
+    fontFamily: SERIF,
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 20,
-    marginBottom: 10,
+    fontWeight: '600',
+    color: colors.neutral.charcoal,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
   },
   successText: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: 15,
+    color: colors.neutral.graphite,
     textAlign: 'center',
     marginBottom: 30,
   },
   backToLoginButton: {
-    backgroundColor: '#8E2DE2',
-    borderRadius: 8,
-    height: 50,
+    backgroundColor: colors.primary.burgundy,
+    borderRadius: borderRadius.md,
+    height: 52,
     justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
   },
   backToLoginText: {
-    color: '#fff',
+    color: colors.neutral.cream,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
 });

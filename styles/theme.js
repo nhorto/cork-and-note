@@ -2,6 +2,8 @@
 // "Château Label" Design System - Elegant & Refined
 // Inspired by fine French wine label typography and aesthetics
 
+import { Platform } from 'react-native';
+
 export const colors = {
   // Primary - Deep Bordeaux wines
   primary: {
@@ -17,6 +19,8 @@ export const colors = {
     muted: '#D4C4A8',         // Subtle gold for borders
     light: '#E8DCC8',         // Very light gold for backgrounds
     shimmer: '#B8976A',       // Darker gold for contrast
+    text: '#7E6430',          // Readable gold for ink — AA on cream (5.28) & parchment (5.01)
+    // Use rich/muted/light/shimmer for rules, borders, icons, stars only — never as small text.
   },
 
   // Neutrals - Warm paper tones
@@ -27,8 +31,8 @@ export const colors = {
     stone: '#D8D2C8',         // Borders and muted elements
     charcoal: '#2C2C2C',      // Primary text
     graphite: '#4A4A4A',      // Secondary text
-    pewter: '#7A7A7A',        // Tertiary text
-    silver: '#A8A8A8',        // Placeholder text
+    pewter: '#6E6E6E',        // Tertiary text — darkened to AA (4.81 cream / 4.57 parchment)
+    silver: '#A8A8A8',        // Placeholder text (decorative / non-essential only)
   },
 
   // Status colors - Refined versions
@@ -50,7 +54,9 @@ export const typography = {
   // Font families - We'll use system fonts that approximate the feel
   // In production, consider expo-google-fonts for Playfair Display + Lora
   fonts: {
-    serif: 'Georgia',              // Elegant serif for headings
+    // Georgia is iOS-only; Android falls back to its generic 'serif' (Noto Serif).
+    // Always read this token instead of hardcoding 'Georgia' so Android stays serif.
+    serif: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     sansSerif: 'System',           // Clean system font for body
   },
 
