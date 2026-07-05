@@ -1,0 +1,422 @@
+<title>Cork &amp; Note — Design Review</title>
+<style>
+  :root{
+    --cream:#FAF8F5; --parchment:#F5F2ED; --linen:#EDE8E0; --stone:#D8D2C8;
+    --charcoal:#2C2C2C; --graphite:#4A4A4A; --pewter:#7A7A7A; --silver:#A8A8A8;
+    --burgundy:#722F37; --wine:#8B1A1A; --merlot:#5C1A1A; --rose:#D4A5A5;
+    --gold:#C9A962; --goldmut:#D4C4A8; --goldlight:#E8DCC8; --goldshim:#B8976A; --goldtext:#7E6430;
+    --sage:#5B7B5B; --slate:#6B7B8B; --err:#9B3B3B;
+    --serif:Georgia,'Times New Roman',serif;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--cream);color:var(--charcoal);font-family:var(--sans);margin:0;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:48px 24px 96px}
+  .eyebrow{font-size:11px;letter-spacing:2.2px;text-transform:uppercase;color:var(--goldtext);font-weight:600}
+  h1{font-family:var(--serif);font-weight:300;font-size:clamp(30px,5vw,44px);letter-spacing:1px;margin:10px 0 6px;text-wrap:balance}
+  .sub{color:var(--graphite);font-size:15px;max-width:62ch}
+  .rule{height:1px;background:var(--goldmut);margin:28px 0}
+  .rule.double{height:5px;background:none;border-top:1px solid var(--goldmut);border-bottom:1px solid var(--goldmut)}
+  h2{font-family:var(--serif);font-weight:400;font-size:24px;letter-spacing:.4px;margin:0 0 4px}
+  h3{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 8px}
+  section{margin:56px 0 0}
+  .findnum{font-family:var(--serif);color:var(--goldshim);font-size:15px;letter-spacing:1.5px;display:block;margin-bottom:2px}
+  p{max-width:70ch}
+  .lede{color:var(--graphite)}
+  .scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:24px}
+  .score{background:var(--parchment);border:1px solid var(--stone);border-radius:12px;padding:14px 16px}
+  .score b{font-family:var(--serif);font-size:26px;font-weight:400;display:block;color:var(--burgundy)}
+  .score span{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--graphite)}
+  .card{background:var(--parchment);border:1px solid var(--stone);border-radius:12px;padding:20px 22px;margin-top:16px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--graphite);text-align:left;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--goldmut)}
+  td{padding:9px 10px;border-bottom:1px solid var(--linen);vertical-align:middle}
+  .tscroll{overflow-x:auto}
+  .chip{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.6px;padding:2px 9px;border-radius:999px;white-space:nowrap}
+  .chip.pass{background:var(--sage);color:#fff}
+  .chip.large{background:var(--slate);color:#fff}
+  .chip.fail{background:var(--err);color:#fff}
+  .sample{display:inline-block;padding:5px 12px;border-radius:6px;border:1px solid var(--stone);font-weight:600;white-space:nowrap}
+  .mono{font-family:var(--mono);font-size:12px;color:var(--graphite)}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--linen);border-radius:4px;padding:1px 5px}
+  pre{background:#2C2C2C;color:#EDE8E0;border-radius:10px;padding:16px 18px;overflow-x:auto;font-size:12.5px;line-height:1.6;margin:14px 0 0}
+  pre code{background:none;color:inherit;padding:0}
+  pre .c{color:#A8A8A8}pre .k{color:#D4A5A5}pre .s{color:#C9A962}
+  .cols{display:flex;gap:20px;flex-wrap:wrap;margin-top:16px}
+  .col{flex:1 1 300px;min-width:280px}
+  .caplabel{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--graphite);font-weight:700;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+  .caplabel .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;margin-top:16px}
+  .sw{border:1px solid var(--stone);border-radius:10px;overflow:hidden;background:#fff}
+  .sw .c{height:52px}
+  .sw .l{padding:6px 9px;font-size:11px;line-height:1.35}
+  .sw .l b{display:block;font-weight:600}
+  .sw .l span{color:var(--pewter);font-family:var(--mono);font-size:10px}
+  /* phone mockups */
+  .phone{width:290px;border:1px solid var(--stone);border-radius:26px;padding:14px 14px 18px;box-shadow:0 8px 24px rgba(44,44,44,.10);flex:none}
+  .phone .notch{width:74px;height:5px;border-radius:3px;background:rgba(0,0,0,.15);margin:0 auto 14px}
+  .ph-label{text-align:center;font-size:12px;color:var(--graphite);margin-top:10px}
+  .ph-label b{display:block;font-size:13px;color:var(--charcoal)}
+  /* current login */
+  .ph-cur{background:#E7E3E2}
+  .ph-cur .logo{width:84px;height:84px;border-radius:50%;background:#8C1C13;margin:6px auto 10px;display:flex;align-items:center;justify-content:center;color:#b08442;font-family:var(--serif);font-size:26px}
+  .ph-cur .hline{font-weight:800;font-size:17px;color:#3E3E3E;text-align:center}
+  .ph-cur .tag{font-size:11.5px;color:#3E3E3E;text-align:center;margin:2px 0 14px}
+  .ph-cur .inp{background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:10px 12px;font-size:13px;color:#8a8484;margin-bottom:10px}
+  .ph-cur .forgot{font-size:11.5px;color:#3E3E3E;text-align:right;margin-bottom:10px}
+  .ph-cur .btn{background:#8C1C13;color:#b08442;border-radius:8px;text-align:center;padding:11px;font-weight:700;font-size:14px}
+  .ph-cur .or{display:flex;align-items:center;gap:8px;color:#3E3E3E;font-size:10px;margin:12px 0}
+  .ph-cur .or:before,.ph-cur .or:after{content:'';flex:1;height:1px;background:#3E3E3E;opacity:.35}
+  .ph-cur .socials{display:flex;gap:8px}
+  .ph-cur .soc{flex:1;border-radius:8px;padding:9px;text-align:center;font-size:12px;font-weight:600}
+  .ph-cur .g{background:#ffff;border:1px solid #ddd;color:#444}
+  .ph-cur .a{background:#000;color:#3E3E3E}
+  .ph-cur .foot{font-size:11.5px;color:#3E3E3E;text-align:center;margin-top:14px}
+  .ph-cur .foot b{color:#8C1C13}
+  /* proposed login */
+  .ph-new{background:var(--cream)}
+  .ph-new .wordmark{font-family:var(--serif);font-weight:300;font-size:27px;letter-spacing:1.5px;color:var(--burgundy);text-align:center;margin-top:14px}
+  .ph-new .wm-sub{font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--goldtext);text-align:center;margin:4px 0 10px}
+  .ph-new .grule{display:flex;align-items:center;gap:8px;margin:0 26px 18px;color:var(--gold)}
+  .ph-new .grule:before,.ph-new .grule:after{content:'';flex:1;height:1px;background:var(--goldmut)}
+  .ph-new .grule i{font-style:normal;font-size:9px;transform:rotate(45deg);display:inline-block;color:var(--gold)}
+  .ph-new .inp{background:#fff;border:1px solid var(--stone);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--silver);margin-bottom:10px}
+  .ph-new .forgot{font-size:11.5px;color:var(--burgundy);font-weight:600;text-align:right;margin-bottom:10px}
+  .ph-new .btn{background:var(--burgundy);color:var(--cream);border-radius:8px;text-align:center;padding:11px;font-weight:600;font-size:14px}
+  .ph-new .or{display:flex;align-items:center;gap:8px;color:var(--pewter);font-size:10px;letter-spacing:1.5px;margin:12px 0}
+  .ph-new .or:before,.ph-new .or:after{content:'';flex:1;height:1px;background:var(--goldmut)}
+  .ph-new .socials{display:flex;gap:8px}
+  .ph-new .soc{flex:1;border-radius:8px;padding:9px;text-align:center;font-size:12px;font-weight:600}
+  .ph-new .g{background:#fff;border:1px solid var(--stone);color:var(--charcoal)}
+  .ph-new .a{background:#1c1c1c;color:#fff}
+  .ph-new .foot{font-size:11.5px;color:var(--graphite);text-align:center;margin-top:14px}
+  .ph-new .foot b{color:var(--burgundy)}
+  /* demo rows */
+  .demo{display:flex;gap:14px;flex-wrap:wrap;align-items:stretch;margin-top:14px}
+  .demo .d{flex:1 1 240px;min-width:220px;border:1px solid var(--stone);border-radius:10px;background:#fff;padding:14px 16px}
+  .d .tag-note{font-size:11px;color:var(--pewter);margin-top:10px;font-family:var(--mono)}
+  .pillrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .pill{font-size:12px;font-weight:600;padding:5px 13px}
+  .badge9{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--cream);padding:3px 8px;border-radius:6px}
+  .hdr-demo{border:1px solid var(--stone);border-radius:12px;background:var(--cream);overflow:hidden;margin-top:12px}
+  .hdr-demo .bar{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--goldmut)}
+  .hdr-demo .bar .t{font-family:var(--serif)}
+  .hdr-demo .meta{font-size:11px;color:var(--pewter);padding:7px 14px;font-family:var(--mono);background:var(--parchment)}
+  .icnbtn{width:34px;height:34px;border:1px dashed var(--rose);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--graphite);flex:none}
+  .roadmap li{margin-bottom:10px;max-width:75ch}
+  .roadmap b{color:var(--burgundy)}
+  .eff{font-size:10px;font-weight:700;letter-spacing:.8px;border:1px solid var(--stone);color:var(--graphite);border-radius:999px;padding:1px 8px;margin-left:6px;white-space:nowrap}
+  .good li{margin-bottom:6px;max-width:75ch}
+  @media (max-width:640px){ .phone{width:100%} }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Cork &amp; Note · Full-app design review · July 2026</div>
+  <h1>Château Label, appraised</h1>
+  <p class="sub">Every screen (18) and every shared component (43) audited against <span class="mono">styles/theme.js</span>, with WCAG&nbsp;2.1 contrast computed for each flagged color pair. Direction: <em>keep the identity, polish the execution.</em></p>
+
+  <div class="scores">
+    <div class="score"><b>18</b><span>screens audited</span></div>
+    <div class="score"><b>43</b><span>components audited</span></div>
+    <div class="score"><b>11</b><span>failing color pairs</span></div>
+    <div class="score"><b>8</b><span>files with square-chip bug</span></div>
+    <div class="score"><b>~30</b><span>unlabeled icon buttons</span></div>
+    <div class="score"><b>7</b><span>dead / leftover components</span></div>
+  </div>
+
+  <section>
+    <h2>The verdict</h2>
+    <p class="lede">The Château Label system is genuinely good — a warm, confident identity with an excellent core: charcoal on cream measures 13.2:1, the burgundy CTAs 9.7:1, and the signed-in tab screens are almost entirely token-driven. The problems are not the design; they are <strong>drift and unfinished edges</strong>. Three patterns account for most of it: (1)&nbsp;the pre-login screens never got the rebrand, (2)&nbsp;gold is being used as <em>ink</em> when it only works as <em>decoration</em>, and (3)&nbsp;the same concept — a chip, a button, a header — has been redrawn slightly differently each time it was needed.</p>
+  </section>
+
+  <section>
+    <h2>Palette &amp; contrast, measured</h2>
+    <p class="lede">Solid pairs first — these carry the whole app and all pass AA or better:</p>
+    <div class="tscroll"><table>
+      <tr><th>Sample</th><th>Pair</th><th>Ratio</th><th>Grade</th></tr>
+      <tr><td><span class="sample" style="color:#2C2C2C;background:#FAF8F5">Wine Details</span></td><td class="mono">charcoal / cream</td><td>13.2</td><td><span class="chip pass">AAA</span></td></tr>
+      <tr><td><span class="sample" style="color:#4A4A4A;background:#F5F2ED">Producer, region</span></td><td class="mono">graphite / parchment</td><td>7.9</td><td><span class="chip pass">AAA</span></td></tr>
+      <tr><td><span class="sample" style="color:#FAF8F5;background:#722F37">Log a wine</span></td><td class="mono">cream / burgundy</td><td>9.7</td><td><span class="chip pass">AAA</span></td></tr>
+      <tr><td><span class="sample" style="color:#722F37;background:#FAF8F5">Cabernet Franc</span></td><td class="mono">burgundy / cream</td><td>9.1</td><td><span class="chip pass">AAA</span></td></tr>
+      <tr><td><span class="sample" style="color:#9B3B3B;background:#FAF8F5">Remove from cellar</span></td><td class="mono">error / cream</td><td>6.4</td><td><span class="chip pass">AA</span></td></tr>
+    </table></div>
+
+    <p class="lede" style="margin-top:26px">And the pairs that fail — every one below is shipping today, shown in its real colors:</p>
+    <div class="tscroll"><table>
+      <tr><th>Sample (as rendered)</th><th>Where</th><th>Ratio</th><th>Grade</th></tr>
+      <tr><td><span class="sample" style="color:#C9A962;background:#E8DCC8">In your cellar</span></td><td>cellar badge, wines tab</td><td>1.66</td><td><span class="chip fail">FAIL</span></td></tr>
+      <tr><td><span class="sample" style="color:#3E3E3E;background:#000">Continue with Apple</span></td><td>register screen button label</td><td>1.96</td><td><span class="chip fail">FAIL</span></td></tr>
+      <tr><td><span class="sample" style="color:#B8976A;background:#E8DCC8">Cherry · Oak · Vanilla</span></td><td>Tonight's Pick flavor chips</td><td>2.02</td><td><span class="chip fail">FAIL</span></td></tr>
+      <tr><td><span class="sample" style="color:#A8A8A8;background:#F5F2ED">Jun 12, 2026 · optional</span></td><td>dates, notes, disclaimers app-wide</td><td>2.13</td><td><span class="chip fail">FAIL</span></td></tr>
+      <tr><td><span class="sample" style="color:#B8976A;background:#F5F2ED">DETAILED RATINGS</span></td><td>section captions app-wide</td><td>2.45</td><td><span class="chip fail">FAIL</span></td></tr>
+      <tr><td><span class="sample" style="color:#FAF8F5;background:#B8976A">TOO YOUNG</span></td><td>drink-window badge, 9px</td><td>2.58</td><td><span class="chip fail">FAIL</span></td></tr>
+      <tr><td><span class="sample" style="color:#b08442;background:#8C1C13">Log In</span></td><td>login &amp; register primary CTA</td><td>2.72</td><td><span class="chip fail">FAIL</span></td></tr>
+      <tr><td><span class="sample" style="color:#D4A5A5;background:#722F37">Takes about a minute</span></td><td>hero sub-copy, chat timestamps (10–13px)</td><td>4.47</td><td><span class="chip large">LARGE ONLY</span></td></tr>
+      <tr><td><span class="sample" style="color:#7A7A7A;background:#F5F2ED">3 bottles · tap to view</span></td><td>pewter metas at 11–13px app-wide</td><td>3.84</td><td><span class="chip large">LARGE ONLY</span></td></tr>
+      <tr><td><span class="sample" style="color:#FAF8F5;background:#6B7B8B">WANT TO VISIT</span></td><td>wishlist badges at 9–13px</td><td>4.10</td><td><span class="chip large">LARGE ONLY</span></td></tr>
+    </table></div>
+
+    <div class="card">
+      <h3>The fix is one new token, not a new palette</h3>
+      <p style="margin:6px 0 0">Keep <span class="mono">#C9A962</span> for rules, borders, stars, and dividers — that's where it shines. Add a <strong>gold ink</strong> for anything that must be read, and darken pewter one step:</p>
+      <div class="demo">
+        <div class="d">
+          <div class="caplabel"><span class="dot" style="background:var(--err)"></span>Today</div>
+          <div style="font-size:11px;letter-spacing:1.4px;font-weight:600;color:#B8976A">READY TO DRINK</div>
+          <div style="font-size:13px;color:#7A7A7A;margin-top:6px">2019 Meritage · Barboursville</div>
+          <div class="tag-note">#B8976A → 2.45 · #7A7A7A → 3.84</div>
+        </div>
+        <div class="d">
+          <div class="caplabel"><span class="dot" style="background:var(--sage)"></span>Proposed</div>
+          <div style="font-size:11px;letter-spacing:1.4px;font-weight:600;color:#7E6430">READY TO DRINK</div>
+          <div style="font-size:13px;color:#6E6E6E;margin-top:6px">2019 Meritage · Barboursville</div>
+          <div class="tag-note">gold.text #7E6430 → 5.0+ AA · #6E6E6E → 4.6 AA</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="swatches">
+      <div class="sw"><div class="c" style="background:#722F37"></div><div class="l"><b>burgundy</b><span>#722F37</span></div></div>
+      <div class="sw"><div class="c" style="background:#8B1A1A"></div><div class="l"><b>wine</b><span>#8B1A1A</span></div></div>
+      <div class="sw"><div class="c" style="background:#5C1A1A"></div><div class="l"><b>merlot</b><span>#5C1A1A</span></div></div>
+      <div class="sw"><div class="c" style="background:#D4A5A5"></div><div class="l"><b>rosé</b><span>#D4A5A5</span></div></div>
+      <div class="sw"><div class="c" style="background:#C9A962"></div><div class="l"><b>gold.rich</b><span>#C9A962</span></div></div>
+      <div class="sw"><div class="c" style="background:#B8976A"></div><div class="l"><b>gold.shimmer</b><span>#B8976A</span></div></div>
+      <div class="sw"><div class="c" style="background:#7E6430"></div><div class="l"><b>gold.text ★new</b><span>#7E6430</span></div></div>
+      <div class="sw"><div class="c" style="background:#FAF8F5;border-bottom:1px solid #EDE8E0"></div><div class="l"><b>cream</b><span>#FAF8F5</span></div></div>
+      <div class="sw"><div class="c" style="background:#F5F2ED"></div><div class="l"><b>parchment</b><span>#F5F2ED</span></div></div>
+      <div class="sw"><div class="c" style="background:#2C2C2C"></div><div class="l"><b>charcoal</b><span>#2C2C2C</span></div></div>
+      <div class="sw"><div class="c" style="background:#5B7B5B"></div><div class="l"><b>sage</b><span>#5B7B5B</span></div></div>
+      <div class="sw"><div class="c" style="background:#6B7B8B"></div><div class="l"><b>slate</b><span>#6B7B8B</span></div></div>
+    </div>
+  </section>
+
+  <div class="rule double" style="margin-top:56px"></div>
+
+  <section>
+    <span class="findnum">FINDING I — CRITICAL</span>
+    <h2>The app has two brands, and guests see the wrong one</h2>
+    <p class="lede">Signed-in screens are unmistakably Château Label. But <span class="mono">index.js</span>, <span class="mono">login.js</span>, <span class="mono">register.js</span>, and <span class="mono">forgot-password.js</span> import <em>zero</em> theme tokens. They run on a near-miss red <span class="mono">#8C1C13</span> (not your wine <span class="mono">#8B1A1A</span>), flat gray <span class="mono">#E7E3E2</span>, Bootstrap grays and Material green in the password checklist, and the old <strong>purple <span class="mono">#8E2DE2</span></strong> still paints the very first spinner a user ever sees, plus both forgot-password CTAs. No serif type appears until after login — first impressions never meet the brand.</p>
+    <div class="cols" style="align-items:flex-start">
+      <div class="col" style="display:flex;justify-content:center">
+        <div>
+          <div class="phone ph-cur">
+            <div class="notch"></div>
+            <div class="logo">C</div>
+            <div class="hline">Welcome to Cork &amp; Note!</div>
+            <div class="tag">Your personal wine journal</div>
+            <div class="inp">Email</div>
+            <div class="inp">Password</div>
+            <div class="forgot">Forgot Password?</div>
+            <div class="btn">Log In</div>
+            <div class="or">OR</div>
+            <div class="socials"><div class="soc g">Google</div><div class="soc a">Apple</div></div>
+            <div class="foot">Don't have an account? <b>Sign Up</b></div>
+          </div>
+          <div class="ph-label"><b>Today</b>gray #E7E3E2 · red #8C1C13 · CTA label 2.72:1 · no serif</div>
+        </div>
+      </div>
+      <div class="col" style="display:flex;justify-content:center">
+        <div>
+          <div class="phone ph-new">
+            <div class="notch"></div>
+            <div class="wordmark">Cork &amp; Note</div>
+            <div class="wm-sub">Your personal wine journal</div>
+            <div class="grule"><i>◆</i></div>
+            <div class="inp">Email</div>
+            <div class="inp">Password</div>
+            <div class="forgot">Forgot password?</div>
+            <div class="btn">Log in</div>
+            <div class="or">OR</div>
+            <div class="socials"><div class="soc g">Google</div><div class="soc a">Apple</div></div>
+            <div class="foot">Don't have an account? <b>Sign up</b></div>
+          </div>
+          <div class="ph-label"><b>Proposed</b>theme tokens only — cream · burgundy · serif wordmark · 9.7:1 CTA</div>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top:18px">Same layout, zero new components — just swap the stylesheet values for theme tokens. While in there: the social buttons currently have <strong>no <span class="mono">onPress</span></strong> (dead UI — wire them or hide them), <span class="mono">login.js</span> references a style that doesn't exist (<span class="mono">socialButtonTextGoogle</span>), the logo is styled 680px wide, and the splash spinner should be burgundy on cream.</p>
+  </section>
+
+  <section>
+    <span class="findnum">FINDING II — CRITICAL</span>
+    <h2>Gold is decoration, not ink</h2>
+    <p class="lede">The single most repeated readability issue: <span class="mono">gold.shimmer</span> captions label nearly every section of every screen at 11px — at 2.45:1. Gold badges put cream text on gold ground. Gold-tinted cards put gold text on gold. None of it clears even the large-text bar.</p>
+    <div class="demo">
+      <div class="d" style="background:#E8DCC8;border-color:#D4C4A8">
+        <div style="font-family:var(--serif);font-size:15px;color:#B8976A">Ask your Sommelier</div>
+        <div style="font-size:12.5px;color:#B8976A;margin-top:3px">Pairings, advice, and picks from your own cellar</div>
+        <div class="tag-note" style="color:#8A6D35">home.js sommelier card — 2.0:1</div>
+      </div>
+      <div class="d" style="background:#E8DCC8;border-color:#D4C4A8">
+        <div style="font-family:var(--serif);font-size:15px;color:#5C1A1A">Ask your Sommelier</div>
+        <div style="font-size:12.5px;color:#7E6430;margin-top:3px">Pairings, advice, and picks from your own cellar</div>
+        <div class="tag-note" style="color:#8A6D35">proposed — merlot title 5.8:1 · gold.text body 4.1:1 (13px+)</div>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="d">
+        <div class="pillrow">
+          <span class="badge9" style="background:#B8976A">Too young</span>
+          <span class="badge9" style="background:#6B7B8B">Hold</span>
+          <span class="badge9" style="background:#5B7B5B">Ready now</span>
+        </div>
+        <div class="tag-note">today — 9px cream text: 2.6 / 4.1 / 4.5</div>
+      </div>
+      <div class="d">
+        <div class="pillrow">
+          <span class="badge9" style="background:#E8DCC8;color:#5C1A1A">Too young</span>
+          <span class="badge9" style="background:#6B7B8B;font-size:11px">Hold</span>
+          <span class="badge9" style="background:#5B7B5B;font-size:11px">Ready now</span>
+        </div>
+        <div class="tag-note">proposed — 11px floor; tinted-bg + dark-ink for the gold badge</div>
+      </div>
+    </div>
+    <p style="margin-top:14px">Rule of thumb going forward: <strong>gold.rich / gold.shimmer touch nothing smaller than an icon</strong>. Captions and gold-card body text use <span class="mono">gold.text #7E6430</span>; badges either keep white text on the darker grounds (at ≥11px) or flip to tinted-background-with-dark-ink like the "Too young" pill above.</p>
+  </section>
+
+  <section>
+    <span class="findnum">FINDING III — BUG</span>
+    <h2>The pill that renders square</h2>
+    <p class="lede"><span class="mono">borderRadius.full</span> doesn't exist in the theme (<span class="mono">sm/md/lg/xl/round</span> do). Every chip styled with it resolves to <span class="mono">undefined</span> and renders square — in <strong>8 files</strong>: varietal chips, flavor tags, wine-type pills, status badges, the star container, photo-count pills, and the wines-tab filter chips. The cellar flow uses <span class="mono">.round</span> correctly, so the same chip concept is round in one flow and square in the next.</p>
+    <div class="demo">
+      <div class="d">
+        <div class="pillrow">
+          <span class="pill" style="background:#D4A5A5;color:#722F37;border-radius:0">Blackberry</span>
+          <span class="pill" style="background:#D4A5A5;color:#722F37;border-radius:0">Tobacco</span>
+        </div>
+        <div class="tag-note">tasting flow today — borderRadius: undefined</div>
+      </div>
+      <div class="d">
+        <div class="pillrow">
+          <span class="pill" style="background:#D4A5A5;color:#5C1A1A;border-radius:999px">Blackberry</span>
+          <span class="pill" style="background:#D4A5A5;color:#5C1A1A;border-radius:999px">Tobacco</span>
+        </div>
+        <div class="tag-note">cellar flow (and intent) — borderRadius.round</div>
+      </div>
+    </div>
+    <pre><code><span class="c">// styles/theme.js — one-line fix keeps every existing call site working</span>
+export const borderRadius = { sm: 4, md: 8, lg: 12, xl: 16, round: 999, <span class="k">full: 999</span> };</code></pre>
+  </section>
+
+  <section>
+    <span class="findnum">FINDING IV — CONSISTENCY</span>
+    <h2>One concept, many designs</h2>
+    <p class="lede">None of these is wrong alone; together they read as unfinished. Each gallery below is the <em>same element</em> as it ships today in different files.</p>
+
+    <h3 style="margin-top:22px">Primary button — 3 designs</h3>
+    <div class="pillrow" style="margin-top:8px">
+      <span style="background:#722F37;color:#FAF8F5;border-radius:4px;padding:10px 18px;font-size:15px;font-weight:600">Save bottle</span>
+      <span style="background:#722F37;color:#FAF8F5;border-radius:8px;padding:10px 18px;font-size:15px;font-weight:600;font-family:var(--serif)">Save wine</span>
+      <span style="background:#722F37;color:#FAF8F5;border-radius:8px;padding:10px 18px;font-size:17px;font-weight:600;font-family:var(--serif)">Tonight's pick</span>
+    </div>
+    <div class="tag-note" style="margin-top:6px">radius 4 + sans (cellar forms) · radius 8 + Georgia (logging flow) · radius 8 + h3 serif (AI cards)</div>
+
+    <h3 style="margin-top:22px">Cancel button — 3 designs</h3>
+    <div class="pillrow" style="margin-top:8px">
+      <span style="background:#F5F2ED;color:#4A4A4A;border:1px solid #D8D2C8;border-radius:8px;padding:9px 18px;font-size:14px;font-weight:600">Cancel</span>
+      <span style="background:#F5F2ED;color:#4A4A4A;border:1px solid #D8D2C8;border-radius:12px;padding:9px 18px;font-size:14px;font-weight:600">Cancel</span>
+      <span style="background:transparent;color:#722F37;border:1px solid #722F37;border-radius:4px;padding:9px 18px;font-size:14px;font-weight:600">Cancel</span>
+    </div>
+    <div class="tag-note" style="margin-top:6px">WineEntryForm · PinActionModal · TastingLinkCard</div>
+
+    <h3 style="margin-top:22px">Flavor chip — 3 colorways for the same tag</h3>
+    <div class="pillrow" style="margin-top:8px">
+      <span class="pill" style="background:#D4A5A5;color:#722F37;border-radius:999px">Cherry</span>
+      <span class="pill" style="background:#722F37;color:#FAF8F5;border-radius:999px">Cherry</span>
+      <span class="pill" style="background:#E8DCC8;color:#B8976A;border-radius:999px">Cherry</span>
+    </div>
+    <div class="tag-note" style="margin-top:6px">selected strip (rosé/burgundy) · palette (burgundy/cream) · Tonight's Pick (gold-on-gold, 2.0:1)</div>
+
+    <h3 style="margin-top:22px">Screen header — 3 recipes on one navigation stack</h3>
+    <div class="hdr-demo">
+      <div class="bar"><span class="icnbtn">‹</span><span class="t" style="font-size:20px">Wine Details</span><span class="icnbtn">✎</span></div>
+      <div class="meta">wine/[id] — SafeAreaView · chevron-back · h2 20 serif · gold hairline</div>
+    </div>
+    <div class="hdr-demo">
+      <div class="bar" style="border-bottom-color:#D4C4A8"><span class="icnbtn" style="width:30px;height:30px">←</span><span class="t" style="font-size:18px">Account Settings</span><span style="width:34px"></span></div>
+      <div class="meta">profile/* — paddingTop: 50 · arrow-back ~34px target · raw 18 serif</div>
+    </div>
+    <div class="hdr-demo">
+      <div class="bar"><span class="icnbtn" style="border-radius:50%;border-style:solid;border-color:#D8D2C8">‹</span><span class="t" style="font-size:17px;font-family:var(--sans);font-weight:600">Help &amp; Support</span><span style="width:34px"></span></div>
+      <div class="meta">help-support — padding 8 · title has NO serif · cellar/* uses paddingTop: 60</div>
+    </div>
+    <p style="margin-top:14px">Pick one recipe — recommend the wine-detail version with real safe-area insets and 44×44 targets — and extract it as a shared <span class="mono">&lt;ScreenHeader&gt;</span>. That single component erases the most visible inconsistency in the app and fixes the sub-44px back buttons everywhere at once.</p>
+  </section>
+
+  <section>
+    <span class="findnum">FINDING V — ACCESSIBILITY</span>
+    <h2>Small targets, silent buttons, frozen type</h2>
+    <ul class="good">
+      <li><strong>Touch targets:</strong> the de-facto icon button is 40×40 (Apple HIG minimum is 44×44); worst offenders are profile back buttons (~34px), place edit/clear (32px), chat photo-remove (18px), and flavor chips (~26px tall). A shared icon-button component with <span class="mono">hitSlop</span> fixes this class of issue.</li>
+      <li><strong>Screen readers:</strong> of ~30 icon-only touchables, exactly 3 have an <span class="mono">accessibilityLabel</span> (tab-bar +, Tonight's Pick collapse, one edit link). Every ×, ‹, ✎, eye-toggle, and stepper is announced as nothing.</li>
+      <li><strong>Dynamic Type:</strong> <span class="mono">tabBarAllowFontScaling: false</span>, and font sizes are fixed units app-wide; 9–10px text (badges, timestamps, filter counts) sits below the theme's own 11px caption floor. Set an 11px floor and let badges grow.</li>
+      <li><strong>Sliders:</strong> the 0–5 rating slider (0.1 steps, 24px thumb) has no <span class="mono">accessibilityRole="adjustable"</span>, no increment actions, and no tap-to-set fallback.</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="findnum">FINDING VI — PLATFORM</span>
+    <h2>Android is quietly sans-serif</h2>
+    <p class="lede">Georgia isn't an Android system font. Five newer components guard it (<span class="mono">Platform.OS === 'ios' ? 'Georgia' : 'serif'</span>) — the other ~15 files hardcode <span class="mono">'Georgia'</span> and silently fall back to sans on Android, so half the brand's serif voice disappears there. Nobody reads <span class="mono">typography.fonts.serif</span> from the theme.</p>
+    <pre><code><span class="c">// styles/theme.js — make the theme the single source of serif truth</span>
+fonts: {
+  serif: Platform.select({ ios: <span class="s">'Georgia'</span>, android: <span class="s">'serif'</span>, default: <span class="s">'Georgia'</span> }),
+  sansSerif: <span class="s">'System'</span>,
+}
+<span class="c">// then replace every raw fontFamily: 'Georgia' with typography.fonts.serif.</span>
+<span class="c">// Longer term: bundle Playfair Display / Lora via expo-font for a true</span>
+<span class="c">// cross-platform label face (the theme file already suggests this).</span></code></pre>
+  </section>
+
+  <section>
+    <span class="findnum">FINDING VII — POLISH</span>
+    <h2>The last 10%: states, motion, and leftovers</h2>
+    <ul class="good">
+      <li><strong>Error states are the weakest link.</strong> Home swallows fetch errors and renders zeros; a cellar fetch failure shows the "Start your cellar" onboarding (actively misleading); sommelier logs failures only to the console. A small inline "Couldn't load — retry" card component, used everywhere, closes this.</li>
+      <li><strong>Motion &amp; haptics: zero.</strong> No animations beyond default modal slides; the sommelier "typing" dots and "Thinking…" are static text; <span class="mono">HapticTab</span> exists but is imported nowhere. Three cheap wins: animate the typing dots, haptic on the center + button and on save-success, fade-in for Tonight's Pick.</li>
+      <li><strong>Shipped placeholders:</strong> "Rate Cork &amp; Note" points at <span class="mono">idXXXXXXXXXX</span>; the notifications toggle saves nothing then claims it did; Delete Account says "Feature Coming Soon"; every winery shares one canned About sentence; <span class="mono">user@example.com</span> fallback; hardcoded v1.0.0 (×3); the 404 page is the untouched Expo template with its teal link.</li>
+      <li><strong>Dead code to delete:</strong> Header.js (broken — contains a pasted copy of _layout.js and the old purple), WineCard.js, ConversationList.js, WinerySearchModal.js, MapErrorBoundary.js, six Expo template components + <span class="mono">constants/Colors.ts</span>. Deleting them removes most remaining off-palette hexes in one sweep.</li>
+      <li><strong>Copy:</strong> Title Case ("Update Password", "Apply Filters") vs sentence case ("Add a bottle", "Log a wine") split roughly by screen age. The newer sentence case reads better with the serif voice — standardize on it. Also "…" vs "...", "Log In" vs "Sign In".</li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="findnum">FINDING VIII — YOUR OWN NOTES, CONFIRMED</span>
+    <h2>Items from "notes from using the app.txt"</h2>
+    <ul class="good">
+      <li><strong>Overall rating placement</strong> — agreed, and it compounds: overall sits above the detailed ratings in WineEntryForm. Tasting flow order should mirror tasting order: identify → detailed impressions → flavors → notes → <em>overall last</em>.</li>
+      <li><strong>Wines-tab filters overflow sideways</strong> — confirmed: three horizontally-scrolling chip rows grow unbounded with your data. The cellar's filter sheet (searchable facets, live result count) is the better pattern — reuse it here.</li>
+      <li><strong>Map help button</strong> — the first-run hint banner exists but disappears forever once pins exist; a small "?" pill near the search bar could re-summon it.</li>
+      <li><strong>Winery sheet → page</strong> — the winery already has a full detail page; the map's pin modal could offer "View winery" as its primary action so the modal stays a shortcut, not a destination.</li>
+    </ul>
+  </section>
+
+  <div class="rule double" style="margin-top:56px"></div>
+
+  <section>
+    <h2>What works well — keep it</h2>
+    <ul class="good">
+      <li>The identity itself: burgundy + gold + cream with serif display is distinctive, warm, and appropriate to the subject. Nothing here argues for a rebrand.</li>
+      <li>The signed-in tab screens are ~100% token-driven — home.js has literally zero hardcoded colors.</li>
+      <li>State design where it was attempted is excellent: cellar's example-data onboarding, Tonight's Pick's five-state matrix, the scanners' fail-soft retry flows, register's live password checklist.</li>
+      <li>Ceremonial details — gold hairlines, the line-diamond-line divider, the raised burgundy center tab — give it a crafted feel most apps lack.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Priority roadmap</h2>
+    <ol class="roadmap">
+      <li><b>Retheme the four pre-login screens</b> with existing tokens; kill the purple; wire or hide the social buttons. Biggest visible win per hour. <span class="eff">~½ day</span></li>
+      <li><b>Add <span class="mono">gold.text</span>, darken pewter, fix badge inks</b> — clears 9 of 11 failing pairs app-wide via theme edits + caption style. <span class="eff">~½ day</span></li>
+      <li><b>Add <span class="mono">full: 999</span> to borderRadius</b> — one line, fixes chips in 8 files. <span class="eff">5 min</span></li>
+      <li><b>Extract <span class="mono">&lt;ScreenHeader&gt;</span></b> (safe-area, 44px targets, one back icon, labeled) and adopt it on all 14 detail/profile screens. <span class="eff">~1 day</span></li>
+      <li><b>Platform-guard the serif via the theme token</b>; replace raw 'Georgia'. <span class="eff">~2 hrs</span></li>
+      <li><b>Standardize button/chip/label recipes</b> (one primary, one cancel, one chip colorway, gold captions → gold.text, sentence case) and sweep. <span class="eff">~1 day</span></li>
+      <li><b>Error-state card + a11y labels + 11px floor + haptics/typing animation.</b> <span class="eff">~1–2 days</span></li>
+      <li><b>Delete dead components &amp; template leftovers; retheme the 404.</b> <span class="eff">~1 hr</span></li>
+    </ol>
+    <p class="lede" style="margin-top:18px">All of it is additive to the current system — nothing above conflicts with the dark-mode direction you have in progress, and the <span class="mono">gold.text</span>/pewter tokens give dark mode a cleaner starting point too.</p>
+  </section>
+</div>
