@@ -157,13 +157,13 @@ export default function ChangePasswordScreen() {
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScreenHeader title="Change Password" />
+      <ScreenHeader title="Change password" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.formContainer}>
           {/* Current Password */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Current Password</Text>
+            <Text style={styles.label}>Current password</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -189,7 +189,7 @@ export default function ChangePasswordScreen() {
 
           {/* New Password */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>New Password</Text>
+            <Text style={styles.label}>New password</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -216,7 +216,7 @@ export default function ChangePasswordScreen() {
           {/* Password Requirements */}
           {newPassword.length > 0 && (
             <View style={styles.requirementsContainer}>
-              <Text style={styles.requirementsTitle}>Password Requirements:</Text>
+              <Text style={styles.requirementsTitle}>Password requirements:</Text>
               {passwordRequirements.map((req, index) => (
                 <View key={index} style={styles.requirementRow}>
                   <Ionicons
@@ -237,7 +237,7 @@ export default function ChangePasswordScreen() {
 
           {/* Confirm New Password */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm New Password</Text>
+            <Text style={styles.label}>Confirm new password</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -276,7 +276,7 @@ export default function ChangePasswordScreen() {
             {isLoading ? (
               <ActivityIndicator color={colors.neutral.cream} />
             ) : (
-              <Text style={styles.updateButtonText}>Update Password</Text>
+              <Text style={styles.updateButtonText}>Update password</Text>
             )}
           </TouchableOpacity>
 

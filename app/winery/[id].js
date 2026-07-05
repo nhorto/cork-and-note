@@ -138,7 +138,7 @@ export default function WineryDetail() {
           <View style={styles.emptyIcon}>
             <Ionicons name="wine-outline" size={48} color={colors.gold.muted} />
           </View>
-          <Text style={styles.emptyTitle}>Winery Not Found</Text>
+          <Text style={styles.emptyTitle}>Winery not found</Text>
           <Text style={styles.emptySubtitle}>This winery may have been removed</Text>
         </View>
       </View>
@@ -197,7 +197,7 @@ export default function WineryDetail() {
               <View style={[styles.actionIcon, { backgroundColor: colors.primary.burgundy }]}>
                 <Ionicons name="wine" size={22} color={colors.neutral.cream} />
               </View>
-              <Text style={styles.actionLabel}>Log Visit</Text>
+              <Text style={styles.actionLabel}>Log visit</Text>
             </TouchableOpacity>
 
             <TouchableOpacity

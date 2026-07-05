@@ -121,7 +121,7 @@ export default function LoginScreen() {
             {isLoading ? (
               <ActivityIndicator color={colors.neutral.cream} />
             ) : (
-              <Text style={styles.loginButtonText}>Log In</Text>
+              <Text style={styles.loginButtonText}>Log in</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -130,7 +130,7 @@ export default function LoginScreen() {
           <Text style={styles.registerText}>Don’t have an account? </Text>
           <Link href="/register" asChild>
             <TouchableOpacity>
-              <Text style={styles.registerLink}>Sign Up</Text>
+              <Text style={styles.registerLink}>Sign up</Text>
             </TouchableOpacity>
           </Link>
         </View>

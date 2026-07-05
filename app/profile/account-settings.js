@@ -83,16 +83,16 @@ export default function AccountSettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Account Settings" />
+      <ScreenHeader title="Account settings" />
 
       <ScrollView style={styles.content}>
         {/* Privacy & Permissions Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Privacy & Permissions</Text>
+          <Text style={styles.sectionTitle}>Privacy & permissions</Text>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Location Services</Text>
+              <Text style={styles.settingTitle}>Location services</Text>
               <Text style={styles.settingDescription}>
                 Allow location access to find nearby wineries and show your location on the map
               </Text>
@@ -116,14 +116,14 @@ export default function AccountSettingsScreen() {
 
         {/* Account Actions Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Actions</Text>
+          <Text style={styles.sectionTitle}>Account actions</Text>
           
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => router.push('/profile/change-password')}
           >
             <Ionicons name="key" size={20} color={colors.primary.burgundy} />
-            <Text style={styles.actionButtonText}>Change Password</Text>
+            <Text style={styles.actionButtonText}>Change password</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
           </TouchableOpacity>
 
@@ -148,14 +148,14 @@ export default function AccountSettingsScreen() {
             }}
           >
             <Ionicons name="trash" size={20} color={colors.status.error} />
-            <Text style={[styles.actionButtonText, styles.dangerText]}>Delete Account</Text>
+            <Text style={[styles.actionButtonText, styles.dangerText]}>Delete account</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
           </TouchableOpacity>
         </View>
 
         {/* Info Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Information</Text>
+          <Text style={styles.sectionTitle}>Account information</Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Email:</Text>
             <Text style={styles.infoValue}>{user?.email}</Text>

@@ -301,7 +301,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     };
 
     addTextField('winemaker', 'Winemaker', suggestions.winemaker, winemaker, setWinemaker);
-    addTextField('wine_name', 'Wine Name', suggestions.wine_name, wineName, setWineName);
+    addTextField('wine_name', 'Wine name', suggestions.wine_name, wineName, setWineName);
     addTextField('wine_type', 'Type', suggestions.wine_type, wineType, setWineType);
     addTextField('year', 'Year', suggestions.year, wineYear, setWineYear);
 
@@ -341,7 +341,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       if (newOnes.length > 0) {
         fields.push({
           key: 'flavor_tags',
-          label: 'Flavor Notes',
+          label: 'Flavor notes',
           current: flavorNotes.length ? flavorNotes.join(', ') : '(none)',
           suggestedDisplay: `+ ${newOnes.join(', ')}`,
           apply: true, // merge is additive, safe to pre-check
@@ -375,7 +375,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     if (overall != null && overall !== overallRating) {
       fields.push({
         key: 'overall_rating',
-        label: 'Overall Rating',
+        label: 'Overall rating',
         current: `${overallRating}/5`,
         suggestedDisplay: `${overall}/5`,
         apply: !overallRating,
@@ -389,7 +389,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       if (note && note !== additionalNotes.trim()) {
         fields.push({
           key: 'additional_notes',
-          label: 'Additional Notes',
+          label: 'Additional notes',
           current: additionalNotes.trim() || '(empty)',
           suggestedDisplay: note,
           apply: !additionalNotes.trim(),
@@ -540,7 +540,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Wine Basic Info */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Wine Information</Text>
+        <Text style={styles.sectionTitle}>Wine information</Text>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Winemaker *</Text>
@@ -600,7 +600,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Wine Name</Text>
+          <Text style={styles.label}>Wine name</Text>
           <TextInput
             style={styles.input}
             value={wineName}
@@ -642,14 +642,14 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
           onPress={() => setShowChatModal(true)}
         >
           <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
-          <Text style={styles.sommelierButtonText}>Ask the Sommelier</Text>
+          <Text style={styles.sommelierButtonText}>Ask the sommelier</Text>
           <Ionicons name="chevron-forward" size={16} color={colors.gold.shimmer} />
         </TouchableOpacity>
       </View>
 
       {/* Overall Rating */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Overall Rating</Text>
+        <Text style={styles.sectionTitle}>Overall rating</Text>
         <RatingSlider
           value={overallRating}
           onValueChange={setOverallRating}
@@ -660,7 +660,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Detailed Ratings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Detailed Ratings</Text>
+        <Text style={styles.sectionTitle}>Detailed ratings</Text>
         
         {Object.entries(ratings).map(([key, value]) => (
           <RatingSlider
@@ -674,7 +674,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Flavor Notes */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Flavor Notes</Text>
+        <Text style={styles.sectionTitle}>Flavor notes</Text>
         <FlavorTagSelector
           selectedTags={flavorNotes}
           onTagsChange={setFlavorNotes}
@@ -689,12 +689,12 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         <View style={styles.photoButtons}>
           <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
             <Ionicons name="camera" size={20} color="#E7E3E2" />
-            <Text style={styles.photoButtonText}>Take Photo</Text>
+            <Text style={styles.photoButtonText}>Take photo</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
             <Ionicons name="images" size={20} color="#E7E3E2" />
-            <Text style={styles.photoButtonText}>Choose Photos</Text>
+            <Text style={styles.photoButtonText}>Choose photos</Text>
           </TouchableOpacity>
         </View>
 
@@ -704,7 +704,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Additional Notes */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Additional Notes</Text>
+        <Text style={styles.sectionTitle}>Additional notes</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           value={additionalNotes}
@@ -728,7 +728,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Wine</Text>
+          <Text style={styles.saveButtonText}>Save wine</Text>
         </TouchableOpacity>
       </View>
 
@@ -741,7 +741,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Wine Type</Text>
+              <Text style={styles.modalTitle}>Select wine type</Text>
               <TouchableOpacity
                 onPress={() => setShowTypeModal(false)}
                 accessibilityRole="button"
@@ -812,7 +812,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
             <View style={styles.modalHeader}>
               <View style={styles.confirmHeaderLeft}>
                 <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
-                <Text style={styles.modalTitle}>Review Suggestions</Text>
+                <Text style={styles.modalTitle}>Review suggestions</Text>
               </View>
               <TouchableOpacity
                 onPress={cancelPendingSuggestions}

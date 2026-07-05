@@ -23,7 +23,7 @@ const HelpSupportModal = () => {
   const guides = [
     {
       id: 'getting-started',
-      title: 'Getting Around Cork & Note',
+      title: 'Getting around Cork & Note',
       icon: 'home',
       content: [
         {
@@ -63,7 +63,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'logging-wine',
-      title: 'Logging a Wine',
+      title: 'Logging a wine',
       icon: 'wine',
       content: [
         {
@@ -92,7 +92,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'cellar',
-      title: 'Your Cellar & Drink Windows',
+      title: 'Your cellar & drink windows',
       icon: 'file-tray-stacked',
       content: [
         {
@@ -137,7 +137,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'sommelier',
-      title: 'The AI Sommelier',
+      title: 'The AI sommelier',
       icon: 'sparkles',
       content: [
         {
@@ -173,7 +173,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'map-places',
-      title: 'Map, Places & Wishlist',
+      title: 'Map, places & wishlist',
       icon: 'map',
       content: [
         {
@@ -213,7 +213,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'wine-statistics',
-      title: 'Your Stats & Journey',
+      title: 'Your stats & journey',
       icon: 'analytics',
       content: [
         {
@@ -228,7 +228,7 @@ const HelpSupportModal = () => {
               description: 'Wines, Places and Wishlist totals — tap any one to open its list'
             },
             {
-              name: 'Your Journey (Profile)',
+              name: 'Your journey (Profile)',
               description: "Châteaux visited, total visits, and wines tasted"
             },
             {
@@ -249,7 +249,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'wine-ratings',
-      title: 'Understanding Wine Ratings',
+      title: 'Understanding wine ratings',
       icon: 'star',
       content: [
         {
@@ -260,7 +260,7 @@ const HelpSupportModal = () => {
           type: 'attributes',
           value: [
             {
-              name: 'Overall Rating',
+              name: 'Overall rating',
               description: 'Your general impression of the wine from 1-5 stars'
             },
             {
@@ -293,7 +293,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'flavor-notes',
-      title: 'Using Flavor Notes',
+      title: 'Using flavor notes',
       icon: 'leaf',
       content: [
         {
@@ -402,7 +402,7 @@ const HelpSupportModal = () => {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Help & Support" onBack={handleBack} />
+      <ScreenHeader title="Help & support" onBack={handleBack} />
 
       <ScrollView style={styles.content}>
         {activeGuide ? (

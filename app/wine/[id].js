@@ -195,7 +195,7 @@ export default function WineDetail() {
       <SafeAreaView style={[styles.container, styles.center]}>
         <Text style={styles.errorText}>Wine not found</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <Text style={styles.backButtonText}>Go back</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -213,7 +213,7 @@ export default function WineDetail() {
   return (
     <View style={styles.container}>
       <ScreenHeader
-        title="Wine Details"
+        title="Wine details"
         right={
           <TouchableOpacity
             onPress={handleEditLog}

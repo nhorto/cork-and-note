@@ -64,7 +64,7 @@ const PinActionModal = ({
                   <Ionicons name="wine" size={20} color={colors.neutral.cream} />
                 </View>
                 <View style={styles.optionTextContainer}>
-                  <Text style={styles.optionText}>Log Visit</Text>
+                  <Text style={styles.optionText}>Log visit</Text>
                   <Text style={styles.optionSubtext}>Record wines and tasting notes</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
@@ -79,7 +79,7 @@ const PinActionModal = ({
                   <Ionicons name="bookmark" size={20} color={colors.neutral.cream} />
                 </View>
                 <View style={styles.optionTextContainer}>
-                  <Text style={styles.optionText}>Add to Wishlist</Text>
+                  <Text style={styles.optionText}>Add to wishlist</Text>
                   <Text style={styles.optionSubtext}>Save for a future visit</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
@@ -95,7 +95,7 @@ const PinActionModal = ({
                     <Ionicons name="information-circle" size={20} color={colors.neutral.cream} />
                   </View>
                   <View style={styles.optionTextContainer}>
-                    <Text style={styles.optionText}>View Details</Text>
+                    <Text style={styles.optionText}>View details</Text>
                     <Text style={styles.optionSubtext}>See past visits and notes</Text>
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
@@ -114,7 +114,7 @@ const PinActionModal = ({
                   <Ionicons name="trash-outline" size={20} color={colors.status.error} />
                 </View>
                 <View style={styles.optionTextContainer}>
-                  <Text style={[styles.optionText, styles.destructiveText]}>Remove Pin</Text>
+                  <Text style={[styles.optionText, styles.destructiveText]}>Remove pin</Text>
                   <Text style={styles.optionSubtext}>Delete from your map</Text>
                 </View>
               </TouchableOpacity>

@@ -256,7 +256,7 @@ export default function RegisterScreen() {
             {isLoading ? (
               <ActivityIndicator color={colors.neutral.cream} />
             ) : (
-              <Text style={styles.registerButtonText}>Sign Up</Text>
+              <Text style={styles.registerButtonText}>Sign up</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -265,7 +265,7 @@ export default function RegisterScreen() {
           <Text style={styles.loginText}>Already have an account? </Text>
           <Link href="/login" asChild>
             <TouchableOpacity>
-              <Text style={styles.loginLink}>Log In</Text>
+              <Text style={styles.loginLink}>Log in</Text>
             </TouchableOpacity>
           </Link>
         </View>

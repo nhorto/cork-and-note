@@ -288,7 +288,7 @@ export default function Wines() {
             <View style={styles.filterHeaderIcon}>
               <Ionicons name="options" size={20} color={colors.primary.burgundy} />
             </View>
-            <Text style={styles.filterTitle}>Filter Wines</Text>
+            <Text style={styles.filterTitle}>Filter wines</Text>
             <TouchableOpacity
               style={styles.filterCloseButton}
               onPress={() => setShowFilters(false)}
@@ -309,7 +309,7 @@ export default function Wines() {
           <ScrollView style={styles.filterContent}>
             {/* Wine Type Filter */}
             <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Wine Type</Text>
+              <Text style={styles.filterSectionTitle}>Wine type</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.filterOptions}>
                   {filterOptions.types.map(type => (
@@ -387,7 +387,7 @@ export default function Wines() {
 
             {/* Rating Sort Filter */}
             <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Sort by Rating</Text>
+              <Text style={styles.filterSectionTitle}>Sort by rating</Text>
               <View style={styles.filterOptions}>
                 {filterOptions.ratings.map(rating => (
                   <TouchableOpacity
@@ -415,13 +415,13 @@ export default function Wines() {
               style={styles.clearFiltersButton}
               onPress={clearAllFilters}
             >
-              <Text style={styles.clearFiltersText}>Clear All</Text>
+              <Text style={styles.clearFiltersText}>Clear all</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.applyFiltersButton}
               onPress={() => setShowFilters(false)}
             >
-              <Text style={styles.applyFiltersText}>Apply Filters</Text>
+              <Text style={styles.applyFiltersText}>Apply filters</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -451,7 +451,7 @@ export default function Wines() {
           <View style={styles.screenHeaderLeft}>
             <Ionicons name="wine" size={20} color={colors.primary.burgundy} />
           </View>
-          <Text style={styles.screenHeaderTitle}>My Wines</Text>
+          <Text style={styles.screenHeaderTitle}>My wines</Text>
           <TouchableOpacity
             style={[
               styles.filterHeaderButton,

@@ -160,7 +160,7 @@ const PastVisitsSection = ({ wineryId }) => {
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={18} color={colors.neutral.cream} />
-          <Text style={styles.addVisitButtonText}>Log Your First Visit</Text>
+          <Text style={styles.addVisitButtonText}>Log your first visit</Text>
         </TouchableOpacity>
       </View>
     );
@@ -204,7 +204,7 @@ const PastVisitsSection = ({ wineryId }) => {
           {/* Visit Photos Preview */}
           {visit.photos && visit.photos.length > 0 && (
             <View style={styles.visitPhotosSection}>
-              <Text style={styles.photosSectionTitle}>Visit Photos</Text>
+              <Text style={styles.photosSectionTitle}>Visit photos</Text>
               {renderPhotoThumbnails(visit.photos, `Visit Photos - ${formatDate(visit.visit_date)}`)}
             </View>
           )}
@@ -215,7 +215,7 @@ const PastVisitsSection = ({ wineryId }) => {
               {/* Visit Notes */}
               {visit.notes && (
                 <View style={styles.notesSection}>
-                  <Text style={styles.notesTitle}>Visit Notes</Text>
+                  <Text style={styles.notesTitle}>Visit notes</Text>
                   <Text style={styles.notesText}>{visit.notes}</Text>
                 </View>
               )}
@@ -223,7 +223,7 @@ const PastVisitsSection = ({ wineryId }) => {
               {/* Wine List */}
               <View style={styles.winesSection}>
                 <View style={styles.winesSectionHeader}>
-                  <Text style={styles.winesSectionTitle}>Wines Tasted</Text>
+                  <Text style={styles.winesSectionTitle}>Wines tasted</Text>
                   <TouchableOpacity
                     style={styles.editLogLink}
                     onPress={() => router.push(`/log-session?editVisitId=${visit.id}`)}

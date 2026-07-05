@@ -109,7 +109,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      <ScreenHeader title="Cellar Reminders" />
+      <ScreenHeader title="Cellar reminders" />
 
       {loading || !prefs ? (
         <View style={styles.loadingWrap}>

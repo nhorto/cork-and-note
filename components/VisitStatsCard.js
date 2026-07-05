@@ -171,12 +171,12 @@ const VisitStatsCard = () => {
       {stats.recentVisits.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Visits</Text>
+            <Text style={styles.sectionTitle}>Recent visits</Text>
             <TouchableOpacity
               onPress={() => router.push('/(tabs)/map')}
               style={styles.seeAllButton}
             >
-              <Text style={styles.seeAllText}>View All</Text>
+              <Text style={styles.seeAllText}>View all</Text>
               <Ionicons name="arrow-forward" size={14} color={colors.primary.burgundy} />
             </TouchableOpacity>
           </View>
@@ -216,12 +216,12 @@ const VisitStatsCard = () => {
       {stats.recentWines.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Wines</Text>
+            <Text style={styles.sectionTitle}>Recent wines</Text>
             <TouchableOpacity
               onPress={() => router.push('/wines')}
               style={styles.seeAllButton}
             >
-              <Text style={styles.seeAllText}>View All</Text>
+              <Text style={styles.seeAllText}>View all</Text>
               <Ionicons name="arrow-forward" size={14} color={colors.primary.burgundy} />
             </TouchableOpacity>
           </View>
@@ -270,7 +270,7 @@ const VisitStatsCard = () => {
           <View style={styles.emptyIconContainer}>
             <Ionicons name="wine-outline" size={32} color={colors.gold.muted} />
           </View>
-          <Text style={styles.emptyTitle}>Begin Your Journey</Text>
+          <Text style={styles.emptyTitle}>Begin your journey</Text>
           <Text style={styles.emptySubtitle}>
             Visit a winery to start tracking your wine discoveries
           </Text>

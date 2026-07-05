@@ -211,7 +211,7 @@ export default function FeedbackScreen() {
             >
               <View style={styles.sectionTitle}>
                 <Ionicons name="chatbubble" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
-                <Text style={styles.sectionTitleText}>Share Feedback</Text>
+                <Text style={styles.sectionTitleText}>Share feedback</Text>
               </View>
               <Ionicons
                 name={activeSection === 'feedback' ? 'chevron-up' : 'chevron-down'}
@@ -222,7 +222,7 @@ export default function FeedbackScreen() {
             
             {activeSection === 'feedback' && (
               <View style={styles.sectionContent}>
-                <Text style={styles.label}>Feedback Type</Text>
+                <Text style={styles.label}>Feedback type</Text>
                 <View style={styles.segmentedControl}>
                   <TouchableOpacity
                     style={[
@@ -237,7 +237,7 @@ export default function FeedbackScreen() {
                         feedbackType === 'feature' && styles.segmentButtonTextActive
                       ]}
                     >
-                      Feature Request
+                      Feature request
                     </Text>
                   </TouchableOpacity>
                   
@@ -278,7 +278,7 @@ export default function FeedbackScreen() {
                 
                 {feedbackType === 'rating' && renderRatingStars()}
                 
-                <Text style={styles.label}>Your Feedback</Text>
+                <Text style={styles.label}>Your feedback</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
                   value={feedbackText}
@@ -301,7 +301,7 @@ export default function FeedbackScreen() {
                   {loading ? (
                     <ActivityIndicator color={colors.neutral.cream} />
                   ) : (
-                    <Text style={styles.actionButtonText}>Submit Feedback</Text>
+                    <Text style={styles.actionButtonText}>Submit feedback</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -316,7 +316,7 @@ export default function FeedbackScreen() {
             >
               <View style={styles.sectionTitle}>
                 <Ionicons name="bug" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
-                <Text style={styles.sectionTitleText}>Report a Bug</Text>
+                <Text style={styles.sectionTitleText}>Report a bug</Text>
               </View>
               <Ionicons
                 name={activeSection === 'bug' ? 'chevron-up' : 'chevron-down'}
@@ -327,7 +327,7 @@ export default function FeedbackScreen() {
             
             {activeSection === 'bug' && (
               <View style={styles.sectionContent}>
-                <Text style={styles.label}>Bug Description</Text>
+                <Text style={styles.label}>Bug description</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
                   value={bugDescription}
@@ -339,7 +339,7 @@ export default function FeedbackScreen() {
                   placeholderTextColor={colors.neutral.silver}
                 />
                 
-                <Text style={styles.label}>Steps to Reproduce</Text>
+                <Text style={styles.label}>Steps to reproduce</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
                   value={bugSteps}
@@ -368,7 +368,7 @@ export default function FeedbackScreen() {
                   {loading ? (
                     <ActivityIndicator color={colors.neutral.cream} />
                   ) : (
-                    <Text style={styles.actionButtonText}>Submit Bug Report</Text>
+                    <Text style={styles.actionButtonText}>Submit bug report</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -383,7 +383,7 @@ export default function FeedbackScreen() {
             >
               <View style={styles.sectionTitle}>
                 <Ionicons name="mail" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
-                <Text style={styles.sectionTitleText}>Contact Support</Text>
+                <Text style={styles.sectionTitleText}>Contact support</Text>
               </View>
               <Ionicons
                 name={activeSection === 'contact' ? 'chevron-up' : 'chevron-down'}
@@ -394,7 +394,7 @@ export default function FeedbackScreen() {
             
             {activeSection === 'contact' && (
               <View style={styles.sectionContent}>
-                <Text style={styles.label}>Your Email</Text>
+                <Text style={styles.label}>Your email</Text>
                 <TextInput
                   style={styles.input}
                   value={contactEmail}
@@ -434,7 +434,7 @@ export default function FeedbackScreen() {
                   {loading ? (
                     <ActivityIndicator color={colors.neutral.cream} />
                   ) : (
-                    <Text style={styles.actionButtonText}>Send Message</Text>
+                    <Text style={styles.actionButtonText}>Send message</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -446,7 +446,7 @@ export default function FeedbackScreen() {
 
           {/* Social Links */}
           <View style={styles.socialLinks}>
-            <Text style={styles.socialTitle}>Connect With Us</Text>
+            <Text style={styles.socialTitle}>Connect with us</Text>
             <View style={styles.socialButtons}>
               <TouchableOpacity
                 style={styles.socialButton}

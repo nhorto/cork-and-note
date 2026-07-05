@@ -110,7 +110,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Flavor Notes:</Text>
+      <Text style={styles.label}>Flavor notes:</Text>
       
       {/* Selected Tags */}
       <ScrollView 

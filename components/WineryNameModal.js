@@ -76,7 +76,7 @@ const WineryNameModal = ({
                   <Ionicons name="location" size={22} color={colors.primary.burgundy} />
                 </View>
                 <View style={styles.headerText}>
-                  <Text style={styles.title}>Drop a Pin</Text>
+                  <Text style={styles.title}>Drop a pin</Text>
                   <Text style={styles.subtitle}>Name this location</Text>
                 </View>
               </View>
@@ -131,7 +131,7 @@ const WineryNameModal = ({
                   activeOpacity={0.7}
                 >
                   <Text style={styles.saveText}>
-                    {loading ? 'Saving...' : 'Save Pin'}
+                    {loading ? 'Saving...' : 'Save pin'}
                   </Text>
                   {!loading && (
                     <Ionicons name="checkmark" size={18} color={colors.neutral.cream} />

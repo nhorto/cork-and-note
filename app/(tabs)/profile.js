@@ -140,7 +140,7 @@ export default function ProfileScreen() {
                 <Ionicons name="settings-outline" size={20} color={colors.primary.burgundy} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Account Settings</Text>
+                <Text style={styles.menuText}>Account settings</Text>
                 <Text style={styles.menuSubtext}>Manage your account preferences</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
@@ -155,7 +155,7 @@ export default function ProfileScreen() {
                 <Ionicons name="notifications-outline" size={20} color={colors.primary.burgundy} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Cellar Reminders</Text>
+                <Text style={styles.menuText}>Cellar reminders</Text>
                 <Text style={styles.menuSubtext}>Gentle nudges when bottles hit their peak</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
@@ -170,7 +170,7 @@ export default function ProfileScreen() {
                 <Ionicons name="help-circle-outline" size={20} color={colors.primary.burgundy} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Help & Support</Text>
+                <Text style={styles.menuText}>Help & support</Text>
                 <Text style={styles.menuSubtext}>Get assistance and FAQs</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
@@ -205,7 +205,7 @@ export default function ProfileScreen() {
             activeOpacity={0.7}
           >
             <Ionicons name="log-out-outline" size={20} color={colors.status.error} />
-            <Text style={styles.signOutText}>Sign Out</Text>
+            <Text style={styles.signOutText}>Sign out</Text>
           </TouchableOpacity>
         </View>
 

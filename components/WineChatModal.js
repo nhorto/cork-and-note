@@ -232,7 +232,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               <Ionicons name="wine" size={18} color={colors.primary.burgundy} />
-              <Text style={styles.headerTitle}>Ask the Sommelier</Text>
+              <Text style={styles.headerTitle}>Ask the sommelier</Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={22} color={colors.neutral.graphite} />

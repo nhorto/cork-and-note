@@ -102,7 +102,7 @@ const ManualWineryEntryModal = ({
   };
 
   const getTitle = () => {
-    return actionType === 'visit' ? 'Log a Visit' : 'Add to Wishlist';
+    return actionType === 'visit' ? 'Log a visit' : 'Add to wishlist';
   };
 
   // Subtitle must match the action — previously hard-coded to the wishlist
@@ -123,7 +123,7 @@ const ManualWineryEntryModal = ({
 
   const getButtonText = () => {
     if (loading) return 'Saving...';
-    return actionType === 'visit' ? 'Continue to Visit' : 'Add to Wishlist';
+    return actionType === 'visit' ? 'Continue to visit' : 'Add to wishlist';
   };
 
   return (
@@ -189,7 +189,7 @@ const ManualWineryEntryModal = ({
                       <Ionicons name="location" size={18} color={colors.primary.burgundy} />
                     </View>
                     <View style={styles.locationTextWrap}>
-                      <Text style={styles.locationLabel}>Use Current Location</Text>
+                      <Text style={styles.locationLabel}>Use current location</Text>
                       <Text style={styles.locationSubtext}>
                         {useCurrentLocation ? 'GPS coordinates will be saved' : 'Will use a default location'}
                       </Text>

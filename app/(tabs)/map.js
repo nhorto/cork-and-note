@@ -401,7 +401,7 @@ export default function MapScreen() {
       {showFabMenu && (
         <View style={styles.fabMenu}>
           <View style={styles.fabMenuHeader}>
-            <Text style={styles.fabMenuTitle}>Quick Actions</Text>
+            <Text style={styles.fabMenuTitle}>Quick actions</Text>
           </View>
 
           <TouchableOpacity
@@ -417,7 +417,7 @@ export default function MapScreen() {
               <Ionicons name="wine" size={18} color={colors.neutral.cream} />
             </View>
             <View style={styles.fabMenuContent}>
-              <Text style={styles.fabMenuText}>Log Visit</Text>
+              <Text style={styles.fabMenuText}>Log visit</Text>
               <Text style={styles.fabMenuSubtext}>Record a new winery visit</Text>
             </View>
           </TouchableOpacity>
@@ -435,7 +435,7 @@ export default function MapScreen() {
               <Ionicons name="bookmark" size={18} color={colors.neutral.cream} />
             </View>
             <View style={styles.fabMenuContent}>
-              <Text style={styles.fabMenuText}>Add to Wishlist</Text>
+              <Text style={styles.fabMenuText}>Add to wishlist</Text>
               <Text style={styles.fabMenuSubtext}>Save for later</Text>
             </View>
           </TouchableOpacity>
@@ -451,7 +451,7 @@ export default function MapScreen() {
               <Ionicons name="location" size={18} color={colors.neutral.cream} />
             </View>
             <View style={styles.fabMenuContent}>
-              <Text style={styles.fabMenuText}>Drop Pin Here</Text>
+              <Text style={styles.fabMenuText}>Drop pin here</Text>
               <Text style={styles.fabMenuSubtext}>Mark your current location</Text>
             </View>
           </TouchableOpacity>
@@ -551,7 +551,7 @@ export default function MapScreen() {
           <View style={styles.listSheet}>
             <View style={styles.handle} />
             <View style={styles.listHeader}>
-              <Text style={styles.listTitle}>Your Places</Text>
+              <Text style={styles.listTitle}>Your places</Text>
               <TouchableOpacity
                 onPress={() => setShowPlacesList(false)}
                 accessibilityRole="button"

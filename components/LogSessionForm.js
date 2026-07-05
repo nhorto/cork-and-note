@@ -437,7 +437,7 @@ export default function LogSessionForm({
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>
-            {isEditing ? 'Edit Log' : isSession ? 'Session' : 'Log a Wine'}
+            {isEditing ? 'Edit log' : isSession ? 'Session' : 'Log a wine'}
           </Text>
           {wines.length > 0 && (
             <Text style={styles.headerSubtitle}>
@@ -587,7 +587,7 @@ export default function LogSessionForm({
               <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>
-              {currentWineIndex !== null ? 'Edit Wine' : 'Add Wine'}
+              {currentWineIndex !== null ? 'Edit wine' : 'Add wine'}
             </Text>
             <View style={styles.headerSpacer} />
           </View>

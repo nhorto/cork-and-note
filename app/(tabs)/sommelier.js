@@ -70,7 +70,7 @@ function ConversationRow({ conversation, onPress, onDelete }) {
           {conversation.title}
         </Text>
         <Text style={styles.convMeta}>
-          {conversation.context_type === 'wine_entry' ? 'Wine Entry' : 'Chat'}
+          {conversation.context_type === 'wine_entry' ? 'Wine entry' : 'Chat'}
           {' · '}
           {formatRelativeDate(conversation.updated_at)}
         </Text>
@@ -273,7 +273,7 @@ export default function SommelierScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Sommelier</Text>
-          <Text style={styles.headerSubtitle}>Your Wine Companion</Text>
+          <Text style={styles.headerSubtitle}>Your wine companion</Text>
         </View>
         <View style={styles.divider} />
 
@@ -297,7 +297,7 @@ export default function SommelierScreen() {
             {/* New conversation */}
             <TouchableOpacity style={styles.newChatButton} onPress={startNewChat}>
               <Ionicons name="add-circle" size={20} color={colors.neutral.cream} />
-              <Text style={styles.newChatText}>New Conversation</Text>
+              <Text style={styles.newChatText}>New conversation</Text>
             </TouchableOpacity>
 
             {conversations.length === 0 ? (
@@ -341,7 +341,7 @@ export default function SommelierScreen() {
         </TouchableOpacity>
         <View style={styles.chatHeaderContent}>
           <Text style={styles.chatHeaderTitle} numberOfLines={1}>
-            {activeConversation?.title || 'New Conversation'}
+            {activeConversation?.title || 'New conversation'}
           </Text>
         </View>
       </View>
