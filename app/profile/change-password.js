@@ -3,7 +3,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -14,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Button from '../../components/Button';
 import ScreenHeader from '../../components/ScreenHeader';
 import { supabase } from '../../lib/supabase';
 import theme from '../../styles/theme';
@@ -265,20 +265,13 @@ export default function ChangePasswordScreen() {
           </View>
 
           {/* Update Button */}
-          <TouchableOpacity
-            style={[
-              styles.updateButton,
-              (!currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword) && styles.updateButtonDisabled
-            ]}
+          <Button
+            title="Update password"
             onPress={handleChangePassword}
-            disabled={isLoading || !currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={colors.neutral.cream} />
-            ) : (
-              <Text style={styles.updateButtonText}>Update password</Text>
-            )}
-          </TouchableOpacity>
+            loading={isLoading}
+            disabled={!currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+            style={{ marginTop: 10 }}
+          />
 
           {/* Security Note */}
           <View style={styles.securityNote}>
@@ -358,21 +351,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.status.error,
     marginTop: 5,
-  },
-  updateButton: {
-    backgroundColor: colors.primary.burgundy,
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  updateButtonDisabled: {
-    backgroundColor: colors.neutral.stone,
-  },
-  updateButtonText: {
-    color: colors.neutral.cream,
-    fontSize: 16,
-    fontWeight: '600',
   },
   securityNote: {
     flexDirection: 'row',

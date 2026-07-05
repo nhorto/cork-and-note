@@ -3,7 +3,6 @@ import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useContext, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Linking,
@@ -15,6 +14,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import Button from '../../components/Button';
 import ScreenHeader from '../../components/ScreenHeader';
 import { supabase } from '../../lib/supabase';
 import theme from '../../styles/theme';
@@ -293,17 +293,11 @@ export default function FeedbackScreen() {
                   textAlignVertical="top"
                 />
                 
-                <TouchableOpacity
-                  style={styles.actionButton}
+                <Button
+                  title="Submit feedback"
                   onPress={submitFeedback}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={colors.neutral.cream} />
-                  ) : (
-                    <Text style={styles.actionButtonText}>Submit feedback</Text>
-                  )}
-                </TouchableOpacity>
+                  loading={loading}
+                />
               </View>
             )}
           </View>
@@ -360,17 +354,11 @@ export default function FeedbackScreen() {
                   placeholderTextColor={colors.neutral.silver}
                 />
                 
-                <TouchableOpacity
-                  style={styles.actionButton}
+                <Button
+                  title="Submit bug report"
                   onPress={reportBug}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={colors.neutral.cream} />
-                  ) : (
-                    <Text style={styles.actionButtonText}>Submit bug report</Text>
-                  )}
-                </TouchableOpacity>
+                  loading={loading}
+                />
               </View>
             )}
           </View>
@@ -426,17 +414,11 @@ export default function FeedbackScreen() {
                   placeholderTextColor={colors.neutral.silver}
                 />
                 
-                <TouchableOpacity
-                  style={styles.actionButton}
+                <Button
+                  title="Send message"
                   onPress={sendContactMessage}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={colors.neutral.cream} />
-                  ) : (
-                    <Text style={styles.actionButtonText}>Send message</Text>
-                  )}
-                </TouchableOpacity>
+                  loading={loading}
+                />
               </View>
             )}
           </View>
@@ -579,17 +561,6 @@ const styles = StyleSheet.create({
   },
   starIcon: {
     margin: 4,
-  },
-  actionButton: {
-    backgroundColor: colors.primary.burgundy,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    color: colors.neutral.cream,
-    fontSize: 16,
-    fontWeight: '500',
   },
   socialLinks: {
     alignItems: 'center',
