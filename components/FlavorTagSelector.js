@@ -148,7 +148,12 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             selectionColor={colors.primary.burgundy}
           />
           {searchQuery !== '' && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              accessibilityRole="button"
+              accessibilityLabel="Clear"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Ionicons name="close-circle" size={18} color={colors.primary.burgundy} />
             </TouchableOpacity>
           )}
@@ -168,6 +173,9 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             style={styles.addButton}
             onPress={addCustomTag}
             disabled={customTag.trim() === ''}
+            accessibilityRole="button"
+            accessibilityLabel="Add"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Ionicons
               name="add-circle"

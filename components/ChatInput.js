@@ -103,7 +103,13 @@ export default function ChatInput({ onSend, disabled }) {
           {photos.map((uri, idx) => (
             <View key={idx} style={styles.photoPreview}>
               <Image source={{ uri }} style={styles.photoImage} />
-              <TouchableOpacity style={styles.removePhoto} onPress={() => removePhoto(idx)}>
+              <TouchableOpacity
+                style={styles.removePhoto}
+                onPress={() => removePhoto(idx)}
+                accessibilityRole="button"
+                accessibilityLabel="Remove"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close-circle" size={18} color={colors.status.error} />
               </TouchableOpacity>
             </View>
@@ -117,6 +123,8 @@ export default function ChatInput({ onSend, disabled }) {
           style={styles.photoButton}
           onPress={showPhotoOptions}
           disabled={disabled}
+          accessibilityRole="button"
+          accessibilityLabel="Add photo"
         >
           <Ionicons
             name="camera"
@@ -140,6 +148,8 @@ export default function ChatInput({ onSend, disabled }) {
           style={[styles.sendButton, hasContent && !disabled && !sending && styles.sendButtonActive]}
           onPress={handleSend}
           disabled={!hasContent || disabled || sending}
+          accessibilityRole="button"
+          accessibilityLabel="Send"
         >
           <Ionicons
             name="send"

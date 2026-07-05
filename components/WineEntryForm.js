@@ -509,6 +509,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
               <TouchableOpacity
                 style={styles.removePhotoButton}
                 onPress={() => removePhoto(index)}
+                accessibilityRole="button"
+                accessibilityLabel="Remove"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons name="close-circle" size={24} color="#FF4444" />
               </TouchableOpacity>
@@ -588,6 +591,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
               onPress={() => addVarietal(varietalInput)}
               disabled={!varietalInput.trim()}
               activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Add"
             >
               <Ionicons name="add" size={22} color={colors.neutral.cream} />
             </TouchableOpacity>
@@ -737,7 +742,12 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select Wine Type</Text>
-              <TouchableOpacity onPress={() => setShowTypeModal(false)}>
+              <TouchableOpacity
+                onPress={() => setShowTypeModal(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
@@ -804,7 +814,12 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
                 <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
                 <Text style={styles.modalTitle}>Review Suggestions</Text>
               </View>
-              <TouchableOpacity onPress={cancelPendingSuggestions}>
+              <TouchableOpacity
+                onPress={cancelPendingSuggestions}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
@@ -863,6 +878,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
           <TouchableOpacity
             style={styles.photoModalClose}
             onPress={() => setShowPhotoModal(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Ionicons name="close" size={32} color="#fff" />
           </TouchableOpacity>

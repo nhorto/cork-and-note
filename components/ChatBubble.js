@@ -263,7 +263,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     textTransform: 'none',
     letterSpacing: 0,
-    fontSize: 10,
   },
   userTimestamp: {
     color: colors.primary.rosé,

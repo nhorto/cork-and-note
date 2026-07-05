@@ -389,7 +389,13 @@ export default function WineDetail() {
       {/* Photo Viewer Modal */}
       <Modal visible={showPhotoModal} animationType="fade" transparent={true}>
         <View style={styles.photoModalOverlay}>
-          <TouchableOpacity style={styles.photoModalClose} onPress={() => setShowPhotoModal(false)}>
+          <TouchableOpacity
+            style={styles.photoModalClose}
+            onPress={() => setShowPhotoModal(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Ionicons name="close" size={32} color={colors.neutral.cream} />
           </TouchableOpacity>
 

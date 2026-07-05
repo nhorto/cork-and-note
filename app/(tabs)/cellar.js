@@ -144,7 +144,12 @@ export default function CellarScreen() {
             <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.burgundy} />
           </View>
           <Text style={styles.headerTitle}>Cellar</Text>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => router.push('/cellar/add')}>
+          <TouchableOpacity
+            style={styles.headerIcon}
+            onPress={() => router.push('/cellar/add')}
+            accessibilityRole="button"
+            accessibilityLabel="Add bottle"
+          >
             <Ionicons name="add" size={22} color={colors.primary.burgundy} />
           </TouchableOpacity>
         </View>
@@ -167,7 +172,12 @@ export default function CellarScreen() {
               returnKeyType="search"
             />
             {query.length > 0 && (
-              <TouchableOpacity onPress={() => setQuery('')} hitSlop={8}>
+              <TouchableOpacity
+                onPress={() => setQuery('')}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Clear"
+              >
                 <Ionicons name="close-circle" size={16} color={colors.neutral.silver} />
               </TouchableOpacity>
             )}
@@ -288,6 +298,8 @@ export default function CellarScreen() {
         style={styles.fab}
         activeOpacity={0.9}
         onPress={() => router.push('/cellar/add')}
+        accessibilityRole="button"
+        accessibilityLabel="Add bottle"
       >
         <Ionicons name="add" size={26} color={colors.neutral.cream} />
       </TouchableOpacity>
@@ -699,7 +711,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  controlBadgeText: { color: colors.neutral.cream, fontSize: 10, fontWeight: '700' },
+  controlBadgeText: { color: colors.neutral.cream, fontSize: 11, fontWeight: '700' },
 
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   activeChip: {
@@ -781,14 +793,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qtyDotText: { color: colors.neutral.cream, fontSize: 10, fontWeight: '700' },
+  qtyDotText: { color: colors.neutral.cream, fontSize: 11, fontWeight: '700' },
   cardMeta: { flex: 1 },
   cardName: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
   cardProducer: { ...typography.body.small, color: colors.neutral.graphite, marginTop: 1 },
   cardSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
   cardRight: { alignItems: 'flex-end', gap: spacing.xs },
   badge: { paddingVertical: 2, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  badgeText: { ...typography.body.caption, color: colors.neutral.cream, fontSize: 9 },
+  badgeText: { ...typography.body.caption, color: colors.neutral.cream },
 
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl },
   iconRing: {

@@ -399,10 +399,22 @@ export default function LogSessionForm({
           </View>
         </View>
         <View style={styles.placeActions}>
-          <TouchableOpacity onPress={() => setShowPlacePicker(true)} style={styles.placeActionBtn}>
+          <TouchableOpacity
+            onPress={() => setShowPlacePicker(true)}
+            style={styles.placeActionBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Edit"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Ionicons name="pencil-outline" size={16} color={colors.primary.burgundy} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setPlace(null)} style={styles.placeActionBtn}>
+          <TouchableOpacity
+            onPress={() => setPlace(null)}
+            style={styles.placeActionBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Remove"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Ionicons name="close" size={18} color={colors.neutral.pewter} />
           </TouchableOpacity>
         </View>
@@ -414,7 +426,13 @@ export default function LogSessionForm({
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel} style={styles.closeButton} activeOpacity={0.7}>
+        <TouchableOpacity
+          onPress={handleCancel}
+          style={styles.closeButton}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+        >
           <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
@@ -502,6 +520,8 @@ export default function LogSessionForm({
                 <TouchableOpacity
                   style={styles.visitPhotoRemove}
                   onPress={() => removeVisitPhoto(index)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove"
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
                   <Ionicons name="close-circle" size={22} color={colors.status.error} />
@@ -558,7 +578,12 @@ export default function LogSessionForm({
       <Modal visible={showWineForm} animationType="slide" transparent={false}>
         <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top || 10 }]} edges={['top']}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity style={styles.modalClose} onPress={handleExitWineForm}>
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={handleExitWineForm}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+            >
               <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>

@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gold.muted,
   },
-  matchTagText: { ...typography.body.caption, color: colors.primary.burgundy, fontSize: 10 },
+  matchTagText: { ...typography.body.caption, color: colors.primary.burgundy },
 
   linkedActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
   linkAction: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },

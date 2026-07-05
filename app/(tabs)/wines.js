@@ -292,6 +292,8 @@ export default function Wines() {
             <TouchableOpacity
               style={styles.filterCloseButton}
               onPress={() => setShowFilters(false)}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
             >
               <Ionicons name="close" size={22} color={colors.neutral.charcoal} />
             </TouchableOpacity>
@@ -456,6 +458,8 @@ export default function Wines() {
               activeFilterCount > 0 && styles.filterHeaderButtonActive
             ]}
             onPress={() => setShowFilters(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Filters"
           >
             <Ionicons
               name="options-outline"
@@ -485,7 +489,13 @@ export default function Wines() {
             selectionColor={colors.primary.burgundy}
           />
           {search.length > 0 && (
-            <TouchableOpacity onPress={() => setSearch('')} style={styles.clearButton}>
+            <TouchableOpacity
+              onPress={() => setSearch('')}
+              style={styles.clearButton}
+              accessibilityRole="button"
+              accessibilityLabel="Clear"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Ionicons name="close-circle" size={20} color={colors.neutral.pewter} />
             </TouchableOpacity>
           )}
@@ -606,7 +616,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   filterBadgeText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     color: colors.neutral.cream,
   },

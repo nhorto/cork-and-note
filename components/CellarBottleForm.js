@@ -279,7 +279,12 @@ export default function CellarBottleForm({
         <View style={styles.flex}>
           <Text style={styles.label}>Quantity</Text>
           <View style={styles.stepper}>
-            <TouchableOpacity style={styles.stepBtn} onPress={() => step(-1)}>
+            <TouchableOpacity
+              style={styles.stepBtn}
+              onPress={() => step(-1)}
+              accessibilityRole="button"
+              accessibilityLabel="Decrease"
+            >
               <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
             </TouchableOpacity>
             <TextInput
@@ -289,7 +294,12 @@ export default function CellarBottleForm({
               keyboardType="number-pad"
               textAlign="center"
             />
-            <TouchableOpacity style={styles.stepBtn} onPress={() => step(1)}>
+            <TouchableOpacity
+              style={styles.stepBtn}
+              onPress={() => step(1)}
+              accessibilityRole="button"
+              accessibilityLabel="Increase"
+            >
               <Ionicons name="add" size={20} color={colors.primary.burgundy} />
             </TouchableOpacity>
           </View>

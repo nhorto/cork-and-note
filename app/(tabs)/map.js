@@ -387,6 +387,8 @@ export default function MapScreen() {
         style={styles.fabButton}
         onPress={() => setShowFabMenu(!showFabMenu)}
         activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={showFabMenu ? 'Close menu' : 'Quick actions'}
       >
         <Ionicons
           name={showFabMenu ? "close" : "add"}
@@ -461,6 +463,8 @@ export default function MapScreen() {
         style={styles.locationButton}
         onPress={zoomToUserLocation}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="Center on my location"
       >
         <Ionicons name="locate" size={22} color={colors.primary.burgundy} />
       </TouchableOpacity>
@@ -548,7 +552,12 @@ export default function MapScreen() {
             <View style={styles.handle} />
             <View style={styles.listHeader}>
               <Text style={styles.listTitle}>Your Places</Text>
-              <TouchableOpacity onPress={() => setShowPlacesList(false)}>
+              <TouchableOpacity
+                onPress={() => setShowPlacesList(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
               </TouchableOpacity>
             </View>
@@ -588,7 +597,12 @@ export default function MapScreen() {
                 selectionColor={colors.primary.burgundy}
               />
               {placeSearch.length > 0 && (
-                <TouchableOpacity onPress={() => setPlaceSearch('')}>
+                <TouchableOpacity
+                  onPress={() => setPlaceSearch('')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear"
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
                   <Ionicons name="close-circle" size={18} color={colors.neutral.silver} />
                 </TouchableOpacity>
               )}

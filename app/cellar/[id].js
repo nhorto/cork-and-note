@@ -239,7 +239,12 @@ export default function BottleDetailScreen() {
         onBack={() => (editing ? setEditing(false) : router.back())}
         right={
           !editing && !removed ? (
-            <TouchableOpacity style={styles.iconBtn} onPress={() => setEditing(true)}>
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={() => setEditing(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Edit"
+            >
               <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
             </TouchableOpacity>
           ) : null
@@ -389,11 +394,21 @@ export default function BottleDetailScreen() {
 
                   <Text style={styles.sheetLabel}>How many?</Text>
                   <View style={styles.stepper}>
-                    <TouchableOpacity style={styles.stepBtn} onPress={() => setOpenQty((q) => Math.max(1, q - 1))}>
+                    <TouchableOpacity
+                      style={styles.stepBtn}
+                      onPress={() => setOpenQty((q) => Math.max(1, q - 1))}
+                      accessibilityRole="button"
+                      accessibilityLabel="Decrease"
+                    >
                       <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
                     </TouchableOpacity>
                     <Text style={styles.stepValue}>{openQty}</Text>
-                    <TouchableOpacity style={styles.stepBtn} onPress={() => setOpenQty((q) => Math.min(bottle.quantity, q + 1))}>
+                    <TouchableOpacity
+                      style={styles.stepBtn}
+                      onPress={() => setOpenQty((q) => Math.min(bottle.quantity, q + 1))}
+                      accessibilityRole="button"
+                      accessibilityLabel="Increase"
+                    >
                       <Ionicons name="add" size={20} color={colors.primary.burgundy} />
                     </TouchableOpacity>
                   </View>
@@ -493,11 +508,21 @@ export default function BottleDetailScreen() {
             </Text>
 
             <View style={[styles.stepper, styles.adjustStepper]}>
-              <TouchableOpacity style={styles.stepBtn} onPress={() => setAdjustQty((q) => Math.max(0, q - 1))}>
+              <TouchableOpacity
+                style={styles.stepBtn}
+                onPress={() => setAdjustQty((q) => Math.max(0, q - 1))}
+                accessibilityRole="button"
+                accessibilityLabel="Decrease"
+              >
                 <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
               </TouchableOpacity>
               <Text style={styles.stepValue}>{adjustQty}</Text>
-              <TouchableOpacity style={styles.stepBtn} onPress={() => setAdjustQty((q) => q + 1)}>
+              <TouchableOpacity
+                style={styles.stepBtn}
+                onPress={() => setAdjustQty((q) => q + 1)}
+                accessibilityRole="button"
+                accessibilityLabel="Increase"
+              >
                 <Ionicons name="add" size={20} color={colors.primary.burgundy} />
               </TouchableOpacity>
             </View>
@@ -553,7 +578,7 @@ const styles = StyleSheet.create({
   producer: { ...typography.body.large, color: colors.neutral.graphite, marginTop: 2 },
   badgeRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   badge: { paddingVertical: 3, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  badgeText: { ...typography.body.caption, color: colors.neutral.cream, fontSize: 10 },
+  badgeText: { ...typography.body.caption, color: colors.neutral.cream },
 
   qtyCard: {
     flexDirection: 'row',

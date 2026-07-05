@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.sm,
   },
-  statusBadgeText: { ...typography.body.caption, color: colors.neutral.cream, fontSize: 10 },
+  statusBadgeText: { ...typography.body.caption, color: colors.neutral.cream },
 
   // Track
   track: {
