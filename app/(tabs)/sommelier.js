@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
 import TonightsPickCard from '../../components/TonightsPickCard';
+import TypingDots from '../../components/TypingDots';
 import { aiService } from '../../lib/ai';
 import { chatService } from '../../lib/chat';
 import theme from '../../styles/theme';
@@ -383,11 +384,7 @@ export default function SommelierScreen() {
         {sending && (
           <View style={styles.typingContainer}>
             <View style={styles.typingBubble}>
-              <View style={styles.typingDots}>
-                <View style={[styles.dot, styles.dot1]} />
-                <View style={[styles.dot, styles.dot2]} />
-                <View style={[styles.dot, styles.dot3]} />
-              </View>
+              <TypingDots />
             </View>
           </View>
         )}
@@ -587,17 +584,4 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     marginLeft: 36, // account for avatar space
   },
-  typingDots: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.neutral.pewter,
-  },
-  dot1: { opacity: 0.4 },
-  dot2: { opacity: 0.6 },
-  dot3: { opacity: 0.8 },
 });

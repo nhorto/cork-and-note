@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import ChatBubble from './ChatBubble';
 import ChatInput from './ChatInput';
+import TypingDots from './TypingDots';
 import { aiService } from '../lib/ai';
 import { chatService } from '../lib/chat';
 import theme from '../styles/theme';
@@ -272,7 +273,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           {sending && (
             <View style={styles.typingContainer}>
               <View style={styles.typingBubble}>
-                <Text style={styles.typingText}>Thinking...</Text>
+                <TypingDots />
               </View>
             </View>
           )}
@@ -369,10 +370,5 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     alignSelf: 'flex-start',
     marginLeft: 36,
-  },
-  typingText: {
-    ...typography.body.small,
-    color: colors.neutral.pewter,
-    fontStyle: 'italic',
   },
 });
