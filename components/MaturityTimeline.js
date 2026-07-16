@@ -139,14 +139,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  title: { ...typography.body.caption, color: colors.gold.shimmer },
+  title: { ...typography.body.caption, color: colors.gold.text },
 
   statusBadge: {
     paddingVertical: 2,
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.sm,
   },
-  statusBadgeText: { ...typography.body.caption, color: colors.neutral.cream, fontSize: 10 },
+  statusBadgeText: { ...typography.body.caption, color: colors.neutral.cream },
 
   // Track
   track: {

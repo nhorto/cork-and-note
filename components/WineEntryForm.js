@@ -7,6 +7,7 @@ import * as MediaLibrary from 'expo-media-library';
 import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Dimensions,
   Image,
   KeyboardAvoidingView,
   Modal,
@@ -22,12 +23,16 @@ import theme from '../styles/theme';
 
 import { parseVarietals } from '../lib/varietals';
 import AutocompleteVarietal from './AutocompleteVarietal';
+import Button from './Button';
 import FlavorTagSelector from './FlavorTagSelector';
 import LabelScanner from './LabelScanner';
 import RatingSlider from './RatingSlider';
 import WineChatModal from './WineChatModal';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
+// pagingEnabled snaps to the screen width, so the photo pages must match it —
+// a hardcoded 400 desyncs the pager and the "N of M" indicator.
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const WINE_TYPES = [
   'Red', 'White', 'Rosé', 'Sparkling', 'Dessert',
@@ -79,8 +84,15 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
   // that a confirm is pending for that dismissal (vs. a plain chat close) (#120).
   const pendingConfirmRef = useRef(false);
 
+  // Double-tap guard for "Save Wine": two rapid presses would call onSave twice
+  // and append the wine to the session twice. Resets when the form remounts
+  // (the wine-form modal unmounts its children when hidden) or when new
+  // initialData loads.
+  const submittedRef = useRef(false);
+
   // Load initial data if editing an existing wine
   useEffect(() => {
+    submittedRef.current = false;
     if (initialData) {
       setWinemaker(initialData.winemaker || defaultWinemaker || '');
       setWineName(initialData.name || '');
@@ -290,7 +302,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     };
 
     addTextField('winemaker', 'Winemaker', suggestions.winemaker, winemaker, setWinemaker);
-    addTextField('wine_name', 'Wine Name', suggestions.wine_name, wineName, setWineName);
+    addTextField('wine_name', 'Wine name', suggestions.wine_name, wineName, setWineName);
     addTextField('wine_type', 'Type', suggestions.wine_type, wineType, setWineType);
     addTextField('year', 'Year', suggestions.year, wineYear, setWineYear);
 
@@ -330,7 +342,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       if (newOnes.length > 0) {
         fields.push({
           key: 'flavor_tags',
-          label: 'Flavor Notes',
+          label: 'Flavor notes',
           current: flavorNotes.length ? flavorNotes.join(', ') : '(none)',
           suggestedDisplay: `+ ${newOnes.join(', ')}`,
           apply: true, // merge is additive, safe to pre-check
@@ -364,7 +376,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
     if (overall != null && overall !== overallRating) {
       fields.push({
         key: 'overall_rating',
-        label: 'Overall Rating',
+        label: 'Overall rating',
         current: `${overallRating}/5`,
         suggestedDisplay: `${overall}/5`,
         apply: !overallRating,
@@ -378,7 +390,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       if (note && note !== additionalNotes.trim()) {
         fields.push({
           key: 'additional_notes',
-          label: 'Additional Notes',
+          label: 'Additional notes',
           current: additionalNotes.trim() || '(empty)',
           suggestedDisplay: note,
           apply: !additionalNotes.trim(),
@@ -441,6 +453,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
   // Handle form submission
   const handleSave = () => {
+    // Ignore a second rapid tap — the first one already saved this wine.
+    if (submittedRef.current) return;
+
     // Required = winemaker only. Everything else (incl. varietal) is optional —
     // blends and unknowns shouldn't block a save (#133). Display falls back to
     // name → varietal → type via lib/wineDisplay.js.
@@ -448,6 +463,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       Alert.alert('Missing Information', 'Please enter the winemaker (a winery or producer).');
       return;
     }
+
+    submittedRef.current = true;
 
     // Create wine data object
     const wineData = {
@@ -493,6 +510,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
               <TouchableOpacity
                 style={styles.removePhotoButton}
                 onPress={() => removePhoto(index)}
+                accessibilityRole="button"
+                accessibilityLabel="Remove"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons name="close-circle" size={24} color="#FF4444" />
               </TouchableOpacity>
@@ -521,7 +541,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Wine Basic Info */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Wine Information</Text>
+        <Text style={styles.sectionTitle}>Wine information</Text>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Winemaker *</Text>
@@ -572,6 +592,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
               onPress={() => addVarietal(varietalInput)}
               disabled={!varietalInput.trim()}
               activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Add"
             >
               <Ionicons name="add" size={22} color={colors.neutral.cream} />
             </TouchableOpacity>
@@ -579,7 +601,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Wine Name</Text>
+          <Text style={styles.label}>Wine name</Text>
           <TextInput
             style={styles.input}
             value={wineName}
@@ -621,14 +643,14 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
           onPress={() => setShowChatModal(true)}
         >
           <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
-          <Text style={styles.sommelierButtonText}>Ask the Sommelier</Text>
+          <Text style={styles.sommelierButtonText}>Ask the sommelier</Text>
           <Ionicons name="chevron-forward" size={16} color={colors.gold.shimmer} />
         </TouchableOpacity>
       </View>
 
       {/* Overall Rating */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Overall Rating</Text>
+        <Text style={styles.sectionTitle}>Overall rating</Text>
         <RatingSlider
           value={overallRating}
           onValueChange={setOverallRating}
@@ -639,7 +661,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Detailed Ratings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Detailed Ratings</Text>
+        <Text style={styles.sectionTitle}>Detailed ratings</Text>
         
         {Object.entries(ratings).map(([key, value]) => (
           <RatingSlider
@@ -653,7 +675,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Flavor Notes */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Flavor Notes</Text>
+        <Text style={styles.sectionTitle}>Flavor notes</Text>
         <FlavorTagSelector
           selectedTags={flavorNotes}
           onTagsChange={setFlavorNotes}
@@ -668,12 +690,12 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         <View style={styles.photoButtons}>
           <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
             <Ionicons name="camera" size={20} color="#E7E3E2" />
-            <Text style={styles.photoButtonText}>Take Photo</Text>
+            <Text style={styles.photoButtonText}>Take photo</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
             <Ionicons name="images" size={20} color="#E7E3E2" />
-            <Text style={styles.photoButtonText}>Choose Photos</Text>
+            <Text style={styles.photoButtonText}>Choose photos</Text>
           </TouchableOpacity>
         </View>
 
@@ -683,7 +705,7 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Additional Notes */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Additional Notes</Text>
+        <Text style={styles.sectionTitle}>Additional notes</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
           value={additionalNotes}
@@ -702,13 +724,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
 
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save Wine</Text>
-        </TouchableOpacity>
+        <Button variant="secondary" title="Cancel" onPress={onCancel} style={{ flex: 1 }} />
+        <Button variant="primary" title="Save wine" onPress={handleSave} style={{ flex: 1 }} />
       </View>
 
       {/* Wine Type Modal */}
@@ -720,8 +737,13 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Wine Type</Text>
-              <TouchableOpacity onPress={() => setShowTypeModal(false)}>
+              <Text style={styles.modalTitle}>Select wine type</Text>
+              <TouchableOpacity
+                onPress={() => setShowTypeModal(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
@@ -786,9 +808,14 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
             <View style={styles.modalHeader}>
               <View style={styles.confirmHeaderLeft}>
                 <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
-                <Text style={styles.modalTitle}>Review Suggestions</Text>
+                <Text style={styles.modalTitle}>Review suggestions</Text>
               </View>
-              <TouchableOpacity onPress={cancelPendingSuggestions}>
+              <TouchableOpacity
+                onPress={cancelPendingSuggestions}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
@@ -826,12 +853,8 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
             </ScrollView>
 
             <View style={styles.confirmActions}>
-              <TouchableOpacity style={styles.cancelButton} onPress={cancelPendingSuggestions}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={applyPendingSuggestions}>
-                <Text style={styles.saveButtonText}>Apply selected</Text>
-              </TouchableOpacity>
+              <Button variant="secondary" title="Cancel" onPress={cancelPendingSuggestions} style={{ flex: 1 }} />
+              <Button variant="primary" title="Apply selected" onPress={applyPendingSuggestions} style={{ flex: 1 }} />
             </View>
           </View>
         </View>
@@ -847,6 +870,9 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
           <TouchableOpacity
             style={styles.photoModalClose}
             onPress={() => setShowPhotoModal(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Ionicons name="close" size={32} color="#fff" />
           </TouchableOpacity>
@@ -856,7 +882,11 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              contentOffset={{ x: selectedPhotoIndex * 400, y: 0 }}
+              contentOffset={{ x: selectedPhotoIndex * SCREEN_WIDTH, y: 0 }}
+              onMomentumScrollEnd={(event) => {
+                const newIndex = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+                setSelectedPhotoIndex(newIndex);
+              }}
             >
               {photos.map((photo, index) => (
                 <View key={index} style={styles.photoModalContainer}>
@@ -906,7 +936,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   input: {
@@ -1000,7 +1030,7 @@ const styles = StyleSheet.create({
   },
   sommelierButtonText: {
     ...typography.body.regular,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     fontWeight: '600',
     fontFamily: 'Georgia',
     flex: 1,
@@ -1040,7 +1070,7 @@ const styles = StyleSheet.create({
   noPhotosText: {
     ...typography.body.small,
     marginTop: spacing.sm,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
   },
   photoGallery: {
     backgroundColor: colors.neutral.parchment,
@@ -1074,32 +1104,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     marginTop: spacing.xl,
     marginBottom: spacing.xxl,
-  },
-  cancelButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
-  },
-  cancelButtonText: {
-    ...typography.body.regular,
-    color: colors.neutral.graphite,
-    fontWeight: '600',
-  },
-  saveButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary.burgundy,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
   },
 
   // Wine Type Modal
@@ -1187,7 +1191,7 @@ const styles = StyleSheet.create({
   },
   confirmFieldLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.xs,
   },
   confirmCurrent: {
@@ -1222,7 +1226,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   photoModalContainer: {
-    width: 400,
+    width: SCREEN_WIDTH,
     height: 400,
     justifyContent: 'center',
     alignItems: 'center',

@@ -32,6 +32,7 @@ export default function MapScreen() {
   const [userLocation, setUserLocation] = useState(null);
   const [userPins, setUserPins] = useState([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
+  const [pinsError, setPinsError] = useState(false);
   const [tempPin, setTempPin] = useState(null);
   const [showNameModal, setShowNameModal] = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
@@ -87,9 +88,13 @@ export default function MapScreen() {
       const { success, wineries } = await wineriesService.getUserWineries();
       if (success) {
         setUserPins(wineries);
+        setPinsError(false);
+      } else {
+        setPinsError(true);
       }
     } catch (error) {
       console.error('Error loading user pins:', error);
+      setPinsError(true);
     } finally {
       setPinsLoaded(true);
     }
@@ -382,6 +387,8 @@ export default function MapScreen() {
         style={styles.fabButton}
         onPress={() => setShowFabMenu(!showFabMenu)}
         activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityLabel={showFabMenu ? 'Close menu' : 'Quick actions'}
       >
         <Ionicons
           name={showFabMenu ? "close" : "add"}
@@ -394,7 +401,7 @@ export default function MapScreen() {
       {showFabMenu && (
         <View style={styles.fabMenu}>
           <View style={styles.fabMenuHeader}>
-            <Text style={styles.fabMenuTitle}>Quick Actions</Text>
+            <Text style={styles.fabMenuTitle}>Quick actions</Text>
           </View>
 
           <TouchableOpacity
@@ -410,7 +417,7 @@ export default function MapScreen() {
               <Ionicons name="wine" size={18} color={colors.neutral.cream} />
             </View>
             <View style={styles.fabMenuContent}>
-              <Text style={styles.fabMenuText}>Log Visit</Text>
+              <Text style={styles.fabMenuText}>Log visit</Text>
               <Text style={styles.fabMenuSubtext}>Record a new winery visit</Text>
             </View>
           </TouchableOpacity>
@@ -428,7 +435,7 @@ export default function MapScreen() {
               <Ionicons name="bookmark" size={18} color={colors.neutral.cream} />
             </View>
             <View style={styles.fabMenuContent}>
-              <Text style={styles.fabMenuText}>Add to Wishlist</Text>
+              <Text style={styles.fabMenuText}>Add to wishlist</Text>
               <Text style={styles.fabMenuSubtext}>Save for later</Text>
             </View>
           </TouchableOpacity>
@@ -444,7 +451,7 @@ export default function MapScreen() {
               <Ionicons name="location" size={18} color={colors.neutral.cream} />
             </View>
             <View style={styles.fabMenuContent}>
-              <Text style={styles.fabMenuText}>Drop Pin Here</Text>
+              <Text style={styles.fabMenuText}>Drop pin here</Text>
               <Text style={styles.fabMenuSubtext}>Mark your current location</Text>
             </View>
           </TouchableOpacity>
@@ -456,23 +463,42 @@ export default function MapScreen() {
         style={styles.locationButton}
         onPress={zoomToUserLocation}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="Center on my location"
       >
         <Ionicons name="locate" size={22} color={colors.primary.burgundy} />
       </TouchableOpacity>
 
-      {/* Hint text for first-time users */}
+      {/* Hint text for first-time users — or an error banner when the pins
+          failed to load, so we don't show onboarding over a wrongly-empty map. */}
       {pinsLoaded && userPins.length === 0 && (
-        <View style={styles.hintContainer}>
-          <View style={styles.hintIcon}>
-            <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+        pinsError ? (
+          <TouchableOpacity
+            style={styles.hintContainer}
+            activeOpacity={0.85}
+            onPress={loadUserPins}
+          >
+            <View style={styles.hintIcon}>
+              <Ionicons name="cloud-offline-outline" size={20} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.hintContent}>
+              <Text style={styles.hintTitle}>Couldn&apos;t load your places</Text>
+              <Text style={styles.hintText}>Tap to try again</Text>
+            </View>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.hintContainer}>
+            <View style={styles.hintIcon}>
+              <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+            </View>
+            <View style={styles.hintContent}>
+              <Text style={styles.hintTitle}>Welcome</Text>
+              <Text style={styles.hintText}>
+                Long-press on the map to drop a pin, or tap + to get started
+              </Text>
+            </View>
           </View>
-          <View style={styles.hintContent}>
-            <Text style={styles.hintTitle}>Welcome</Text>
-            <Text style={styles.hintText}>
-              Long-press on the map to drop a pin, or tap + to get started
-            </Text>
-          </View>
-        </View>
+        )
       )}
 
       {/* Modals */}
@@ -525,8 +551,13 @@ export default function MapScreen() {
           <View style={styles.listSheet}>
             <View style={styles.handle} />
             <View style={styles.listHeader}>
-              <Text style={styles.listTitle}>Your Places</Text>
-              <TouchableOpacity onPress={() => setShowPlacesList(false)}>
+              <Text style={styles.listTitle}>Your places</Text>
+              <TouchableOpacity
+                onPress={() => setShowPlacesList(false)}
+                accessibilityRole="button"
+                accessibilityLabel="Close"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
               </TouchableOpacity>
             </View>
@@ -566,7 +597,12 @@ export default function MapScreen() {
                 selectionColor={colors.primary.burgundy}
               />
               {placeSearch.length > 0 && (
-                <TouchableOpacity onPress={() => setPlaceSearch('')}>
+                <TouchableOpacity
+                  onPress={() => setPlaceSearch('')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear"
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
                   <Ionicons name="close-circle" size={18} color={colors.neutral.silver} />
                 </TouchableOpacity>
               )}
@@ -704,7 +740,7 @@ const styles = StyleSheet.create({
   },
   fabMenuTitle: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
   fabMenuItem: {
     flexDirection: 'row',

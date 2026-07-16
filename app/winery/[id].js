@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Linking,
   Platform,
   SafeAreaView,
@@ -15,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import PastVisitsSection from '../../components/PastVisitsSection';
+import ScreenHeader from '../../components/ScreenHeader';
 import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import { wineriesService } from '../../lib/wineries';
@@ -132,35 +132,22 @@ export default function WineryDetail() {
   // Not found state
   if (!winery) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color={colors.neutral.charcoal} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Winery</Text>
-          <View style={styles.headerSpacer} />
-        </View>
+      <View style={styles.container}>
+        <ScreenHeader title="Winery" onBack={() => navigation.goBack()} />
         <View style={styles.centerContainer}>
           <View style={styles.emptyIcon}>
             <Ionicons name="wine-outline" size={48} color={colors.gold.muted} />
           </View>
-          <Text style={styles.emptyTitle}>Winery Not Found</Text>
+          <Text style={styles.emptyTitle}>Winery not found</Text>
           <Text style={styles.emptySubtitle}>This winery may have been removed</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color={colors.neutral.charcoal} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>{winery.name}</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+    <View style={styles.container}>
+      <ScreenHeader title={winery.name} onBack={() => navigation.goBack()} />
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -210,7 +197,7 @@ export default function WineryDetail() {
               <View style={[styles.actionIcon, { backgroundColor: colors.primary.burgundy }]}>
                 <Ionicons name="wine" size={22} color={colors.neutral.cream} />
               </View>
-              <Text style={styles.actionLabel}>Log Visit</Text>
+              <Text style={styles.actionLabel}>Log visit</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -249,7 +236,7 @@ export default function WineryDetail() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -257,38 +244,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
-  },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
-    backgroundColor: colors.neutral.cream,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-  },
-  headerTitle: {
-    flex: 1,
-    ...typography.heading.h3,
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-    textAlign: 'center',
-    marginHorizontal: spacing.md,
-  },
-  headerSpacer: {
-    width: 40,
   },
 
   // Scroll Content
@@ -446,7 +401,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   aboutText: {

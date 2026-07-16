@@ -20,14 +20,25 @@ const { colors, typography, spacing, borderRadius } = theme;
 export default function ChatInput({ onSend, disabled }) {
   const [text, setText] = useState('');
   const [photos, setPhotos] = useState([]);
+  const [sending, setSending] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = text.trim();
     if (!trimmed && photos.length === 0) return;
+    if (sending) return;
 
-    onSend(trimmed, photos);
-    setText('');
-    setPhotos([]);
+    setSending(true);
+    try {
+      await onSend(trimmed, photos);
+      // Only clear once the send succeeded — a failure keeps the user's typed
+      // message and photos so they can retry.
+      setText('');
+      setPhotos([]);
+    } catch {
+      // Send failed: keep the contents.
+    } finally {
+      setSending(false);
+    }
   };
 
   const takePhoto = async () => {
@@ -92,7 +103,13 @@ export default function ChatInput({ onSend, disabled }) {
           {photos.map((uri, idx) => (
             <View key={idx} style={styles.photoPreview}>
               <Image source={{ uri }} style={styles.photoImage} />
-              <TouchableOpacity style={styles.removePhoto} onPress={() => removePhoto(idx)}>
+              <TouchableOpacity
+                style={styles.removePhoto}
+                onPress={() => removePhoto(idx)}
+                accessibilityRole="button"
+                accessibilityLabel="Remove"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
                 <Ionicons name="close-circle" size={18} color={colors.status.error} />
               </TouchableOpacity>
             </View>
@@ -106,6 +123,8 @@ export default function ChatInput({ onSend, disabled }) {
           style={styles.photoButton}
           onPress={showPhotoOptions}
           disabled={disabled}
+          accessibilityRole="button"
+          accessibilityLabel="Add photo"
         >
           <Ionicons
             name="camera"
@@ -126,14 +145,16 @@ export default function ChatInput({ onSend, disabled }) {
         />
 
         <TouchableOpacity
-          style={[styles.sendButton, hasContent && !disabled && styles.sendButtonActive]}
+          style={[styles.sendButton, hasContent && !disabled && !sending && styles.sendButtonActive]}
           onPress={handleSend}
-          disabled={!hasContent || disabled}
+          disabled={!hasContent || disabled || sending}
+          accessibilityRole="button"
+          accessibilityLabel="Send"
         >
           <Ionicons
             name="send"
             size={18}
-            color={hasContent && !disabled ? colors.neutral.cream : colors.neutral.silver}
+            color={hasContent && !disabled && !sending ? colors.neutral.cream : colors.neutral.silver}
           />
         </TouchableOpacity>
       </View>

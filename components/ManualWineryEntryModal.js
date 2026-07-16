@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Modal,
@@ -17,6 +16,7 @@ import {
   View
 } from 'react-native';
 import theme from '../styles/theme';
+import Button from './Button';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
@@ -54,13 +54,35 @@ const ManualWineryEntryModal = ({
       } catch (error) {
         console.error('Location error:', error);
       }
+
+      // The user asked for their real location but we couldn't get a fix
+      // (permission denied or GPS failure) — never silently substitute the
+      // default coordinates. Let them retry or explicitly opt into the default.
+      if (!location) {
+        setLoading(false);
+        Alert.alert(
+          "Couldn't get your location",
+          'We could not get a GPS fix. You can try again, or save without a precise location.',
+          [
+            { text: 'Retry', onPress: handleSave },
+            { text: 'Save without precise location', onPress: () => saveWinery(null) },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        return;
+      }
     }
 
+    await saveWinery(location);
+  };
+
+  const saveWinery = async (location) => {
+    setLoading(true);
     try {
       await onSave({
         name: name.trim(),
-        latitude: location?.latitude || 37.4316,
-        longitude: location?.longitude || -78.6569,
+        latitude: location?.latitude ?? 37.4316,
+        longitude: location?.longitude ?? -78.6569,
       }, actionType);
 
       setName('');
@@ -80,7 +102,7 @@ const ManualWineryEntryModal = ({
   };
 
   const getTitle = () => {
-    return actionType === 'visit' ? 'Log a Visit' : 'Add to Wishlist';
+    return actionType === 'visit' ? 'Log a visit' : 'Add to wishlist';
   };
 
   // Subtitle must match the action — previously hard-coded to the wishlist
@@ -97,11 +119,6 @@ const ManualWineryEntryModal = ({
 
   const getIconColor = () => {
     return actionType === 'visit' ? colors.primary.burgundy : colors.status.wishlist;
-  };
-
-  const getButtonText = () => {
-    if (loading) return 'Saving...';
-    return actionType === 'visit' ? 'Continue to Visit' : 'Add to Wishlist';
   };
 
   return (
@@ -167,7 +184,7 @@ const ManualWineryEntryModal = ({
                       <Ionicons name="location" size={18} color={colors.primary.burgundy} />
                     </View>
                     <View style={styles.locationTextWrap}>
-                      <Text style={styles.locationLabel}>Use Current Location</Text>
+                      <Text style={styles.locationLabel}>Use current location</Text>
                       <Text style={styles.locationSubtext}>
                         {useCurrentLocation ? 'GPS coordinates will be saved' : 'Will use a default location'}
                       </Text>
@@ -185,33 +202,20 @@ const ManualWineryEntryModal = ({
 
               {/* Buttons */}
               <View style={styles.buttons}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
+                <Button
+                  variant="secondary"
+                  title="Cancel"
                   onPress={handleClose}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.cancelText}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.saveButton,
-                    { backgroundColor: getIconColor() },
-                    loading && styles.disabled
-                  ]}
+                  style={{ flex: 0.4 }}
+                />
+                <Button
+                  variant="primary"
+                  title={actionType === 'visit' ? 'Continue to visit' : 'Add to wishlist'}
+                  icon="arrow-forward"
+                  loading={loading}
                   onPress={handleSave}
-                  disabled={loading}
-                  activeOpacity={0.7}
-                >
-                  {loading ? (
-                    <ActivityIndicator size="small" color={colors.neutral.cream} />
-                  ) : (
-                    <>
-                      <Text style={styles.saveText}>{getButtonText()}</Text>
-                      <Ionicons name="arrow-forward" size={18} color={colors.neutral.cream} />
-                    </>
-                  )}
-                </TouchableOpacity>
+                  style={{ flex: 0.6, backgroundColor: getIconColor() }}
+                />
               </View>
             </View>
         </KeyboardAvoidingView>
@@ -298,7 +302,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   input: {
@@ -362,37 +366,6 @@ const styles = StyleSheet.create({
   buttons: {
     flexDirection: 'row',
     gap: spacing.md,
-  },
-  cancelButton: {
-    flex: 0.4,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
-  },
-  cancelText: {
-    ...typography.body.regular,
-    color: colors.neutral.graphite,
-    fontWeight: '500',
-  },
-  saveButton: {
-    flex: 0.6,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  saveText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
-  },
-  disabled: {
-    opacity: 0.6,
   },
 });
 

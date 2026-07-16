@@ -1,9 +1,8 @@
 // components/FeedbackModal.js
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
 import { useContext, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Linking,
@@ -15,6 +14,8 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import Button from '../../components/Button';
+import ScreenHeader from '../../components/ScreenHeader';
 import { supabase } from '../../lib/supabase';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
@@ -22,7 +23,6 @@ import { AuthContext } from '../_layout';
 const { colors } = theme;
 
 export default function FeedbackScreen() {
-  const router = useRouter();
   const { user } = useContext(AuthContext);
 
   const [activeSection, setActiveSection] = useState(null);
@@ -115,7 +115,7 @@ export default function FeedbackScreen() {
           steps_to_reproduce: bugSteps.trim(),
           device: bugDevice,
           platform: Platform.OS,
-          version: '1.0.0' // App version
+          version: Constants.expoConfig?.version ?? 'unknown'
         });
 
       if (error) throw error;
@@ -173,21 +173,6 @@ export default function FeedbackScreen() {
     }
   };
 
-  // Rate the app (open app store)
-  const rateApp = () => {
-    const appStoreUrl = Platform.OS === 'ios' 
-      ? 'https://apps.apple.com/app/idXXXXXXXXXX' // Replace with actual App Store URL
-      : 'https://play.google.com/store/apps/details?id=com.yourcompany.corkandnote'; // Replace with actual Play Store URL
-    
-    Linking.canOpenURL(appStoreUrl).then(supported => {
-      if (supported) {
-        Linking.openURL(appStoreUrl);
-      } else {
-        Alert.alert('Error', 'Could not open app store');
-      }
-    });
-  };
-
   // Render star rating selector
   const renderRatingStars = () => {
     return (
@@ -211,17 +196,7 @@ export default function FeedbackScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Feedback</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Feedback" />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -236,7 +211,7 @@ export default function FeedbackScreen() {
             >
               <View style={styles.sectionTitle}>
                 <Ionicons name="chatbubble" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
-                <Text style={styles.sectionTitleText}>Share Feedback</Text>
+                <Text style={styles.sectionTitleText}>Share feedback</Text>
               </View>
               <Ionicons
                 name={activeSection === 'feedback' ? 'chevron-up' : 'chevron-down'}
@@ -247,7 +222,7 @@ export default function FeedbackScreen() {
             
             {activeSection === 'feedback' && (
               <View style={styles.sectionContent}>
-                <Text style={styles.label}>Feedback Type</Text>
+                <Text style={styles.label}>Feedback type</Text>
                 <View style={styles.segmentedControl}>
                   <TouchableOpacity
                     style={[
@@ -262,7 +237,7 @@ export default function FeedbackScreen() {
                         feedbackType === 'feature' && styles.segmentButtonTextActive
                       ]}
                     >
-                      Feature Request
+                      Feature request
                     </Text>
                   </TouchableOpacity>
                   
@@ -303,7 +278,7 @@ export default function FeedbackScreen() {
                 
                 {feedbackType === 'rating' && renderRatingStars()}
                 
-                <Text style={styles.label}>Your Feedback</Text>
+                <Text style={styles.label}>Your feedback</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
                   value={feedbackText}
@@ -318,17 +293,11 @@ export default function FeedbackScreen() {
                   textAlignVertical="top"
                 />
                 
-                <TouchableOpacity
-                  style={styles.actionButton}
+                <Button
+                  title="Submit feedback"
                   onPress={submitFeedback}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={colors.neutral.cream} />
-                  ) : (
-                    <Text style={styles.actionButtonText}>Submit Feedback</Text>
-                  )}
-                </TouchableOpacity>
+                  loading={loading}
+                />
               </View>
             )}
           </View>
@@ -341,7 +310,7 @@ export default function FeedbackScreen() {
             >
               <View style={styles.sectionTitle}>
                 <Ionicons name="bug" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
-                <Text style={styles.sectionTitleText}>Report a Bug</Text>
+                <Text style={styles.sectionTitleText}>Report a bug</Text>
               </View>
               <Ionicons
                 name={activeSection === 'bug' ? 'chevron-up' : 'chevron-down'}
@@ -352,7 +321,7 @@ export default function FeedbackScreen() {
             
             {activeSection === 'bug' && (
               <View style={styles.sectionContent}>
-                <Text style={styles.label}>Bug Description</Text>
+                <Text style={styles.label}>Bug description</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
                   value={bugDescription}
@@ -364,7 +333,7 @@ export default function FeedbackScreen() {
                   placeholderTextColor={colors.neutral.silver}
                 />
                 
-                <Text style={styles.label}>Steps to Reproduce</Text>
+                <Text style={styles.label}>Steps to reproduce</Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
                   value={bugSteps}
@@ -385,17 +354,11 @@ export default function FeedbackScreen() {
                   placeholderTextColor={colors.neutral.silver}
                 />
                 
-                <TouchableOpacity
-                  style={styles.actionButton}
+                <Button
+                  title="Submit bug report"
                   onPress={reportBug}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={colors.neutral.cream} />
-                  ) : (
-                    <Text style={styles.actionButtonText}>Submit Bug Report</Text>
-                  )}
-                </TouchableOpacity>
+                  loading={loading}
+                />
               </View>
             )}
           </View>
@@ -408,7 +371,7 @@ export default function FeedbackScreen() {
             >
               <View style={styles.sectionTitle}>
                 <Ionicons name="mail" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
-                <Text style={styles.sectionTitleText}>Contact Support</Text>
+                <Text style={styles.sectionTitleText}>Contact support</Text>
               </View>
               <Ionicons
                 name={activeSection === 'contact' ? 'chevron-up' : 'chevron-down'}
@@ -419,7 +382,7 @@ export default function FeedbackScreen() {
             
             {activeSection === 'contact' && (
               <View style={styles.sectionContent}>
-                <Text style={styles.label}>Your Email</Text>
+                <Text style={styles.label}>Your email</Text>
                 <TextInput
                   style={styles.input}
                   value={contactEmail}
@@ -451,38 +414,21 @@ export default function FeedbackScreen() {
                   placeholderTextColor={colors.neutral.silver}
                 />
                 
-                <TouchableOpacity
-                  style={styles.actionButton}
+                <Button
+                  title="Send message"
                   onPress={sendContactMessage}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color={colors.neutral.cream} />
-                  ) : (
-                    <Text style={styles.actionButtonText}>Send Message</Text>
-                  )}
-                </TouchableOpacity>
+                  loading={loading}
+                />
               </View>
             )}
           </View>
 
-          {/* Rate App Section */}
-          <View style={styles.section}>
-            <TouchableOpacity
-              style={styles.sectionHeader}
-              onPress={rateApp}
-            >
-              <View style={styles.sectionTitle}>
-                <Ionicons name="star" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
-                <Text style={styles.sectionTitleText}>Rate Cork & Note</Text>
-              </View>
-              <Ionicons name="open-outline" size={22} color={colors.neutral.pewter} />
-            </TouchableOpacity>
-          </View>
+          {/* "Rate Cork & Note" section removed until the app has real App
+              Store / Play Store IDs to link to. */}
 
           {/* Social Links */}
           <View style={styles.socialLinks}>
-            <Text style={styles.socialTitle}>Connect With Us</Text>
+            <Text style={styles.socialTitle}>Connect with us</Text>
             <View style={styles.socialButtons}>
               <TouchableOpacity
                 style={styles.socialButton}
@@ -524,35 +470,9 @@ const styles = StyleSheet.create({
   keyboardAvoid: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-  },
-  headerSpacer: {
-    width: 40, // Same width as back button to maintain balance
-  },
-  backButton: {
-    padding: 8,
-    marginRight: 8,
-  },
   closeButton: {
     padding: 8,
     marginLeft: 'auto',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-    flex: 1,
-    textAlign: 'center',
   },
   content: {
     flex: 1,
@@ -641,17 +561,6 @@ const styles = StyleSheet.create({
   },
   starIcon: {
     margin: 4,
-  },
-  actionButton: {
-    backgroundColor: colors.primary.burgundy,
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    color: colors.neutral.cream,
-    fontSize: 16,
-    fontWeight: '500',
   },
   socialLinks: {
     alignItems: 'center',

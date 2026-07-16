@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import Chip from './Chip';
 import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
@@ -110,7 +111,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Flavor Notes:</Text>
+      <Text style={styles.label}>Flavor notes:</Text>
       
       {/* Selected Tags */}
       <ScrollView 
@@ -123,14 +124,13 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
           <Text style={styles.noTagsText}>No flavor notes selected</Text>
         ) : (
           selectedTags.map((tag, index) => (
-            <TouchableOpacity
+            <Chip
               key={index}
-              style={styles.selectedTag}
-              onPress={() => toggleTag(tag)}
-            >
-              <Text style={styles.selectedTagText}>{tag}</Text>
-              <Ionicons name="close-circle" size={16} color={colors.primary.burgundy} style={styles.removeIcon} />
-            </TouchableOpacity>
+              label={tag}
+              selected
+              onRemove={() => toggleTag(tag)}
+              style={styles.selectedChip}
+            />
           ))
         )}
       </ScrollView>
@@ -148,7 +148,12 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             selectionColor={colors.primary.burgundy}
           />
           {searchQuery !== '' && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <TouchableOpacity
+              onPress={() => setSearchQuery('')}
+              accessibilityRole="button"
+              accessibilityLabel="Clear"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Ionicons name="close-circle" size={18} color={colors.primary.burgundy} />
             </TouchableOpacity>
           )}
@@ -168,6 +173,9 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             style={styles.addButton}
             onPress={addCustomTag}
             disabled={customTag.trim() === ''}
+            accessibilityRole="button"
+            accessibilityLabel="Add"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Ionicons
               name="add-circle"
@@ -236,26 +244,13 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
               (!searchQuery && activeCategory === category)) && (
               <View style={styles.tagsContainer}>
                 {tags.map((tag, index) => (
-                  <TouchableOpacity
+                  <Chip
                     key={index}
-                    style={[
-                      styles.tagButton,
-                      selectedTags.includes(tag) && styles.selectedTagButton
-                    ]}
+                    label={tag}
+                    selected={selectedTags.includes(tag)}
                     onPress={() => toggleTag(tag)}
-                  >
-                    <Text 
-                      style={[
-                        styles.tagText,
-                        selectedTags.includes(tag) && styles.selectedTagButtonText
-                      ]}
-                    >
-                      {tag}
-                    </Text>
-                    {selectedTags.includes(tag) && (
-                      <Ionicons name="checkmark" size={14} color={colors.neutral.cream} style={styles.checkIcon} />
-                    )}
-                  </TouchableOpacity>
+                    style={styles.tagChip}
+                  />
                 ))}
               </View>
             )}
@@ -272,7 +267,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   selectedTagsScroll: {
@@ -288,22 +283,8 @@ const styles = StyleSheet.create({
     color: colors.neutral.silver,
     paddingHorizontal: spacing.xs,
   },
-  selectedTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primary.rosé,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+  selectedChip: {
     marginRight: spacing.sm,
-  },
-  selectedTagText: {
-    ...typography.body.small,
-    color: colors.primary.burgundy,
-    fontWeight: '500',
-  },
-  removeIcon: {
-    marginLeft: spacing.xs,
   },
   searchContainer: {
     marginVertical: spacing.md,
@@ -400,31 +381,9 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingHorizontal: spacing.xs,
   },
-  tagButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.neutral.linen,
-    borderRadius: borderRadius.full,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
+  tagChip: {
     marginRight: spacing.sm,
     marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-  },
-  selectedTagButton: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
-  },
-  tagText: {
-    ...typography.body.small,
-    color: colors.neutral.graphite,
-  },
-  selectedTagButtonText: {
-    color: colors.neutral.cream,
-  },
-  checkIcon: {
-    marginLeft: spacing.xs,
   },
 });
 

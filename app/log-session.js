@@ -15,6 +15,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import LogSessionForm from '../components/LogSessionForm';
+import { notifySuccess } from '../lib/haptics';
 import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
 
@@ -27,6 +28,14 @@ const photoFailureNote = (failed) => {
   if (!failed || failed < 1) return '';
   const plural = failed > 1;
   return ` However, ${failed} photo${plural ? 's' : ''} couldn't be uploaded — open the wine to add ${plural ? 'them' : 'it'} again.`;
+};
+
+// Same treatment for flavor notes that couldn't be saved (e.g. the catalog
+// insert was rejected) — warn instead of reporting a clean success.
+const noteFailureNote = (failed) => {
+  if (!failed || failed < 1) return '';
+  const plural = failed > 1;
+  return ` However, ${failed} flavor note${plural ? 's' : ''} couldn't be saved — open the wine to add ${plural ? 'them' : 'it'} again.`;
 };
 
 export default function LogSessionScreen() {
@@ -122,8 +131,9 @@ export default function LogSessionScreen() {
           );
           return;
         }
+        notifySuccess();
         goBack();
-        Alert.alert('Log updated', `Your changes were saved.${photoFailureNote(result.photosFailed)}`);
+        Alert.alert('Log updated', `Your changes were saved.${photoFailureNote(result.photosFailed)}${noteFailureNote(result.notesFailed)}`);
         return;
       }
 
@@ -132,10 +142,11 @@ export default function LogSessionScreen() {
         Alert.alert('Could not save', result?.error || 'Something went wrong. Please try again.');
         return;
       }
+      notifySuccess();
       const count = visitData.wines?.length || 0;
       router.replace('/(tabs)/home');
       const savedMsg = count > 1 ? `Your session of ${count} wines was saved.` : 'Your wine was saved.';
-      Alert.alert('Logged', `${savedMsg}${photoFailureNote(result.photosFailed)}`);
+      Alert.alert('Logged', `${savedMsg}${photoFailureNote(result.photosFailed)}${noteFailureNote(result.notesFailed)}`);
     } catch (e) {
       Alert.alert('Could not save', e.message || 'Something went wrong. Please try again.');
     } finally {

@@ -1,8 +1,8 @@
 // app/(tabs)/wishlist.js
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useContext, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -27,9 +27,14 @@ export default function WishlistScreen() {
   const router = useRouter();
   const { user } = useContext(AuthContext);
 
-  useEffect(() => {
-    loadWishlist();
-  }, [user]);
+  // Reload whenever the tab gains focus so wineries saved elsewhere show up
+  // without a manual refresh.
+  useFocusEffect(
+    useCallback(() => {
+      loadWishlist();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user])
+  );
 
   const loadWishlist = async () => {
     if (!user) {
@@ -133,7 +138,7 @@ export default function WishlistScreen() {
         <View style={styles.emptyIcon}>
           <Ionicons name="bookmark-outline" size={40} color={colors.gold.muted} />
         </View>
-        <Text style={styles.messageTitle}>Sign In Required</Text>
+        <Text style={styles.messageTitle}>Sign in required</Text>
         <Text style={styles.messageText}>
           Please sign in to view and manage your wishlist
         </Text>
@@ -198,9 +203,9 @@ export default function WishlistScreen() {
             <View style={styles.emptyIcon}>
               <Ionicons name="bookmark-outline" size={40} color={colors.gold.muted} />
             </View>
-            <Text style={styles.emptyTitle}>Your Wishlist is Empty</Text>
+            <Text style={styles.emptyTitle}>Your wishlist is empty</Text>
             <Text style={styles.emptyText}>
-              Add wineries you'd like to visit to keep track of them here
+              Add wineries you’d like to visit to keep track of them here
             </Text>
 
             <TouchableOpacity
@@ -209,7 +214,7 @@ export default function WishlistScreen() {
               activeOpacity={0.7}
             >
               <Ionicons name="map-outline" size={18} color={colors.neutral.cream} />
-              <Text style={styles.exploreButtonText}>Explore Map</Text>
+              <Text style={styles.exploreButtonText}>Explore map</Text>
             </TouchableOpacity>
           </View>
         }
@@ -289,7 +294,7 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginHorizontal: spacing.md,
   },
   headerCount: {

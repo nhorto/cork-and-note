@@ -7,7 +7,7 @@
         "./*"
       ]
     },
-    "skipLibCheck": true  // Add this line
+    "skipLibCheck": true
   },
   "include": [
     "**/*.ts",

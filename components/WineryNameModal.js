@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import Button from './Button';
 import theme from '../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
@@ -76,7 +77,7 @@ const WineryNameModal = ({
                   <Ionicons name="location" size={22} color={colors.primary.burgundy} />
                 </View>
                 <View style={styles.headerText}>
-                  <Text style={styles.title}>Drop a Pin</Text>
+                  <Text style={styles.title}>Drop a pin</Text>
                   <Text style={styles.subtitle}>Name this location</Text>
                 </View>
               </View>
@@ -116,27 +117,20 @@ const WineryNameModal = ({
 
               {/* Buttons */}
               <View style={styles.buttons}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
+                <Button
+                  variant="secondary"
+                  title="Cancel"
                   onPress={handleClose}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.cancelText}>Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.saveButton, loading && styles.disabled]}
+                  style={{ flex: 1 }}
+                />
+                <Button
+                  variant="primary"
+                  title="Save pin"
+                  icon="checkmark"
+                  loading={loading}
                   onPress={handleSave}
-                  disabled={loading}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.saveText}>
-                    {loading ? 'Saving...' : 'Save Pin'}
-                  </Text>
-                  {!loading && (
-                    <Ionicons name="checkmark" size={18} color={colors.neutral.cream} />
-                  )}
-                </TouchableOpacity>
+                  style={{ flex: 1 }}
+                />
               </View>
             </View>
           </TouchableOpacity>
@@ -218,7 +212,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   input: {
@@ -249,38 +243,6 @@ const styles = StyleSheet.create({
   buttons: {
     flexDirection: 'row',
     gap: spacing.md,
-  },
-  cancelButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
-  },
-  cancelText: {
-    ...typography.body.regular,
-    color: colors.neutral.graphite,
-    fontWeight: '500',
-  },
-  saveButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.primary.burgundy,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  saveText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
-  },
-  disabled: {
-    opacity: 0.6,
   },
 });
 

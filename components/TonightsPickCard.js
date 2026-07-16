@@ -26,6 +26,7 @@ import {
   OCCASIONS,
 } from '../lib/cellarSommelier';
 import theme from '../styles/theme';
+import Button from './Button';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
 
@@ -167,16 +168,15 @@ export default function TonightsPickCard({ onRequireCellar }) {
           Add a few bottles you own and your sommelier will recommend exactly
           what to open tonight — with the reasoning and a couple of alternatives.
         </Text>
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          activeOpacity={0.9}
+        <Button
+          variant="primary"
+          title="Add a bottle"
+          icon="add"
           onPress={() =>
             onRequireCellar ? onRequireCellar() : router.push('/cellar/add')
           }
-        >
-          <Ionicons name="add" size={18} color={colors.neutral.cream} />
-          <Text style={styles.primaryBtnText}>Add a bottle</Text>
-        </TouchableOpacity>
+          style={{ marginTop: spacing.md }}
+        />
       </View>
     );
   }
@@ -270,25 +270,14 @@ export default function TonightsPickCard({ onRequireCellar }) {
       )}
 
       {/* Primary CTA */}
-      <TouchableOpacity
-        style={[styles.primaryBtn, thinking && styles.primaryBtnDisabled]}
-        activeOpacity={0.9}
+      <Button
+        variant="primary"
+        title={recommendation ? 'Pick again' : 'Pick my bottle'}
+        icon="wine"
+        loading={thinking}
         onPress={askSommelier}
-        disabled={thinking}
-      >
-        {thinking ? (
-          <ActivityIndicator color={colors.neutral.cream} size="small" />
-        ) : (
-          <Ionicons name="wine" size={18} color={colors.neutral.cream} />
-        )}
-        <Text style={styles.primaryBtnText}>
-          {thinking
-            ? 'Choosing…'
-            : recommendation
-            ? 'Pick again'
-            : 'Pick my bottle'}
-        </Text>
-      </TouchableOpacity>
+        style={{ marginTop: spacing.md }}
+      />
 
       {/* Error */}
       {error && !thinking && <Text style={styles.errorText}>{error}</Text>}
@@ -417,7 +406,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
   flexSpacer: { flex: 1 },
   collapsedTeaser: {
@@ -513,27 +502,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 
-  // CTA
-  primaryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.primary.burgundy,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    marginTop: spacing.md,
-    ...shadows.soft,
-  },
-  primaryBtnDisabled: {
-    opacity: 0.7,
-  },
-  primaryBtnText: {
-    ...typography.heading.h3,
-    color: colors.neutral.cream,
-    fontFamily: SERIF,
-  },
-
   errorText: {
     ...typography.body.small,
     color: colors.status.error,
@@ -559,7 +527,7 @@ const styles = StyleSheet.create({
   },
   pickLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
   pickName: {
     ...typography.heading.h2,
@@ -597,7 +565,7 @@ const styles = StyleSheet.create({
   },
   flavorChipText: {
     ...typography.body.small,
-    color: colors.gold.shimmer,
+    color: colors.neutral.charcoal,
     fontSize: 12,
   },
 
@@ -650,7 +618,7 @@ const styles = StyleSheet.create({
 
   disclaimer: {
     ...typography.body.small,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     fontStyle: 'italic',
     marginTop: spacing.md,
     textAlign: 'center',

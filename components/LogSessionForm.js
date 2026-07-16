@@ -22,6 +22,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { parseVarietals, varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
+import Button from './Button';
 import PlacePicker from './PlacePicker';
 import TastingMenuScanner from './TastingMenuScanner';
 import WineEntryForm from './WineEntryForm';
@@ -52,6 +53,14 @@ const formatDate = (s) => {
     day: 'numeric',
     timeZone: 'UTC',
   });
+};
+
+// Strict YYYY-MM-DD check: format + real-calendar round-trip, so junk like
+// "2024-13-45" never reaches Postgres and fails with a raw DB error.
+const isValidISODate = (s) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(s + 'T00:00:00Z');
+  return !isNaN(d) && d.toISOString().slice(0, 10) === s;
 };
 
 // Map a DB wine row (snake_case, singular ratings) to the in-app wine shape
@@ -283,6 +292,10 @@ export default function LogSessionForm({
       Alert.alert('Add a date', 'Please enter a date for this log.');
       return;
     }
+    if (!isValidISODate(visitDate)) {
+      Alert.alert('Check the date', 'Please enter the date as YYYY-MM-DD.');
+      return;
+    }
     setSaving(true);
     try {
       await onSave({
@@ -313,7 +326,8 @@ export default function LogSessionForm({
         ? colors.gold.rich
         : colors.primary.rosé;
     return (
-      <View key={index} style={styles.wineCard}>
+      // Wines are removable, so an index key would misalign rows after a delete.
+      <View key={wine.id ?? `draft-${index}-${wine.name ?? ''}`} style={styles.wineCard}>
         <View style={styles.wineCardHeader}>
           <View style={[styles.wineTypeBar, { backgroundColor: typeColor }]} />
           <View style={styles.wineInfo}>
@@ -386,10 +400,22 @@ export default function LogSessionForm({
           </View>
         </View>
         <View style={styles.placeActions}>
-          <TouchableOpacity onPress={() => setShowPlacePicker(true)} style={styles.placeActionBtn}>
+          <TouchableOpacity
+            onPress={() => setShowPlacePicker(true)}
+            style={styles.placeActionBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Edit"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Ionicons name="pencil-outline" size={16} color={colors.primary.burgundy} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setPlace(null)} style={styles.placeActionBtn}>
+          <TouchableOpacity
+            onPress={() => setPlace(null)}
+            style={styles.placeActionBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Remove"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Ionicons name="close" size={18} color={colors.neutral.pewter} />
           </TouchableOpacity>
         </View>
@@ -401,12 +427,18 @@ export default function LogSessionForm({
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel} style={styles.closeButton} activeOpacity={0.7}>
+        <TouchableOpacity
+          onPress={handleCancel}
+          style={styles.closeButton}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+        >
           <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>
-            {isEditing ? 'Edit Log' : isSession ? 'Session' : 'Log a Wine'}
+            {isEditing ? 'Edit log' : isSession ? 'Session' : 'Log a wine'}
           </Text>
           {wines.length > 0 && (
             <Text style={styles.headerSubtitle}>
@@ -452,7 +484,15 @@ export default function LogSessionForm({
           placeholderTextColor={colors.neutral.silver}
           selectionColor={colors.primary.burgundy}
         />
-        <Text style={styles.datePreview}>{formatDate(visitDate)}</Text>
+        <Text
+          style={[
+            styles.datePreview,
+            // Surface a bad date before save: non-empty but unparseable → error color.
+            !!visitDate && !isValidISODate(visitDate) && { color: colors.status.error },
+          ]}
+        >
+          {formatDate(visitDate)}
+        </Text>
 
         {/* Notes */}
         <Text style={styles.sectionLabel}>NOTES</Text>
@@ -481,6 +521,8 @@ export default function LogSessionForm({
                 <TouchableOpacity
                   style={styles.visitPhotoRemove}
                   onPress={() => removeVisitPhoto(index)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove"
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
                   <Ionicons name="close-circle" size={22} color={colors.status.error} />
@@ -511,37 +553,32 @@ export default function LogSessionForm({
 
       {/* Footer */}
       <View style={[styles.footer, { paddingBottom: spacing.md + (insets.bottom || 0) }]}>
-        <TouchableOpacity
-          style={[
-            styles.saveBtn,
-            ((wines.length === 0 && !isEditing) || saving) && styles.saveBtnDisabled,
-          ]}
+        <Button
+          variant="primary"
+          title={
+            isEditing ? 'Save changes' : isSession ? 'Save session' : 'Save wine'
+          }
+          icon="checkmark-circle"
+          loading={saving}
+          disabled={wines.length === 0 && !isEditing}
           onPress={handleSaveSession}
-          activeOpacity={0.85}
-          disabled={(wines.length === 0 && !isEditing) || saving}
-        >
-          <Ionicons name="checkmark-circle" size={20} color={colors.neutral.cream} />
-          <Text style={styles.saveBtnText}>
-            {saving
-              ? 'Saving…'
-              : isEditing
-              ? 'Save changes'
-              : isSession
-              ? 'Save session'
-              : 'Save wine'}
-          </Text>
-        </TouchableOpacity>
+        />
       </View>
 
       {/* Wine form modal */}
       <Modal visible={showWineForm} animationType="slide" transparent={false}>
         <SafeAreaView style={[styles.modalContainer, { paddingTop: insets.top || 10 }]} edges={['top']}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity style={styles.modalClose} onPress={handleExitWineForm}>
+            <TouchableOpacity
+              style={styles.modalClose}
+              onPress={handleExitWineForm}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+            >
               <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>
-              {currentWineIndex !== null ? 'Edit Wine' : 'Add Wine'}
+              {currentWineIndex !== null ? 'Edit wine' : 'Add wine'}
             </Text>
             <View style={styles.headerSpacer} />
           </View>
@@ -606,7 +643,7 @@ const styles = StyleSheet.create({
     borderColor: colors.neutral.stone,
     borderStyle: 'dashed',
   },
-  emptyWinesText: { ...typography.body.small, color: colors.neutral.silver, marginTop: spacing.sm },
+  emptyWinesText: { ...typography.body.small, color: colors.neutral.pewter, marginTop: spacing.sm },
 
   wineCard: {
     backgroundColor: colors.neutral.parchment,
@@ -662,7 +699,7 @@ const styles = StyleSheet.create({
 
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
@@ -681,7 +718,7 @@ const styles = StyleSheet.create({
   addPlaceText: { flex: 1 },
   addPlaceTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
   addPlaceSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
-  optTag: { ...typography.body.small, color: colors.neutral.silver, fontWeight: '400' },
+  optTag: { ...typography.body.small, color: colors.neutral.pewter, fontWeight: '400' },
 
   placeCard: {
     flexDirection: 'row',
@@ -792,22 +829,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.neutral.linen,
     backgroundColor: colors.neutral.cream,
-  },
-  saveBtn: {
-    flexDirection: 'row',
-    backgroundColor: colors.primary.burgundy,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  saveBtnDisabled: { opacity: 0.5 },
-  saveBtnText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
-    fontFamily: 'Georgia',
   },
 
   modalContainer: { flex: 1, backgroundColor: colors.neutral.cream },

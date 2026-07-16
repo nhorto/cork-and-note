@@ -82,12 +82,15 @@ const VisitStatsCard = () => {
     }
   };
 
+  // visit_date is a date-only value parsed as UTC midnight, so format in UTC
+  // too — otherwise it renders a day early west of UTC.
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'UTC'
     });
   };
 
@@ -168,12 +171,12 @@ const VisitStatsCard = () => {
       {stats.recentVisits.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Visits</Text>
+            <Text style={styles.sectionTitle}>Recent visits</Text>
             <TouchableOpacity
               onPress={() => router.push('/(tabs)/map')}
               style={styles.seeAllButton}
             >
-              <Text style={styles.seeAllText}>View All</Text>
+              <Text style={styles.seeAllText}>View all</Text>
               <Ionicons name="arrow-forward" size={14} color={colors.primary.burgundy} />
             </TouchableOpacity>
           </View>
@@ -213,12 +216,12 @@ const VisitStatsCard = () => {
       {stats.recentWines.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent Wines</Text>
+            <Text style={styles.sectionTitle}>Recent wines</Text>
             <TouchableOpacity
               onPress={() => router.push('/wines')}
               style={styles.seeAllButton}
             >
-              <Text style={styles.seeAllText}>View All</Text>
+              <Text style={styles.seeAllText}>View all</Text>
               <Ionicons name="arrow-forward" size={14} color={colors.primary.burgundy} />
             </TouchableOpacity>
           </View>
@@ -267,7 +270,7 @@ const VisitStatsCard = () => {
           <View style={styles.emptyIconContainer}>
             <Ionicons name="wine-outline" size={32} color={colors.gold.muted} />
           </View>
-          <Text style={styles.emptyTitle}>Begin Your Journey</Text>
+          <Text style={styles.emptyTitle}>Begin your journey</Text>
           <Text style={styles.emptySubtitle}>
             Visit a winery to start tracking your wine discoveries
           </Text>
@@ -322,7 +325,7 @@ const styles = StyleSheet.create({
   },
   headerLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginHorizontal: spacing.md,
   },
 
@@ -419,8 +422,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.primary.rosé,
-    opacity: 0.3,
+    // rosé (#D4A5A5) at 30% alpha — container opacity would fade the icon too.
+    backgroundColor: 'rgba(212, 165, 165, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,

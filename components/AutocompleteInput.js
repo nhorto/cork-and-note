@@ -123,6 +123,8 @@ export default function AutocompleteInput({
           <TouchableOpacity
             style={styles.clearButton}
             onPress={clearInput}
+            accessibilityRole="button"
+            accessibilityLabel="Clear"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <Ionicons name="close-circle" size={20} color={colors.neutral.silver} />

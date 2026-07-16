@@ -14,14 +14,15 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import CellarBottleForm from '../../components/CellarBottleForm';
 import LabelScanner from '../../components/LabelScanner';
+import ScreenHeader from '../../components/ScreenHeader';
 import { cellarService } from '../../lib/cellar';
 import { getEntrySuggestions } from '../../lib/cellarEntry';
 import { knownLocations } from '../../lib/cellarLocation';
+import { notifySuccess } from '../../lib/haptics';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
@@ -123,6 +124,8 @@ export default function AddBottleScreen() {
       return;
     }
 
+    notifySuccess();
+
     // If we auto-linked the new bottle to an existing tasting (#140), say so.
     const linkedNote = res.linkedWine ? ' Linked to a matching tasting in your journal.' : '';
 
@@ -147,14 +150,7 @@ export default function AddBottleScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Add a bottle</Text>
-        <View style={styles.backBtn} />
-      </View>
-      <View style={styles.headerBorder} />
+      <ScreenHeader title="Add a bottle" />
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -200,21 +196,6 @@ export default function AddBottleScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.cream },
   flex: { flex: 1 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingTop: 60,
-    paddingBottom: spacing.sm,
-  },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: {
-    ...typography.heading.h2,
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
-  headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
 
   addedBanner: {

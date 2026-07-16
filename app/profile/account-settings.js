@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
 
@@ -22,7 +23,6 @@ export default function AccountSettingsScreen() {
   const { user } = useContext(AuthContext);
   
   // Local state for settings
-  const [notifications, setNotifications] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locationPermissionStatus, setLocationPermissionStatus] = useState(null);
 
@@ -81,53 +81,18 @@ export default function AccountSettingsScreen() {
     }
   };
 
-  const handleNotificationsToggle = (value) => {
-    setNotifications(value);
-    // You can add actual notification preference saving logic here
-    if (value) {
-      Alert.alert('Notifications Enabled', 'You will receive notifications about new features and updates.');
-    } else {
-      Alert.alert('Notifications Disabled', 'You will not receive notifications from the app.');
-    }
-  };
-
   return (
     <View style={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Account Settings</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Account settings" />
 
       <ScrollView style={styles.content}>
         {/* Privacy & Permissions Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Privacy & Permissions</Text>
-          
-          <View style={styles.settingRow}>
-            <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Push Notifications</Text>
-              <Text style={styles.settingDescription}>
-                Receive notifications about new features and updates
-              </Text>
-            </View>
-            <Switch
-              value={notifications}
-              onValueChange={handleNotificationsToggle}
-              trackColor={{ false: colors.neutral.stone, true: colors.primary.burgundy }}
-              thumbColor={colors.neutral.cream}
-            />
-          </View>
+          <Text style={styles.sectionTitle}>Privacy & permissions</Text>
 
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingTitle}>Location Services</Text>
+              <Text style={styles.settingTitle}>Location services</Text>
               <Text style={styles.settingDescription}>
                 Allow location access to find nearby wineries and show your location on the map
               </Text>
@@ -151,14 +116,14 @@ export default function AccountSettingsScreen() {
 
         {/* Account Actions Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Actions</Text>
+          <Text style={styles.sectionTitle}>Account actions</Text>
           
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => router.push('/profile/change-password')}
           >
             <Ionicons name="key" size={20} color={colors.primary.burgundy} />
-            <Text style={styles.actionButtonText}>Change Password</Text>
+            <Text style={styles.actionButtonText}>Change password</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
           </TouchableOpacity>
 
@@ -183,14 +148,14 @@ export default function AccountSettingsScreen() {
             }}
           >
             <Ionicons name="trash" size={20} color={colors.status.error} />
-            <Text style={[styles.actionButtonText, styles.dangerText]}>Delete Account</Text>
+            <Text style={[styles.actionButtonText, styles.dangerText]}>Delete account</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
           </TouchableOpacity>
         </View>
 
         {/* Info Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Information</Text>
+          <Text style={styles.sectionTitle}>Account information</Text>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Email:</Text>
             <Text style={styles.infoValue}>{user?.email}</Text>
@@ -212,29 +177,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-    paddingTop: 50,
-  },
-  backButton: {
-    padding: 5,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
-  headerSpacer: {
-    width: 34,
   },
   content: {
     flex: 1,
@@ -317,7 +259,7 @@ const styles = StyleSheet.create({
   },
   infoNote: {
     fontSize: 12,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     fontStyle: 'italic',
     marginTop: 10,
     lineHeight: 16,

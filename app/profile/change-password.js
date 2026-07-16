@@ -3,7 +3,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -14,6 +13,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Button from '../../components/Button';
+import ScreenHeader from '../../components/ScreenHeader';
 import { supabase } from '../../lib/supabase';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
@@ -156,23 +157,13 @@ export default function ChangePasswordScreen() {
       style={styles.container} 
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Change Password</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Change password" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.formContainer}>
           {/* Current Password */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Current Password</Text>
+            <Text style={styles.label}>Current password</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -198,7 +189,7 @@ export default function ChangePasswordScreen() {
 
           {/* New Password */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>New Password</Text>
+            <Text style={styles.label}>New password</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -225,7 +216,7 @@ export default function ChangePasswordScreen() {
           {/* Password Requirements */}
           {newPassword.length > 0 && (
             <View style={styles.requirementsContainer}>
-              <Text style={styles.requirementsTitle}>Password Requirements:</Text>
+              <Text style={styles.requirementsTitle}>Password requirements:</Text>
               {passwordRequirements.map((req, index) => (
                 <View key={index} style={styles.requirementRow}>
                   <Ionicons
@@ -246,7 +237,7 @@ export default function ChangePasswordScreen() {
 
           {/* Confirm New Password */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirm New Password</Text>
+            <Text style={styles.label}>Confirm new password</Text>
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -274,20 +265,13 @@ export default function ChangePasswordScreen() {
           </View>
 
           {/* Update Button */}
-          <TouchableOpacity
-            style={[
-              styles.updateButton,
-              (!currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword) && styles.updateButtonDisabled
-            ]}
+          <Button
+            title="Update password"
             onPress={handleChangePassword}
-            disabled={isLoading || !currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
-          >
-            {isLoading ? (
-              <ActivityIndicator color={colors.neutral.cream} />
-            ) : (
-              <Text style={styles.updateButtonText}>Update Password</Text>
-            )}
-          </TouchableOpacity>
+            loading={isLoading}
+            disabled={!currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+            style={{ marginTop: 10 }}
+          />
 
           {/* Security Note */}
           <View style={styles.securityNote}>
@@ -306,29 +290,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-    paddingTop: 50, // Account for status bar
-  },
-  backButton: {
-    padding: 5,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
-  headerSpacer: {
-    width: 34, // Same width as back button to center title
   },
   content: {
     flex: 1,
@@ -390,21 +351,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.status.error,
     marginTop: 5,
-  },
-  updateButton: {
-    backgroundColor: colors.primary.burgundy,
-    paddingVertical: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  updateButtonDisabled: {
-    backgroundColor: colors.neutral.stone,
-  },
-  updateButtonText: {
-    color: colors.neutral.cream,
-    fontSize: 16,
-    fontWeight: '600',
   },
   securityNote: {
     flexDirection: 'row',

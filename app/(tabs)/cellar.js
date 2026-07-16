@@ -45,6 +45,9 @@ export default function CellarScreen() {
   const params = useLocalSearchParams();
   const [bottles, setBottles] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  // Bumped by the error view's retry action to re-run the focus load below.
+  const [reloadKey, setReloadKey] = useState(0);
 
   // Browse state.
   const [query, setQuery] = useState('');
@@ -64,14 +67,26 @@ export default function CellarScreen() {
       (async () => {
         const res = await cellarService.getCellar().catch(() => ({ success: false }));
         if (!active) return;
-        setBottles(res?.success ? res.bottles : []);
+        if (res?.success) {
+          setBottles(res.bottles);
+          setLoadError(false);
+        } else {
+          // Don't map failures to an empty cellar — that would show the
+          // "Start your cellar" onboarding to users who own bottles.
+          setLoadError(true);
+        }
         setLoaded(true);
       })();
       return () => {
         active = false;
       };
-    }, [])
+    }, [reloadKey])
   );
+
+  const retryLoad = () => {
+    setLoaded(false);
+    setReloadKey((k) => k + 1);
+  };
 
   // Deep-link from the Home "Ready to Drink" strip: ?status=ready pre-applies the
   // matching drink-window filter (and resets the segment so the filter shows).
@@ -80,8 +95,11 @@ export default function CellarScreen() {
     if (status && DEEP_LINK_STATUSES.includes(status)) {
       setSegment('all');
       setFilters({ ...EMPTY_FILTERS, statuses: [status] });
+      // Clear the param so re-tapping the same Home tile after clearing the
+      // chip applies the filter again.
+      router.setParams({ status: undefined });
     }
-  }, [params?.status]);
+  }, [params?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Whole pipeline (search -> segment -> filters -> sort -> group) in one memo.
   const { sections, facets, counts } = useMemo(
@@ -126,7 +144,12 @@ export default function CellarScreen() {
             <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.burgundy} />
           </View>
           <Text style={styles.headerTitle}>Cellar</Text>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => router.push('/cellar/add')}>
+          <TouchableOpacity
+            style={styles.headerIcon}
+            onPress={() => router.push('/cellar/add')}
+            accessibilityRole="button"
+            accessibilityLabel="Add bottle"
+          >
             <Ionicons name="add" size={22} color={colors.primary.burgundy} />
           </TouchableOpacity>
         </View>
@@ -149,7 +172,12 @@ export default function CellarScreen() {
               returnKeyType="search"
             />
             {query.length > 0 && (
-              <TouchableOpacity onPress={() => setQuery('')} hitSlop={8}>
+              <TouchableOpacity
+                onPress={() => setQuery('')}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Clear"
+              >
                 <Ionicons name="close-circle" size={16} color={colors.neutral.silver} />
               </TouchableOpacity>
             )}
@@ -233,7 +261,11 @@ export default function CellarScreen() {
           <ActivityIndicator color={colors.primary.burgundy} />
         </View>
       ) : bottles.length === 0 ? (
-        <EmptyCellar onAdd={() => router.push('/cellar/add')} />
+        loadError ? (
+          <LoadError onRetry={retryLoad} />
+        ) : (
+          <EmptyCellar onAdd={() => router.push('/cellar/add')} />
+        )
       ) : !hasResults ? (
         <NoResults onReset={resetAll} />
       ) : (
@@ -266,6 +298,8 @@ export default function CellarScreen() {
         style={styles.fab}
         activeOpacity={0.9}
         onPress={() => router.push('/cellar/add')}
+        accessibilityRole="button"
+        accessibilityLabel="Add bottle"
       >
         <Ionicons name="add" size={26} color={colors.neutral.cream} />
       </TouchableOpacity>
@@ -543,6 +577,27 @@ function EmptyCellar({ onAdd }) {
   );
 }
 
+// Load-failure state: shown instead of the onboarding when the cellar fetch
+// fails, so owners of bottles aren't told to "start" their cellar.
+function LoadError({ onRetry }) {
+  return (
+    <View style={styles.body}>
+      <View style={styles.iconRing}>
+        <Ionicons name="cloud-offline-outline" size={36} color={colors.gold.shimmer} />
+      </View>
+      <Text style={styles.emptyTitle}>Couldn&apos;t load your cellar</Text>
+      <Text style={styles.emptySub}>
+        Something went wrong while fetching your bottles. Check your connection
+        and try again.
+      </Text>
+      <TouchableOpacity style={styles.emptyCta} onPress={onRetry} activeOpacity={0.9}>
+        <Ionicons name="refresh" size={18} color={colors.neutral.cream} />
+        <Text style={styles.emptyCtaText}>Try again</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 function NoResults({ onReset }) {
   return (
     <View style={styles.body}>
@@ -656,7 +711,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  controlBadgeText: { color: colors.neutral.cream, fontSize: 10, fontWeight: '700' },
+  controlBadgeText: { color: colors.neutral.cream, fontSize: 11, fontWeight: '700' },
 
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   activeChip: {
@@ -738,14 +793,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qtyDotText: { color: colors.neutral.cream, fontSize: 10, fontWeight: '700' },
+  qtyDotText: { color: colors.neutral.cream, fontSize: 11, fontWeight: '700' },
   cardMeta: { flex: 1 },
   cardName: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
   cardProducer: { ...typography.body.small, color: colors.neutral.graphite, marginTop: 1 },
   cardSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
   cardRight: { alignItems: 'flex-end', gap: spacing.xs },
   badge: { paddingVertical: 2, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  badgeText: { ...typography.body.caption, color: colors.neutral.cream, fontSize: 9 },
+  badgeText: { ...typography.body.caption, color: colors.neutral.cream },
 
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl },
   iconRing: {

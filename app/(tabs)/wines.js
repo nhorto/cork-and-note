@@ -1,8 +1,8 @@
 // Updated wines.js with comprehensive filtering
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   FlatList,
   Modal,
@@ -27,8 +27,9 @@ export default function Wines() {
   const [search, setSearch] = useState('');
   const [wines, setWines] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);  
+  const [refreshing, setRefreshing] = useState(false);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -49,9 +50,14 @@ export default function Wines() {
     ratings: ['All', 'Highest to Lowest', 'Lowest to Highest']
   });
 
-  useEffect(() => {
-    loadUserWines();
-  }, [user]);
+  // Reload whenever the tab gains focus so wines logged elsewhere show up
+  // without a manual refresh.
+  useFocusEffect(
+    useCallback(() => {
+      loadUserWines();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user])
+  );
 
   useEffect(() => {
     if (wines.length > 0) {
@@ -67,6 +73,7 @@ export default function Wines() {
 
     try {
       isRefresh ? setRefreshing(true) : setLoading(true);
+      setError(false);
 
       // Both reads are cached (#83), so cross-referencing tasted wines against
       // the cellar to badge owned wines (#117) costs no extra DB round-trips.
@@ -105,6 +112,7 @@ export default function Wines() {
       }
     } catch (error) {
       console.error('Error loading wines:', error);
+      setError(true);
     } finally {
       isRefresh ? setRefreshing(false) : setLoading(false);
     }
@@ -225,7 +233,7 @@ export default function Wines() {
 
           <Text style={styles.wineryName}>{item.wineryName}</Text>
           <Text style={styles.visitDate}>
-            {new Date(item.visitDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            {new Date(item.visitDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}
           </Text>
 
           {/* Badge: this tasted wine is also in the cellar (#117). */}
@@ -271,6 +279,7 @@ export default function Wines() {
       visible={showFilters}
       animationType="slide"
       transparent={true}
+      onRequestClose={() => setShowFilters(false)}
     >
       <View style={styles.modalOverlay}>
         <View style={styles.filterModal}>
@@ -279,10 +288,12 @@ export default function Wines() {
             <View style={styles.filterHeaderIcon}>
               <Ionicons name="options" size={20} color={colors.primary.burgundy} />
             </View>
-            <Text style={styles.filterTitle}>Filter Wines</Text>
+            <Text style={styles.filterTitle}>Filter wines</Text>
             <TouchableOpacity
               style={styles.filterCloseButton}
               onPress={() => setShowFilters(false)}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
             >
               <Ionicons name="close" size={22} color={colors.neutral.charcoal} />
             </TouchableOpacity>
@@ -298,7 +309,7 @@ export default function Wines() {
           <ScrollView style={styles.filterContent}>
             {/* Wine Type Filter */}
             <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Wine Type</Text>
+              <Text style={styles.filterSectionTitle}>Wine type</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={styles.filterOptions}>
                   {filterOptions.types.map(type => (
@@ -376,7 +387,7 @@ export default function Wines() {
 
             {/* Rating Sort Filter */}
             <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Sort by Rating</Text>
+              <Text style={styles.filterSectionTitle}>Sort by rating</Text>
               <View style={styles.filterOptions}>
                 {filterOptions.ratings.map(rating => (
                   <TouchableOpacity
@@ -404,13 +415,13 @@ export default function Wines() {
               style={styles.clearFiltersButton}
               onPress={clearAllFilters}
             >
-              <Text style={styles.clearFiltersText}>Clear All</Text>
+              <Text style={styles.clearFiltersText}>Clear all</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.applyFiltersButton}
               onPress={() => setShowFilters(false)}
             >
-              <Text style={styles.applyFiltersText}>Apply Filters</Text>
+              <Text style={styles.applyFiltersText}>Apply filters</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -440,13 +451,15 @@ export default function Wines() {
           <View style={styles.screenHeaderLeft}>
             <Ionicons name="wine" size={20} color={colors.primary.burgundy} />
           </View>
-          <Text style={styles.screenHeaderTitle}>My Wines</Text>
+          <Text style={styles.screenHeaderTitle}>My wines</Text>
           <TouchableOpacity
             style={[
               styles.filterHeaderButton,
               activeFilterCount > 0 && styles.filterHeaderButtonActive
             ]}
             onPress={() => setShowFilters(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Filters"
           >
             <Ionicons
               name="options-outline"
@@ -476,7 +489,13 @@ export default function Wines() {
             selectionColor={colors.primary.burgundy}
           />
           {search.length > 0 && (
-            <TouchableOpacity onPress={() => setSearch('')} style={styles.clearButton}>
+            <TouchableOpacity
+              onPress={() => setSearch('')}
+              style={styles.clearButton}
+              accessibilityRole="button"
+              accessibilityLabel="Clear"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Ionicons name="close-circle" size={20} color={colors.neutral.pewter} />
             </TouchableOpacity>
           )}
@@ -504,17 +523,32 @@ export default function Wines() {
         onRefresh={handleRefresh}                // NEW
         refreshing={refreshing}                  // NEW
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIcon}>
-              <Ionicons name="wine-outline" size={40} color={colors.gold.muted} />
+          error ? (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="cloud-offline-outline" size={40} color={colors.gold.muted} />
+              </View>
+              <Text style={styles.emptyTitle}>Couldn&apos;t load your wines</Text>
+              <Text style={styles.emptyText}>
+                Something went wrong. Check your connection and try again.
+              </Text>
+              <TouchableOpacity style={styles.retryButton} onPress={() => loadUserWines()}>
+                <Text style={styles.retryButtonText}>Try again</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.emptyTitle}>No wines found</Text>
-            <Text style={styles.emptyText}>
-              {wines.length === 0
-                ? 'Start logging your winery visits to see your wines here!'
-                : 'Try adjusting your search or filters'}
-            </Text>
-          </View>
+          ) : (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="wine-outline" size={40} color={colors.gold.muted} />
+              </View>
+              <Text style={styles.emptyTitle}>No wines found</Text>
+              <Text style={styles.emptyText}>
+                {wines.length === 0
+                  ? 'Start logging your winery visits to see your wines here!'
+                  : 'Try adjusting your search or filters'}
+              </Text>
+            </View>
+          )
         }
       />
 
@@ -582,7 +616,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   filterBadgeText: {
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     color: colors.neutral.cream,
   },
@@ -713,7 +747,7 @@ const styles = StyleSheet.create({
   },
   visitDate: {
     ...typography.body.caption,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     marginBottom: spacing.xs,
   },
   cellarBadge: {
@@ -731,7 +765,7 @@ const styles = StyleSheet.create({
   },
   cellarBadgeText: {
     ...typography.body.caption,
-    color: colors.gold.rich,
+    color: colors.neutral.charcoal,
     fontWeight: '600',
   },
   ratingContainer: {
@@ -785,6 +819,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: spacing.xl,
     maxWidth: 280,
+  },
+  retryButton: {
+    marginTop: spacing.md,
+    backgroundColor: colors.primary.burgundy,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.md,
+  },
+  retryButtonText: {
+    ...typography.body.regular,
+    color: colors.neutral.cream,
+    fontWeight: '600',
   },
 
   // Filter Modal
@@ -860,7 +906,7 @@ const styles = StyleSheet.create({
   },
   filterSectionTitle: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   filterOptions: {

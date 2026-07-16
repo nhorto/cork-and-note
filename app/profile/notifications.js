@@ -4,7 +4,6 @@
 // Push defaults OFF: the in-app Home "Ready to Drink" strip (#54) is the default
 // surface. This screen lets a wine lover opt in and tune *what* and *when*.
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -27,6 +26,7 @@ import {
   sendTestNotification,
   setPrefs,
 } from '../../lib/notifications';
+import ScreenHeader from '../../components/ScreenHeader';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
@@ -41,8 +41,6 @@ const HOUR_OPTIONS = [
 ];
 
 export default function NotificationsScreen() {
-  const router = useRouter();
-
   const [loading, setLoading] = useState(true);
   const [prefs, setLocalPrefs] = useState(null);
   const [permission, setPermission] = useState('undetermined');
@@ -111,14 +109,7 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Cellar Reminders</Text>
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Cellar reminders" />
 
       {loading || !prefs ? (
         <View style={styles.loadingWrap}>
@@ -280,28 +271,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.neutral.cream,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    paddingTop: 50,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-  },
-  backButton: {
-    padding: spacing.xs,
-  },
-  headerTitle: {
-    ...typography.heading.h2,
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
-  headerSpacer: {
-    width: 34,
-  },
   loadingWrap: {
     flex: 1,
     alignItems: 'center',
@@ -344,7 +313,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
   },
   sectionHint: {

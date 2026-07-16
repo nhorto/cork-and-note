@@ -19,6 +19,7 @@ import { useRouter } from 'expo-router';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
 import TonightsPickCard from '../../components/TonightsPickCard';
+import TypingDots from '../../components/TypingDots';
 import { aiService } from '../../lib/ai';
 import { chatService } from '../../lib/chat';
 import theme from '../../styles/theme';
@@ -70,7 +71,7 @@ function ConversationRow({ conversation, onPress, onDelete }) {
           {conversation.title}
         </Text>
         <Text style={styles.convMeta}>
-          {conversation.context_type === 'wine_entry' ? 'Wine Entry' : 'Chat'}
+          {conversation.context_type === 'wine_entry' ? 'Wine entry' : 'Chat'}
           {' · '}
           {formatRelativeDate(conversation.updated_at)}
         </Text>
@@ -90,6 +91,10 @@ export default function SommelierScreen() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(null);
+  // True only when the active conversation genuinely has no messages (a new
+  // chat, or one whose history loaded empty). Gates the auto-title on first
+  // send so a failed history load can't re-title an existing conversation.
+  const [loadedEmpty, setLoadedEmpty] = useState(false);
   const flatListRef = useRef(null);
 
   // Load conversations on mount
@@ -124,8 +129,13 @@ export default function SommelierScreen() {
         displayText: m.role === 'assistant' ? aiService.getDisplayText(m.content) : m.content,
       }));
       setMessages(processed);
+      setLoadedEmpty(processed.length === 0);
     } catch (err) {
       console.error('Failed to load messages:', err);
+      Alert.alert('Error', 'Could not load this conversation. Please try again.');
+      setView('list');
+      setActiveConversation(null);
+      setMessages([]);
     } finally {
       setLoading(false);
     }
@@ -136,9 +146,11 @@ export default function SommelierScreen() {
       const conversation = await chatService.createConversation('general');
       setActiveConversation(conversation);
       setMessages([]);
+      setLoadedEmpty(true);
       setView('chat');
     } catch (err) {
       console.error('Failed to create conversation:', err);
+      Alert.alert('Error', 'Could not start a new conversation. Please try again.');
     }
   }, []);
 
@@ -187,11 +199,13 @@ export default function SommelierScreen() {
       const displayUserMsg = { ...userMsg, displayText: text };
       setMessages(prev => [...prev, displayUserMsg]);
 
-      // Auto-title on first message
-      if (messages.length === 0 && text) {
+      // Auto-title on first message — only when the conversation genuinely
+      // started empty, not when its history simply failed to load.
+      if (loadedEmpty && messages.length === 0 && text) {
         const title = chatService.generateTitle(text);
         await chatService.updateConversationTitle(activeConversation.id, title);
         setActiveConversation(prev => ({ ...prev, title }));
+        setLoadedEmpty(false);
       }
 
       // Build messages array for AI — send base64 images directly, not URLs
@@ -241,7 +255,7 @@ export default function SommelierScreen() {
     } finally {
       setSending(false);
     }
-  }, [activeConversation, messages, systemPrompt]);
+  }, [activeConversation, messages, systemPrompt, loadedEmpty]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -260,7 +274,7 @@ export default function SommelierScreen() {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Sommelier</Text>
-          <Text style={styles.headerSubtitle}>Your Wine Companion</Text>
+          <Text style={styles.headerSubtitle}>Your wine companion</Text>
         </View>
         <View style={styles.divider} />
 
@@ -284,7 +298,7 @@ export default function SommelierScreen() {
             {/* New conversation */}
             <TouchableOpacity style={styles.newChatButton} onPress={startNewChat}>
               <Ionicons name="add-circle" size={20} color={colors.neutral.cream} />
-              <Text style={styles.newChatText}>New Conversation</Text>
+              <Text style={styles.newChatText}>New conversation</Text>
             </TouchableOpacity>
 
             {conversations.length === 0 ? (
@@ -328,7 +342,7 @@ export default function SommelierScreen() {
         </TouchableOpacity>
         <View style={styles.chatHeaderContent}>
           <Text style={styles.chatHeaderTitle} numberOfLines={1}>
-            {activeConversation?.title || 'New Conversation'}
+            {activeConversation?.title || 'New conversation'}
           </Text>
         </View>
       </View>
@@ -370,11 +384,7 @@ export default function SommelierScreen() {
         {sending && (
           <View style={styles.typingContainer}>
             <View style={styles.typingBubble}>
-              <View style={styles.typingDots}>
-                <View style={[styles.dot, styles.dot1]} />
-                <View style={[styles.dot, styles.dot2]} />
-                <View style={[styles.dot, styles.dot3]} />
-              </View>
+              <TypingDots />
             </View>
           </View>
         )}
@@ -403,7 +413,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     ...typography.body.small,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     fontStyle: 'italic',
     marginTop: 2,
   },
@@ -438,7 +448,7 @@ const styles = StyleSheet.create({
   },
   recentLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
@@ -574,17 +584,4 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     marginLeft: 36, // account for avatar space
   },
-  typingDots: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.neutral.pewter,
-  },
-  dot1: { opacity: 0.4 },
-  dot2: { opacity: 0.6 },
-  dot3: { opacity: 0.8 },
 });

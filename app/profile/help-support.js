@@ -1,5 +1,6 @@
 // components/HelpSupportModal.js
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -9,6 +10,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 import theme from '../../styles/theme';
 
 const { colors } = theme;
@@ -21,7 +23,7 @@ const HelpSupportModal = () => {
   const guides = [
     {
       id: 'getting-started',
-      title: 'Getting Around Cork & Note',
+      title: 'Getting around Cork & Note',
       icon: 'home',
       content: [
         {
@@ -61,7 +63,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'logging-wine',
-      title: 'Logging a Wine',
+      title: 'Logging a wine',
       icon: 'wine',
       content: [
         {
@@ -90,7 +92,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'cellar',
-      title: 'Your Cellar & Drink Windows',
+      title: 'Your cellar & drink windows',
       icon: 'file-tray-stacked',
       content: [
         {
@@ -135,7 +137,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'sommelier',
-      title: 'The AI Sommelier',
+      title: 'The AI sommelier',
       icon: 'sparkles',
       content: [
         {
@@ -171,7 +173,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'map-places',
-      title: 'Map, Places & Wishlist',
+      title: 'Map, places & wishlist',
       icon: 'map',
       content: [
         {
@@ -211,7 +213,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'wine-statistics',
-      title: 'Your Stats & Journey',
+      title: 'Your stats & journey',
       icon: 'analytics',
       content: [
         {
@@ -226,7 +228,7 @@ const HelpSupportModal = () => {
               description: 'Wines, Places and Wishlist totals — tap any one to open its list'
             },
             {
-              name: 'Your Journey (Profile)',
+              name: 'Your journey (Profile)',
               description: "Châteaux visited, total visits, and wines tasted"
             },
             {
@@ -247,7 +249,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'wine-ratings',
-      title: 'Understanding Wine Ratings',
+      title: 'Understanding wine ratings',
       icon: 'star',
       content: [
         {
@@ -258,7 +260,7 @@ const HelpSupportModal = () => {
           type: 'attributes',
           value: [
             {
-              name: 'Overall Rating',
+              name: 'Overall rating',
               description: 'Your general impression of the wine from 1-5 stars'
             },
             {
@@ -291,7 +293,7 @@ const HelpSupportModal = () => {
     },
     {
       id: 'flavor-notes',
-      title: 'Using Flavor Notes',
+      title: 'Using flavor notes',
       icon: 'leaf',
       content: [
         {
@@ -400,18 +402,7 @@ const HelpSupportModal = () => {
 
   return (
     <View style={styles.container}>
-      {/* Custom Header - FIXED: Proper centering without save button */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={handleBack}
-        >
-          <Ionicons name="arrow-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Help & Support</Text>
-        {/* Empty view to balance the layout and center the title */}
-        <View style={styles.headerSpacer} />
-      </View>
+      <ScreenHeader title="Help & support" onBack={handleBack} />
 
       <ScrollView style={styles.content}>
         {activeGuide ? (
@@ -445,7 +436,9 @@ const HelpSupportModal = () => {
 
             {/* App version info */}
             <View style={styles.versionInfo}>
-              <Text style={styles.versionText}>Cork & Note v1.0.0</Text>
+              <Text style={styles.versionText}>
+                Cork & Note v{Constants.expoConfig?.version ?? 'unknown'}
+              </Text>
               <Text style={styles.copyrightText}>© 2026 Cork & Note. All rights reserved.</Text>
             </View>
           </View>
@@ -459,30 +452,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 50,
-    paddingBottom: 16,
-    backgroundColor: colors.neutral.cream,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    flex: 1,
-    textAlign: 'center',
-  },
-  // FIXED: Added spacer to balance the layout and center the title
-  headerSpacer: {
-    width: 40, // Same width as back button to maintain balance
   },
   content: {
     flex: 1,
@@ -634,7 +603,7 @@ const styles = StyleSheet.create({
   },
   copyrightText: {
     fontSize: 12,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
   },
 });
 

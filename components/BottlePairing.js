@@ -12,7 +12,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
 import {
-  ActivityIndicator,
   Platform,
   ScrollView,
   StyleSheet,
@@ -23,6 +22,7 @@ import {
 } from 'react-native';
 import { OCCASIONS, SEASONS, cellarPairing } from '../lib/cellarPairing';
 import theme from '../styles/theme';
+import Button from './Button';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
@@ -148,21 +148,14 @@ export default function BottlePairing({ bottle }) {
       )}
 
       {/* Primary CTA */}
-      <TouchableOpacity
-        style={[styles.primaryBtn, thinking && styles.primaryBtnDisabled]}
-        activeOpacity={0.9}
+      <Button
+        variant="primary"
+        title={pairing ? 'Suggest again' : 'Suggest pairings'}
+        icon="restaurant-outline"
+        loading={thinking}
         onPress={askSommelier}
-        disabled={thinking}
-      >
-        {thinking ? (
-          <ActivityIndicator color={colors.neutral.cream} size="small" />
-        ) : (
-          <Ionicons name="restaurant-outline" size={18} color={colors.neutral.cream} />
-        )}
-        <Text style={styles.primaryBtnText}>
-          {thinking ? 'Pairing…' : pairing ? 'Suggest again' : 'Suggest pairings'}
-        </Text>
-      </TouchableOpacity>
+        style={{ marginTop: spacing.md }}
+      />
 
       {/* Error (fail soft — gentle retry, never crash) */}
       {error && !thinking && (
@@ -225,7 +218,7 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
   },
   flexSpacer: { flex: 1 },
   tuneLink: {
@@ -293,24 +286,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 
-  // CTA
-  primaryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.primary.burgundy,
-    borderRadius: borderRadius.md,
-    paddingVertical: spacing.md,
-    marginTop: spacing.md,
-  },
-  primaryBtnDisabled: { opacity: 0.7 },
-  primaryBtnText: {
-    ...typography.heading.h3,
-    color: colors.neutral.cream,
-    fontFamily: SERIF,
-  },
-
   // Error
   errorRow: {
     alignItems: 'center',
@@ -373,7 +348,7 @@ const styles = StyleSheet.create({
 
   disclaimer: {
     ...typography.body.small,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     fontStyle: 'italic',
     marginTop: spacing.md,
     textAlign: 'center',

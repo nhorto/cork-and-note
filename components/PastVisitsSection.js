@@ -1,11 +1,12 @@
 // Updated PastVisitsSection.js with photo display support
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Dimensions,
   Image,
   Modal,
   ScrollView,
@@ -19,6 +20,9 @@ import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
+// pagingEnabled snaps to the screen width, so the photo pages must match it —
+// a hardcoded 400 desyncs the pager and the "N of M" indicator.
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const PastVisitsSection = ({ wineryId }) => {
   const [loading, setLoading] = useState(true);
@@ -30,30 +34,33 @@ const PastVisitsSection = ({ wineryId }) => {
   const [photoModalTitle, setPhotoModalTitle] = useState('');
   const router = useRouter();
 
-  // Load visits for this winery
-  useEffect(() => {
-    const loadVisits = async () => {
-      try {
-        setLoading(true);
-        const { success, visits } = await visitsService.getUserVisits();
-        
-        if (success && visits) {
-          // Filter visits to this winery (winery_id can be null for
-          // location-optional logs, so guard the toString()).
-          const wineryVisits = visits.filter(visit =>
-            visit.winery_id?.toString() === wineryId?.toString()
-          );
-          setVisits(wineryVisits);
-        }
-      } catch (error) {
-        console.error('Error loading visits:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Load visits for this winery. Reload on focus (not just once per wineryId)
+  // so changes made via "Edit log" appear when the user navigates back.
+  useFocusEffect(
+    useCallback(() => {
+      const loadVisits = async () => {
+        try {
+          setLoading(true);
+          const { success, visits } = await visitsService.getUserVisits();
 
-    loadVisits();
-  }, [wineryId]);
+          if (success && visits) {
+            // Filter visits to this winery (winery_id can be null for
+            // location-optional logs, so guard the toString()).
+            const wineryVisits = visits.filter(visit =>
+              visit.winery_id?.toString() === wineryId?.toString()
+            );
+            setVisits(wineryVisits);
+          }
+        } catch (error) {
+          console.error('Error loading visits:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadVisits();
+    }, [wineryId])
+  );
 
   // Toggle visit expansion
   const toggleVisitExpansion = (visitId) => {
@@ -79,13 +86,15 @@ const PastVisitsSection = ({ wineryId }) => {
     }
   };
 
-  // Format date for display
+  // Format date for display. visit_date is a date-only value parsed as UTC
+  // midnight, so format in UTC too — otherwise it renders a day early west of UTC.
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC'
     });
   };
 
@@ -143,7 +152,7 @@ const PastVisitsSection = ({ wineryId }) => {
           <Ionicons name="calendar-outline" size={32} color={colors.gold.muted} />
         </View>
         <Text style={styles.emptyText}>
-          You haven't logged any visits to this winery yet.
+          You haven’t logged any visits to this winery yet.
         </Text>
         <TouchableOpacity
           style={styles.addVisitButton}
@@ -151,7 +160,7 @@ const PastVisitsSection = ({ wineryId }) => {
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={18} color={colors.neutral.cream} />
-          <Text style={styles.addVisitButtonText}>Log Your First Visit</Text>
+          <Text style={styles.addVisitButtonText}>Log your first visit</Text>
         </TouchableOpacity>
       </View>
     );
@@ -195,7 +204,7 @@ const PastVisitsSection = ({ wineryId }) => {
           {/* Visit Photos Preview */}
           {visit.photos && visit.photos.length > 0 && (
             <View style={styles.visitPhotosSection}>
-              <Text style={styles.photosSectionTitle}>Visit Photos</Text>
+              <Text style={styles.photosSectionTitle}>Visit photos</Text>
               {renderPhotoThumbnails(visit.photos, `Visit Photos - ${formatDate(visit.visit_date)}`)}
             </View>
           )}
@@ -206,7 +215,7 @@ const PastVisitsSection = ({ wineryId }) => {
               {/* Visit Notes */}
               {visit.notes && (
                 <View style={styles.notesSection}>
-                  <Text style={styles.notesTitle}>Visit Notes</Text>
+                  <Text style={styles.notesTitle}>Visit notes</Text>
                   <Text style={styles.notesText}>{visit.notes}</Text>
                 </View>
               )}
@@ -214,7 +223,7 @@ const PastVisitsSection = ({ wineryId }) => {
               {/* Wine List */}
               <View style={styles.winesSection}>
                 <View style={styles.winesSectionHeader}>
-                  <Text style={styles.winesSectionTitle}>Wines Tasted</Text>
+                  <Text style={styles.winesSectionTitle}>Wines tasted</Text>
                   <TouchableOpacity
                     style={styles.editLogLink}
                     onPress={() => router.push(`/log-session?editVisitId=${visit.id}`)}
@@ -297,9 +306,9 @@ const PastVisitsSection = ({ wineryId }) => {
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              contentOffset={{ x: selectedPhotoIndex * 400, y: 0 }}
+              contentOffset={{ x: selectedPhotoIndex * SCREEN_WIDTH, y: 0 }}
               onMomentumScrollEnd={(event) => {
-                const newIndex = Math.round(event.nativeEvent.contentOffset.x / 400);
+                const newIndex = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
                 setSelectedPhotoIndex(newIndex);
               }}
             >
@@ -345,7 +354,7 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginHorizontal: spacing.md,
   },
   visitCount: {
@@ -587,7 +596,7 @@ const styles = StyleSheet.create({
   },
   noWinesText: {
     ...typography.body.regular,
-    color: colors.neutral.silver,
+    color: colors.neutral.pewter,
     fontStyle: 'italic',
     textAlign: 'center',
     padding: spacing.lg,
@@ -616,7 +625,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   photoModalContainer: {
-    width: 400,
+    width: SCREEN_WIDTH,
     height: 400,
     justifyContent: 'center',
     alignItems: 'center',

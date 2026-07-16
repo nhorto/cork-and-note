@@ -55,13 +55,13 @@ const mdStyles = {
     marginVertical: 2,
   },
   bullet_list_icon: {
-    color: colors.gold.rich,
+    color: colors.gold.text,
     fontSize: 14,
     lineHeight: 22,
     marginRight: spacing.xs,
   },
   ordered_list_icon: {
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     fontSize: 14,
     lineHeight: 22,
     marginRight: spacing.xs,
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   },
   suggestionsButtonText: {
     ...typography.body.small,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     fontWeight: '600',
   },
   timestamp: {
@@ -263,7 +263,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     textTransform: 'none',
     letterSpacing: 0,
-    fontSize: 10,
   },
   userTimestamp: {
     color: colors.primary.rosé,

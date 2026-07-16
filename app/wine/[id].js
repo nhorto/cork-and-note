@@ -5,6 +5,7 @@ import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from '
 import { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
+    Dimensions,
     Image,
     Modal,
     SafeAreaView,
@@ -14,6 +15,8 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
+import StarRating from '../../components/StarRating';
 import { cellarService } from '../../lib/cellar';
 import { matchWineToCellar } from '../../lib/cellarMatch';
 import { varietalText } from '../../lib/varietals';
@@ -22,6 +25,10 @@ import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
+
+// pagingEnabled snaps to the screen width, so the photo-viewer pages must
+// match it exactly for the offset math and "n of N" indicator to line up.
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function WineDetail() {
   const { id } = useLocalSearchParams();
@@ -107,12 +114,17 @@ export default function WineDetail() {
             })
             .catch(() => setCellarMatch(null));
         } else {
-          router.back();
+          // Not found — clear state so the "Wine not found" view renders.
+          setWine(null);
+          setVisit(null);
         }
       }
     } catch (error) {
       console.error('Error loading wine details:', error);
-      router.back();
+      // Load failed — render the "Wine not found" view instead of silently
+      // navigating away.
+      setWine(null);
+      setVisit(null);
     } finally {
       setLoading(false);
     }
@@ -123,7 +135,8 @@ export default function WineDetail() {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'UTC'
     });
   };
 
@@ -183,7 +196,7 @@ export default function WineDetail() {
       <SafeAreaView style={[styles.container, styles.center]}>
         <Text style={styles.errorText}>Wine not found</Text>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>Go Back</Text>
+          <Text style={styles.backButtonText}>Go back</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -199,18 +212,20 @@ export default function WineDetail() {
     .join(' · ');
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.iconBtn}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Wine Details</Text>
-        <TouchableOpacity onPress={handleEditLog} style={styles.iconBtn} accessibilityLabel="Edit log">
-          <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.headerBorder} />
+    <View style={styles.container}>
+      <ScreenHeader
+        title="Wine details"
+        right={
+          <TouchableOpacity
+            onPress={handleEditLog}
+            style={styles.iconBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Edit log"
+          >
+            <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
+          </TouchableOpacity>
+        }
+      />
 
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Wine Basic Info */}
@@ -236,16 +251,12 @@ export default function WineDetail() {
           <Text style={styles.ratingValue}>
             {wine.overall_rating ? wine.overall_rating.toFixed(1) : '0.0'}
           </Text>
-          <View style={styles.starsContainer}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Ionicons
-                key={star}
-                name={star <= Math.round(wine.overall_rating || 0) ? 'star' : 'star-outline'}
-                size={20}
-                color={colors.gold.rich}
-              />
-            ))}
-          </View>
+          <StarRating
+            value={wine.overall_rating || 0}
+            size={20}
+            showValue={false}
+            style={styles.starsContainer}
+          />
         </View>
 
         {/* "In your cellar" link (#117) — shown when this same wine is also a
@@ -375,7 +386,13 @@ export default function WineDetail() {
       {/* Photo Viewer Modal */}
       <Modal visible={showPhotoModal} animationType="fade" transparent={true}>
         <View style={styles.photoModalOverlay}>
-          <TouchableOpacity style={styles.photoModalClose} onPress={() => setShowPhotoModal(false)}>
+          <TouchableOpacity
+            style={styles.photoModalClose}
+            onPress={() => setShowPhotoModal(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
             <Ionicons name="close" size={32} color={colors.neutral.cream} />
           </TouchableOpacity>
 
@@ -384,7 +401,10 @@ export default function WineDetail() {
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              contentOffset={{ x: selectedPhotoIndex * 400, y: 0 }}
+              contentOffset={{ x: selectedPhotoIndex * SCREEN_WIDTH, y: 0 }}
+              onMomentumScrollEnd={(e) =>
+                setSelectedPhotoIndex(Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH))
+              }
             >
               {wine.photos.map((photo, index) => (
                 <View key={index} style={styles.photoModalContainer}>
@@ -401,7 +421,7 @@ export default function WineDetail() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -411,22 +431,7 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   scrollContent: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
   iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: {
-    ...typography.heading.h2,
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-    flex: 1,
-    textAlign: 'center',
-  },
-  headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
 
   wineName: {
     ...typography.heading.h1,
@@ -496,7 +501,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     ...shadows.soft,
   },
-  sectionLabel: { ...typography.body.caption, color: colors.gold.shimmer, marginBottom: spacing.md },
+  sectionLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.md },
 
   // Photos
   photoScroll: { marginHorizontal: -spacing.xs },
@@ -602,7 +607,7 @@ const styles = StyleSheet.create({
   // Photo modal (dark overlay intentional)
   photoModalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)', justifyContent: 'center', alignItems: 'center' },
   photoModalClose: { position: 'absolute', top: 50, right: 20, zIndex: 1, padding: spacing.sm },
-  photoModalContainer: { width: 400, height: 400, justifyContent: 'center', alignItems: 'center' },
+  photoModalContainer: { width: SCREEN_WIDTH, height: 400, justifyContent: 'center', alignItems: 'center' },
   photoModalImage: { width: '90%', height: '90%', resizeMode: 'contain' },
   photoModalIndicator: {
     position: 'absolute',

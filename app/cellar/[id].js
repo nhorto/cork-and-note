@@ -21,6 +21,7 @@ import CellarBottleForm from '../../components/CellarBottleForm';
 import ConsumptionHistory from '../../components/ConsumptionHistory';
 import MaturityTimeline from '../../components/MaturityTimeline';
 import BottlePairing from '../../components/BottlePairing';
+import ScreenHeader from '../../components/ScreenHeader';
 import TastingLinkCard from '../../components/TastingLinkCard';
 import { KEEP_BOTTLE_REASON, cellarService, drinkWindowMeta } from '../../lib/cellar';
 import { flattenTastedWines } from '../../lib/cellarMatch';
@@ -233,22 +234,22 @@ export default function BottleDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconBtn} onPress={() => (editing ? setEditing(false) : router.back())}>
-          <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle} numberOfLines={1}>
-          {editing ? 'Edit bottle' : 'Bottle'}
-        </Text>
-        {!editing && !removed ? (
-          <TouchableOpacity style={styles.iconBtn} onPress={() => setEditing(true)}>
-            <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.iconBtn} />
-        )}
-      </View>
-      <View style={styles.headerBorder} />
+      <ScreenHeader
+        title={editing ? 'Edit bottle' : 'Bottle'}
+        onBack={() => (editing ? setEditing(false) : router.back())}
+        right={
+          !editing && !removed ? (
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={() => setEditing(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Edit"
+            >
+              <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
+            </TouchableOpacity>
+          ) : null
+        }
+      />
 
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -393,11 +394,21 @@ export default function BottleDetailScreen() {
 
                   <Text style={styles.sheetLabel}>How many?</Text>
                   <View style={styles.stepper}>
-                    <TouchableOpacity style={styles.stepBtn} onPress={() => setOpenQty((q) => Math.max(1, q - 1))}>
+                    <TouchableOpacity
+                      style={styles.stepBtn}
+                      onPress={() => setOpenQty((q) => Math.max(1, q - 1))}
+                      accessibilityRole="button"
+                      accessibilityLabel="Decrease"
+                    >
                       <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
                     </TouchableOpacity>
                     <Text style={styles.stepValue}>{openQty}</Text>
-                    <TouchableOpacity style={styles.stepBtn} onPress={() => setOpenQty((q) => Math.min(bottle.quantity, q + 1))}>
+                    <TouchableOpacity
+                      style={styles.stepBtn}
+                      onPress={() => setOpenQty((q) => Math.min(bottle.quantity, q + 1))}
+                      accessibilityRole="button"
+                      accessibilityLabel="Increase"
+                    >
                       <Ionicons name="add" size={20} color={colors.primary.burgundy} />
                     </TouchableOpacity>
                   </View>
@@ -497,11 +508,21 @@ export default function BottleDetailScreen() {
             </Text>
 
             <View style={[styles.stepper, styles.adjustStepper]}>
-              <TouchableOpacity style={styles.stepBtn} onPress={() => setAdjustQty((q) => Math.max(0, q - 1))}>
+              <TouchableOpacity
+                style={styles.stepBtn}
+                onPress={() => setAdjustQty((q) => Math.max(0, q - 1))}
+                accessibilityRole="button"
+                accessibilityLabel="Decrease"
+              >
                 <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
               </TouchableOpacity>
               <Text style={styles.stepValue}>{adjustQty}</Text>
-              <TouchableOpacity style={styles.stepBtn} onPress={() => setAdjustQty((q) => q + 1)}>
+              <TouchableOpacity
+                style={styles.stepBtn}
+                onPress={() => setAdjustQty((q) => q + 1)}
+                accessibilityRole="button"
+                accessibilityLabel="Increase"
+              >
                 <Ionicons name="add" size={20} color={colors.primary.burgundy} />
               </TouchableOpacity>
             </View>
@@ -541,17 +562,7 @@ const styles = StyleSheet.create({
   missing: { ...typography.body.regular, color: colors.neutral.graphite },
   link: { ...typography.body.regular, color: colors.primary.burgundy },
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingTop: 60,
-    paddingBottom: spacing.sm,
-  },
   iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: 'Georgia', flex: 1, textAlign: 'center' },
-  headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
 
   hero: {
@@ -567,7 +578,7 @@ const styles = StyleSheet.create({
   producer: { ...typography.body.large, color: colors.neutral.graphite, marginTop: 2 },
   badgeRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   badge: { paddingVertical: 3, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  badgeText: { ...typography.body.caption, color: colors.neutral.cream, fontSize: 10 },
+  badgeText: { ...typography.body.caption, color: colors.neutral.cream },
 
   qtyCard: {
     flexDirection: 'row',
@@ -617,7 +628,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  notesLabel: { ...typography.body.caption, color: colors.gold.shimmer, marginBottom: spacing.xs },
+  notesLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.xs },
   notesText: { ...typography.body.regular, color: colors.neutral.charcoal, lineHeight: 22 },
 
   openBtn: {

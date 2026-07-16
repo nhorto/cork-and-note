@@ -22,6 +22,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { wineriesService } from '../lib/wineries';
 import theme from '../styles/theme';
+import Button from './Button';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
@@ -263,12 +264,13 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
 
         {/* Footer actions */}
         <View style={styles.footer}>
-          <TouchableOpacity style={styles.primaryBtn} onPress={handleUseThisPlace} activeOpacity={0.85}>
-            <Text style={styles.primaryBtnText}>Use this place</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.ghostBtn} onPress={handleSkip} activeOpacity={0.7}>
-            <Text style={styles.ghostBtnText}>Skip — no location</Text>
-          </TouchableOpacity>
+          <Button variant="primary" title="Use this place" onPress={handleUseThisPlace} />
+          <Button
+            variant="ghost"
+            title="Skip — no location"
+            onPress={handleSkip}
+            style={{ marginTop: spacing.xs }}
+          />
         </View>
       </SafeAreaView>
     </Modal>
@@ -309,7 +311,7 @@ const styles = StyleSheet.create({
 
   label: {
     ...typography.body.caption,
-    color: colors.gold.shimmer,
+    color: colors.gold.text,
     marginBottom: spacing.sm,
     marginTop: spacing.md,
   },
@@ -374,7 +376,7 @@ const styles = StyleSheet.create({
   suggestionText: { ...typography.body.regular, color: colors.neutral.charcoal, flex: 1 },
 
   pinHeader: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
-  optTag: { ...typography.body.small, color: colors.neutral.silver, fontStyle: 'italic' },
+  optTag: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic' },
 
   mapWrap: {
     height: 150,
@@ -417,18 +419,4 @@ const styles = StyleSheet.create({
     borderTopColor: colors.neutral.linen,
     backgroundColor: colors.neutral.cream,
   },
-  primaryBtn: {
-    backgroundColor: colors.primary.burgundy,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  primaryBtnText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
-    fontFamily: 'Georgia',
-  },
-  ghostBtn: { padding: spacing.md, alignItems: 'center', marginTop: spacing.xs },
-  ghostBtnText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '500' },
 });

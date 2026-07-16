@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  cardLabel: { ...typography.body.caption, color: colors.gold.shimmer, marginBottom: spacing.sm },
+  cardLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.sm },
   prompt: { ...typography.body.small, color: colors.neutral.graphite, marginBottom: spacing.sm, lineHeight: 19 },
 
   row: {
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gold.muted,
   },
-  matchTagText: { ...typography.body.caption, color: colors.primary.burgundy, fontSize: 10 },
+  matchTagText: { ...typography.body.caption, color: colors.primary.burgundy },
 
   linkedActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
   linkAction: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
