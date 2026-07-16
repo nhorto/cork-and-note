@@ -35,7 +35,7 @@ export default function HubMenu({ visible, onClose }) {
       <View style={styles.sheetWrap} pointerEvents="box-none">
         <View style={styles.sheet}>
           <View style={styles.handle} />
-          <Text style={styles.title}>Quick Actions</Text>
+          <Text style={styles.title}>Quick actions</Text>
 
           <Action
             icon="wine"
