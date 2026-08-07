@@ -222,9 +222,12 @@ export default function WineryDetail() {
           {/* About Section */}
           <View style={styles.aboutSection}>
             <Text style={styles.sectionLabel}>ABOUT</Text>
+            {/* No region sentence here: `wineries` has no region column — not in
+                the schema, not in any migration, and not in the live DB — so
+                `winery.region` was always undefined and this never rendered.
+                Region lives only on cellar_bottles today (#88). */}
             <Text style={styles.aboutText}>
               Discover this winery and experience their selection of wines.
-              {winery.region && ` Located in the ${winery.region} region.`}
             </Text>
           </View>
         </View>
