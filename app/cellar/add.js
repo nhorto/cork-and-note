@@ -22,6 +22,7 @@ import ScreenHeader from '../../components/ScreenHeader';
 import { cellarService } from '../../lib/cellar';
 import { getEntrySuggestions } from '../../lib/cellarEntry';
 import { knownLocations } from '../../lib/cellarLocation';
+import { knownRegions } from '../../lib/cellarRegion';
 import { notifySuccess } from '../../lib/haptics';
 import theme from '../../styles/theme';
 
@@ -36,6 +37,9 @@ export default function AddBottleScreen() {
   const [wineOptions, setWineOptions] = useState([]);
   // #62: distinct storage locations the user has already typed, as { name } items.
   const [locationOptions, setLocationOptions] = useState([]);
+  // #88: distinct regions already in the cellar, so the same place isn't stored
+  // under two spellings and split across two filter chips. Plain strings.
+  const [regionOptions, setRegionOptions] = useState([]);
 
   // Prefill + remount control for "add another like the last one".
   const [prefill, setPrefill] = useState(null);
@@ -60,8 +64,9 @@ export default function AddBottleScreen() {
       .catch(() => ({ success: false }))
       .then((res) => {
         if (!active) return;
-        const locs = knownLocations(res?.success ? res.bottles : []);
-        setLocationOptions(locs.map((name) => ({ name })));
+        const bottles = res?.success ? res.bottles : [];
+        setLocationOptions(knownLocations(bottles).map((name) => ({ name })));
+        setRegionOptions(knownRegions(bottles));
       });
     return () => {
       active = false;
@@ -183,6 +188,7 @@ export default function AddBottleScreen() {
             producerOptions={producerOptions}
             wineOptions={wineOptions}
             locationOptions={locationOptions}
+            regionOptions={regionOptions}
             onSubmit={handleSubmit}
             submitLabel="Add to cellar"
             saving={saving}

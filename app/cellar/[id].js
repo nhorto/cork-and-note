@@ -25,6 +25,7 @@ import ScreenHeader from '../../components/ScreenHeader';
 import TastingLinkCard from '../../components/TastingLinkCard';
 import { KEEP_BOTTLE_REASON, cellarService, drinkWindowMeta } from '../../lib/cellar';
 import { flattenTastedWines } from '../../lib/cellarMatch';
+import { knownRegions } from '../../lib/cellarRegion';
 import { visitsService } from '../../lib/visits';
 import theme from '../../styles/theme';
 
@@ -50,6 +51,8 @@ export default function BottleDetailScreen() {
   // The user's tasted wines, for the "From a tasting" link card (#140).
   const [tastedWines, setTastedWines] = useState([]);
   const [linking, setLinking] = useState(false);
+  // Regions already in the cellar, for the edit form's region autocomplete (#88).
+  const [regionOptions, setRegionOptions] = useState([]);
 
   // Open-bottle modal state. `openMode` is 'open' (a draw-down: drank/gifted/…)
   // or 'taste' (Coravin sample: log a tasting, keep the bottle in inventory).
@@ -80,12 +83,17 @@ export default function BottleDetailScreen() {
   };
 
   const load = useCallback(async () => {
-    const [res, visitsRes] = await Promise.all([
+    const [res, visitsRes, cellarRes] = await Promise.all([
       cellarService.getBottle(id).catch(() => ({ success: false })),
       visitsService.getUserVisits().catch(() => ({ success: false })),
+      // For the edit form's region autocomplete (#88). getCellar is cached, so
+      // this is normally free — and this screen is where a mis-typed region
+      // actually gets corrected.
+      cellarService.getCellar().catch(() => ({ success: false })),
     ]);
     setBottle(res?.success ? res.bottle : null);
     setTastedWines(visitsRes?.success ? flattenTastedWines(visitsRes.visits) : []);
+    setRegionOptions(knownRegions(cellarRes?.success ? cellarRes.bottles : []));
     setLoaded(true);
   }, [id]);
 
@@ -259,6 +267,7 @@ export default function BottleDetailScreen() {
               onSubmit={handleUpdate}
               submitLabel="Save changes"
               saving={saving}
+              regionOptions={regionOptions}
             />
           ) : (
             <>
