@@ -6,7 +6,7 @@
 // (the "A" feel) — same underlying data, two experiences.
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Image,
@@ -19,6 +19,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TIER, findPriorTastings, flattenTastedWines } from '../lib/cellarMatch';
 import { parseVarietals, varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
@@ -155,6 +156,73 @@ export default function LogSessionForm({
 
   const isSession = wines.length >= 2;
   const winemakerDefault = place?.placeType === 'winery' ? place?.placeName || '' : '';
+
+  // ── Duplicate-tasting awareness (#93) ──────────────────────────────────────
+  // Prior tastings from OTHER visits, for the "you've logged this before"
+  // banner. getUserVisits is cached (#83), so this is usually free; a failure is
+  // silent because the banner is a nicety and must never block logging.
+  const [priorTastings, setPriorTastings] = useState([]);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const { success, visits } = await visitsService.getUserVisits();
+        if (!alive || !success) return;
+        // Drop the session being edited — its own wines would self-match.
+        const others = (visits || []).filter((v) => v.id !== initialSession?.id);
+        setPriorTastings(flattenTastedWines(others));
+      } catch {
+        // non-fatal: no banner
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [initialSession?.id]);
+
+  // Drafts already on THIS visit, projected onto the field names the matcher
+  // reads (the in-app wine shape uses name/varietal/year, the DB shape uses
+  // wine_name/wine_varietal/wine_year). Excludes the row being edited.
+  const sessionWines = useMemo(
+    () =>
+      wines
+        .map((w, i) => ({ w, i }))
+        .filter(({ i }) => i !== currentWineIndex)
+        .map(({ w }) => ({
+          winemaker: w.winemaker,
+          wine_name: w.name,
+          wine_varietal: w.varietal,
+          wine_year: w.year,
+          wine_type: w.type,
+          overall_rating: w.overallRating,
+          additional_notes: w.additionalNotes,
+          placeName: place?.placeName || null,
+          visitDate,
+        })),
+    [wines, currentWineIndex, place?.placeName, visitDate]
+  );
+
+  // Compact per-row flag for the review list (#93E). A full banner per row would
+  // be overwhelming when a tasting-card scan (#139) drops eight drafts in at
+  // once, so each row gets a quiet badge instead; the banner is reserved for the
+  // form, where there's only ever one wine in view.
+  const priorFlags = useMemo(() => {
+    if (priorTastings.length === 0) return {};
+    const out = {};
+    wines.forEach((w, i) => {
+      const hit = findPriorTastings(
+        {
+          winemaker: w.winemaker,
+          wine_name: w.name,
+          wine_varietal: w.varietal,
+          wine_year: w.year,
+        },
+        priorTastings
+      );
+      if (hit) out[i] = hit;
+    });
+    return out;
+  }, [wines, priorTastings]);
 
   const handleAddWine = () => {
     setCurrentWineIndex(null);
@@ -337,6 +405,16 @@ export default function LogSessionForm({
             <Text style={styles.wineMeta} numberOfLines={1}>
               {[wine.winemaker, wine.year, wine.type].filter(Boolean).join(' · ')}
             </Text>
+            {priorFlags[index] ? (
+              <View style={styles.priorTag}>
+                <Ionicons name="time-outline" size={10} color={colors.primary.burgundy} />
+                <Text style={styles.priorTagText}>
+                  {priorFlags[index].tier === TIER.RELATED && priorFlags[index].otherVintage
+                    ? `You've tasted the ${priorFlags[index].otherVintage}`
+                    : 'Logged before'}
+                </Text>
+              </View>
+            ) : null}
           </View>
           {wine.overallRating ? (
             <View style={styles.scorePill}>
@@ -587,6 +665,8 @@ export default function LogSessionForm({
             onCancel={handleExitWineForm}
             initialData={currentWineIndex !== null ? wines[currentWineIndex] : null}
             defaultWinemaker={winemakerDefault}
+            priorTastings={priorTastings}
+            sessionWines={sessionWines}
           />
         </SafeAreaView>
       </Modal>
@@ -655,6 +735,22 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   wineCardHeader: { flexDirection: 'row', alignItems: 'center' },
+  priorTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 3,
+    marginTop: 3,
+    paddingVertical: 1,
+    paddingHorizontal: spacing.xs,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.gold.light,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+  },
+  // body.small, not body.caption — caption uppercases (it's the label style), so
+  // a vintage-aware badge would read "YOU'VE TASTED THE 2019".
+  priorTagText: { ...typography.body.small, fontSize: 11, color: colors.primary.burgundy },
   wineTypeBar: { width: 4, height: 40, borderRadius: 2, marginRight: spacing.md },
   wineInfo: { flex: 1 },
   wineName: {

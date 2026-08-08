@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Dimensions,
@@ -21,11 +21,13 @@ import {
 } from 'react-native';
 import theme from '../styles/theme';
 
+import { findPriorTastings } from '../lib/cellarMatch';
 import { parseVarietals } from '../lib/varietals';
 import AutocompleteVarietal from './AutocompleteVarietal';
 import Button from './Button';
 import FlavorTagSelector from './FlavorTagSelector';
 import LabelScanner from './LabelScanner';
+import PriorTastingBanner from './PriorTastingBanner';
 import RatingSlider from './RatingSlider';
 import WineChatModal from './WineChatModal';
 
@@ -39,7 +41,17 @@ const WINE_TYPES = [
   'Red Blend', 'White Blend', 'Orange'
 ];
 
-export default function WineEntryForm({ onSave, onCancel, initialData, defaultWinemaker = '' }) {
+export default function WineEntryForm({
+  onSave,
+  onCancel,
+  initialData,
+  defaultWinemaker = '',
+  // Duplicate-tasting awareness (#93). Both default to empty so the form still
+  // works standalone — no banner, no crash.
+  priorTastings = [], // flattened tastings from OTHER visits
+  sessionWines = [], // match-shaped drafts already on the current visit
+  onOpenTasting, // (wine) => void — deep-link to a prior tasting
+}) {
   // Form state
   const [winemaker, setWinemaker] = useState(defaultWinemaker);
   const [wineName, setWineName] = useState('');
@@ -120,7 +132,52 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
       }
     }
   }, [initialData]);
-  
+
+  // ── Duplicate-tasting awareness (#93) ────────────────────────────────────
+  // Debounced so the banner doesn't flicker mid-word. The corpus is already in
+  // memory (visits are cached) and the match is a linear scan over a few hundred
+  // objects, so this costs nothing — the delay is purely cosmetic.
+  const [matchDraft, setMatchDraft] = useState(null);
+  const [dupDismissed, setDupDismissed] = useState(false);
+
+  // A wine that's already SAVED always matches itself, and editing is a
+  // different mental mode (fixing a typo, not discovering a duplicate) — so the
+  // banner is suppressed there. Scanned drafts have no id yet, so they still get it.
+  const isPersisted = initialData?.id != null;
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setMatchDraft({
+        winemaker,
+        wine_name: wineName,
+        wine_varietal: wineVarietals,
+        wine_year: wineYear,
+      });
+    }, 250);
+    return () => clearTimeout(t);
+  }, [winemaker, wineName, wineVarietals, wineYear]);
+
+  // Re-arm the banner when the identity changes — a dismissal applies to the
+  // wine it was shown for, not to the rest of the editing session.
+  useEffect(() => {
+    setDupDismissed(false);
+  }, [winemaker, wineName, wineYear, wineVarietals]);
+
+  // A duplicate WITHIN the current visit is the stronger signal (that one is
+  // probably a genuine mistake), so it wins when both would fire.
+  const sessionDup = useMemo(
+    () => (isPersisted || !matchDraft ? null : findPriorTastings(matchDraft, sessionWines)),
+    [isPersisted, matchDraft, sessionWines]
+  );
+  const priorDup = useMemo(
+    () =>
+      isPersisted || !matchDraft
+        ? null
+        : findPriorTastings(matchDraft, priorTastings, { excludeIds: [initialData?.id] }),
+    [isPersisted, matchDraft, priorTastings, initialData?.id]
+  );
+  const duplicate = sessionDup || priorDup;
+
   // Request permissions for camera and media library
   const requestPermissions = async () => {
     const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
@@ -636,6 +693,17 @@ export default function WineEntryForm({ onSave, onCancel, initialData, defaultWi
             maxLength={4}
           />
         </View>
+
+        {/* "You've logged this before" (#93). Sits with the identity fields it
+            is derived from, and ABOVE the ratings — never blocks the save. */}
+        {duplicate && !dupDismissed ? (
+          <PriorTastingBanner
+            result={duplicate}
+            variant={sessionDup ? 'session' : 'prior'}
+            onDismiss={() => setDupDismissed(true)}
+            onOpen={sessionDup ? undefined : onOpenTasting}
+          />
+        ) : null}
 
         {/* Ask the Sommelier button */}
         <TouchableOpacity
