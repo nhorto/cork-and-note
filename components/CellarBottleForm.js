@@ -9,6 +9,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { canonicalizeRegion, normalizeRegion } from '../lib/cellarRegion';
 import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
 import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal, varietalText } from '../lib/varietals';
 import theme from '../styles/theme';
@@ -41,7 +42,9 @@ export function toBottlePayload(form) {
     vintage: form.vintage?.trim() || null,
     wine_type: form.wine_type?.trim() || null,
     varietal: form.varietal?.trim() || null,
-    region: form.region?.trim() || null,
+    // Trim + collapse internal whitespace so "Napa  Valley" and "Napa Valley"
+    // aren't two distinct facet values (#88).
+    region: normalizeRegion(form.region) || null,
     quantity: Math.max(0, parseInt(form.quantity, 10) || 0),
     bottle_size: form.bottle_size || '750ml',
     location: form.location?.trim() || null,
@@ -111,6 +114,9 @@ export default function CellarBottleForm({
   // #62 location reuse: distinct storage locations the user has already typed, so
   // "Wine fridge" isn't re-entered three slightly-different ways. [{ name }] shape.
   locationOptions = [],
+  // #88 Stage 1: regions already in the cellar, so "Napa Valley" isn't also
+  // stored as "napa valley" and split across two filter chips. Plain strings.
+  regionOptions = [],
   // #53 smart default: prefill purchase date with today (add screen opts in).
   defaultPurchaseToday = false,
 }) {
@@ -245,7 +251,12 @@ export default function CellarBottleForm({
       return;
     }
     setError(null);
-    onSubmit(toBottlePayload(form));
+    // Adopt the user's own existing spelling for a region they've already used
+    // (#88) — the one place we're allowed to rewrite what they typed, and only
+    // ever to something they typed themselves.
+    onSubmit(
+      toBottlePayload({ ...form, region: canonicalizeRegion(form.region, regionOptions) })
+    );
   };
 
   return (
@@ -359,10 +370,20 @@ export default function CellarBottleForm({
             getLabel={(v) => v.name}
             placeholder="Cabernet Sauvignon…"
           />
-          <Row>
-            <Field flex label="Type" value={form.wine_type} onChangeText={set('wine_type')} placeholder="Red, White…" />
-            <Field flex label="Region" value={form.region} onChangeText={set('region')} placeholder="Napa Valley…" />
-          </Row>
+          <Field label="Type" value={form.wine_type} onChangeText={set('wine_type')} placeholder="Red, White…" />
+
+          {/* Region reuses regions already typed (#88) — same trick as Location
+              below, so "Napa Valley" doesn't also become "napa valley" and split
+              into two filter chips. Free text stays valid: the list only suggests. */}
+          <AutocompleteInput
+            label="Region"
+            value={form.region}
+            onChangeText={set('region')}
+            onSelect={(item) => set('region')(item.name)}
+            items={regionOptions.map((name) => ({ name }))}
+            getLabel={(r) => r.name}
+            placeholder="Napa Valley…"
+          />
 
           {/* Where the bottle physically lives (#62). Location reuses places already
               typed (autocomplete) so the same spot isn't spelled three ways; bin is a
