@@ -748,7 +748,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gold.muted,
   },
-  priorTagText: { ...typography.body.caption, color: colors.primary.burgundy },
+  // body.small, not body.caption — caption uppercases (it's the label style), so
+  // a vintage-aware badge would read "YOU'VE TASTED THE 2019".
+  priorTagText: { ...typography.body.small, fontSize: 11, color: colors.primary.burgundy },
   wineTypeBar: { width: 4, height: 40, borderRadius: 2, marginRight: spacing.md },
   wineInfo: { flex: 1 },
   wineName: {

@@ -153,9 +153,13 @@ const styles = StyleSheet.create({
     color: colors.neutral.charcoal,
     fontWeight: '600',
   },
-  sub: { ...typography.body.caption, color: colors.neutral.pewter, marginTop: 1 },
+  // NOT typography.body.caption — that's a LABEL style (uppercase + letterspaced,
+  // as used for "WINEMAKER" / "YEAR"). Running a wine name through it renders
+  // "BOURBON BARREL AGED CAB", which is unreadable and unlike how the name shows
+  // everywhere else.
+  sub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
   reveal: {
-    ...typography.body.caption,
+    ...typography.body.small,
     color: colors.primary.burgundy,
     fontWeight: '600',
     marginTop: spacing.sm,
@@ -174,5 +178,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   noteText: { ...typography.body.small, color: colors.neutral.graphite, lineHeight: 19 },
-  noteEmpty: { ...typography.body.caption, color: colors.neutral.pewter, fontStyle: 'italic' },
+  noteEmpty: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic' },
 });
