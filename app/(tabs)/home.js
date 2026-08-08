@@ -293,7 +293,7 @@ export default function HomeScreen() {
         >
           <Ionicons name="sparkles" size={22} color={colors.gold.shimmer} />
           <View style={styles.sommText}>
-            <Text style={styles.sommTitle}>Ask your Sommelier</Text>
+            <Text style={styles.sommTitle}>Ask your sommelier</Text>
             <Text style={styles.sommSub}>Personalized to the wines you&apos;ve rated</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />

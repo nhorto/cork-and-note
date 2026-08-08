@@ -703,9 +703,14 @@ const styles = StyleSheet.create({
   },
 
   // FAB Button
+  //
+  // bottom: 64, not 24 — Apple renders the "Maps" logo and its "Legal" link at
+  // the BOTTOM-LEFT of the MapView, directly under this button. MapKit's terms
+  // require that attribution stay visible and unobstructed, so covering it is a
+  // potential App Review rejection, not just a cosmetic overlap (#155).
   fabButton: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 64,
     left: 16,
     backgroundColor: colors.primary.burgundy,
     width: 56,
@@ -721,7 +726,7 @@ const styles = StyleSheet.create({
   // FAB Menu
   fabMenu: {
     position: 'absolute',
-    bottom: 92,
+    bottom: 132, // keeps its 68pt gap above the FAB, which moved up by 40
     left: 16,
     backgroundColor: colors.neutral.cream,
     borderRadius: borderRadius.lg,
@@ -782,7 +787,7 @@ const styles = StyleSheet.create({
   // Location Button
   locationButton: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 64, // stays level with the FAB (see fabButton)
     right: 16,
     backgroundColor: colors.neutral.cream,
     width: 48,

@@ -6,7 +6,7 @@
 //   • Log a wine        → the existing log chooser (/(tabs)/log)
 //   • Add a bottle      → /cellar/add
 //   • Add to wishlist   → Explore, which opens its winery-entry modal (?quickAdd)
-//   • Ask the Sommelier → /(tabs)/sommelier
+//   • Ask the sommelier → /(tabs)/sommelier
 //
 // Every item just closes the sheet and navigates — deliberately NO nested modal.
 // Presenting a second modal while this one dismisses leaves iOS's modal system
@@ -61,7 +61,7 @@ export default function HubMenu({ visible, onClose }) {
           <Action
             icon="sparkles"
             color={colors.gold.shimmer}
-            title="Ask the Sommelier"
+            title="Ask the sommelier"
             subtitle="Personalized to the wines you've rated"
             onPress={() => go('/(tabs)/sommelier')}
             last
