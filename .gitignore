@@ -57,3 +57,6 @@ android/
 # local-only (symlinked for linting in this worktree) + deno check artifact
 node_modules
 deno.lock
+
+# App Atlas keeps its map here. Local to this machine.
+.app-atlas/

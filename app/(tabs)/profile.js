@@ -116,7 +116,7 @@ export default function ProfileScreen() {
                 <Ionicons name="sparkles" size={20} color={colors.primary.burgundy} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Ask the Sommelier</Text>
+                <Text style={styles.menuText}>Ask the sommelier</Text>
                 <Text style={styles.menuSubtext}>Personalized to the wines you&apos;ve rated</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />

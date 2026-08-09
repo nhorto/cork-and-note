@@ -51,7 +51,7 @@ const HelpSupportModal = () => {
             },
             {
               name: 'Profile',
-              description: 'Your journey stats, the Sommelier, settings, and this help'
+              description: 'Your journey stats, the sommelier, settings, and this help'
             }
           ]
         },
@@ -112,7 +112,7 @@ const HelpSupportModal = () => {
             },
             {
               name: "Tonight's Pick",
-              description: 'Let the Sommelier choose a bottle from your own cellar for the occasion'
+              description: 'Let the sommelier choose a bottle from your own cellar for the occasion'
             },
             {
               name: 'Reminders',
@@ -142,7 +142,7 @@ const HelpSupportModal = () => {
       content: [
         {
           type: 'text',
-          value: "Your Sommelier gives personalized recommendations grounded in the wines you've rated and the bottles in your cellar."
+          value: "Your sommelier gives personalized recommendations grounded in the wines you've rated and the bottles in your cellar."
         },
         {
           type: 'attributes',

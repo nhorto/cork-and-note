@@ -144,14 +144,11 @@ export default function CellarScreen() {
             <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.burgundy} />
           </View>
           <Text style={styles.headerTitle}>Cellar</Text>
-          <TouchableOpacity
-            style={styles.headerIcon}
-            onPress={() => router.push('/cellar/add')}
-            accessibilityRole="button"
-            accessibilityLabel="Add bottle"
-          >
-            <Ionicons name="add" size={22} color={colors.primary.burgundy} />
-          </TouchableOpacity>
+          {/* Deliberately empty. Adding a bottle lives on the FAB below (and on
+              the tab bar's "+") — this screen used to offer all three, which was
+              two too many for one action (#155). The spacer keeps the title
+              optically centred now that the button is gone. */}
+          <View style={styles.headerIconSpacer} />
         </View>
         <View style={styles.headerBorder} />
       </View>
@@ -639,6 +636,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.gold.muted,
   },
+  headerIconSpacer: { width: 40, height: 40 },
   headerTitle: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
