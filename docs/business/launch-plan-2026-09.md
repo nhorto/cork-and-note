@@ -1,7 +1,7 @@
 # Cork & Note — App Store Launch & Business Plan
 
 **Prepared:** 2026-09-03
-**Status:** PROPOSAL for owner decisions (see §7). No product code changed in this PR.
+**Status:** Owner decisions taken 2026-09-03 on pricing ($9.99/mo · $59.99/yr, no lifetime), free meters (as proposed), and platform (iOS only). Navigation option (§3 Layer A vs B) pending mockup review. No product code changed in this PR.
 **Builds on:** [`monetization-and-marketing-strategy.md`](monetization-and-marketing-strategy.md) (June 2026 research), the 2026-07-05 [code review](../audits/2026-07-05-code-review.md) and [design review](../audits/2026-07-05-design-review.md), issue #148, and three fresh audits of the current `main` (UX/findability, launch readiness, payments/pricing research).
 
 ---
@@ -122,7 +122,7 @@ Pre-login screens rethemed (done since), `gold.text`/pewter tokens (done), `<Scr
 ### 4.1 Payments: not Stripe (on iOS)
 Apple Guideline 3.1.1 requires **in-app purchase** for anything that unlocks features inside the app. A Stripe-only Pro would be rejected outside the US and is risky even inside it. The US link-out carve-out (post Epic v. Apple) is real but legally unsettled: the Supreme Court granted cert on 2026-06-30 and a commission on link-outs is being set on remand. Don't build the business on it.
 
-**Recommendation:** Apple IAP through **RevenueCat** (`react-native-purchases` + `react-native-purchases-ui`), free under $2,500/month tracked revenue, then 1%. Stripe can come later for a web checkout, honored in-app under 3.1.3(b). At the 15% Small Business rate, $7.99 nets **$6.79**; $49.99/yr nets **$42.49**.
+**Recommendation:** Apple IAP through **RevenueCat** (`react-native-purchases` + `react-native-purchases-ui`), free under $2,500/month tracked revenue, then 1%. Stripe can come later for a web checkout, honored in-app under 3.1.3(b). At the 15% Small Business rate, $9.99 nets **$8.49**; $59.99/yr nets **$50.99** (about $4.25/mo).
 
 ### 4.2 Tiers: one paid tier at launch
 Two paid tiers before you have any conversion data is premature. Launch with Free + Pro and add a higher tier only if usage shows a heavy-AI segment.
@@ -135,23 +135,23 @@ Two paid tiers before you have any conversion data is premature. Launch with Fre
 | Label scan / tasting-card scan | 3 per month | Unlimited |
 | AI sommelier chat | 5 messages per month | Unlimited (fair-use cap ~300/day, already enforced) |
 | Export (CSV of tastings) | — | Yes |
-| Price | $0 | **$7.99/mo · $49.99/yr (7-day trial on annual) · $99.99 lifetime** |
+| Price | $0 | **$9.99/mo · $59.99/yr (7-day trial on annual)** — decided 2026-09-03; no lifetime SKU at launch |
 
 Reasoning:
 - **Never gate the journal itself.** Logging is the habit loop and the data that makes the sommelier personal. Every rating benchmark says gating the core kills retention before conversion.
 - **Gate the things that cost you money or feel magical:** scans and AI. Metered free use (3 scans, 5 messages) lets people feel it, then locks. Sommo, the closest AI-native competitor, ships 5 lifetime scans + a 3-day trial at $4.99/mo.
 - **Cellar cap** mirrors CellarTracker's bottle-tiered model and catches the collector segment without touching casual tasters.
-- **Price:** consumer wine apps cluster at $5–6/mo (Vivino $4.99, Delectable $5.99); AI/collector tools at $10–15 (Wine-Searcher $10.99, InVintory $14.95). Your $10 instinct is defensible only if the AI is unmistakably the hero on the paywall. $7.99 sits between the two clusters; annual at $49.99 (about five months' price) is the plan to push, since annual subscribers retain 44% at 12 months versus 17.5% for monthly. Test $9.99 later with a RevenueCat experiment.
-- **Lifetime SKU:** about 40% of lifestyle apps blend a one-time unlock; some people pay $100 once who would never subscribe. Cap it if AI costs surprise you.
+- **Price (decided: $9.99/mo · $59.99/yr):** consumer wine apps cluster at $5–6/mo (Vivino $4.99, Delectable $5.99); AI/collector tools at $10–15 (Wine-Searcher $10.99, InVintory $14.95). $9.99 places Cork & Note with the AI/collector tools, so the paywall must lead with the sommelier and unlimited scans, not with "more journaling." Annual at $59.99 (six months' price) is the plan to push, since annual subscribers retain 44% at 12 months versus 17.5% for monthly. If trial-to-paid comes in under ~25%, run a RevenueCat price experiment at $7.99 before touching features.
+- **No lifetime SKU at launch** (decided). Revisit after 90 days of data; about 40% of lifestyle apps blend one in later.
 
 ### 4.3 Will the AI cost eat the margin? No.
 Modeled at 30 chats/month (2k context in, 400 out) plus 20 label scans (1,000px photo ≈ 1,300 image tokens):
 
-| Model | Cost / paying user / month | Share of $6.79 net |
+| Model | Cost / paying user / month | Share of $8.49 net |
 |---|---|---|
-| Claude Haiku 4.5 (scans today) | ~$0.18 | 3% |
-| Claude Sonnet-class (chat today) | ~$0.36 | 5% |
-| A 10× power user on Sonnet | ~$3.60 | 53% |
+| Claude Haiku 4.5 (scans today) | ~$0.18 | 2% |
+| Claude Sonnet-class (chat today) | ~$0.36 | 4% |
+| A 10× power user on Sonnet | ~$3.60 | 42% |
 
 Two cheap wins before launch: **downscale photos to ~1,000px** on the long edge before upload (`lib/ai.js`), and **prompt-cache the system prompt** (cuts cached input cost ~90%). Free users are the real exposure, which is exactly why the 5-message meter and the Anthropic spend cap matter.
 
@@ -160,14 +160,14 @@ RevenueCat's 2026 median for freemium is **2.1%** of downloads paying by day 35 
 
 | Lifetime downloads | Payers at 2–3% | Monthly revenue (mixed monthly/annual, net) |
 |---|---|---|
-| 1,000 | 20–30 | ~$100–200 |
-| 10,000 | 200–300 | ~$1,000–2,000 |
-| 50,000 | 1,000–1,500 | ~$5,000–10,000 |
+| 1,000 | 20–30 | ~$120–250 |
+| 10,000 | 200–300 | ~$1,200–2,500 |
+| 50,000 | 1,000–1,500 | ~$6,000–12,000 |
 
 Fixed costs: Apple $99/yr, Supabase Pro ~$25/mo, Anthropic $20–100/mo at launch scale, RevenueCat $0 until $2.5k MTR, domain ~$15/yr. The first goal is not profit; it is **retention data and 100 real users** to learn what people pay for. The B2B winery line (sponsored placements, visit analytics) from the June doc is the eventual larger business, but it needs consumer scale first.
 
 ### 4.5 Implementation plan for Pro (about 4–5 days)
-1. **Products in App Store Connect:** `pro_monthly`, `pro_annual` (7-day intro trial), `pro_lifetime` (non-consumable), in one subscription group "Cork & Note Pro".
+1. **Products in App Store Connect:** `pro_monthly` ($9.99) and `pro_annual` ($59.99, 7-day intro trial) in one subscription group "Cork & Note Pro".
 2. **RevenueCat:** project, entitlement `pro`, offering `default`; paywall designed in the dashboard (Paywalls v2) so copy and price tests don't need a release.
 3. **Client:** `npx expo install react-native-purchases react-native-purchases-ui`; identify the user with the Supabase user id at login; `usePro()` hook exposing `isPro` + `presentPaywall()`; Restore Purchases in Account settings; Terms and Privacy links on the paywall.
 4. **Server truth:** RevenueCat webhook → a small edge function → `public.entitlements (user_id, is_pro, expires_at, source)`. The chat edge function reads it and enforces the monthly meter for free users using the existing `chat_usage` table (count rows per calendar month; separate `task` for scans vs chat). Never trust `isPro` from the client for the AI call.
@@ -215,14 +215,14 @@ Android can wait: it doubles QA and store work, and every tester today is on iOS
 
 ## 7. Decisions needed from you
 
-1. **Journal tab (Layer B) or Profile-nesting only (Layer A)?** Recommendation: B. It demotes Cellar from the bar.
-2. **Pricing:** $7.99/mo · $49.99/yr · $99.99 lifetime as proposed, or hold your $9.99 instinct? Lifetime SKU yes or no?
-3. **Free meters:** 3 scans + 5 AI messages per month and a 25-bottle cellar cap. Too tight, too loose?
+1. **Journal tab (Layer B) or Profile-nesting only (Layer A)?** Recommendation: B. It demotes Cellar from the bar. *Owner asked for mockups of both before deciding (see `docs/design/mockups/`).*
+2. ~~**Pricing**~~ — **Decided:** $9.99/mo · $59.99/yr, no lifetime SKU at launch.
+3. ~~**Free meters**~~ — **Decided:** 3 scans + 5 AI messages per month, 25-bottle cellar cap, logging unlimited.
 4. **Launch region:** which wine region can you visit regularly for QR partnerships and content?
 5. **Domain:** do you own corkandnote.com or similar? Repurpose the Vercel deploy for the landing + legal pages, or delete it?
-6. **Apple account:** can you sign the agreement this week, and is the membership active? Nothing else moves until then.
+6. ~~**Apple account**~~ — **Decided:** owner will sign the pending agreement this week.
 7. **Entity and money:** Apple pays whoever owns the developer account. An LLC is not required to launch but is worth setting up before real revenue. Do you have one?
 8. **AI budget:** what monthly Anthropic cap are you comfortable with at launch? Suggest $100 with an alert at $50.
-9. **Android:** confirm iOS-only for v1.
+9. ~~**Android**~~ — **Decided:** iOS only for v1.
 
 Answer these and the roadmap in §6 can start immediately: §2.1 items and UX Layer A need no decisions at all.
