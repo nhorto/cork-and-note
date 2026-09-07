@@ -20,6 +20,7 @@ import Button from './Button';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const ManualWineryEntryModal = ({
   visible,
   onClose,
@@ -269,7 +270,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: 2,
   },
   subtitle: {
@@ -313,7 +314,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     fontSize: typography.body.regular.fontSize,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
 
   // Location Section

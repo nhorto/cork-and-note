@@ -22,6 +22,7 @@ import { AuthContext } from '../_layout';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function HomeScreen() {
   const router = useRouter();
   const { user } = useContext(AuthContext);
@@ -502,7 +503,7 @@ const styles = StyleSheet.create({
   name: {
     ...typography.heading.h1,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginTop: 2,
   },
   avatar: {
@@ -516,7 +517,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     fontSize: 18,
     color: colors.primary.burgundy,
   },
@@ -563,7 +564,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statNum: {
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     fontSize: 24,
     color: colors.primary.burgundy,
   },
@@ -582,7 +583,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   rtdDot: { width: 8, height: 8, borderRadius: 4, marginBottom: spacing.xs },
-  rtdCount: { fontFamily: 'Georgia', fontSize: 22, color: colors.neutral.charcoal },
+  rtdCount: { fontFamily: SERIF, fontSize: 22, color: colors.neutral.charcoal },
   rtdCountMuted: { color: colors.neutral.silver },
   rtdLabel: {
     ...typography.body.small,
@@ -607,7 +608,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     ...typography.heading.h3,
     color: colors.neutral.cream,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   heroSub: { ...typography.body.small, color: colors.primary.rosé, marginTop: 2 },
 
@@ -691,7 +692,7 @@ const styles = StyleSheet.create({
   wineMeta: { flex: 1 },
   wineName: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
   wineDetail: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
-  wineScore: { fontFamily: 'Georgia', fontSize: 16, color: colors.primary.burgundy },
+  wineScore: { fontFamily: SERIF, fontSize: 16, color: colors.primary.burgundy },
 
   // Empty state
   empty: {
@@ -706,7 +707,7 @@ const styles = StyleSheet.create({
   emptyText: {
     ...typography.body.regular,
     color: colors.neutral.graphite,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginTop: spacing.sm,
   },
   emptySub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
@@ -771,7 +772,7 @@ const styles = StyleSheet.create({
   sommTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   sommSub: { ...typography.body.small, color: colors.neutral.charcoal, marginTop: 2 },
 });

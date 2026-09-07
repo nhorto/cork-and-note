@@ -29,6 +29,7 @@ import Button from './Button';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 // Drink-window statuses offered as filter chips — labels come from the canonical
 // taxonomy (lib/cellar.js) so they stay in sync with the badges everywhere.
 const STATUS_OPTIONS = [
@@ -320,7 +321,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.sm,
   },
-  title: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: 'Georgia' },
+  title: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: SERIF },
   clearAll: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
   clearAllDisabled: { color: colors.neutral.silver },
 

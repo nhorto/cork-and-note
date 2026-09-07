@@ -26,6 +26,7 @@ import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
 
+const SERIF = typography.fonts.serif;
 // pagingEnabled snaps to the screen width, so the photo-viewer pages must
 // match it exactly for the offset math and "n of N" indicator to line up.
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -436,7 +437,7 @@ const styles = StyleSheet.create({
   wineName: {
     ...typography.heading.h1,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginTop: spacing.lg,
   },
   wineTypeContainer: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: spacing.xs },
@@ -488,7 +489,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     marginTop: spacing.lg,
   },
-  ratingValue: { fontFamily: 'Georgia', fontSize: 40, color: colors.primary.burgundy, marginBottom: spacing.xs },
+  ratingValue: { fontFamily: SERIF, fontSize: 40, color: colors.primary.burgundy, marginBottom: spacing.xs },
   starsContainer: { flexDirection: 'row', gap: spacing.xs },
 
   // Cards
@@ -595,7 +596,7 @@ const styles = StyleSheet.create({
 
   // Loading / error
   loadingText: { marginTop: spacing.md, ...typography.body.regular, color: colors.neutral.pewter },
-  errorText: { ...typography.heading.h3, color: colors.neutral.graphite, marginBottom: spacing.lg, fontFamily: 'Georgia' },
+  errorText: { ...typography.heading.h3, color: colors.neutral.graphite, marginBottom: spacing.lg, fontFamily: SERIF },
   backButton: {
     backgroundColor: colors.primary.burgundy,
     paddingHorizontal: spacing.lg,

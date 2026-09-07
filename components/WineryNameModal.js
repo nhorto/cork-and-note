@@ -18,6 +18,7 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const WineryNameModal = ({
   visible,
   onClose,
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   subtitle: {
     ...typography.body.small,
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     fontSize: typography.body.regular.fontSize,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
 
   // Coordinates

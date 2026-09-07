@@ -32,6 +32,7 @@ import RatingSlider from './RatingSlider';
 import WineChatModal from './WineChatModal';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
+const SERIF = typography.fonts.serif;
 // pagingEnabled snaps to the screen width, so the photo pages must match it —
 // a hardcoded 400 desyncs the pager and the "N of M" indicator.
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -997,7 +998,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.md,
   },
   inputGroup: {
@@ -1016,7 +1017,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     backgroundColor: colors.neutral.parchment,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   textArea: {
     height: 120,
@@ -1101,7 +1102,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     color: colors.gold.text,
     fontWeight: '600',
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     flex: 1,
   },
 
@@ -1198,7 +1199,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   typeOption: {
     flexDirection: 'row',
@@ -1270,7 +1271,7 @@ const styles = StyleSheet.create({
   confirmSuggested: {
     ...typography.body.regular,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginTop: 2,
   },
   confirmActions: {

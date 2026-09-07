@@ -26,6 +26,7 @@ import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function CellarInsightsScreen() {
   const router = useRouter();
   const [insights, setInsights] = useState(null);
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   totalCard: { flex: 1, alignItems: 'center' },
-  totalNum: { fontFamily: 'Georgia', fontSize: 34, color: colors.primary.burgundy },
+  totalNum: { fontFamily: SERIF, fontSize: 34, color: colors.primary.burgundy },
   totalLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginTop: 2 },
   totalDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.neutral.stone },
   breadth: {
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginTop: spacing.md,
     textAlign: 'center',
   },

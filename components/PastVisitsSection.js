@@ -19,6 +19,7 @@ import { visitsService } from '../lib/visits';
 import theme from '../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
+const SERIF = typography.fonts.serif;
 // pagingEnabled snaps to the screen width, so the photo pages must match it —
 // a hardcoded 400 desyncs the pager and the "N of M" indicator.
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -466,7 +467,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     fontWeight: '600',
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.xs,
   },
   wineCount: {
@@ -588,7 +589,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     fontWeight: '600',
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.xs,
   },
   wineDetails: {

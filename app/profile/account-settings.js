@@ -17,8 +17,8 @@ import { accountService } from '../../lib/account';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
 
-const { colors } = theme;
-
+const { colors, typography } = theme;
+const SERIF = typography.fonts.serif;
 export default function AccountSettingsScreen() {
   const router = useRouter();
   const { user, signOut } = useContext(AuthContext);
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: 15,
   },
   settingRow: {

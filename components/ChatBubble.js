@@ -10,6 +10,7 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
 
+const SERIF = typography.fonts.serif;
 // Markdown styles for AI messages (Château Label theme)
 const mdStyles = {
   body: {
@@ -27,14 +28,14 @@ const mdStyles = {
   heading1: {
     ...typography.heading.h2,
     color: colors.primary.burgundy,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginTop: spacing.sm,
     marginBottom: spacing.xs,
   },
   heading2: {
     ...typography.heading.h3,
     color: colors.primary.burgundy,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginTop: spacing.sm,
     marginBottom: spacing.xs,
   },

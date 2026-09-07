@@ -24,6 +24,7 @@ import { AuthContext } from '../_layout';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function WineryDetail() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -285,7 +286,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.xs,
   },
   emptySubtitle: {
@@ -324,7 +325,7 @@ const styles = StyleSheet.create({
   wineryName: {
     ...typography.heading.hero,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     textAlign: 'center',
     marginBottom: spacing.sm,
   },

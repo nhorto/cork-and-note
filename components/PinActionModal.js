@@ -7,6 +7,7 @@ import Button from './Button';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const PinActionModal = ({
   visible,
   winery,
@@ -184,7 +185,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     textAlign: 'center',
     marginBottom: spacing.xs,
   },

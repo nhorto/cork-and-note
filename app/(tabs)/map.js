@@ -14,6 +14,7 @@ import { wishlistService } from '../../lib/wishlist';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
+const SERIF = typography.fonts.serif;
 
 export default function MapScreen() {
   const router = useRouter();
@@ -698,7 +699,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.neutral.charcoal,
     textAlign: 'center',
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   wineryMarker: {
     backgroundColor: colors.primary.burgundy,
@@ -875,7 +876,7 @@ const styles = StyleSheet.create({
   listTitle: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   // Visited / Wishlist segmented control (#97)
   segment: {
@@ -995,7 +996,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     color: colors.neutral.cream,
     fontWeight: '600',
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: 2,
   },
   hintText: {

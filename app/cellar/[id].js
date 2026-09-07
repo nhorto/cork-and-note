@@ -31,6 +31,7 @@ import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
 
+const SERIF = typography.fonts.serif;
 // Draw-down reasons (everything but the keep-the-bottle sample).
 const REASONS = [
   { key: 'consumed', label: 'Drank it' },
@@ -583,7 +584,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.parchment,
     marginBottom: spacing.lg,
   },
-  wineName: { ...typography.heading.h1, color: colors.neutral.charcoal, fontFamily: 'Georgia' },
+  wineName: { ...typography.heading.h1, color: colors.neutral.charcoal, fontFamily: SERIF },
   producer: { ...typography.body.large, color: colors.neutral.graphite, marginTop: 2 },
   badgeRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   badge: { paddingVertical: 3, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
@@ -601,7 +602,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   qtyMain: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm, flexShrink: 1 },
-  qtyNum: { fontFamily: 'Georgia', fontSize: 32, color: colors.primary.burgundy },
+  qtyNum: { fontFamily: SERIF, fontSize: 32, color: colors.primary.burgundy },
   qtyLabel: { ...typography.body.regular, color: colors.neutral.graphite },
   adjustBtn: {
     flexDirection: 'row',
@@ -677,7 +678,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
     ...shadows.strong,
   },
-  sheetTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: 'Georgia', marginBottom: spacing.sm },
+  sheetTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: SERIF, marginBottom: spacing.sm },
   sheetIntro: { ...typography.body.small, color: colors.neutral.graphite, marginBottom: spacing.sm, lineHeight: 19 },
   sheetLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginBottom: spacing.sm, marginTop: spacing.md },
 
@@ -713,7 +714,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.parchment,
   },
   stepBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-  stepValue: { width: 56, textAlign: 'center', fontSize: 18, fontFamily: 'Georgia', color: colors.neutral.charcoal },
+  stepValue: { width: 56, textAlign: 'center', fontSize: 18, fontFamily: SERIF, color: colors.neutral.charcoal },
 
   reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   reasonChip: {

@@ -9,6 +9,7 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function CellarOptionSheet({ visible, title, options = [], selected, onSelect, onClose }) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
   list: { marginTop: spacing.xs },
