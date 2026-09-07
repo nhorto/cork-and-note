@@ -16,6 +16,7 @@ import { WINE_VARIETALS } from '../lib/varietals';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const AutocompleteVarietal = ({
   value,
   onChangeText,
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     backgroundColor: colors.neutral.parchment,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   inputFocused: {
     borderColor: colors.primary.burgundy,

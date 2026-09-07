@@ -29,6 +29,7 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const formatDate = (s) => {
   if (!s) return '';
   const d = new Date(s);
@@ -260,7 +261,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
     maxHeight: '80%',
   },
-  sheetTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: 'Georgia', marginBottom: spacing.xs },
+  sheetTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: SERIF, marginBottom: spacing.xs },
   sheetIntro: { ...typography.body.small, color: colors.neutral.graphite, marginBottom: spacing.md },
   search: {
     backgroundColor: colors.neutral.parchment,

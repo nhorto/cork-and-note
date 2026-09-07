@@ -18,6 +18,7 @@ import { AuthContext } from '../_layout';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function ProfileScreen() {
   const { signOut, user } = useContext(AuthContext);
   const router = useRouter();
@@ -352,7 +353,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   headerRight: {
     width: 40,
@@ -405,13 +406,13 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '300',
     color: colors.neutral.cream,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     letterSpacing: 2,
   },
   name: {
     ...typography.heading.h1,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.xs,
     textAlign: 'center',
   },
@@ -529,7 +530,7 @@ const styles = StyleSheet.create({
   footerText: {
     ...typography.body.small,
     color: colors.neutral.pewter,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     fontStyle: 'italic',
   },
   footerVersion: {

@@ -24,6 +24,7 @@ import { AuthContext } from '../_layout';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function Wines() {
   const [search, setSearch] = useState('');
   const [wines, setWines] = useState([]);
@@ -697,7 +698,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     fontWeight: '600',
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: 2,
   },
   wineVarietal: {
@@ -776,7 +777,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
   emptyText: {
@@ -832,7 +833,7 @@ const styles = StyleSheet.create({
   filterTitle: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   filterCloseButton: {
     width: 40,

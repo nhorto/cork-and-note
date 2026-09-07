@@ -11,6 +11,7 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const VisitStatsCard = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -356,7 +357,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '300',
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     letterSpacing: -0.5,
   },
   statLabel: {
@@ -387,7 +388,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   seeAllButton: {
     flexDirection: 'row',
@@ -478,7 +479,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.xs,
   },
   emptySubtitle: {

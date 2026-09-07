@@ -9,6 +9,7 @@ import theme from '../../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function LogScreen() {
   const router = useRouter();
 
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   headerBorder: {
     height: 1,
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   prompt: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.lg,
   },
   choice: {
@@ -127,7 +128,7 @@ const styles = StyleSheet.create({
   choiceTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   choiceSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
   note: {

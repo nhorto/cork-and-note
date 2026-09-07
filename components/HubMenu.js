@@ -19,6 +19,7 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius, shadows } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function HubMenu({ visible, onClose }) {
   const router = useRouter();
 
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
   title: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
   item: {

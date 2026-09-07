@@ -19,6 +19,7 @@ import Button from './Button';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const BOTTLE_SIZES = ['375ml', '750ml', '1.5L', '3L'];
 
 // Varietal picker options (#86): the canonical grape list as autocomplete items.
@@ -558,7 +559,7 @@ const styles = StyleSheet.create({
   stepValue: {
     width: 64,
     fontSize: 18,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     color: colors.neutral.charcoal,
   },
 

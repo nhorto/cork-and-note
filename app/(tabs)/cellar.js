@@ -34,6 +34,7 @@ import theme from '../../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const SORT_LABEL = Object.fromEntries(SORTS.map((s) => [s.key, s.label]));
 const GROUP_LABEL = Object.fromEntries(GROUPS.map((g) => [g.key, g.label]));
 
@@ -640,7 +641,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.heading.h2,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
 
@@ -749,7 +750,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     flexShrink: 1,
     marginRight: spacing.sm,
   },
@@ -815,7 +816,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...typography.heading.h1,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.sm,
     textAlign: 'center',
   },

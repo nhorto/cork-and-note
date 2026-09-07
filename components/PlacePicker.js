@@ -26,6 +26,7 @@ import Button from './Button';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const PLACE_TYPES = [
   { id: 'winery', label: 'Winery' },
   { id: 'restaurant', label: 'Restaurant' },
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   headerSubtitle: { ...typography.body.small, color: colors.neutral.pewter },
   headerSpacer: { width: 40 },

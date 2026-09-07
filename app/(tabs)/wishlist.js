@@ -20,6 +20,7 @@ import { AuthContext } from '../_layout';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 export default function WishlistScreen() {
   const [loading, setLoading] = useState(true);
   const [wishlist, setWishlist] = useState([]);
@@ -330,7 +331,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     color: colors.neutral.charcoal,
     fontWeight: '600',
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: 2,
   },
   wineryAddress: {
@@ -376,7 +377,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
   emptyText: {
@@ -405,7 +406,7 @@ const styles = StyleSheet.create({
   messageTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
   messageText: {

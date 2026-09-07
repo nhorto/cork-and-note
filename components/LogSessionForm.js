@@ -30,6 +30,7 @@ import WineEntryForm from './WineEntryForm';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
+const SERIF = typography.fonts.serif;
 const PLACE_META = {
   winery: { icon: 'wine', label: 'Winery' },
   restaurant: { icon: 'restaurant', label: 'Restaurant' },
@@ -706,7 +707,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   headerSubtitle: { ...typography.body.small, color: colors.neutral.pewter },
   headerSpacer: { width: 40 },
@@ -757,7 +758,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     color: colors.neutral.charcoal,
     fontWeight: '600',
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   wineMeta: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
   scorePill: {
@@ -842,7 +843,7 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     color: colors.neutral.charcoal,
     fontWeight: '600',
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
   },
   placeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: 2 },
   placeMeta: { ...typography.body.small, color: colors.neutral.pewter },
@@ -949,7 +950,7 @@ const styles = StyleSheet.create({
     flex: 1,
     ...typography.heading.h3,
     color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
+    fontFamily: SERIF,
     textAlign: 'center',
   },
 });
