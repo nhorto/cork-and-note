@@ -100,6 +100,76 @@ export default function ProfileScreen() {
           <VisitStatsCard />
         </View>
 
+        {/* Your journal — the IA promise from the June doc, restored (#170 item 1):
+            direct rows to everything you've logged, always visible. */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>YOUR JOURNAL</Text>
+          </View>
+
+          <View style={styles.menuContainer}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push('/wines')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name="wine" size={20} color={colors.primary.burgundy} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Your tastings</Text>
+                <Text style={styles.menuSubtext}>Every wine you&apos;ve logged</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push('/places')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name="location-outline" size={20} color={colors.primary.burgundy} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Your places</Text>
+                <Text style={styles.menuSubtext}>Wineries and spots you&apos;ve visited</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push('/wishlist')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name="bookmark-outline" size={20} color={colors.primary.burgundy} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Wishlist</Text>
+                <Text style={styles.menuSubtext}>Places you want to visit</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemLast]}
+              onPress={() => router.push('/(tabs)/cellar')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.burgundy} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Cellar</Text>
+                <Text style={styles.menuSubtext}>The bottles you own</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Sommelier Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
