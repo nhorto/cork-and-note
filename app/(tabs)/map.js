@@ -34,6 +34,9 @@ export default function MapScreen() {
   const [userPins, setUserPins] = useState([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
   const [pinsError, setPinsError] = useState(false);
+  // The welcome hint self-destructs after the first pin; the "?" button
+  // re-shows it on demand (#170 Layer C).
+  const [showHelpHint, setShowHelpHint] = useState(false);
   const [tempPin, setTempPin] = useState(null);
   const [showNameModal, setShowNameModal] = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
@@ -487,6 +490,35 @@ export default function MapScreen() {
         <Ionicons name="locate" size={22} color={colors.primary.burgundy} />
       </TouchableOpacity>
 
+      <TouchableOpacity
+        style={styles.helpButton}
+        onPress={() => setShowHelpHint((v) => !v)}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="How to use the map"
+      >
+        <Ionicons name="help" size={20} color={colors.primary.burgundy} />
+      </TouchableOpacity>
+
+      {/* Re-shown hint via the "?" button — dismissable by tapping it. */}
+      {showHelpHint && !(pinsLoaded && userPins.length === 0 && !pinsError) && (
+        <TouchableOpacity
+          style={styles.hintContainer}
+          activeOpacity={0.85}
+          onPress={() => setShowHelpHint(false)}
+        >
+          <View style={styles.hintIcon}>
+            <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+          </View>
+          <View style={styles.hintContent}>
+            <Text style={styles.hintTitle}>Getting around</Text>
+            <Text style={styles.hintText}>
+              Long-press on the map to drop a pin, or tap + to get started
+            </Text>
+          </View>
+        </TouchableOpacity>
+      )}
+
       {/* Hint text for first-time users — or an error banner when the pins
           failed to load, so we don't show onboarding over a wrongly-empty map. */}
       {pinsLoaded && userPins.length === 0 && (
@@ -806,6 +838,20 @@ const styles = StyleSheet.create({
   locationButton: {
     position: 'absolute',
     bottom: 64, // stays level with the FAB (see fabButton)
+    right: 16,
+    backgroundColor: colors.neutral.cream,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+    ...shadows.soft,
+  },
+  helpButton: {
+    position: 'absolute',
+    bottom: 120, // stacked above the locate button (48 + 8 gap)
     right: 16,
     backgroundColor: colors.neutral.cream,
     width: 48,
