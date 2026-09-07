@@ -60,3 +60,4 @@ deno.lock
 
 # App Atlas keeps its map here. Local to this machine.
 .app-atlas/
+site/dist/
