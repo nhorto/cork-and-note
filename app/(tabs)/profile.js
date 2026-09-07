@@ -177,7 +177,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.menuItem, styles.menuItemLast]}
+              style={styles.menuItem}
               onPress={() => router.push('/profile/feedback')}
               activeOpacity={0.7}
             >
@@ -187,6 +187,36 @@ export default function ProfileScreen() {
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Feedback</Text>
                 <Text style={styles.menuSubtext}>Share your thoughts with us</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => router.push('/profile/privacy-policy')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary.burgundy} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Privacy policy</Text>
+                <Text style={styles.menuSubtext}>How your data is handled</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemLast]}
+              onPress={() => router.push('/profile/terms-of-use')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons name="document-text-outline" size={20} color={colors.primary.burgundy} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Terms of use</Text>
+                <Text style={styles.menuSubtext}>The agreement for using Cork & Note</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
             </TouchableOpacity>
