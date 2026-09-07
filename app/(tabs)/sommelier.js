@@ -18,6 +18,7 @@ import {
 import { useRouter } from 'expo-router';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
+import ScreenHeader from '../../components/ScreenHeader';
 import TonightsPickCard from '../../components/TonightsPickCard';
 import TypingDots from '../../components/TypingDots';
 import { aiService } from '../../lib/ai';
@@ -270,13 +271,10 @@ export default function SommelierScreen() {
 
   if (view === 'list') {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Sommelier</Text>
-          <Text style={styles.headerSubtitle}>Your wine companion</Text>
-        </View>
-        <View style={styles.divider} />
+      <View style={styles.safeArea}>
+        {/* Hidden tab route — a real back chevron so you're not stranded (#170
+            item 4). ScreenHeader handles the top inset itself. */}
+        <ScreenHeader title="Sommelier" subtitle="Your wine companion" />
 
         {loading ? (
           <View style={styles.centered}>
@@ -328,7 +326,7 @@ export default function SommelierScreen() {
             )}
           </ScrollView>
         )}
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -400,22 +398,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: colors.neutral.cream,
-  },
-  header: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
-  },
-  headerTitle: {
-    ...typography.heading.h1,
-    color: colors.neutral.charcoal,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-  },
-  headerSubtitle: {
-    ...typography.body.small,
-    color: colors.gold.text,
-    fontStyle: 'italic',
-    marginTop: 2,
   },
   divider: {
     height: 1,

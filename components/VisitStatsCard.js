@@ -35,7 +35,7 @@ const VisitStatsCard = () => {
 
       if (success && visits) {
         const totalVisits = visits.length;
-        // "Châteaux" = distinct real wineries. Location-optional logs have a
+        // "Places" = distinct real wineries. Location-optional logs have a
         // null winery_id and must not be counted as a place.
         const uniqueWineries = new Set(
           visits.map(v => v.winery_id).filter(Boolean)
@@ -143,7 +143,7 @@ const VisitStatsCard = () => {
             <Ionicons name="business-outline" size={20} color={colors.primary.burgundy} />
           </View>
           <Text style={styles.statValue}>{stats.totalWineries}</Text>
-          <Text style={styles.statLabel}>Châteaux</Text>
+          <Text style={styles.statLabel}>Places</Text>
         </View>
 
         <View style={styles.statDivider} />

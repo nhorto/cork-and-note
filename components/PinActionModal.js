@@ -54,8 +54,27 @@ const PinActionModal = ({
               )}
             </View>
 
-            {/* Action Options */}
+            {/* Action Options — look first, create second (#170 item 6): the
+                primary row opens the winery page with your notes; logging goes
+                straight to the log form. */}
             <View style={styles.options}>
+              {onViewDetails && (
+                <TouchableOpacity
+                  style={styles.option}
+                  onPress={onViewDetails}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.iconContainer, { backgroundColor: colors.status.visited }]}>
+                    <Ionicons name="reader" size={20} color={colors.neutral.cream} />
+                  </View>
+                  <View style={styles.optionTextContainer}>
+                    <Text style={styles.optionText}>View winery & your notes</Text>
+                    <Text style={styles.optionSubtext}>Past visits and the wines you logged</Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity
                 style={styles.option}
                 onPress={onLogVisit}
@@ -65,7 +84,7 @@ const PinActionModal = ({
                   <Ionicons name="wine" size={20} color={colors.neutral.cream} />
                 </View>
                 <View style={styles.optionTextContainer}>
-                  <Text style={styles.optionText}>Log visit</Text>
+                  <Text style={styles.optionText}>Log a visit here</Text>
                   <Text style={styles.optionSubtext}>Record wines and tasting notes</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
@@ -85,23 +104,6 @@ const PinActionModal = ({
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
               </TouchableOpacity>
-
-              {onViewDetails && (
-                <TouchableOpacity
-                  style={styles.option}
-                  onPress={onViewDetails}
-                  activeOpacity={0.7}
-                >
-                  <View style={[styles.iconContainer, { backgroundColor: colors.status.visited }]}>
-                    <Ionicons name="information-circle" size={20} color={colors.neutral.cream} />
-                  </View>
-                  <View style={styles.optionTextContainer}>
-                    <Text style={styles.optionText}>View details</Text>
-                    <Text style={styles.optionSubtext}>See past visits and notes</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
-                </TouchableOpacity>
-              )}
 
               {/* Divider before destructive action */}
               <View style={styles.destructiveDivider} />

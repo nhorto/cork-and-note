@@ -219,23 +219,16 @@ export default function WineryDetail() {
             <View style={styles.dividerLine} />
           </View>
 
-          {/* About Section */}
-          <View style={styles.aboutSection}>
-            <Text style={styles.sectionLabel}>ABOUT</Text>
-            {/* No region sentence here: `wineries` has no region column — not in
-                the schema, not in any migration, and not in the live DB — so
-                `winery.region` was always undefined and this never rendered.
-                Region lives only on cellar_bottles today (#88). */}
-            <Text style={styles.aboutText}>
-              Discover this winery and experience their selection of wines.
-            </Text>
-          </View>
+          {/* No ABOUT section: `wineries` has no description or region column
+              (see #88), so it only ever showed a canned "Discover this
+              winery…" filler that pushed the user's own notes below the fold
+              (#170 item 7). Your visits are the content of this page. */}
         </View>
 
         {/* Past Visits Section */}
         {user && (
           <View style={styles.pastVisitsContainer}>
-            <PastVisitsSection wineryId={id} />
+            <PastVisitsSection wineryId={id} wineryName={winery?.name} />
           </View>
         )}
       </ScrollView>
@@ -396,21 +389,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.gold.rich,
     transform: [{ rotate: '45deg' }],
     marginHorizontal: spacing.sm,
-  },
-
-  // About Section
-  aboutSection: {
-    marginTop: spacing.sm,
-  },
-  sectionLabel: {
-    ...typography.body.caption,
-    color: colors.gold.text,
-    marginBottom: spacing.sm,
-  },
-  aboutText: {
-    ...typography.body.regular,
-    color: colors.neutral.graphite,
-    lineHeight: 24,
   },
 
   // Past Visits Container

@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import { wishlistService } from '../../lib/wishlist';
 import theme from '../../styles/theme';
@@ -160,19 +161,16 @@ export default function WishlistScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Custom Screen Header */}
-      <View style={styles.screenHeader}>
-        <View style={styles.screenHeaderContent}>
-          <View style={styles.screenHeaderLeft}>
-            <Ionicons name="bookmark" size={20} color={colors.primary.burgundy} />
-          </View>
-          <Text style={styles.screenHeaderTitle}>Wishlist</Text>
+      {/* Hidden tab route — a real back chevron so you're not stranded (#170
+          item 4). */}
+      <ScreenHeader
+        title="Wishlist"
+        right={
           <View style={styles.countBadge}>
             <Text style={styles.countBadgeText}>{wishlist.length}</Text>
           </View>
-        </View>
-        <View style={styles.screenHeaderBorder} />
-      </View>
+        }
+      />
 
       {/* Section Header */}
       <View style={styles.header}>
@@ -229,37 +227,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.cream,
   },
 
-  // Custom Screen Header
-  screenHeader: {
-    backgroundColor: colors.neutral.cream,
-    paddingTop: 60, // Safe area for iOS
-  },
-  screenHeaderContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  screenHeaderLeft: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.gold.muted,
-  },
-  screenHeaderTitle: {
-    ...typography.heading.h2,
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
   countBadge: {
-    minWidth: 40,
-    height: 40,
-    borderRadius: 20,
+    minWidth: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: colors.primary.burgundy,
     alignItems: 'center',
     justifyContent: 'center',
@@ -270,12 +241,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.cream,
     fontWeight: '600',
   },
-  screenHeaderBorder: {
-    height: 1,
-    backgroundColor: colors.gold.muted,
-    marginHorizontal: spacing.lg,
-  },
-
   // Section Header
   header: {
     paddingHorizontal: spacing.lg,
