@@ -5,12 +5,7 @@
 //  - request-size, image-count/size, and per-message input validation (#3, #4)
 //  - proper HTTP status codes; upstream error details are logged, not echoed (#5)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
+import { corsHeaders } from "../_shared/cors.ts";
 
 // ── Limits ──────────────────────────────────────────────────────────────
 const MAX_BODY_BYTES = 25_000_000; // ~25MB (base64 images are large)
@@ -26,16 +21,16 @@ const SHORT_WINDOW_MIN = 5;
 const MAX_REQUESTS_SHORT = 15; // ≤15 requests / 5 min
 const MAX_REQUESTS_DAY = 150; // ≤150 requests / 24h
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
-
 Deno.serve(async (req: Request) => {
+  const cors = corsHeaders(req);
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", { headers: cors });
   }
 
   try {
