@@ -9,8 +9,10 @@ import { AppState, useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import OfflineBanner from '../components/OfflineBanner';
 import { checkAndReschedule, setNotificationHandler } from '../lib/notifications';
 import { supabase } from '../lib/supabase';
+import { startUpdateWatcher } from '../lib/updates';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -151,6 +153,11 @@ export default function RootLayout() {
       sub.remove();
     };
   }, [isAuthenticated]);
+
+  // OTA updates: check on launch and on every return to the foreground, so a
+  // shipped JS fix reaches testers on this launch rather than the next one
+  // (§2.3). No-ops in development and when updates are disabled.
+  useEffect(() => startUpdateWatcher(), []);
 
   const signIn = async (email, password) => {
     try {
@@ -297,6 +304,8 @@ export default function RootLayout() {
     <AuthContext.Provider value={authContextValue}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
+          {/* Pinned above the navigator so it shows on every screen (§2.3). */}
+          <OfflineBanner />
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" />
