@@ -391,3 +391,8 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 # The function also verifies the JWT in code (defense in depth).
 [functions.chat]
 verify_jwt = true
+
+# In-app account deletion (#161). JWT enforced at the gateway and re-verified
+# in code; the function uses the service role for storage + auth.users cleanup.
+[functions.delete-account]
+verify_jwt = true
