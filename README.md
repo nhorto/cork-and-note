@@ -25,6 +25,13 @@ Cork & Note is a wine tasting journal for iOS and Android, built with
    EXPO_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
    ```
 
+   For Android builds that use Google Maps, also set (locally and as an
+   EAS environment variable):
+
+   ```bash
+   GOOGLE_MAPS_ANDROID_API_KEY=<restricted-android-maps-key>
+   ```
+
 3. Start the app (a development build is required — the app uses native
    modules like maps and camera, so Expo Go won't work):
 

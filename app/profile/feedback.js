@@ -5,7 +5,6 @@ import { useContext, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
-  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -426,36 +425,8 @@ export default function FeedbackScreen() {
           {/* "Rate Cork & Note" section removed until the app has real App
               Store / Play Store IDs to link to. */}
 
-          {/* Social Links */}
-          <View style={styles.socialLinks}>
-            <Text style={styles.socialTitle}>Connect with us</Text>
-            <View style={styles.socialButtons}>
-              <TouchableOpacity
-                style={styles.socialButton}
-                onPress={() => Linking.openURL('https://instagram.com/corkandnote')}
-              >
-                <Ionicons name="logo-instagram" size={24} color={colors.neutral.cream} />
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.socialButton}
-                onPress={() => Linking.openURL('https://facebook.com/corkandnote')}
-              >
-                <Ionicons name="logo-facebook" size={24} color={colors.neutral.cream} />
-              </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.socialButton}
-                onPress={() => Linking.openURL('https://twitter.com/corkandnote')}
-              >
-                <Ionicons name="logo-twitter" size={24} color={colors.neutral.cream} />
-              </TouchableOpacity>
-            </View>
-            
-            <Text style={styles.emailContact}>
-              Email: support@corkandnote.com
-            </Text>
-          </View>
+          {/* "Connect with us" (social links + support email) removed until
+              the handles and support mailbox actually exist (#166). */}
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -562,32 +533,4 @@ const styles = StyleSheet.create({
   starIcon: {
     margin: 4,
   },
-  socialLinks: {
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 30,
-  },
-  socialTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.neutral.charcoal,
-    marginBottom: 16,
-  },
-  socialButtons: {
-    flexDirection: 'row',
-    marginBottom: 16,
-  },
-  socialButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.primary.burgundy,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 8,
-  },
-  emailContact: {
-    fontSize: 14,
-    color: colors.neutral.pewter,
-  }
 });

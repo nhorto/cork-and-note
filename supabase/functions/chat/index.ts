@@ -133,21 +133,21 @@ Deno.serve(async (req: Request) => {
         .gte("created_at", dayStart),
     ]);
 
-    // The chat_usage RLS auto-scopes counts to this user. Fail closed on the
-    // limits we could read; if the table is unreachable, log and continue
-    // (don't take the sommelier down over the counter).
+    // The chat_usage RLS auto-scopes counts to this user. Fail closed: if the
+    // counter is unreachable we cannot enforce limits, so refuse the (paid)
+    // Anthropic call rather than run it unmetered.
     if (shortRes.error || dayRes.error) {
       console.error("Rate-limit read error:", shortRes.error, dayRes.error);
-    } else {
-      if ((shortRes.count ?? 0) >= MAX_REQUESTS_SHORT) {
-        return json(
-          { error: "Rate limit exceeded. Please wait a few minutes and try again." },
-          429
-        );
-      }
-      if ((dayRes.count ?? 0) >= MAX_REQUESTS_DAY) {
-        return json({ error: "Daily limit reached. Please try again tomorrow." }, 429);
-      }
+      return json({ error: "Service temporarily unavailable" }, 503);
+    }
+    if ((shortRes.count ?? 0) >= MAX_REQUESTS_SHORT) {
+      return json(
+        { error: "Rate limit exceeded. Please wait a few minutes and try again." },
+        429
+      );
+    }
+    if ((dayRes.count ?? 0) >= MAX_REQUESTS_DAY) {
+      return json({ error: "Daily limit reached. Please try again tomorrow." }, 429);
     }
 
     // ── API key ───────────────────────────────────────────────────────
