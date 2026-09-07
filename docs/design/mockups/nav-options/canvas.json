@@ -1,0 +1,110 @@
+{
+  "artboards": [
+    {
+      "file": "OptionA_Home.dc.html",
+      "x": 320,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "A \u00b7 Home"
+    },
+    {
+      "file": "OptionA_Profile.dc.html",
+      "x": 790,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "A \u00b7 Profile"
+    },
+    {
+      "file": "OptionA_Places.dc.html",
+      "x": 1260,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "A \u00b7 Your places (new)"
+    },
+    {
+      "file": "OptionA_QuickActions.dc.html",
+      "x": 1730,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "A \u00b7 Quick actions"
+    },
+    {
+      "file": "OptionB_Home.dc.html",
+      "x": 320,
+      "y": 1040,
+      "w": 390,
+      "h": 844,
+      "title": "B \u00b7 Home"
+    },
+    {
+      "file": "OptionB_JournalTastings.dc.html",
+      "x": 790,
+      "y": 1040,
+      "w": 390,
+      "h": 844,
+      "title": "B \u00b7 Journal \u203a Tastings"
+    },
+    {
+      "file": "OptionB_JournalPlaces.dc.html",
+      "x": 1260,
+      "y": 1040,
+      "w": 390,
+      "h": 844,
+      "title": "B \u00b7 Journal \u203a Places"
+    },
+    {
+      "file": "OptionB_Profile.dc.html",
+      "x": 1730,
+      "y": 1040,
+      "w": 390,
+      "h": 844,
+      "title": "B \u00b7 Profile"
+    },
+    {
+      "file": "Main.dc.html",
+      "x": 320,
+      "y": 2080,
+      "w": 390,
+      "h": 844,
+      "title": "Both \u00b7 Pin sheet, reordered"
+    },
+    {
+      "file": "Both_WineryPage.dc.html",
+      "x": 790,
+      "y": 2080,
+      "w": 390,
+      "h": 844,
+      "title": "Both \u00b7 Winery page, visits first"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-a",
+      "x": 0,
+      "y": 0,
+      "w": 260,
+      "text": "OPTION A \u2014 Findability fixes\nKeeps today's five tabs (Home \u00b7 Cellar \u00b7 + \u00b7 Explore \u00b7 Profile).\n\nWhat changes: Home tiles become labeled links, Profile gets a 'Your journal' section, a new Your places list screen, and the + sheet gains a Browse row.\n\nWhy: 1\u20132 days, no structural risk, nothing testers already know moves.\nTradeoff: tastings still have no tab of their own; the main route stays 'Home tile' or 'Profile row'."
+    },
+    {
+      "id": "note-b",
+      "x": 0,
+      "y": 1040,
+      "w": 260,
+      "text": "OPTION B \u2014 Journal tab (recommended)\nHome \u00b7 Journal \u00b7 + \u00b7 Explore \u00b7 Profile.\n\nJournal is one screen with Tastings / Places / Wishlist segments, grouped by visit. Cellar leaves the bar and lives in a Home card, a Profile row, and the + sheet.\n\nWhy: the thing people create most gets a tab; 'where are my wines' becomes one obvious tap.\nTradeoff: cellar users lose a dedicated tab (still one tap from Home); +2\u20133 days."
+    },
+    {
+      "id": "note-both",
+      "x": 0,
+      "y": 2080,
+      "w": 260,
+      "text": "APPLIES TO BOTH\nPin sheet: 'View winery & your notes' is the primary row; 'Log a visit here' goes straight into the log flow. A persistent ? on the map brings the drop-pin hint back.\n\nWinery page: Your visits sits above About, the latest visit is expanded, and the canned About sentence is gone.\n\nAll names, wines and counts here are sample data."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
