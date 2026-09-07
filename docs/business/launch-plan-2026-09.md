@@ -1,6 +1,7 @@
 # Cork & Note — App Store Launch & Business Plan
 
 **Prepared:** 2026-09-03
+**Owner-only tasks:** see [`owner-checklist.md`](owner-checklist.md).
 **Status:** Owner decisions taken 2026-09-03 on pricing ($9.99/mo · $59.99/yr, no lifetime), free meters (as proposed), and platform (iOS only). Navigation option (§3 Layer A vs B) pending mockup review. No product code changed in this PR.
 **Builds on:** [`monetization-and-marketing-strategy.md`](monetization-and-marketing-strategy.md) (June 2026 research), the 2026-07-05 [code review](../audits/2026-07-05-code-review.md) and [design review](../audits/2026-07-05-design-review.md), issue #148, and three fresh audits of the current `main` (UX/findability, launch readiness, payments/pricing research).
 
@@ -25,7 +26,7 @@
 ## 2. Path to the App Store
 
 ### 2.0 This week, you personally (no code)
-1. Sign in to App Store Connect **as the Account Holder** → Business → accept any pending agreement. Then developer.apple.com/account → accept the updated Program License Agreement banner. Confirm the $99/yr membership is active.
+1. ~~Sign in to App Store Connect as the Account Holder and accept the pending agreement.~~ **DONE 2026-09-03.** Still confirm the $99/yr membership expiry date while you're there.
 2. Enroll in the **App Store Small Business Program** (15% commission instead of 30% under $1M/yr). Do this before the first paid subscriber exists.
 3. Move `AuthKey_9L4MP9Y7C6.p8` out of `~/Downloads` to `~/.private_keys/`. Never commit it.
 4. Re-run the production build (command in #148). Build 8 goes to TestFlight and un-crashes your testers.
@@ -220,7 +221,7 @@ Android can wait: it doubles QA and store work, and every tester today is on iOS
 3. ~~**Free meters**~~ — **Decided:** 3 scans + 5 AI messages per month, 25-bottle cellar cap, logging unlimited.
 4. **Launch region:** which wine region can you visit regularly for QR partnerships and content?
 5. **Domain:** do you own corkandnote.com or similar? Repurpose the Vercel deploy for the landing + legal pages, or delete it?
-6. ~~**Apple account**~~ — **Decided:** owner will sign the pending agreement this week.
+6. ~~**Apple account**~~ — **DONE 2026-09-03:** agreement signed.
 7. **Entity and money:** Apple pays whoever owns the developer account. An LLC is not required to launch but is worth setting up before real revenue. Do you have one?
 8. **AI budget:** what monthly Anthropic cap are you comfortable with at launch? Suggest $100 with an alert at $50.
 9. ~~**Android**~~ — **Decided:** iOS only for v1.
