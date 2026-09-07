@@ -5,7 +5,6 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   Image,
   Modal,
@@ -24,7 +23,7 @@ const { colors, typography, spacing, shadows, borderRadius } = theme;
 // a hardcoded 400 desyncs the pager and the "N of M" indicator.
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-const PastVisitsSection = ({ wineryId }) => {
+const PastVisitsSection = ({ wineryId, wineryName }) => {
   const [loading, setLoading] = useState(true);
   const [visits, setVisits] = useState([]);
   const [expandedVisit, setExpandedVisit] = useState(null);
@@ -50,6 +49,16 @@ const PastVisitsSection = ({ wineryId }) => {
               visit.winery_id?.toString() === wineryId?.toString()
             );
             setVisits(wineryVisits);
+
+            // Auto-expand the most recent visit — the notes are why the user
+            // opened this page, so don't hide them behind a collapsed row
+            // (#170 item 7). Only on first load; don't fight a manual toggle.
+            if (wineryVisits.length > 0) {
+              const mostRecent = wineryVisits.reduce((a, b) =>
+                new Date(b.visit_date) > new Date(a.visit_date) ? b : a
+              );
+              setExpandedVisit(prev => prev ?? mostRecent.id);
+            }
           }
         } catch (error) {
           console.error('Error loading visits:', error);
@@ -156,7 +165,14 @@ const PastVisitsSection = ({ wineryId }) => {
         </Text>
         <TouchableOpacity
           style={styles.addVisitButton}
-          onPress={() => Alert.alert('Log Visit', 'Use the "Log Your Visit" button at the top to add a visit.')}
+          onPress={() =>
+            // Straight into the log form for this winery — the old Alert named
+            // a button that doesn't exist on this screen (#170 item 9).
+            router.push({
+              pathname: '/log-session',
+              params: { mode: 'winery', wineryId, ...(wineryName ? { wineryName } : {}) },
+            })
+          }
           activeOpacity={0.7}
         >
           <Ionicons name="add" size={18} color={colors.neutral.cream} />

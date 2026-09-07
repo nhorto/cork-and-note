@@ -716,17 +716,6 @@ export default function WineEntryForm({
         </TouchableOpacity>
       </View>
 
-      {/* Overall Rating */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Overall rating</Text>
-        <RatingSlider
-          value={overallRating}
-          onValueChange={setOverallRating}
-          label="Overall Rating"
-          showLabel={false}
-        />
-      </View>
-
       {/* Detailed Ratings */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Detailed ratings</Text>
@@ -787,6 +776,18 @@ export default function WineEntryForm({
           onFocus={() => {
             setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
           }}
+        />
+      </View>
+
+      {/* Overall Rating — last, so it's a verdict you give after working
+          through the characteristics, notes and photos (#170 item 10). */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Overall rating</Text>
+        <RatingSlider
+          value={overallRating}
+          onValueChange={setOverallRating}
+          label="Overall Rating"
+          showLabel={false}
         />
       </View>
 

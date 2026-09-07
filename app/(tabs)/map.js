@@ -223,10 +223,27 @@ export default function MapScreen() {
     setShowPinActions(true);
   }, []);
 
-  const handleLogVisit = () => {
+  // "View winery & your notes" → the winery page; "Log a visit here" → the log
+  // form directly, pre-filled with this winery. The two used to open the same
+  // page (#170 item 6).
+  const handleViewWinery = () => {
     setShowPinActions(false);
     if (selectedPin) {
       router.push(`/winery/${selectedPin.id}`);
+    }
+  };
+
+  const handleLogVisit = () => {
+    setShowPinActions(false);
+    if (selectedPin) {
+      router.push({
+        pathname: '/log-session',
+        params: {
+          mode: 'winery',
+          wineryId: selectedPin.id,
+          wineryName: selectedPin.name,
+        },
+      });
     }
   };
 
@@ -522,7 +539,7 @@ export default function MapScreen() {
         onLogVisit={handleLogVisit}
         onAddToWishlist={handleAddPinToWishlist}
         onRemovePin={handleRemovePin}
-        onViewDetails={handleLogVisit}
+        onViewDetails={handleViewWinery}
       />
 
       <ManualWineryEntryModal

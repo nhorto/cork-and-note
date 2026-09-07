@@ -17,6 +17,7 @@ import { cellarService } from '../../lib/cellar';
 import { matchWineToCellar } from '../../lib/cellarMatch';
 import { parseVarietals, varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
+import ScreenHeader from '../../components/ScreenHeader';
 import { wineDisplayName } from '../../lib/wineDisplay';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
@@ -445,13 +446,11 @@ export default function Wines() {
 
   return (
     <View style={styles.container}>
-      {/* Custom Screen Header */}
-      <View style={styles.screenHeader}>
-        <View style={styles.screenHeaderContent}>
-          <View style={styles.screenHeaderLeft}>
-            <Ionicons name="wine" size={20} color={colors.primary.burgundy} />
-          </View>
-          <Text style={styles.screenHeaderTitle}>My wines</Text>
+      {/* Hidden tab route — a real back chevron so you're not stranded (#170
+          item 4); "Your tastings" is the one vocabulary (item 8). */}
+      <ScreenHeader
+        title="Your tastings"
+        right={
           <TouchableOpacity
             style={[
               styles.filterHeaderButton,
@@ -472,9 +471,8 @@ export default function Wines() {
               </View>
             )}
           </TouchableOpacity>
-        </View>
-        <View style={styles.screenHeaderBorder} />
-      </View>
+        }
+      />
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
@@ -563,33 +561,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.cream,
   },
 
-  // Custom Screen Header
-  screenHeader: {
-    backgroundColor: colors.neutral.cream,
-    paddingTop: 60,
-  },
-  screenHeaderContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  screenHeaderLeft: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.gold.muted,
-  },
-  screenHeaderTitle: {
-    ...typography.heading.h2,
-    color: colors.neutral.charcoal,
-    fontFamily: 'Georgia',
-  },
   filterHeaderButton: {
     width: 40,
     height: 40,
@@ -619,11 +590,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: colors.neutral.cream,
-  },
-  screenHeaderBorder: {
-    height: 1,
-    backgroundColor: colors.gold.muted,
-    marginHorizontal: spacing.lg,
   },
 
   // Loading

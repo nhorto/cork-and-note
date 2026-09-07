@@ -229,7 +229,7 @@ const HelpSupportModal = () => {
             },
             {
               name: 'Your journey (Profile)',
-              description: "Châteaux visited, total visits, and wines tasted"
+              description: "Places visited, total visits, and wines tasted"
             },
             {
               name: "Where you've been",
