@@ -66,9 +66,33 @@ export default function HubMenu({ visible, onClose }) {
             onPress={() => go('/(tabs)/sommelier')}
             last
           />
+
+          {/* Browse — the hub used to be create-only, leaving nothing to *look
+              at* from the most discoverable control (#170 item 5). */}
+          <Text style={styles.browseLabel}>Browse</Text>
+          <View style={styles.browseRow}>
+            <BrowseLink icon="wine" label="Tastings" onPress={() => go('/wines')} />
+            <BrowseLink icon="location" label="Places" onPress={() => go('/places')} />
+            <BrowseLink icon="bookmark" label="Wishlist" onPress={() => go('/wishlist')} />
+          </View>
         </View>
       </View>
     </Modal>
+  );
+}
+
+function BrowseLink({ icon, label, onPress }) {
+  return (
+    <TouchableOpacity
+      style={styles.browseLink}
+      activeOpacity={0.8}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Browse ${label.toLowerCase()}`}
+    >
+      <Ionicons name={icon} size={18} color={colors.primary.burgundy} />
+      <Text style={styles.browseLinkText}>{label}</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -150,5 +174,34 @@ const styles = StyleSheet.create({
     ...typography.body.small,
     color: colors.neutral.pewter,
     marginTop: 1,
+  },
+  browseLabel: {
+    ...typography.body.caption,
+    color: colors.neutral.pewter,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  browseRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  browseLink: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    minHeight: 44,
+    backgroundColor: colors.neutral.parchment,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    borderRadius: borderRadius.md,
+  },
+  browseLinkText: {
+    ...typography.body.small,
+    color: colors.neutral.charcoal,
+    fontWeight: '600',
   },
 });

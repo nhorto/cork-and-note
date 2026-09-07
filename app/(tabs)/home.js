@@ -156,11 +156,12 @@ export default function HomeScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Stat strip — each counter taps through to its list (#96). */}
+        {/* Stat strip — labeled links so the tiles read as lists, and Places
+            opens the list screen rather than the map (#170 item 2). */}
         <View style={styles.stats}>
-          <Stat n={stats.wines} label="Wines" onPress={() => router.push('/wines')} />
-          <Stat n={stats.places} label="Places" onPress={() => router.push('/(tabs)/map')} />
-          <Stat n={stats.wishlist} label="Wishlist" onPress={() => router.push('/wishlist')} />
+          <Stat n={stats.wines} label="Wines tasted ▸" onPress={() => router.push('/wines')} />
+          <Stat n={stats.places} label="Places visited ▸" onPress={() => router.push('/places')} />
+          <Stat n={stats.wishlist} label="Wishlist ▸" onPress={() => router.push('/wishlist')} />
         </View>
 
         {/* Tonight's pick — AI sommelier grounded in the user's own cellar (#51) */}
