@@ -2,23 +2,30 @@
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useState } from 'react';
 import {
   FlatList,
-  Modal,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
+import ScreenHeader from '../../components/ScreenHeader';
+import WinesFilterModal from '../../components/WinesFilterModal';
 import { cellarService } from '../../lib/cellar';
 import { matchWineToCellar } from '../../lib/cellarMatch';
-import { parseVarietals, varietalText } from '../../lib/varietals';
+import { varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
-import ScreenHeader from '../../components/ScreenHeader';
 import { wineDisplayName } from '../../lib/wineDisplay';
+import {
+  EMPTY_FILTERS,
+  SORTS,
+  activeFilterCount,
+  applyFilters,
+  applySort,
+  facetOptions,
+} from '../../lib/winesBrowse';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
 
@@ -33,24 +40,13 @@ export default function Wines() {
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   
-  // Filter states
-  const [filters, setFilters] = useState({
-    type: 'All',
-    winery: 'All',
-    varietal: 'All',
-    rating: 'All'
-  });
-  
+  // Filters (multi-select facets, committed by the sheet's Apply) and sort —
+  // split apart per #170 Layer C; pure logic lives in lib/winesBrowse.js.
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [sort, setSort] = useState('recent');
+
   const router = useRouter();
   const { user } = useContext(AuthContext);
-
-  // Get unique values for filter options
-  const [filterOptions, setFilterOptions] = useState({
-    types: ['All'],
-    wineries: ['All'],
-    varietals: ['All'],
-    ratings: ['All', 'Highest to Lowest', 'Lowest to Highest']
-  });
 
   // Reload whenever the tab gains focus so wines logged elsewhere show up
   // without a manual refresh.
@@ -60,12 +56,6 @@ export default function Wines() {
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user])
   );
-
-  useEffect(() => {
-    if (wines.length > 0) {
-      generateFilterOptions();
-    }
-  }, [wines]);
 
   const loadUserWines = async (isRefresh = false) => {         
     if (!user) {
@@ -122,65 +112,22 @@ export default function Wines() {
 
   const handleRefresh = () => loadUserWines(true); 
 
-  const generateFilterOptions = () => {
-    const types = ['All', ...new Set(wines.map((w) => w.wine_type).filter(Boolean))];
-    const wineries = [
-      'All',
-      ...new Set(wines.map((w) => w.wineryName).filter(Boolean)),
-    ];
-    const varietals = [
-      'All',
-      // A wine can have several grapes (#135) — list each grape as its own facet.
-      ...new Set(wines.flatMap((w) => parseVarietals(w.wine_varietal))),
-    ];
-
-    setFilterOptions({
-      types,
-      wineries,
-      varietals,
-      ratings: ['All', 'Highest to Lowest', 'Lowest to Highest'],
-    });
-  };
-
-  const getFilteredWines = () => {
-    let filtered = wines.filter((wine) => {
-      const matchesSearch =
-        (wine.wine_name?.toLowerCase().includes(search.toLowerCase()) || '') ||
-        (wine.wineryName?.toLowerCase().includes(search.toLowerCase()) || '') ||
-        (wine.wine_type?.toLowerCase().includes(search.toLowerCase()) || '') ||
-        (varietalText(wine.wine_varietal).toLowerCase().includes(search.toLowerCase()) || '');
-
-      const matchesType = filters.type === 'All' || wine.wine_type === filters.type;
-      const matchesWinery =
-        filters.winery === 'All' || wine.wineryName === filters.winery;
-      const matchesVarietal =
-        filters.varietal === 'All' ||
-        parseVarietals(wine.wine_varietal).some((g) => g === filters.varietal);
-
-      return matchesSearch && matchesType && matchesWinery && matchesVarietal;
-    });
-
-    if (filters.rating === 'Highest to Lowest') {
-      filtered.sort((a, b) => (b.overall_rating || 0) - (a.overall_rating || 0));
-    } else if (filters.rating === 'Lowest to Highest') {
-      filtered.sort((a, b) => (a.overall_rating || 0) - (b.overall_rating || 0));
-    }
-
-    return filtered;
-  };
-
-  const clearAllFilters = () => {
-    setFilters({
-      type: 'All',
-      winery: 'All',
-      varietal: 'All',
-      rating: 'All'
-    });
-    setSearch('');
-  };
-
-  const getActiveFilterCount = () => {
-    return Object.values(filters).filter(value => value !== 'All').length;
+  // Free-text search over name / winery / type / varietal.
+  const getSearchedWines = () => {
+    const q = search.trim().toLowerCase();
+    if (!q) return wines;
+    return wines.filter((wine) =>
+      [
+        wine.wine_name,
+        wine.wineryName,
+        wine.wine_type,
+        varietalText(wine.wine_varietal),
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(q)
+    );
   };
 
   const navigateToWineDetail = (wine) => {
@@ -276,160 +223,6 @@ export default function Wines() {
     );
   };
 
-  const renderFilterModal = () => (
-    <Modal
-      visible={showFilters}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={() => setShowFilters(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.filterModal}>
-          {/* Modal Header */}
-          <View style={styles.filterHeader}>
-            <View style={styles.filterHeaderIcon}>
-              <Ionicons name="options" size={20} color={colors.primary.burgundy} />
-            </View>
-            <Text style={styles.filterTitle}>Filter wines</Text>
-            <TouchableOpacity
-              style={styles.filterCloseButton}
-              onPress={() => setShowFilters(false)}
-              accessibilityRole="button"
-              accessibilityLabel="Close"
-            >
-              <Ionicons name="close" size={22} color={colors.neutral.charcoal} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Decorative Divider */}
-          <View style={styles.filterDivider}>
-            <View style={styles.filterDividerLine} />
-            <View style={styles.filterDividerDiamond} />
-            <View style={styles.filterDividerLine} />
-          </View>
-          
-          <ScrollView style={styles.filterContent}>
-            {/* Wine Type Filter */}
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Wine type</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.filterOptions}>
-                  {filterOptions.types.map(type => (
-                    <TouchableOpacity
-                      key={type}
-                      style={[
-                        styles.filterOption,
-                        filters.type === type && styles.filterOptionActive
-                      ]}
-                      onPress={() => setFilters(prev => ({ ...prev, type }))}
-                    >
-                      <Text style={[
-                        styles.filterOptionText,
-                        filters.type === type && styles.filterOptionTextActive
-                      ]}>
-                        {type}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-
-            {/* Winery Filter */}
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Winery</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.filterOptions}>
-                  {filterOptions.wineries.map(winery => (
-                    <TouchableOpacity
-                      key={winery}
-                      style={[
-                        styles.filterOption,
-                        filters.winery === winery && styles.filterOptionActive
-                      ]}
-                      onPress={() => setFilters(prev => ({ ...prev, winery }))}
-                    >
-                      <Text style={[
-                        styles.filterOptionText,
-                        filters.winery === winery && styles.filterOptionTextActive
-                      ]}>
-                        {winery}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-
-            {/* Varietal Filter */}
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Varietal</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.filterOptions}>
-                  {filterOptions.varietals.map(varietal => (
-                    <TouchableOpacity
-                      key={varietal}
-                      style={[
-                        styles.filterOption,
-                        filters.varietal === varietal && styles.filterOptionActive
-                      ]}
-                      onPress={() => setFilters(prev => ({ ...prev, varietal }))}
-                    >
-                      <Text style={[
-                        styles.filterOptionText,
-                        filters.varietal === varietal && styles.filterOptionTextActive
-                      ]}>
-                        {varietal}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </ScrollView>
-            </View>
-
-            {/* Rating Sort Filter */}
-            <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>Sort by rating</Text>
-              <View style={styles.filterOptions}>
-                {filterOptions.ratings.map(rating => (
-                  <TouchableOpacity
-                    key={rating}
-                    style={[
-                      styles.filterOption,
-                      filters.rating === rating && styles.filterOptionActive
-                    ]}
-                    onPress={() => setFilters(prev => ({ ...prev, rating }))}
-                  >
-                    <Text style={[
-                      styles.filterOptionText,
-                      filters.rating === rating && styles.filterOptionTextActive
-                    ]}>
-                      {rating}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          </ScrollView>
-          
-          <View style={styles.filterActions}>
-            <TouchableOpacity 
-              style={styles.clearFiltersButton}
-              onPress={clearAllFilters}
-            >
-              <Text style={styles.clearFiltersText}>Clear all</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.applyFiltersButton}
-              onPress={() => setShowFilters(false)}
-            >
-              <Text style={styles.applyFiltersText}>Apply filters</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    </Modal>
-  );
 
   if (loading) {
     return (
@@ -442,8 +235,12 @@ export default function Wines() {
     );
   }
 
-  const filteredWines = getFilteredWines();
-  const activeFilterCount = getActiveFilterCount();
+  const searchedWines = getSearchedWines();
+  // Facets reflect the search-narrowed set, so the sheet only offers choices
+  // that exist and its counts are live.
+  const facets = facetOptions(searchedWines);
+  const filteredWines = applySort(applyFilters(searchedWines, filters), sort);
+  const filterCount = activeFilterCount(filters);
 
   return (
     <View style={styles.container}>
@@ -455,7 +252,7 @@ export default function Wines() {
           <TouchableOpacity
             style={[
               styles.filterHeaderButton,
-              activeFilterCount > 0 && styles.filterHeaderButtonActive
+              filterCount > 0 && styles.filterHeaderButtonActive
             ]}
             onPress={() => setShowFilters(true)}
             accessibilityRole="button"
@@ -464,11 +261,11 @@ export default function Wines() {
             <Ionicons
               name="options-outline"
               size={20}
-              color={activeFilterCount > 0 ? colors.neutral.cream : colors.neutral.charcoal}
+              color={filterCount > 0 ? colors.neutral.cream : colors.neutral.charcoal}
             />
-            {activeFilterCount > 0 && (
+            {filterCount > 0 && (
               <View style={styles.filterBadge}>
-                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+                <Text style={styles.filterBadgeText}>{filterCount}</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -501,16 +298,29 @@ export default function Wines() {
         </View>
       </View>
 
-      {/* Results Count & Quick Filter */}
+      {/* Results Count & Sort — sort lives on the screen, not in the filter
+          sheet (#170 Layer C). */}
       <View style={styles.resultsBar}>
         <Text style={styles.resultsCount}>
           {filteredWines.length} {filteredWines.length === 1 ? 'wine' : 'wines'}
         </Text>
-        {activeFilterCount > 0 && (
-          <TouchableOpacity onPress={clearAllFilters}>
-            <Text style={styles.clearFiltersSmallText}>Clear filters</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.sortRow}>
+          {SORTS.map((s) => (
+            <TouchableOpacity
+              key={s.key}
+              style={[styles.sortChip, sort === s.key && styles.sortChipActive]}
+              onPress={() => setSort(s.key)}
+              accessibilityRole="button"
+              accessibilityLabel={`Sort by ${s.label.toLowerCase()}`}
+            >
+              <Text
+                style={[styles.sortChipText, sort === s.key && styles.sortChipTextActive]}
+              >
+                {s.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
       
       {/* Wine List */}
@@ -551,7 +361,17 @@ export default function Wines() {
         }
       />
 
-      {renderFilterModal()}
+      <WinesFilterModal
+        visible={showFilters}
+        wines={searchedWines}
+        facets={facets}
+        filters={filters}
+        onApply={(next) => {
+          setFilters(next);
+          setShowFilters(false);
+        }}
+        onClose={() => setShowFilters(false)}
+      />
     </View>
   );
 }
@@ -658,10 +478,29 @@ const styles = StyleSheet.create({
     ...typography.body.small,
     color: colors.neutral.pewter,
   },
-  clearFiltersSmallText: {
-    ...typography.body.small,
-    color: colors.primary.burgundy,
+  sortRow: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  sortChip: {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.round,
+    borderWidth: 1,
+    borderColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.parchment,
+  },
+  sortChipActive: {
+    backgroundColor: colors.primary.burgundy,
+    borderColor: colors.primary.burgundy,
+  },
+  sortChipText: {
+    ...typography.body.caption,
+    color: colors.neutral.graphite,
     fontWeight: '500',
+  },
+  sortChipTextActive: {
+    color: colors.neutral.cream,
   },
 
   // Wine List
@@ -800,144 +639,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Filter Modal
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: colors.overlay.dark,
-    justifyContent: 'flex-end',
-  },
-  filterModal: {
-    backgroundColor: colors.neutral.cream,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    maxHeight: '85%',
-    minHeight: '60%',
-  },
-  filterHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.lg,
-    paddingBottom: spacing.md,
-  },
-  filterHeaderIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.gold.muted,
-  },
-  filterTitle: {
-    ...typography.heading.h2,
-    color: colors.neutral.charcoal,
-    fontFamily: SERIF,
-  },
-  filterCloseButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-  },
-  filterDivider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-  },
-  filterDividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: colors.gold.muted,
-  },
-  filterDividerDiamond: {
-    width: 6,
-    height: 6,
-    backgroundColor: colors.gold.rich,
-    transform: [{ rotate: '45deg' }],
-    marginHorizontal: spacing.sm,
-  },
-  filterContent: {
-    flex: 1,
-    padding: spacing.lg,
-    paddingTop: spacing.sm,
-  },
-  filterSection: {
-    marginBottom: spacing.lg,
-  },
-  filterSectionTitle: {
-    ...typography.body.caption,
-    color: colors.gold.text,
-    marginBottom: spacing.sm,
-  },
-  filterOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  filterOption: {
-    backgroundColor: colors.neutral.parchment,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    marginRight: spacing.sm,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-  },
-  filterOptionActive: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
-  },
-  filterOptionText: {
-    ...typography.body.small,
-    color: colors.neutral.charcoal,
-  },
-  filterOptionTextActive: {
-    color: colors.neutral.cream,
-    fontWeight: '500',
-  },
-  filterActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: spacing.lg,
-    paddingTop: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.neutral.linen,
-    backgroundColor: colors.neutral.cream,
-    paddingBottom: 34, // Safe area
-  },
-  clearFiltersButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    marginRight: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
-  },
-  clearFiltersText: {
-    ...typography.body.regular,
-    color: colors.neutral.graphite,
-    fontWeight: '500',
-  },
-  applyFiltersButton: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    marginLeft: spacing.sm,
-    backgroundColor: colors.primary.burgundy,
-  },
-  applyFiltersText: {
-    ...typography.body.regular,
-    color: colors.neutral.cream,
-    fontWeight: '600',
-  },
 });
