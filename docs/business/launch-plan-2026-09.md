@@ -2,7 +2,9 @@
 
 **Prepared:** 2026-09-03
 **Owner-only tasks:** see [`owner-checklist.md`](owner-checklist.md).
-**Status:** Owner decisions taken 2026-09-03 on pricing ($9.99/mo · $59.99/yr, no lifetime), free meters (as proposed), and platform (iOS only). Navigation option (§3 Layer A vs B) pending mockup review. No product code changed in this PR.
+**Status (2026-09-07):** Owner decisions taken 2026-09-03 on pricing ($9.99/mo · $59.99/yr, no lifetime), free meters (as proposed), and platform (iOS only). Navigation option (§3 Layer A vs B) still pending mockup review — it is now the main blocker on further UX work.
+
+Delivered since: every §2.1 must-fix that needed no owner decision (account deletion #161 — verified end-to-end in production, legal screens #162, Maps key #164, fail-closed limiter #165, dead links #166), the full §3.2 Layer A findability pass plus most of Layer C (#170), the §3.3 serif guard, and from §2.3 the `handle_new_user` migration and the first test suite. **Build 11 is on TestFlight** (§2.0 complete). The privacy-policy and support URLs Apple requires are live at <https://cork-and-note.vercel.app> without waiting on the domain. Still open: icons (#163, needs final artwork), the Journal tab (Layer B, needs the A/B decision), the Pro tier (§4.5, needs the RevenueCat and App Store Connect accounts), and the rest of §2.3.
 **Builds on:** [`monetization-and-marketing-strategy.md`](monetization-and-marketing-strategy.md) (June 2026 research), the 2026-07-05 [code review](../audits/2026-07-05-code-review.md) and [design review](../audits/2026-07-05-design-review.md), issue #148, and three fresh audits of the current `main` (UX/findability, launch readiness, payments/pricing research).
 
 ---
