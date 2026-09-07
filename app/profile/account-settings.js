@@ -13,6 +13,7 @@ import {
   View
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
+import { accountService } from '../../lib/account';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
 
@@ -20,11 +21,30 @@ const { colors } = theme;
 
 export default function AccountSettingsScreen() {
   const router = useRouter();
-  const { user } = useContext(AuthContext);
-  
+  const { user, signOut } = useContext(AuthContext);
+
   // Local state for settings
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locationPermissionStatus, setLocationPermissionStatus] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      await accountService.deleteAccount();
+      // The account is gone server-side; signing out clears the local session
+      // and the auth listener in _layout routes back to the login screen.
+      await signOut();
+    } catch (error) {
+      Alert.alert(
+        'Account deletion failed',
+        error.message || 'Something went wrong. Please try again.'
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // Check current location permission status on component mount
   useEffect(() => {
@@ -127,28 +147,28 @@ export default function AccountSettingsScreen() {
             <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
           </TouchableOpacity>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.actionButton, styles.dangerButton]}
+            disabled={deleting}
             onPress={() => {
               Alert.alert(
                 'Delete Account',
-                'This action cannot be undone. Are you sure you want to delete your account and all associated data?',
+                'This permanently deletes your account, tastings, photos, cellar and chat history. This cannot be undone. Are you sure?',
                 [
                   { text: 'Cancel', style: 'cancel' },
-                  { 
-                    text: 'Delete', 
+                  {
+                    text: 'Delete',
                     style: 'destructive',
-                    onPress: () => {
-                      // Implement account deletion logic here
-                      Alert.alert('Feature Coming Soon', 'Account deletion will be available in a future update.');
-                    }
+                    onPress: handleDeleteAccount
                   }
                 ]
               );
             }}
           >
             <Ionicons name="trash" size={20} color={colors.status.error} />
-            <Text style={[styles.actionButtonText, styles.dangerText]}>Delete account</Text>
+            <Text style={[styles.actionButtonText, styles.dangerText]}>
+              {deleting ? 'Deleting account…' : 'Delete account'}
+            </Text>
             <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
           </TouchableOpacity>
         </View>
