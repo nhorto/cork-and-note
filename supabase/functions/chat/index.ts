@@ -210,7 +210,18 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify({
         model,
         max_tokens: 1024,
-        system: (system_prompt as string) || "You are a helpful wine sommelier.",
+        // Prompt caching (launch plan §4.3): the system prompt is stable across
+        // the turns of a sommelier conversation (and byte-identical across all
+        // label scans), so mark it as a cache breakpoint — cached reads bill at
+        // ~10% of input price. Prompts under the model's minimum cacheable size
+        // silently skip the cache, so this is safe for short prompts too.
+        system: [
+          {
+            type: "text",
+            text: (system_prompt as string) || "You are a helpful wine sommelier.",
+            cache_control: { type: "ephemeral" },
+          },
+        ],
         messages: claudeMessages,
       }),
     });
