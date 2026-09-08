@@ -1,0 +1,29 @@
+# Wine-ampersand image prompts
+
+These images were created with the built-in image-generation tool as edits of
+`../logo-round-2/images/render-02-cn-ring.png`. The reference preserves the
+Bordeaux square, gold circle, and C/N lettering while the middle glyph changes.
+All output PNGs are preserved as returned by the tool.
+
+## A · The Looped Glass
+
+Output: `images/wine-ampersand-01-looped-glass.png`
+
+Use case: logo-brand. Edit the attached Cork & Note app icon. Preserve its fully opaque Bordeaux-red SQUARE background to all four edges and corners, its gold circular frame INSIDE the square, its refined estate-gold palette, and the large elegant serif C on the left and N on the right. The middle character must be a new custom hybrid glyph combining an AMPERSAND (&) and a STEMMED WINE GLASS as ONE integrated symbol. This should still read as C & N, with the clever discovery that the & is a wine glass. Keep the center symbol distinct from both letters, with clear spacing. No extra words or objects. Flat front-facing icon artwork, no mockup scene, no transparent pixels, no circular cutout, no black or white corners. Direction A: Redraw the ampersand with a small recognizable upper loop and diagonal crossing stroke; shape its larger lower loop into the rounded bowl of a wine glass. Extend the bottom center of this lower bowl into a slender vertical wine-glass stem and small horizontal foot. Keep the familiar ampersand diagonal/tail recognizable, visually integrated into the glass bowl rather than a separate decoration. The hybrid should be about two-thirds the height of C and N, plus a short stem descending just below their baseline. Gold satin ink with delicate texture, matching the letters. The main criterion is that a viewer sees BOTH an ampersand and a wine glass, not an ordinary ampersand next to a separate glass.
+
+## B · The Cutout Glass
+
+Output: `images/wine-ampersand-02-cutout-glass.png`
+
+Use case: logo-brand. Edit the attached Cork & Note app icon. Preserve its fully opaque Bordeaux-red SQUARE background to all four edges and corners, its gold circular frame INSIDE the square, its refined estate-gold palette, and the large elegant serif C on the left and N on the right. The middle character must be a new custom hybrid glyph combining an AMPERSAND (&) and a STEMMED WINE GLASS as ONE integrated symbol. This should still read as C & N, with the clever discovery that the & is a wine glass. Keep the center symbol distinct from both letters, with clear spacing. No extra words or objects. Flat front-facing icon artwork, no mockup scene, no transparent pixels, no circular cutout, no black or white corners. Direction B: Use a compact bold gold wine-glass silhouette for the middle character, with a rounded bowl, slim stem and neat foot. Cut a clearly readable classic AMPERSAND (&) into the glass bowl in Bordeaux negative space, like a custom engraved letterform, so the glass and ampersand are one integrated glyph. The ampersand must be large within the bowl with open, readable counters; its lower stroke may flow into the glass stem. Let the wine-glass-ampersand stand slightly shorter than the large C and N. Restrained satin gold, strong silhouette similar to a wine glass with a pen nib cutout, but the cutout is an ampersand instead of a nib. Keep the circle and square intact.
+
+## C · The Calligraphic Glass
+
+Output: `images/wine-ampersand-03-calligraphic-glass.png`
+
+Use case: logo-brand. Edit the attached Cork & Note app icon. Preserve its fully opaque Bordeaux-red SQUARE background to all four edges and corners, its gold circular frame INSIDE the square, its refined estate-gold palette, and the large elegant serif C on the left and N on the right. The middle character must be a new custom hybrid glyph combining an AMPERSAND (&) and a STEMMED WINE GLASS as ONE integrated symbol. This should still read as C & N, with the clever discovery that the & is a wine glass. Keep the center symbol distinct from both letters, with clear spacing. No extra words or objects. Flat front-facing icon artwork, no mockup scene, no transparent pixels, no circular cutout, no black or white corners. Direction C: Draw an elegant fluid calligraphic ampersand as a SINGLE continuous gold ribbon stroke. Its upper loop forms a small tilted oval wine-glass rim; its broad lower loop becomes a tulip-shaped wine-glass bowl, while the ampersand's descending terminal narrows into a short vertical glass stem and gracefully flared foot. Preserve the diagonal crossover and two-loop structure that make an & legible. Aim for a convincing typographic ligature, not an illustration pasted beside an ampersand. Give this glyph a little more height than a usual ampersand but keep it below C/N cap height. Clean flat estate-gold ink, a SINGLE thin gold circle, plain opaque Bordeaux square, no metallic shadows. C and N stay classic serif and well spaced.
+
+The first A request returned a server error and was retried. The final A image
+uses this successful retry brief:
+
+Use case: logo-brand. EDIT the attached C & N logo. Keep its fully opaque Bordeaux red square background, gold circular border inside the square, and large elegant gold serif C and N. Redesign ONLY the central ampersand into a wine-glass-shaped ampersand. The glyph should still clearly be an &: small upper loop, diagonal crossing stroke, larger lower loop, and recognizable tail. Shape the lower loop like a wine-glass bowl, extending its bottom into a thin vertical stem and small horizontal foot. The hybrid center symbol should be slightly shorter than C and N, spaced clearly away from both letters. Restrained gold ink with a satin finish matching the existing lettering. One integrated ampersand-glass symbol, not two adjacent symbols. Preserve the full red SQUARE to every edge and corner with no transparency, white margins, or circular cutout. No extra text or decoration. Flat front-facing original logo artwork.
