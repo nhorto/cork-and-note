@@ -20,6 +20,7 @@ import {
   View,
 } from 'react-native';
 import CellarFilterModal from '../../components/CellarFilterModal';
+import Chip from '../../components/Chip';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
 import { cellarService, drinkWindowMeta } from '../../lib/cellar';
 import {
@@ -223,22 +224,15 @@ export default function CellarScreen() {
           {activeChips.length > 0 && (
             <View style={styles.chipsRow}>
               {activeChips.map((chip) => (
-                <TouchableOpacity
-                  key={chip.id}
-                  style={styles.activeChip}
-                  onPress={() => removeChip(chip)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.activeChipText} numberOfLines={1}>
-                    {chip.label}
-                  </Text>
-                  <Ionicons name="close" size={13} color={colors.primary.burgundy} />
-                </TouchableOpacity>
+                <Chip key={chip.id} label={chip.label} onRemove={() => removeChip(chip)} />
               ))}
               <TouchableOpacity
                 style={styles.clearChip}
                 onPress={() => setFilters(EMPTY_FILTERS)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Clear all filters"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Text style={styles.clearChipText}>Clear all</Text>
               </TouchableOpacity>
@@ -713,19 +707,6 @@ const styles = StyleSheet.create({
   controlBadgeText: { color: colors.neutral.cream, fontSize: 11, fontWeight: '700' },
 
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
-  activeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.round,
-    borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.gold.light,
-    maxWidth: '100%',
-  },
-  activeChipText: { ...typography.body.small, color: colors.primary.burgundy, flexShrink: 1 },
   clearChip: {
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,

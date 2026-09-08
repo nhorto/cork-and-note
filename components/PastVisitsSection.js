@@ -313,6 +313,9 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
             <TouchableOpacity
               style={styles.photoModalClose}
               onPress={() => setShowPhotoModal(false)}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               <Ionicons name="close" size={28} color="#fff" />
             </TouchableOpacity>

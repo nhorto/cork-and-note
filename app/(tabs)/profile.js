@@ -62,6 +62,8 @@ export default function ProfileScreen() {
           <TouchableOpacity
             style={styles.headerRight}
             onPress={() => router.push('/profile/account-settings')}
+            accessibilityRole="button"
+            accessibilityLabel="Settings"
           >
             <Ionicons name="settings-outline" size={22} color={colors.neutral.charcoal} />
           </TouchableOpacity>
@@ -356,9 +358,10 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
   },
   headerRight: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    // 44pt minimum touch target (launch plan §3.3)
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: colors.neutral.parchment,
     alignItems: 'center',
     justifyContent: 'center',

@@ -15,6 +15,8 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import Button from '../../components/Button';
+import Chip from '../../components/Chip';
 import ScreenHeader from '../../components/ScreenHeader';
 import StarRating from '../../components/StarRating';
 import { cellarService } from '../../lib/cellar';
@@ -171,6 +173,8 @@ export default function WineDetail() {
               key={index}
               style={styles.photoThumbnailContainer}
               onPress={() => viewPhoto(index)}
+              accessibilityRole="button"
+              accessibilityLabel={`View photo ${index + 1} of ${wine.photos.length}`}
             >
               <Image source={{ uri: photo }} style={styles.photoThumbnail} />
               <View style={styles.photoOverlay}>
@@ -317,9 +321,7 @@ export default function WineDetail() {
             <Text style={styles.sectionLabel}>FLAVOR NOTES</Text>
             <View style={styles.flavorTags}>
               {wine.flavorNotes.map((flavor, index) => (
-                <View key={index} style={styles.flavorTag}>
-                  <Text style={styles.flavorTagText}>{flavor}</Text>
-                </View>
+                <Chip key={index} label={flavor} />
               ))}
             </View>
           </View>
@@ -374,14 +376,12 @@ export default function WineDetail() {
         )}
 
         {/* Ask the Sommelier */}
-        <TouchableOpacity
-          style={styles.sommelierButton}
+        <Button
+          title="Ask about this wine"
+          icon="sparkles"
           onPress={() => router.push('/(tabs)/sommelier')}
-          activeOpacity={0.9}
-        >
-          <Ionicons name="sparkles" size={20} color={colors.neutral.cream} />
-          <Text style={styles.sommelierButtonText}>Ask about this wine</Text>
-        </TouchableOpacity>
+          style={styles.sommelierButton}
+        />
       </ScrollView>
 
       {/* Photo Viewer Modal */}
@@ -545,15 +545,6 @@ const styles = StyleSheet.create({
 
   // Flavor notes
   flavorTags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  flavorTag: {
-    backgroundColor: colors.gold.light,
-    borderWidth: 1,
-    borderColor: colors.gold.muted,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.round,
-  },
-  flavorTagText: { ...typography.body.small, color: colors.primary.burgundy },
 
   notesText: { ...typography.body.regular, color: colors.neutral.charcoal, lineHeight: 22 },
 
@@ -582,17 +573,7 @@ const styles = StyleSheet.create({
   visitNotes: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic', marginTop: 2 },
 
   // Sommelier CTA
-  sommelierButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.primary.burgundy,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.sm,
-    marginTop: spacing.xl,
-  },
-  sommelierButtonText: { ...typography.body.large, color: colors.neutral.cream, fontWeight: '600' },
+  sommelierButton: { marginTop: spacing.xl },
 
   // Loading / error
   loadingText: { marginTop: spacing.md, ...typography.body.regular, color: colors.neutral.pewter },

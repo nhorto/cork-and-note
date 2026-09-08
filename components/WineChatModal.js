@@ -235,7 +235,12 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
               <Ionicons name="wine" size={18} color={colors.primary.burgundy} />
               <Text style={styles.headerTitle}>Ask the sommelier</Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              accessibilityRole="button"
+              accessibilityLabel="Close"
+            >
               <Ionicons name="close" size={22} color={colors.neutral.graphite} />
             </TouchableOpacity>
           </View>
@@ -330,7 +335,11 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   closeButton: {
-    padding: spacing.xs,
+    // 44pt minimum touch target (launch plan §3.3)
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   divider: {
     height: 1,

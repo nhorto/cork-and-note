@@ -17,7 +17,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Button from '../../components/Button';
 import CellarBottleForm from '../../components/CellarBottleForm';
+import Chip from '../../components/Chip';
 import ConsumptionHistory from '../../components/ConsumptionHistory';
 import MaturityTimeline from '../../components/MaturityTimeline';
 import BottlePairing from '../../components/BottlePairing';
@@ -371,10 +373,13 @@ export default function BottleDetailScreen() {
                     <Ionicons name="wine" size={20} color={colors.neutral.cream} />
                     <Text style={styles.openBtnText}>Open a bottle</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.tasteBtn} activeOpacity={0.9} onPress={() => openOpenSheet('taste')}>
-                    <Ionicons name="wine-outline" size={18} color={colors.primary.burgundy} />
-                    <Text style={styles.tasteBtnText}>Tasted, keep the bottle</Text>
-                  </TouchableOpacity>
+                  <Button
+                    title="Tasted, keep the bottle"
+                    icon="wine-outline"
+                    variant="outline"
+                    onPress={() => openOpenSheet('taste')}
+                    style={styles.tasteBtn}
+                  />
                 </>
               )}
               <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete}>
@@ -426,13 +431,12 @@ export default function BottleDetailScreen() {
                   <Text style={styles.sheetLabel}>What happened?</Text>
                   <View style={styles.reasonRow}>
                     {REASONS.map((r) => (
-                      <TouchableOpacity
+                      <Chip
                         key={r.key}
-                        style={[styles.reasonChip, openReason === r.key && styles.reasonChipActive]}
+                        label={r.label}
+                        selected={openReason === r.key}
                         onPress={() => setOpenReason(r.key)}
-                      >
-                        <Text style={[styles.reasonText, openReason === r.key && styles.reasonTextActive]}>{r.label}</Text>
-                      </TouchableOpacity>
+                      />
                     ))}
                   </View>
 
@@ -468,7 +472,14 @@ export default function BottleDetailScreen() {
                   </View>
                   <View style={styles.starsRow}>
                     {[1, 2, 3, 4, 5].map((n) => (
-                      <TouchableOpacity key={n} onPress={() => setOpenRating(n)} hitSlop={6} style={styles.starBtn}>
+                      <TouchableOpacity
+                        key={n}
+                        onPress={() => setOpenRating(n)}
+                        style={styles.starBtn}
+                        accessibilityRole="radio"
+                        accessibilityLabel={`Rate ${n} of 5`}
+                        accessibilityState={{ selected: n === openRating }}
+                      >
                         <Ionicons
                           name={n <= openRating ? 'star' : 'star-outline'}
                           size={28}
@@ -652,19 +663,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
   },
   openBtnText: { ...typography.body.large, color: colors.neutral.cream, fontWeight: '600' },
-  tasteBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    backgroundColor: colors.neutral.cream,
-    borderWidth: 1,
-    borderColor: colors.primary.burgundy,
-    paddingVertical: spacing.md,
-    borderRadius: borderRadius.sm,
-    marginTop: spacing.sm,
-  },
-  tasteBtnText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
+  tasteBtn: { marginTop: spacing.sm },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.md, marginTop: spacing.sm },
   deleteText: { ...typography.body.regular, color: colors.status.error },
 
@@ -685,7 +684,8 @@ const styles = StyleSheet.create({
   ratingHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   clearRating: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600', marginTop: spacing.md },
   starsRow: { flexDirection: 'row', gap: spacing.xs, alignSelf: 'flex-start' },
-  starBtn: { padding: 2 },
+  // 44pt touch target (§3.3) — sized, not hitSlopped, so adjacent stars can't overlap
+  starBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 
   noteInput: {
     ...typography.body.regular,
@@ -717,17 +717,6 @@ const styles = StyleSheet.create({
   stepValue: { width: 56, textAlign: 'center', fontSize: 18, fontFamily: SERIF, color: colors.neutral.charcoal },
 
   reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  reasonChip: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.round,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
-  },
-  reasonChipActive: { backgroundColor: colors.primary.burgundy, borderColor: colors.primary.burgundy },
-  reasonText: { ...typography.body.small, color: colors.neutral.graphite },
-  reasonTextActive: { color: colors.neutral.cream },
 
   tastingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.lg },
   tastingTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },

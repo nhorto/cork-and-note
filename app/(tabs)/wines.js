@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import Chip from '../../components/Chip';
 import ScreenHeader from '../../components/ScreenHeader';
 import WinesFilterModal from '../../components/WinesFilterModal';
 import { cellarService } from '../../lib/cellar';
@@ -306,19 +307,12 @@ export default function Wines() {
         </Text>
         <View style={styles.sortRow}>
           {SORTS.map((s) => (
-            <TouchableOpacity
+            <Chip
               key={s.key}
-              style={[styles.sortChip, sort === s.key && styles.sortChipActive]}
+              label={s.label}
+              selected={sort === s.key}
               onPress={() => setSort(s.key)}
-              accessibilityRole="button"
-              accessibilityLabel={`Sort by ${s.label.toLowerCase()}`}
-            >
-              <Text
-                style={[styles.sortChipText, sort === s.key && styles.sortChipTextActive]}
-              >
-                {s.label}
-              </Text>
-            </TouchableOpacity>
+            />
           ))}
         </View>
       </View>
@@ -481,26 +475,6 @@ const styles = StyleSheet.create({
   sortRow: {
     flexDirection: 'row',
     gap: spacing.xs,
-  },
-  sortChip: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: borderRadius.round,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
-  },
-  sortChipActive: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
-  },
-  sortChipText: {
-    ...typography.body.caption,
-    color: colors.neutral.graphite,
-    fontWeight: '500',
-  },
-  sortChipTextActive: {
-    color: colors.neutral.cream,
   },
 
   // Wine List

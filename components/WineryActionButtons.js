@@ -117,6 +117,9 @@ const WineryActionButtons = ({
           ]}
           onPress={toggleWishlist}
           disabled={loading}
+          accessibilityRole="button"
+          accessibilityLabel={status.isWantToVisit ? 'Remove from wishlist' : 'Add to wishlist'}
+          accessibilityState={{ selected: status.isWantToVisit }}
         >
           <Ionicons
             name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}

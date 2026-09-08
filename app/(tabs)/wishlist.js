@@ -125,6 +125,8 @@ export default function WishlistScreen() {
         style={styles.removeButton}
         onPress={() => handleRemoveItem(item)}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        accessibilityRole="button"
+        accessibilityLabel="Remove from wishlist"
       >
         <View style={styles.removeButtonInner}>
           <Ionicons name="close" size={16} color={colors.status.error} />
