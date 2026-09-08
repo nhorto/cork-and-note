@@ -19,7 +19,12 @@ export default function LogScreen() {
         <View style={styles.headerContent}>
           <View style={styles.headerIcon} />
           <Text style={styles.headerTitle}>Log</Text>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.headerIcon}
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+          >
             <Ionicons name="close" size={22} color={colors.neutral.charcoal} />
           </TouchableOpacity>
         </View>
@@ -78,9 +83,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   headerIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    // 44pt minimum touch target (launch plan §3.3)
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },

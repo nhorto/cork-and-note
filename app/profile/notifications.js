@@ -26,6 +26,7 @@ import {
   sendTestNotification,
   setPrefs,
 } from '../../lib/notifications';
+import Chip from '../../components/Chip';
 import ScreenHeader from '../../components/ScreenHeader';
 import theme from '../../styles/theme';
 
@@ -218,21 +219,13 @@ export default function NotificationsScreen() {
                   const active = prefs.hour === opt.hour;
                   const disabled = !prefs.enabled || busy || unavailable;
                   return (
-                    <TouchableOpacity
+                    <Chip
                       key={opt.hour}
-                      style={[
-                        styles.chip,
-                        active && styles.chipActive,
-                        disabled && styles.chipDisabled,
-                      ]}
-                      onPress={() => updatePref({ hour: opt.hour, minute: 0 })}
+                      label={opt.label}
+                      selected={active}
                       disabled={disabled}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                        {opt.label}
-                      </Text>
-                    </TouchableOpacity>
+                      onPress={() => updatePref({ hour: opt.hour, minute: 0 })}
+                    />
                   );
                 })}
               </View>
@@ -360,30 +353,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.md,
   },
-  chip: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.round,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.cream,
-  },
-  chipActive: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
-  },
-  chipDisabled: {
-    opacity: 0.5,
-  },
-  chipText: {
-    ...typography.body.small,
-    color: colors.neutral.graphite,
-    fontWeight: '500',
-  },
-  chipTextActive: {
-    color: colors.neutral.cream,
-  },
-
   testButton: {
     flexDirection: 'row',
     alignItems: 'center',

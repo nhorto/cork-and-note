@@ -144,7 +144,13 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
       <SafeAreaView style={styles.container} edges={['top']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={onClose}
+            style={styles.closeButton}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+          >
             <Ionicons name="chevron-back" size={24} color={colors.neutral.charcoal} />
           </TouchableOpacity>
           <View style={styles.headerContent}>
@@ -238,7 +244,14 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                   >
                     <Marker coordinate={{ latitude, longitude }} />
                   </MapView>
-                  <TouchableOpacity style={styles.clearPin} onPress={clearPin} activeOpacity={0.8}>
+                  <TouchableOpacity
+                    style={styles.clearPin}
+                    onPress={clearPin}
+                    activeOpacity={0.8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Remove pin"
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
                     <Ionicons name="close" size={16} color={colors.neutral.cream} />
                   </TouchableOpacity>
                 </View>
@@ -289,9 +302,10 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.neutral.linen,
   },
   closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    // 44pt minimum touch target (launch plan §3.3)
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: colors.neutral.parchment,
     alignItems: 'center',
     justifyContent: 'center',

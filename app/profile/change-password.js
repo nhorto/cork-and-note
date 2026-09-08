@@ -177,6 +177,9 @@ export default function ChangePasswordScreen() {
               <TouchableOpacity
                 style={styles.eyeButton}
                 onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                accessibilityRole="button"
+                accessibilityLabel={showCurrentPassword ? 'Hide password' : 'Show password'}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons
                   name={showCurrentPassword ? 'eye-off' : 'eye'}
@@ -203,6 +206,9 @@ export default function ChangePasswordScreen() {
               <TouchableOpacity
                 style={styles.eyeButton}
                 onPress={() => setShowNewPassword(!showNewPassword)}
+                accessibilityRole="button"
+                accessibilityLabel={showNewPassword ? 'Hide password' : 'Show password'}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons
                   name={showNewPassword ? 'eye-off' : 'eye'}
@@ -251,6 +257,9 @@ export default function ChangePasswordScreen() {
               <TouchableOpacity
                 style={styles.eyeButton}
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                accessibilityRole="button"
+                accessibilityLabel={showConfirmPassword ? 'Hide password' : 'Show password'}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off' : 'eye'}

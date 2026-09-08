@@ -335,7 +335,12 @@ export default function SommelierScreen() {
     <SafeAreaView style={styles.safeArea}>
       {/* Chat Header */}
       <View style={styles.chatHeader}>
-        <TouchableOpacity onPress={goBackToList} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={goBackToList}
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+        >
           <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
         </TouchableOpacity>
         <View style={styles.chatHeaderContent}>
@@ -500,7 +505,11 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
   },
   backButton: {
-    padding: spacing.sm,
+    // 44pt minimum touch target (launch plan §3.3)
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   chatHeaderContent: {
     flex: 1,

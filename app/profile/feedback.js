@@ -180,12 +180,15 @@ export default function FeedbackScreen() {
           <TouchableOpacity
             key={star}
             onPress={() => setRating(star)}
+            style={styles.starButton}
+            accessibilityRole="radio"
+            accessibilityLabel={`Rate ${star} of 5`}
+            accessibilityState={{ selected: star === rating }}
           >
             <Ionicons
               name={star <= rating ? 'star' : 'star-outline'}
               size={36}
               color={star <= rating ? colors.gold.rich : colors.neutral.stone}
-              style={styles.starIcon}
             />
           </TouchableOpacity>
         ))}
@@ -530,7 +533,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 16,
   },
-  starIcon: {
-    margin: 4,
+  // 44pt touch target (§3.3); the margin lived on the icon and didn't extend it
+  starButton: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
