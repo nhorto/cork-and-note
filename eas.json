@@ -41,6 +41,16 @@
         "simulator": true
       },
       "environment": "development"
+    },
+    "simulator": {
+      "distribution": "internal",
+      "environment": "preview",
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_SCREENSHOT_MODE": "1"
+      }
     }
   },
   "submit": {

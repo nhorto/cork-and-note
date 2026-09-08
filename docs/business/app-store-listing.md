@@ -131,19 +131,37 @@ Notes for the reviewer:
 
 ## 9. Screenshots — 6.9" iPhone (required)
 
-Five screens, captioned with the job each does:
+**Captured 2026-09-07 and committed to [`docs/marketing/screenshots/`](../marketing/screenshots/)** at 1320x2868, the exact 6.9" size Apple requires. Taken from the seeded demo account on an iPhone 16 Pro Max simulator, with a normalised 9:41 / full-signal status bar.
 
-| # | Screen | Caption |
-|---|---|---|
-| 1 | Home | Every wine you've tasted, in one place |
-| 2 | Log a tasting (wine form with ratings + flavour notes) | Capture it while you're still in the tasting room |
-| 3 | Winery page with past visits | Remember what you drank, and where |
-| 4 | Explore map with pins | See everywhere you've been |
-| 5 | Sommelier | Ask a sommelier who's read your notes |
+| # | File | Screen | Caption |
+|---|---|---|---|
+| 1 | `1-home.png` | Home | Every wine you've tasted, in one place |
+| 2 | `2-log-a-tasting.png` | Add wine (scan prompt + rating form) | Capture it while you're still in the tasting room |
+| 3 | `3-winery-visits.png` | Winery page with past visits | Remember what you drank, and where |
+| 4 | `4-explore-map.png` | Explore map with your places | See everywhere you've been |
+| 5 | `5-sommelier.png` | Sommelier + Tonight's Pick | Ask a sommelier who's read your notes |
 
-6.5" is optional — Apple scales the 6.9" set down. iPad screenshots are not needed unless the app is submitted as universal.
+6.5" is optional — Apple scales the 6.9" set down. iPad shots are not needed unless the app is submitted as universal.
 
----
+**To regenerate** (after a UI change, or for a different device size):
+
+```sh
+eas build -p ios --profile simulator          # standalone sim build
+xcrun simctl boot "iPhone 16 Pro Max" && open -a Simulator
+xcrun simctl install booted /path/to/CorkNote.app
+CORKNOTE_DEMO_PASSWORD=... ./scripts/capture-screenshots.sh
+```
+
+The script drives the app by writing an initial route into its AsyncStorage and
+relaunching, rather than by tapping: `simctl` has no touch injection,
+`idb-companion` no longer builds against current Command Line Tools, and
+AppleScript clicking needs macOS Accessibility permission. The hook that reads
+that route is compiled in **only** when the `simulator` build profile sets
+`EXPO_PUBLIC_SCREENSHOT_MODE=1`, so it cannot exist in a production binary.
+
+Two things worth improving before submission if there's time: shot 2 shows an
+empty form (a partly-filled one would sell the feature harder), and shot 5 has
+no past conversations. Both are demo-data changes, not code.
 
 ## 10. Demo account — created and seeded 2026-09-07
 
