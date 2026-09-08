@@ -1,6 +1,7 @@
 // app/_layout.js — root layout: auth context, navigation guard, cellar reminders
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -128,6 +129,38 @@ export default function RootLayout() {
       router.replace('/login');
     }
   }, [isAuthenticated, isInitialized, isLoading, segments]);
+
+  // SCREENSHOT AUTOMATION — App Store listing capture.
+  //
+  // Compiled in ONLY when the `simulator` EAS build profile sets
+  // EXPO_PUBLIC_SCREENSHOT_MODE=1, so it cannot exist in a production binary.
+  // scripts/capture-screenshots.sh writes a route into AsyncStorage and
+  // relaunches; this drives the app there. It exists because capturing the
+  // store screenshots otherwise needs synthetic taps, and macOS will not grant
+  // Accessibility permission to a non-interactive session. It only navigates to
+  // an in-app route — it grants no data or privilege the user doesn't have.
+  useEffect(() => {
+    if (process.env.EXPO_PUBLIC_SCREENSHOT_MODE !== '1') return;
+    if (!isAuthenticated || !isInitialized || isLoading) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const route = await AsyncStorage.getItem('__screenshot_route__');
+        if (route && !cancelled) {
+          // Let the auth redirect to /(tabs)/home settle first.
+          setTimeout(() => {
+            if (!cancelled) router.replace(route);
+          }, 500);
+        }
+      } catch {
+        // Screenshot tooling only — never break app startup over it.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, isInitialized, isLoading]);
 
   // CELLAR REMINDERS - check & (re)schedule the restrained drink-soon / past-peak
   // nudge when the app comes to the foreground (and once on first authenticated
