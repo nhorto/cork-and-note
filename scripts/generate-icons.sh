@@ -1,56 +1,34 @@
 #!/usr/bin/env bash
-# Regenerate the app icon set from the master logo (#163).
-#
-# Run this again if the artwork changes:  ./scripts/generate-icons.sh
-#
-# Source: assets/images/cork_and_note_logo.png — a 1024x1024 lockup of the C&N
-# monogram, the glass/book mark, and the "Cork & Note" wordmark on cream.
-#
-# The wordmark is deliberately DROPPED from the app icon: at the 60x60pt the
-# home screen actually renders, it is unreadable mush. The icon uses just the
-# monogram + mark, which stays legible. The splash keeps the full lockup,
-# because it is displayed large enough to read.
+# Regenerate app and site assets from the selected master without redrawing it.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-SRC=assets/images/cork_and_note_logo.png
+SRC=assets/images/brand-mark.png
 OUT=assets/images
-CREAM='#F9F4EE'          # the master file's own background — used as-is so
-                         # composited canvases never show a seam against it
-LOGO_BG='#F9F4EE'        # same value, keyed out for the transparent foreground
 
-# Content boxes measured from the master (fuzz-trimmed):
-#   mark (monogram + glass/book):  443x478+291+189
-#   full lockup incl. wordmark:    684x631+169+189
-#
-# The mark is isolated by cropping off the bottom third (which holds the
-# wordmark) and trimming to content, then re-canvassed onto a flat fill of the
-# master's OWN background colour, so the composite shows no seam.
-MARK=$(mktemp -t cn-mark).png
-magick "$SRC" -crop 1024x660+0+0 +repage -fuzz 8% -trim +repage "$MARK"
+# Full-bleed iOS icon, with no alpha channel.
+magick "$SRC" -resize 1024x1024 -alpha off -strip "PNG24:$OUT/icon.png"
 
-# 1. iOS/base app icon — content at ~60% of the frame, comfortably inside
-#    Apple's rounded-rect mask. NO alpha channel: the App Store rejects icons
-#    that have one.
-magick "$MARK" -resize x610 -background "$CREAM" -gravity center \
-  -extent 1024x1024 -alpha remove -alpha off -strip "$OUT/icon.png"
+# Keep the glass within Android's central safe circle. Extend the source
+# edges to avoid a seam against the render's subtly varied coral background.
+magick "$SRC" -resize 720x720 -virtual-pixel Edge \
+  -set option:distort:viewport 1024x1024-152-152 -distort SRT 0 \
+  -alpha off -strip "PNG24:$OUT/adaptive-icon.png"
 
-# 2. Android adaptive foreground — transparent, sized for the central 66% safe
-#    zone, since the launcher mask can crop anything outside it.
-magick "$MARK" -fuzz 12% -transparent "$LOGO_BG" -resize x520 \
-  -background none -gravity center -extent 1024x1024 -strip \
-  "$OUT/adaptive-icon.png"
+# Preserve the existing rounded tiles for splash and authentication screens.
+magick "$SRC" -resize 800x800 \
+  \( -size 800x800 xc:none -fill white -draw "roundrectangle 0,0,799,799,179,179" \) \
+  -alpha set -compose DstIn -composite -strip "PNG32:$OUT/splash-icon.png"
 
-# 3. Splash — the full lockup, wordmark included, with breathing room.
-magick "$SRC" -fuzz 8% -trim +repage -resize 900x900 \
-  -background "$CREAM" -gravity center -extent 1200x1200 \
-  -alpha remove -alpha off -strip "$OUT/splash-icon.png"
+magick "$SRC" -resize 600x600 \
+  \( -size 600x600 xc:none -fill white -draw "roundrectangle 0,0,599,599,134,134" \) \
+  -alpha set -compose DstIn -composite -strip "PNG32:$OUT/cork_and_note_logo.png"
 
-# 4. Web favicon.
-magick "$MARK" -resize x120 -background "$CREAM" -gravity center \
-  -extent 196x196 -alpha remove -alpha off -strip "$OUT/favicon.png"
+magick "$SRC" -resize 196x196 -alpha off -strip "PNG24:$OUT/favicon.png"
 
-rm -f "$MARK"
+# The site build copies these committed derivatives without image tooling.
+magick "$SRC" -resize 512x512 -alpha off -strip -quality 92 site/assets/logo.jpg
+magick "$SRC" -resize 64x64 -alpha off -strip PNG24:site/assets/favicon.png
+magick "$SRC" -resize 1024x1024 -alpha off -strip -quality 92 site/assets/og-image.jpg
 
-echo "Regenerated:"
-magick identify "$OUT/icon.png" "$OUT/adaptive-icon.png" "$OUT/splash-icon.png" "$OUT/favicon.png"
+echo "Regenerated app icons, authentication logo, splash, and site branding."
