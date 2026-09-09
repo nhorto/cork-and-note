@@ -706,6 +706,12 @@ export default function MapScreen() {
   );
 }
 
+// How far the floating map controls sit above the bottom of the MapView, which
+// is also the top of the tab bar. Only needs to clear Apple's attribution row
+// (~16pt tall, bottom-left); the previous 64 left a band of dead map between the
+// controls and the tab bar and pushed them out of comfortable thumb reach.
+const MAP_CONTROL_BOTTOM = 32;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -754,13 +760,13 @@ const styles = StyleSheet.create({
 
   // FAB Button
   //
-  // bottom: 64, not 24 — Apple renders the "Maps" logo and its "Legal" link at
-  // the BOTTOM-LEFT of the MapView, directly under this button. MapKit's terms
-  // require that attribution stay visible and unobstructed, so covering it is a
-  // potential App Review rejection, not just a cosmetic overlap (#155).
+  // MAP_CONTROL_BOTTOM, not 0 — Apple renders the "Maps" logo and its "Legal"
+  // link at the BOTTOM-LEFT of the MapView, directly under this button. MapKit's
+  // terms require that attribution stay visible and unobstructed, so covering it
+  // is a potential App Review rejection, not just a cosmetic overlap (#155).
   fabButton: {
     position: 'absolute',
-    bottom: 64,
+    bottom: MAP_CONTROL_BOTTOM,
     left: 16,
     backgroundColor: colors.primary.burgundy,
     width: 56,
@@ -774,16 +780,24 @@ const styles = StyleSheet.create({
   },
 
   // FAB Menu
+  //
+  // width, not minWidth — with an auto width, Yoga measured each row's subtitle
+  // at its natural single-line width, settled the card at minWidth, and only
+  // then re-wrapped "Mark your current location" onto a second line. The card's
+  // height was already fixed from the first pass, so the last action spilled out
+  // of the cream background and onto the map. A definite width makes both passes
+  // agree; 272 leaves ~172pt for the text column, enough for the longest
+  // subtitle to stay on one line.
   fabMenu: {
     position: 'absolute',
-    bottom: 132, // keeps its 68pt gap above the FAB, which moved up by 40
+    bottom: MAP_CONTROL_BOTTOM + 56 + spacing.md, // clears the 56pt FAB below it
     left: 16,
     backgroundColor: colors.neutral.cream,
     borderRadius: borderRadius.lg,
     padding: spacing.sm,
     borderWidth: 1,
     borderColor: colors.neutral.stone,
-    minWidth: 220,
+    width: 272,
     ...shadows.strong,
   },
   fabMenuHeader: {
@@ -837,7 +851,7 @@ const styles = StyleSheet.create({
   // Location Button
   locationButton: {
     position: 'absolute',
-    bottom: 64, // stays level with the FAB (see fabButton)
+    bottom: MAP_CONTROL_BOTTOM, // stays level with the FAB (see fabButton)
     right: 16,
     backgroundColor: colors.neutral.cream,
     width: 48,
@@ -851,7 +865,7 @@ const styles = StyleSheet.create({
   },
   helpButton: {
     position: 'absolute',
-    bottom: 120, // stacked above the locate button (48 + 8 gap)
+    bottom: MAP_CONTROL_BOTTOM + 48 + spacing.sm, // stacked above the locate button
     right: 16,
     backgroundColor: colors.neutral.cream,
     width: 48,
@@ -890,7 +904,7 @@ const styles = StyleSheet.create({
   // Places list sheet (#101)
   listOverlay: {
     flex: 1,
-    backgroundColor: colors.overlay.dark,
+    backgroundColor: colors.overlay.scrim,
     justifyContent: 'flex-end',
   },
   listBackdrop: {

@@ -668,7 +668,7 @@ const styles = StyleSheet.create({
   deleteText: { ...typography.body.regular, color: colors.status.error },
 
   // Modal / sheet
-  modalBackdrop: { flex: 1, backgroundColor: colors.overlay.dark, justifyContent: 'flex-end' },
+  modalBackdrop: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: colors.neutral.cream,
     borderTopLeftRadius: borderRadius.xl,
