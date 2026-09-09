@@ -16,6 +16,7 @@ import {
 import PastVisitsSection from '../../components/PastVisitsSection';
 import ScreenHeader from '../../components/ScreenHeader';
 import WineryActionButtons from '../../components/WineryActionButtons';
+import WineryGoogleCard from '../../components/WineryGoogleCard';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import { wineriesService } from '../../lib/wineries';
 import { wineryStatusService } from '../../lib/wineryStatus';
@@ -220,10 +221,16 @@ export default function WineryDetail() {
             <View style={styles.dividerLine} />
           </View>
 
-          {/* No ABOUT section: `wineries` has no description or region column
-              (see #88), so it only ever showed a canned "Discover this
-              winery…" filler that pushed the user's own notes below the fold
-              (#170 item 7). Your visits are the content of this page. */}
+          {/* Google enrichment (Pro, #203 Phase 2): live rating / hours /
+              website, or a paywall teaser on free. Unlike the old canned
+              ABOUT filler this is real data, and it degrades to nothing —
+              your visits stay the content of this page (#170 item 7). */}
+          <WineryGoogleCard
+            winery={winery}
+            onPlaceIdSaved={(placeId) =>
+              setWinery((prev) => (prev ? { ...prev, google_place_id: placeId } : prev))
+            }
+          />
         </View>
 
         {/* Past Visits Section */}

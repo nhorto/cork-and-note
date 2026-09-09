@@ -43,6 +43,7 @@ const SERIF = typography.fonts.serif;
 // this sits with the AI/collector tools, not with the $5 journal apps (§4.2).
 const BENEFITS = [
   { icon: 'sparkles', text: 'Unlimited AI sommelier — ask anything, any time' },
+  { icon: 'star', text: 'Live winery ratings, hours & websites on every winery page' },
   { icon: 'scan', text: 'Unlimited label and tasting-card scans' },
   { icon: 'wine', text: 'An unlimited cellar with drink windows and Tonight’s Pick' },
   { icon: 'download', text: 'Export your tastings to CSV' },
@@ -150,7 +151,9 @@ export default function PaywallScreen() {
                 ? `A free cellar holds ${FREE_CELLAR_BOTTLE_LIMIT} bottles. Pro holds your whole collection.`
                 : source === 'export'
                   ? 'Exporting your tastings to CSV is part of Pro.'
-                  : 'Your journal stays free, forever. Pro unlocks the parts that think.'}
+                  : source === 'places'
+                    ? 'Live winery ratings, hours and websites are part of Pro.'
+                    : 'Your journal stays free, forever. Pro unlocks the parts that think.'}
         </Text>
 
         <View style={styles.benefits}>
