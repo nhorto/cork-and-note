@@ -396,3 +396,9 @@ verify_jwt = true
 # in code; the function uses the service role for storage + auth.users cleanup.
 [functions.delete-account]
 verify_jwt = true
+
+# RevenueCat subscription webhook (launch plan §4.5). The caller is RevenueCat,
+# which cannot present a Supabase JWT, so the gateway check is disabled here and
+# the function authenticates the shared REVENUECAT_WEBHOOK_SECRET itself.
+[functions.revenuecat-webhook]
+verify_jwt = false

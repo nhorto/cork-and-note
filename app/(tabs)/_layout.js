@@ -15,11 +15,10 @@ import theme from '../../styles/theme';
 const { colors } = theme;
 
 // Get screen dimensions for responsive scaling
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 // Create responsive scaling functions
 const scale = (size) => (width / 375) * size;
-const verticalScale = (size) => (height / 667) * size;
 const moderateScale = (size, factor = 0.5) => size + (scale(size) - size) * factor;
 
 // Dynamic icon size based on screen size
@@ -29,15 +28,23 @@ const getIconSize = () => {
   return moderateScale(24);
 };
 
+// Height of the row that actually holds the icons and labels, above whatever the
+// device reserves for the home indicator / gesture bar. A fixed point value on
+// purpose: the row holds one icon and one line of text, so it does not get
+// taller on a bigger phone. The old code ran this and the safe-area padding
+// through verticalScale(), sizing the inset from the SCREEN height rather than
+// the device's real inset — on a tall phone that produced a 126pt bar with 40pt
+// of dead space beneath the labels, so every tab sat well above where a thumb
+// expects it. The inset now comes from useSafeAreaInsets() (see Layout below).
+const TAB_BAR_ROW_HEIGHT = 60;
+
 // Tab bar styling with Château Label aesthetic
 const tabBarStyles = {
   tabBarStyle: {
     backgroundColor: colors.neutral.cream,
     borderTopWidth: 1,
     borderTopColor: colors.gold.muted,
-    height: Platform.OS === 'ios' ? verticalScale(88) : verticalScale(64),
-    paddingBottom: Platform.OS === 'ios' ? verticalScale(28) : verticalScale(8),
-    paddingTop: verticalScale(8),
+    paddingTop: 8,
     shadowColor: colors.neutral.charcoal,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.05,
@@ -75,11 +82,12 @@ const headerStyles = {
   headerTintColor: colors.primary.burgundy,
 };
 
-// Custom tab icon with active indicator
-const TabIcon = ({ name, color, focused, size }) => (
+// The active tab already reads as active from the burgundy tint on its icon and
+// label, so there is no separate indicator dot — a second marker under one of
+// five tabs just looked like a smudge.
+const TabIcon = ({ name, color, size }) => (
   <View style={styles.tabIconContainer}>
     <Ionicons name={name} color={color} size={size} />
-    {focused && <View style={styles.activeIndicator} />}
   </View>
 );
 
@@ -104,16 +112,16 @@ export default function Layout() {
   // The center "＋" opens the quick-actions hub instead of navigating.
   const [hubOpen, setHubOpen] = useState(false);
 
-  // With Android edge-to-edge (app.json `edgeToEdgeEnabled`), the system
-  // navigation bar draws over the app, overlapping the tab bar (#130). Reserve
-  // its height with the bottom safe-area inset so every tab stays fully tappable.
-  // iOS already bakes the home-indicator space into the static padding above.
+  // Reserve exactly what the device reserves, on both platforms: the iOS home
+  // indicator and the Android edge-to-edge navigation bar (#130) are the same
+  // problem, and both report their real size here. Padding the row by the inset
+  // keeps every tab tappable; adding the inset to the height keeps the bar's
+  // cream background running to the bottom edge instead of floating.
   const insets = useSafeAreaInsets();
-  const androidNavInset = Platform.OS === 'android' ? insets.bottom : 0;
   const tabBarStyle = {
     ...tabBarStyles.tabBarStyle,
-    height: tabBarStyles.tabBarStyle.height + androidNavInset,
-    paddingBottom: tabBarStyles.tabBarStyle.paddingBottom + androidNavInset,
+    height: TAB_BAR_ROW_HEIGHT + insets.bottom,
+    paddingBottom: insets.bottom,
   };
 
   return (
@@ -131,8 +139,8 @@ export default function Layout() {
       <Tabs.Screen
         name="home"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="home" color={color} focused={focused} size={iconSize} />
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="home" color={color} size={iconSize} />
           ),
           title: 'Home',
           headerShown: false,
@@ -141,8 +149,8 @@ export default function Layout() {
       <Tabs.Screen
         name="cellar"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="file-tray-stacked" color={color} focused={focused} size={iconSize} />
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="file-tray-stacked" color={color} size={iconSize} />
           ),
           title: 'Cellar',
           headerShown: false,
@@ -169,8 +177,8 @@ export default function Layout() {
       <Tabs.Screen
         name="map"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="map" color={color} focused={focused} size={iconSize} />
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="map" color={color} size={iconSize} />
           ),
           title: 'Explore',
           headerShown: false, // Hide header on map for more space
@@ -179,8 +187,8 @@ export default function Layout() {
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="person" color={color} focused={focused} size={iconSize} />
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="person" color={color} size={iconSize} />
           ),
           title: 'Profile',
           headerShown: false, // Custom header in profile screen
@@ -201,14 +209,6 @@ const styles = StyleSheet.create({
   tabIconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  activeIndicator: {
-    position: 'absolute',
-    bottom: -6,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary.burgundy,
   },
   // Raised center Log button
   logButtonSlot: {

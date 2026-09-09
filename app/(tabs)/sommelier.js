@@ -18,9 +18,11 @@ import {
 import { useRouter } from 'expo-router';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
+import MeterHint from '../../components/MeterHint';
 import ScreenHeader from '../../components/ScreenHeader';
 import TonightsPickCard from '../../components/TonightsPickCard';
 import TypingDots from '../../components/TypingDots';
+import { usePro } from '../../hooks/usePro';
 import { aiService } from '../../lib/ai';
 import { chatService } from '../../lib/chat';
 import theme from '../../styles/theme';
@@ -83,6 +85,7 @@ function ConversationRow({ conversation, onPress, onDelete }) {
 }
 
 export default function SommelierScreen() {
+  const { gate } = usePro();
   const router = useRouter();
   // State
   const [view, setView] = useState('list'); // 'list' or 'chat'
@@ -173,6 +176,10 @@ export default function SommelierScreen() {
 
   const handleSend = useCallback(async (text, photos = []) => {
     if (!activeConversation) return;
+    // Free sommelier chat is metered (5/month, §4.2). Checked before the photo
+    // uploads below, so a walled message costs the user neither bandwidth nor a
+    // stored image they never got an answer to.
+    if (!gate('chat')) return;
 
     setSending(true);
     try {
@@ -256,7 +263,7 @@ export default function SommelierScreen() {
     } finally {
       setSending(false);
     }
-  }, [activeConversation, messages, systemPrompt, loadedEmpty]);
+  }, [activeConversation, messages, systemPrompt, loadedEmpty, gate]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -393,6 +400,7 @@ export default function SommelierScreen() {
         )}
 
         {/* Input */}
+        <MeterHint task="chat" style={styles.meterHint} />
         <ChatInput onSend={handleSend} disabled={sending} />
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -400,6 +408,9 @@ export default function SommelierScreen() {
 }
 
 const styles = StyleSheet.create({
+  meterHint: {
+    paddingHorizontal: spacing.md,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: colors.neutral.cream,

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mobile-harness": {
+      "command": "node",
+      "args": [".claude/skills/MobileSimulators/Harness/mcp/server.mjs"],
+      "description": "Drive the iOS simulator / Android emulator: bringup, screenshot (inline image), UI tree, tap/type/back, Maestro flows. macOS only."
+    }
+  }
+}
