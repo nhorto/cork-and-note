@@ -1,5 +1,10 @@
 // app/(tabs)/home.js - Home / overview landing
 // Château Label Design - Elegant & Refined
+// "Passport" layout (epic #203, Home A): leads with Your Journey — where
+// you've been — then Tonight's Pick and the cellar. The Near You (Pro) row
+// slots in under the Journey card when Google winery enrichment ships
+// (Phase 2). Logging moved to the floating "＋ Log" pill; the sommelier is a
+// first-class tab now, so neither needs a home card anymore.
 // Shell screen: degrades gracefully when there is no data / no backend yet.
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
@@ -11,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import LogFab from '../../components/LogFab';
 import TonightsPickCard from '../../components/TonightsPickCard';
 import { DRINK_WINDOW_META, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
@@ -96,8 +102,8 @@ export default function HomeScreen() {
           }
           setRecent(items);
 
-          // "Where you've been" at-a-glance highlights (#95): most-recent place,
-          // most-visited winery, total places. Derived from the same visits.
+          // Journey highlights: most-recent place, most-visited winery, total
+          // places. Derived from the same visits (#95).
           setHighlights(visitsService.summarizeVisits(visits));
         } catch {
           // ignore — empty states will render
@@ -133,6 +139,8 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={styles.avatar}
             onPress={() => router.push('/(tabs)/profile')}
+            accessibilityRole="button"
+            accessibilityLabel="Profile & settings"
           >
             <Text style={styles.avatarText}>{initials}</Text>
           </TouchableOpacity>
@@ -157,13 +165,17 @@ export default function HomeScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Stat strip — labeled links so the tiles read as lists, and Places
-            opens the list screen rather than the map (#170 item 2). */}
-        <View style={styles.stats}>
-          <Stat n={stats.wines} label="Wines tasted ▸" onPress={() => router.push('/wines')} />
-          <Stat n={stats.places} label="Places visited ▸" onPress={() => router.push('/places')} />
-          <Stat n={stats.wishlist} label="Wishlist ▸" onPress={() => router.push('/wishlist')} />
-        </View>
+        {/* Your Journey — the passport card. Where you've been, at a glance,
+            with the stat links folded in (Wines → journal list, Places → list
+            screen rather than the map (#170 item 2), Wishlist → wishlist). */}
+        <JourneyCard
+          stats={stats}
+          highlights={highlights}
+          onOpenMap={() => router.push('/(tabs)/map')}
+          onPressWines={() => router.push('/wines')}
+          onPressPlaces={() => router.push('/places')}
+          onPressWishlist={() => router.push('/wishlist')}
+        />
 
         {/* Tonight's pick — AI sommelier grounded in the user's own cellar (#51) */}
         <View style={styles.tonightsPick}>
@@ -178,20 +190,6 @@ export default function HomeScreen() {
             router.push({ pathname: '/(tabs)/cellar', params: { status } })
           }
         />
-
-        {/* Log a wine hero */}
-        <TouchableOpacity
-          style={styles.hero}
-          activeOpacity={0.9}
-          onPress={() => router.push('/(tabs)/log')}
-        >
-          <Ionicons name="wine" size={26} color={colors.gold.rich} />
-          <View style={styles.heroText}>
-            <Text style={styles.heroTitle}>Log a wine</Text>
-            <Text style={styles.heroSub}>Had something good? Capture it.</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.gold.rich} />
-        </TouchableOpacity>
 
         {/* Cellar summary */}
         <View style={styles.sectionHeader}>
@@ -266,60 +264,17 @@ export default function HomeScreen() {
             <Text style={styles.emptyText}>
               {loaded ? 'No wines logged yet' : 'Loading…'}
             </Text>
-            <Text style={styles.emptySub}>Tap “Log a wine” to start your journal.</Text>
+            <Text style={styles.emptySub}>Tap “＋ Log” to start your journal.</Text>
           </View>
         )}
-
-        {/* Where you've been → Explore. Shows at-a-glance stats (most-recent
-            place, most-visited winery, total places) once there's a place to
-            describe, otherwise a simple map teaser (#95). */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionLabel}>WHERE YOU&apos;VE BEEN</Text>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/map')}>
-            <Text style={styles.sectionAction}>Explore</Text>
-          </TouchableOpacity>
-        </View>
-        <WhereYouveBeen
-          highlights={highlights}
-          onPress={() => router.push('/(tabs)/map')}
-        />
-
-        {/* Sommelier */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionLabel}>SOMMELIER</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.somm}
-          activeOpacity={0.9}
-          onPress={() => router.push('/(tabs)/sommelier')}
-        >
-          <Ionicons name="sparkles" size={22} color={colors.gold.shimmer} />
-          <View style={styles.sommText}>
-            <Text style={styles.sommTitle}>Ask your sommelier</Text>
-            <Text style={styles.sommSub}>Personalized to the wines you&apos;ve rated</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
-        </TouchableOpacity>
       </ScrollView>
+
+      <LogFab />
     </View>
   );
 }
 
-function Stat({ n, label, onPress }) {
-  return (
-    <TouchableOpacity
-      style={styles.stat}
-      activeOpacity={onPress ? 0.85 : 1}
-      onPress={onPress}
-      disabled={!onPress}
-    >
-      <Text style={styles.statNum}>{n}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
-
-// Compact relative date for the "where you've been" highlights.
+// Compact relative date for the Journey card's last-visit line.
 function timeAgo(dateString) {
   if (!dateString) return '';
   const then = new Date(dateString);
@@ -339,65 +294,53 @@ function timeAgo(dateString) {
   return then.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 }
 
-// "Where you've been" card. Renders at-a-glance stats when the user has visited
-// at least one real place, otherwise a simple map teaser. The whole card taps
-// through to the map (#95).
-function WhereYouveBeen({ highlights, onPress }) {
-  const hasPlaces = highlights && highlights.totalPlaces > 0;
+// The passport card: headline journey stats, the most recent visit, a map
+// link, and the three stat links that used to be the stat strip. Empty state
+// keeps the same silhouette with an invitation instead of numbers.
+function JourneyCard({ stats, highlights, onOpenMap, onPressWines, onPressPlaces, onPressWishlist }) {
+  const hasJourney = stats.places > 0 || stats.wines > 0;
+  const lastVisit = highlights?.mostRecentPlace;
 
   return (
-    <TouchableOpacity
-      style={hasPlaces ? styles.whereCard : styles.teaser}
-      activeOpacity={0.9}
-      onPress={onPress}
-    >
-      {hasPlaces ? (
-        <>
-          {highlights.mostRecentPlace && (
-            <WhereRow
-              icon="time-outline"
-              label="Most recent"
-              value={`${highlights.mostRecentPlace.name} · ${timeAgo(highlights.mostRecentPlace.date)}`}
-            />
-          )}
-          {highlights.topWinery && highlights.topWinery.visits > 1 && (
-            <WhereRow
-              icon="star-outline"
-              label="Most visited"
-              value={`${highlights.topWinery.name} · ${highlights.topWinery.visits} visits`}
-            />
-          )}
-          <WhereRow
-            icon="map-outline"
-            label="On your map"
-            value={`${highlights.totalPlaces} place${highlights.totalPlaces === 1 ? '' : 's'} explored`}
-            showChevron
-          />
-        </>
-      ) : (
-        <>
-          <Ionicons name="map-outline" size={28} color={colors.primary.burgundy} />
-          <Text style={styles.teaserText}>Your map of places</Text>
-        </>
-      )}
-    </TouchableOpacity>
+    <View style={styles.journeyCard}>
+      <Text style={styles.journeyLabel}>YOUR JOURNEY</Text>
+      <Text style={styles.journeyTitle}>
+        {hasJourney
+          ? `${stats.places} ${stats.places === 1 ? 'winery' : 'wineries'} · ${stats.wines} ${stats.wines === 1 ? 'wine' : 'wines'}`
+          : 'Your wine journey starts here'}
+      </Text>
+      <Text style={styles.journeySub} numberOfLines={1}>
+        {lastVisit
+          ? `Last visit: ${lastVisit.name} · ${timeAgo(lastVisit.date)}`
+          : 'Every winery you visit goes on your map.'}
+      </Text>
+      <TouchableOpacity
+        style={styles.journeyMapLink}
+        activeOpacity={0.85}
+        onPress={onOpenMap}
+        accessibilityRole="button"
+        accessibilityLabel="Open your map"
+      >
+        <Ionicons name="map-outline" size={16} color={colors.primary.burgundy} />
+        <Text style={styles.journeyMapLinkText}>Open your map ›</Text>
+      </TouchableOpacity>
+
+      <View style={styles.journeyDivider} />
+      <View style={styles.journeyStats}>
+        <JourneyStat n={stats.wines} label="Wines ▸" onPress={onPressWines} />
+        <JourneyStat n={stats.places} label="Places ▸" onPress={onPressPlaces} />
+        <JourneyStat n={stats.wishlist} label="Wishlist ▸" onPress={onPressWishlist} />
+      </View>
+    </View>
   );
 }
 
-function WhereRow({ icon, label, value, showChevron }) {
+function JourneyStat({ n, label, onPress }) {
   return (
-    <View style={styles.whereRow}>
-      <View style={styles.whereIcon}>
-        <Ionicons name={icon} size={18} color={colors.primary.burgundy} />
-      </View>
-      <View style={styles.whereText}>
-        <Text style={styles.whereLabel}>{label}</Text>
-        <Text style={styles.whereValue} numberOfLines={1}>{value}</Text>
-      </View>
-      {showChevron && (
-        <Ionicons name="chevron-forward" size={18} color={colors.neutral.silver} />
-      )}
-    </View>
+    <TouchableOpacity style={styles.journeyStat} activeOpacity={0.85} onPress={onPress}>
+      <Text style={styles.journeyStatNum}>{n}</Text>
+      <Text style={styles.journeyStatLabel}>{label}</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -549,26 +492,53 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Stat strip
-  stats: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },
-
-  // Tonight's pick hero
-  tonightsPick: { marginTop: spacing.lg },
-  stat: {
-    flex: 1,
-    backgroundColor: colors.neutral.parchment,
+  // Your Journey — passport card
+  journeyCard: {
+    backgroundColor: colors.neutral.linen,
     borderWidth: 1,
     borderColor: colors.neutral.stone,
     borderRadius: borderRadius.lg,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
+    padding: spacing.md,
+    marginTop: spacing.lg,
   },
-  statNum: {
+  journeyLabel: { ...typography.body.caption, color: colors.gold.text },
+  journeyTitle: {
     fontFamily: SERIF,
-    fontSize: 24,
+    fontSize: 22,
+    color: colors.neutral.charcoal,
+    marginTop: spacing.xs,
+  },
+  journeySub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
+  journeyMapLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+    minHeight: 32,
+    marginTop: spacing.sm,
+  },
+  journeyMapLinkText: {
+    ...typography.body.small,
+    color: colors.primary.burgundy,
+    fontWeight: '600',
+  },
+  journeyDivider: {
+    height: 1,
+    backgroundColor: colors.neutral.stone,
+    marginTop: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  journeyStats: { flexDirection: 'row', gap: spacing.sm },
+  journeyStat: { flex: 1, alignItems: 'center', paddingVertical: spacing.xs },
+  journeyStatNum: {
+    fontFamily: SERIF,
+    fontSize: 20,
     color: colors.primary.burgundy,
   },
-  statLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginTop: 4 },
+  journeyStatLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginTop: 2 },
+
+  // Tonight's pick hero
+  tonightsPick: { marginTop: spacing.lg },
 
   // Ready-to-Drink strip (R4 / #54)
   rtdStrip: { flexDirection: 'row', gap: spacing.sm },
@@ -592,25 +562,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign: 'center',
   },
-
-  // Hero CTA
-  hero: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.primary.burgundy,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginTop: spacing.lg,
-    ...shadows.medium,
-  },
-  heroText: { flex: 1 },
-  heroTitle: {
-    ...typography.heading.h3,
-    color: colors.neutral.cream,
-    fontFamily: SERIF,
-  },
-  heroSub: { ...typography.body.small, color: colors.primary.rosé, marginTop: 2 },
 
   // Cellar summary
   cellar: {
@@ -711,68 +662,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   emptySub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
-
-  // Map teaser (empty state for "where you've been")
-  teaser: {
-    height: 110,
-    borderRadius: borderRadius.lg,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.linen,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-  },
-  teaserText: { ...typography.body.small, color: colors.neutral.graphite },
-
-  // Where you've been — at-a-glance stats card (#95)
-  whereCard: {
-    backgroundColor: colors.neutral.parchment,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  whereRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  whereIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.gold.light,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  whereText: { flex: 1 },
-  whereLabel: { ...typography.body.caption, color: colors.neutral.pewter },
-  whereValue: {
-    ...typography.body.regular,
-    color: colors.neutral.charcoal,
-    fontWeight: '600',
-    marginTop: 1,
-  },
-
-  // Sommelier
-  somm: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.gold.light,
-    borderWidth: 1,
-    borderColor: colors.gold.muted,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-  },
-  sommText: { flex: 1 },
-  sommTitle: {
-    ...typography.heading.h3,
-    color: colors.neutral.charcoal,
-    fontFamily: SERIF,
-  },
-  sommSub: { ...typography.body.small, color: colors.neutral.charcoal, marginTop: 2 },
 });

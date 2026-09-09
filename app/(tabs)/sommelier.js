@@ -279,9 +279,9 @@ export default function SommelierScreen() {
   if (view === 'list') {
     return (
       <View style={styles.safeArea}>
-        {/* Hidden tab route — a real back chevron so you're not stranded (#170
-            item 4). ScreenHeader handles the top inset itself. */}
-        <ScreenHeader title="Sommelier" subtitle="Your wine companion" />
+        {/* Somm tab root (flat-five bar, #203) — no back chevron.
+            ScreenHeader handles the top inset itself. */}
+        <ScreenHeader title="Sommelier" subtitle="Your wine companion" showBack={false} />
 
         {loading ? (
           <View style={styles.centered}>

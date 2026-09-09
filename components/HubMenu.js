@@ -1,12 +1,15 @@
-// components/HubMenu.js — the center "＋" quick-actions hub.
+// components/HubMenu.js — the "＋ Log" quick-actions hub.
 //
-// Tabs are DESTINATIONS (Home / Cellar / Explore / Profile); this hub is the
-// single front door for the "start / create" ACTIONS. Tapping the raised center
-// "＋" opens this bottom sheet (mirrors the map's Quick Actions pattern):
+// Tabs are DESTINATIONS (Home / Journal / Wineries / Somm / Cellar); this hub
+// is the single front door for the "start / create" ACTIONS. The floating
+// "＋ Log" pill (components/LogFab.js) opens this bottom sheet:
 //   • Log a wine        → the existing log chooser (/(tabs)/log)
 //   • Add a bottle      → /cellar/add
-//   • Add to wishlist   → Explore, which opens its winery-entry modal (?quickAdd)
-//   • Ask the sommelier → /(tabs)/sommelier
+//   • Add to wishlist   → Wineries, which opens its winery-entry modal (?quickAdd)
+//
+// Browse links and the sommelier shortcut left with the flat-five bar (#203):
+// Journal, Wineries, and Somm are first-class tabs now, so the hub is
+// create-only again.
 //
 // Every item just closes the sheet and navigates — deliberately NO nested modal.
 // Presenting a second modal while this one dismisses leaves iOS's modal system
@@ -58,42 +61,11 @@ export default function HubMenu({ visible, onClose }) {
             title="Add to wishlist"
             subtitle="Save a winery you'd like to visit"
             onPress={() => go('/(tabs)/map?quickAdd=wishlist')}
-          />
-          <Action
-            icon="sparkles"
-            color={colors.gold.shimmer}
-            title="Ask the sommelier"
-            subtitle="Personalized to the wines you've rated"
-            onPress={() => go('/(tabs)/sommelier')}
             last
           />
-
-          {/* Browse — the hub used to be create-only, leaving nothing to *look
-              at* from the most discoverable control (#170 item 5). */}
-          <Text style={styles.browseLabel}>Browse</Text>
-          <View style={styles.browseRow}>
-            <BrowseLink icon="wine" label="Tastings" onPress={() => go('/wines')} />
-            <BrowseLink icon="location" label="Places" onPress={() => go('/places')} />
-            <BrowseLink icon="bookmark" label="Wishlist" onPress={() => go('/wishlist')} />
-          </View>
         </View>
       </View>
     </Modal>
-  );
-}
-
-function BrowseLink({ icon, label, onPress }) {
-  return (
-    <TouchableOpacity
-      style={styles.browseLink}
-      activeOpacity={0.8}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`Browse ${label.toLowerCase()}`}
-    >
-      <Ionicons name={icon} size={18} color={colors.primary.burgundy} />
-      <Text style={styles.browseLinkText}>{label}</Text>
-    </TouchableOpacity>
   );
 }
 
@@ -175,34 +147,5 @@ const styles = StyleSheet.create({
     ...typography.body.small,
     color: colors.neutral.pewter,
     marginTop: 1,
-  },
-  browseLabel: {
-    ...typography.body.caption,
-    color: colors.neutral.pewter,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
-  },
-  browseRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  browseLink: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    minHeight: 44,
-    backgroundColor: colors.neutral.parchment,
-    borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    borderRadius: borderRadius.md,
-  },
-  browseLinkText: {
-    ...typography.body.small,
-    color: colors.neutral.charcoal,
-    fontWeight: '600',
   },
 });

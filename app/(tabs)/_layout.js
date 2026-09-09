@@ -1,15 +1,14 @@
 // app/(tabs)/_layout.js
 // Château Label Design - Elegant & Refined
-// 5-tab layout: Home · Cellar · ＋Log (center) · Explore · Profile.
-// Wishlist / Wines / Sommelier routes are preserved but hidden from the bar
-// (reached contextually / nested) per docs/design/information-architecture.md.
+// Flat five-tab layout (epic #203): Home · Journal · Wineries · Somm · Cellar.
+// The raised center "＋" is gone — logging moved to the floating "＋ Log" pill
+// (components/LogFab.js) on Home, Journal, and winery pages, and Profile moved
+// behind the Home avatar. Log / Wishlist / Profile routes are preserved but
+// hidden from the bar (reached contextually).
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { useState } from 'react';
-import { Dimensions, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import HubMenu from '../../components/HubMenu';
-import { tapMedium } from '../../lib/haptics';
 import theme from '../../styles/theme';
 
 const { colors } = theme;
@@ -91,26 +90,8 @@ const TabIcon = ({ name, color, size }) => (
   </View>
 );
 
-// Raised center "＋ Log" button
-const LogTabButton = ({ onPress, accessibilityState }) => (
-  <View style={styles.logButtonSlot}>
-    <TouchableOpacity
-      style={styles.logButton}
-      onPress={onPress}
-      activeOpacity={0.85}
-      accessibilityRole="button"
-      accessibilityLabel="Quick actions"
-      accessibilityState={accessibilityState}
-    >
-      <Ionicons name="add" size={30} color={colors.neutral.cream} />
-    </TouchableOpacity>
-  </View>
-);
-
 export default function Layout() {
   const iconSize = getIconSize();
-  // The center "＋" opens the quick-actions hub instead of navigating.
-  const [hubOpen, setHubOpen] = useState(false);
 
   // Reserve exactly what the device reserves, on both platforms: the iOS home
   // indicator and the Android edge-to-edge navigation bar (#130) are the same
@@ -125,7 +106,6 @@ export default function Layout() {
   };
 
   return (
-    <>
     <Tabs
       screenOptions={{
         ...tabBarStyles,
@@ -147,6 +127,36 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
+        name="wines"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="book" color={color} size={iconSize} />
+          ),
+          title: 'Journal',
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="location" color={color} size={iconSize} />
+          ),
+          title: 'Wineries',
+          headerShown: false, // Hide header on map for more space
+        }}
+      />
+      <Tabs.Screen
+        name="sommelier"
+        options={{
+          tabBarIcon: ({ color }) => (
+            <TabIcon name="sparkles" color={color} size={iconSize} />
+          ),
+          title: 'Somm',
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
         name="cellar"
         options={{
           tabBarIcon: ({ color }) => (
@@ -156,52 +166,14 @@ export default function Layout() {
           headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="log"
-        options={{
-          title: 'Log',
-          headerShown: false,
-          // Intercept the press: open the quick-actions hub instead of
-          // navigating straight to the log chooser.
-          tabBarButton: (props) => (
-            <LogTabButton
-              {...props}
-              onPress={() => {
-                tapMedium();
-                setHubOpen(true);
-              }}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <TabIcon name="map" color={color} size={iconSize} />
-          ),
-          title: 'Explore',
-          headerShown: false, // Hide header on map for more space
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <TabIcon name="person" color={color} size={iconSize} />
-          ),
-          title: 'Profile',
-          headerShown: false, // Custom header in profile screen
-        }}
-      />
 
-      {/* Routes preserved but hidden from the tab bar (reached contextually) */}
+      {/* Routes preserved but hidden from the tab bar (reached contextually):
+          log via the ＋ Log pill / hub, wishlist via Home & the Wineries list,
+          profile via the Home avatar. */}
+      <Tabs.Screen name="log" options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="wishlist" options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="wines" options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="sommelier" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="profile" options={{ href: null, headerShown: false }} />
     </Tabs>
-    <HubMenu visible={hubOpen} onClose={() => setHubOpen(false)} />
-    </>
   );
 }
 
@@ -209,27 +181,5 @@ const styles = StyleSheet.create({
   tabIconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  // Raised center Log button
-  logButtonSlot: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
-  logButton: {
-    top: -18,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colors.primary.burgundy,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: colors.neutral.cream,
-    shadowColor: colors.primary.burgundy,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 8,
   },
 });
