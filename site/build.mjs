@@ -223,6 +223,7 @@ const COMPARE = [
   ['Sommelier & scanning', [
     ['Label & tasting-card scans', '3 to try', 'Unlimited'],
     ['Sommelier messages', '5 a month, text only', 'Unlimited, photos included'],
+    ['Looks up specific wines on the web', NO, YES],
   ]],
   ['Your data', [
     ['Export your journal to CSV', NO, YES],
@@ -244,7 +245,7 @@ const compareRows = COMPARE.map(
 const PRO_WINS = [
   [
     'A sommelier on call',
-    'Ask what to open, what to try next, or what that grape on the menu is. Every answer starts from your own ratings, not a crowd score.',
+    'Ask what to open, what to try next, or what that grape on the menu is. Every answer starts from your own ratings, not a crowd score — and when you ask about one specific bottle, it looks the wine up rather than guessing, and shows you where it read.',
   ],
   [
     'The winery, live',
@@ -267,7 +268,7 @@ const FAQ = [
   ],
   [
     'Will my journal get locked behind Pro?',
-    'No. Everything you log — tastings, places, photos, notes, your map, and up to 25 cellar bottles — is free for as long as you use the app, and we never delete your entries on any plan. Pro adds the unlimited sommelier and scans, live winery details, the unlimited cellar with drink windows and Tonight’s Pick, and export.',
+    'No. Everything you log — tastings, places, photos, notes, your map, and up to 25 cellar bottles — is free for as long as you use the app, and we never delete your entries on any plan. Pro adds the unlimited sommelier (which can look specific wines up on the web), unlimited scans, live winery details, the unlimited cellar with drink windows and Tonight’s Pick, and export.',
   ],
   [
     'Is my journal public?',
