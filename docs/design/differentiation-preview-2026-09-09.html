@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cork &amp; Note — visual differentiation directions (2026-09-09)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* Companion to docs/research/sommo-differentiation.md.
+     Four phone mockups: current Château theme, then directions A / B / C. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; background: #ECEAE6; padding: 32px 24px 64px; color: #26241F; }
+  h1 { font-family: Georgia, serif; font-weight: 400; font-size: 26px; margin-bottom: 6px; }
+  .sub { color: #6E6E6E; font-size: 14px; margin-bottom: 28px; max-width: 760px; line-height: 1.5; }
+  .row { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+  .col { width: 300px; }
+  .col h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .col p.note { font-size: 12px; color: #6E6E6E; line-height: 1.45; margin: 0 0 12px; min-height: 50px; }
+  .phone { width: 300px; height: 560px; border-radius: 34px; overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,.18); display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,.08); }
+  .screen { flex: 1; padding: 18px 16px 8px; overflow: hidden; display: flex; flex-direction: column; gap: 12px; }
+  .hdr { display: flex; justify-content: space-between; align-items: center; }
+  .hdr .kicker { font-size: 9px; letter-spacing: 1.4px; font-weight: 600; }
+  .hdr .name { font-size: 24px; line-height: 1.15; }
+  .avatar { width: 36px; height: 36px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+  .card { border-radius: 14px; padding: 14px; }
+  .card .label { font-size: 9px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 6px; }
+  .card .title { font-size: 17px; line-height: 1.3; margin-bottom: 4px; }
+  .card .body { font-size: 11px; line-height: 1.45; margin-bottom: 10px; }
+  .btnrow { display: flex; gap: 8px; }
+  .btn { font-size: 11px; font-weight: 600; padding: 7px 12px; border-radius: 8px; }
+  .btn.ghost { background: transparent; }
+  .strip { border-radius: 12px; padding: 10px 12px; font-size: 11px; display: flex; align-items: center; justify-content: space-between; border: 1px solid transparent; }
+  .strip b { font-size: 12px; }
+  .journey { border-radius: 12px; padding: 12px; border: 1px solid transparent; }
+  .journey .label { font-size: 9px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 6px; }
+  .journey .places { font-size: 12px; line-height: 1.5; }
+  .tabbar { height: 66px; display: flex; align-items: flex-start; padding-top: 9px; position: relative; border-top: 1px solid transparent; }
+  .tab { flex: 1; text-align: center; font-size: 9px; font-weight: 600; }
+  .tab .ico { display: block; font-size: 17px; margin-bottom: 2px; }
+  .center-slot { flex: 1; position: relative; }
+  .fab { position: absolute; left: 50%; transform: translateX(-50%); top: -24px; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 300; box-shadow: 0 6px 14px rgba(0,0,0,.28); }
+  .fab.circle { border-radius: 25px; }
+  .fab.stamp { border-radius: 15px; }  /* the "cork stamp" — same slot, different form */
+  .serif { font-family: Georgia, "Times New Roman", serif; }
+  /* Fraunces isn't bundled here; Georgia Bold Italic stands in for its warmth in B & C. */
+  .fraunces-ish { font-family: Georgia, serif; font-weight: 700; }
+</style>
+</head>
+<body>
+  <h1>Visual differentiation — three directions vs. today</h1>
+  <p class="sub">
+    Context: <code>docs/research/sommo-differentiation.md</code>. The first phone is our current
+    Château Label theme — which now reads nearly identically to Sommo. Each direction keeps the
+    same IA and modules (greeting, Tonight's Pick, Your Journey, Ready-to-Drink, 5-tab bar) and
+    changes palette, display type, and the center button's form. Type note: directions B and C
+    would ship with <b>Fraunces</b> (expo-google-fonts); bold Georgia stands in below.
+  </p>
+
+  <div class="row">
+
+    <!-- CURRENT -->
+    <div class="col">
+      <h2>Today — “Château Label”</h2>
+      <p class="note">Burgundy #722F37 · gold #C9A962 · cream #FAF8F5 · Georgia serif · raised burgundy circle. Sommo's look is effectively this exact recipe.</p>
+      <div class="phone" style="background:#FAF8F5;">
+        <div class="screen">
+          <div class="hdr">
+            <div>
+              <div class="kicker" style="color:#7E6430;">WELCOME BACK</div>
+              <div class="name serif" style="color:#2C2C2C;">Nick</div>
+            </div>
+            <div class="avatar" style="background:#722F37;color:#FAF8F5;">N</div>
+          </div>
+          <div class="card" style="background:#722F37;">
+            <div class="label" style="color:#C9A962;">TONIGHT'S PICK</div>
+            <div class="title serif" style="color:#FAF8F5;">The 2021 Barboursville Nebbiolo is ready.</div>
+            <div class="body" style="color:#E8DCC8;">Peak window through 2027 — but Tuesday counts as an occasion.</div>
+            <div class="btnrow">
+              <div class="btn" style="background:#C9A962;color:#2C2C2C;">Open this bottle</div>
+              <div class="btn ghost" style="border:1px solid #D4C4A8;color:#FAF8F5;">Another pick</div>
+            </div>
+          </div>
+          <div class="journey" style="background:#F5F2ED;border-color:#D8D2C8;">
+            <div class="label" style="color:#7E6430;">YOUR JOURNEY</div>
+            <div class="places" style="color:#4A4A4A;">🍷 14 wineries · Last visit: Early Mountain, Madison VA</div>
+          </div>
+          <div class="strip" style="background:#F5F2ED;border-color:#D8D2C8;color:#4A4A4A;">
+            <span><b style="color:#722F37;">6 bottles</b> ready to drink</span><span style="color:#722F37;">›</span>
+          </div>
+        </div>
+        <div class="tabbar" style="background:#FAF8F5;border-top-color:#D4C4A8;">
+          <div class="tab" style="color:#722F37;"><span class="ico">⌂</span>Home</div>
+          <div class="tab" style="color:#6E6E6E;"><span class="ico">▤</span>Cellar</div>
+          <div class="center-slot"><div class="fab circle" style="background:#722F37;color:#FAF8F5;border:3px solid #FAF8F5;">＋</div></div>
+          <div class="tab" style="color:#6E6E6E;"><span class="ico">◎</span>Explore</div>
+          <div class="tab" style="color:#6E6E6E;"><span class="ico">◉</span>Profile</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A -->
+    <div class="col">
+      <h2>A — “Midnight Cellar” (dark-first)</h2>
+      <p class="note">Espresso-ink surfaces, candlelight gold, wine only as a whisper. Max distance from Sommo's ivory; highest rework cost.</p>
+      <div class="phone" style="background:#201B18;">
+        <div class="screen">
+          <div class="hdr">
+            <div>
+              <div class="kicker" style="color:#D4A960;">WELCOME BACK</div>
+              <div class="name serif" style="color:#F2EDE4;">Nick</div>
+            </div>
+            <div class="avatar" style="background:#D4A960;color:#201B18;">N</div>
+          </div>
+          <div class="card" style="background:#2B2420;border:1px solid #3A322C;">
+            <div class="label" style="color:#D4A960;">TONIGHT'S PICK</div>
+            <div class="title serif" style="color:#F2EDE4;">The 2021 Barboursville Nebbiolo is ready.</div>
+            <div class="body" style="color:#B7AB9C;">Peak window through 2027 — but Tuesday counts as an occasion.</div>
+            <div class="btnrow">
+              <div class="btn" style="background:#D4A960;color:#201B18;">Open this bottle</div>
+              <div class="btn ghost" style="border:1px solid #4A403A;color:#F2EDE4;">Another pick</div>
+            </div>
+          </div>
+          <div class="journey" style="background:#2B2420;border-color:#3A322C;">
+            <div class="label" style="color:#D4A960;">YOUR JOURNEY</div>
+            <div class="places" style="color:#B7AB9C;">🍷 14 wineries · Last visit: Early Mountain, Madison VA</div>
+          </div>
+          <div class="strip" style="background:#2B2420;border-color:#3A322C;color:#B7AB9C;">
+            <span><b style="color:#D4A960;">6 bottles</b> ready to drink</span><span style="color:#D4A960;">›</span>
+          </div>
+        </div>
+        <div class="tabbar" style="background:#241F1C;border-top-color:#3A322C;">
+          <div class="tab" style="color:#D4A960;"><span class="ico">⌂</span>Home</div>
+          <div class="tab" style="color:#8A7F72;"><span class="ico">▤</span>Cellar</div>
+          <div class="center-slot"><div class="fab stamp" style="background:#D4A960;color:#201B18;border:3px solid #241F1C;">＋</div></div>
+          <div class="tab" style="color:#8A7F72;"><span class="ico">◎</span>Explore</div>
+          <div class="tab" style="color:#8A7F72;"><span class="ico">◉</span>Profile</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- B -->
+    <div class="col">
+      <h2>B — “Cork &amp; Vine” ★ recommended</h2>
+      <p class="note">Deep vine green + cork terracotta on linen. No wine app owns green; says vineyards &amp; travel, keeps our warm editorial feel, cheapest to ship.</p>
+      <div class="phone" style="background:#F6F5F0;">
+        <div class="screen">
+          <div class="hdr">
+            <div>
+              <div class="kicker" style="color:#A2643C;">WELCOME BACK</div>
+              <div class="name fraunces-ish" style="color:#26241F;">Nick</div>
+            </div>
+            <div class="avatar" style="background:#3E5C43;color:#F6F5F0;">N</div>
+          </div>
+          <div class="card" style="background:#3E5C43;">
+            <div class="label" style="color:#E4C9A8;">TONIGHT'S PICK</div>
+            <div class="title fraunces-ish" style="color:#F6F5F0;">The 2021 Barboursville Nebbiolo is ready.</div>
+            <div class="body" style="color:#CDD8C9;">Peak window through 2027 — but Tuesday counts as an occasion.</div>
+            <div class="btnrow">
+              <div class="btn" style="background:#C0794F;color:#FFF;">Open this bottle</div>
+              <div class="btn ghost" style="border:1px solid #6B8A6E;color:#F6F5F0;">Another pick</div>
+            </div>
+          </div>
+          <div class="journey" style="background:#FFFFFF;border-color:#E0DDD3;">
+            <div class="label" style="color:#3E5C43;">YOUR JOURNEY</div>
+            <div class="places" style="color:#57534A;">🍷 14 wineries · Last visit: Early Mountain, Madison VA</div>
+          </div>
+          <div class="strip" style="background:#FFFFFF;border-color:#E0DDD3;color:#57534A;">
+            <span><b style="color:#A2643C;">6 bottles</b> ready to drink</span><span style="color:#3E5C43;">›</span>
+          </div>
+        </div>
+        <div class="tabbar" style="background:#F6F5F0;border-top-color:#E0DDD3;">
+          <div class="tab" style="color:#3E5C43;"><span class="ico">⌂</span>Home</div>
+          <div class="tab" style="color:#8B877C;"><span class="ico">▤</span>Cellar</div>
+          <div class="center-slot"><div class="fab stamp" style="background:#C0794F;color:#FFF;border:3px solid #F6F5F0;">＋</div></div>
+          <div class="tab" style="color:#8B877C;"><span class="ico">◎</span>Explore</div>
+          <div class="tab" style="color:#8B877C;"><span class="ico">◉</span>Profile</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C -->
+    <div class="col">
+      <h2>C — “Ink &amp; Terracotta” (editorial)</h2>
+      <p class="note">Blue-black ink + terracotta on gallery white. Leans into the “Note” half of the name — a modern field journal. Distinct but least “wine.”</p>
+      <div class="phone" style="background:#FAFAF7;">
+        <div class="screen">
+          <div class="hdr">
+            <div>
+              <div class="kicker" style="color:#C25E40;">WELCOME BACK</div>
+              <div class="name fraunces-ish" style="color:#23262C;">Nick</div>
+            </div>
+            <div class="avatar" style="background:#23262C;color:#FAFAF7;">N</div>
+          </div>
+          <div class="card" style="background:#23262C;">
+            <div class="label" style="color:#C25E40;">TONIGHT'S PICK</div>
+            <div class="title fraunces-ish" style="color:#FAFAF7;">The 2021 Barboursville Nebbiolo is ready.</div>
+            <div class="body" style="color:#A9ADB6;">Peak window through 2027 — but Tuesday counts as an occasion.</div>
+            <div class="btnrow">
+              <div class="btn" style="background:#C25E40;color:#FFF;">Open this bottle</div>
+              <div class="btn ghost" style="border:1px solid #4A4F58;color:#FAFAF7;">Another pick</div>
+            </div>
+          </div>
+          <div class="journey" style="background:#FFFFFF;border-color:#E4E3DD;">
+            <div class="label" style="color:#23262C;">YOUR JOURNEY</div>
+            <div class="places" style="color:#54575E;">🍷 14 wineries · Last visit: Early Mountain, Madison VA</div>
+          </div>
+          <div class="strip" style="background:#FFFFFF;border-color:#E4E3DD;color:#54575E;">
+            <span><b style="color:#C25E40;">6 bottles</b> ready to drink</span><span style="color:#23262C;">›</span>
+          </div>
+        </div>
+        <div class="tabbar" style="background:#FAFAF7;border-top-color:#E4E3DD;">
+          <div class="tab" style="color:#23262C;"><span class="ico">⌂</span>Home</div>
+          <div class="tab" style="color:#8E9097;"><span class="ico">▤</span>Cellar</div>
+          <div class="center-slot"><div class="fab stamp" style="background:#C25E40;color:#FFF;border:3px solid #FAFAF7;">＋</div></div>
+          <div class="tab" style="color:#8E9097;"><span class="ico">◎</span>Explore</div>
+          <div class="tab" style="color:#8E9097;"><span class="ico">◉</span>Profile</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
