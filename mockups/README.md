@@ -1,5 +1,14 @@
 # Design mockups
 
+## Advertising concepts
+
+Open [ad-campaigns/index.html](ad-campaigns/index.html) for six Facebook and
+Instagram ad directions. Preview feed and Story formats, combine messages and
+visuals, shortlist favorites, and download feedback or draft artwork. The gallery
+is self-contained and works directly from a local file. See the
+[campaign plan](../docs/marketing/ad-campaign-plan-2026-09-09.md) for the test
+sequence and image-production briefs.
+
 ## Round 03 — The wine ampersand
 
 Open `logo-round-3/index.html` for three AI-generated C & N concepts where the
