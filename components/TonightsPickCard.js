@@ -65,7 +65,7 @@ function PickerRow({ label, options, value, onChange }) {
 }
 
 export default function TonightsPickCard({ onRequireCellar }) {
-  const { gate } = usePro();
+  const { isPro, presentPaywall } = usePro();
   const router = useRouter();
 
   const [bottles, setBottles] = useState(null); // null = not loaded yet
@@ -123,9 +123,14 @@ export default function TonightsPickCard({ onRequireCellar }) {
 
   const askSommelier = useCallback(async () => {
     if (!hasCellar) return;
-    // These are sommelier calls too: they spend the same 5/month chat meter
-    // server-side, so they get the same gate rather than a confusing refusal.
-    if (!gate('chat')) return;
+    // Tonight's Pick is Pro-only (owner decision 2026-09-09; the marketing
+    // site already says so). The server enforces via the tonights_pick task
+    // (limit 0 for free); this check just gets the paywall up BEFORE the
+    // spinner rather than after a 402.
+    if (!isPro) {
+      presentPaywall('tonights_pick');
+      return;
+    }
     setThinking(true);
     setError(null);
     try {
@@ -149,7 +154,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
     } finally {
       setThinking(false);
     }
-  }, [bottles, hasCellar, occasion, cuisine, mood, freeText, gate]);
+  }, [bottles, hasCellar, occasion, cuisine, mood, freeText, isPro, presentPaywall]);
 
   // ── Loading the cellar ───────────────────────────────────
   if (loadingCellar) {
@@ -199,6 +204,13 @@ export default function TonightsPickCard({ onRequireCellar }) {
       >
         <Ionicons name="sparkles" size={18} color={colors.accent.base} />
         <Text style={styles.eyebrow}>TONIGHT&apos;S PICK</Text>
+        {/* The wall is never a surprise (launch plan §4.5 item 5): free users
+            see the Pro badge before they tap, not a refusal after. */}
+        {!isPro && (
+          <View style={styles.proBadge}>
+            <Text style={styles.proBadgeText}>PRO</Text>
+          </View>
+        )}
         {collapsed ? (
           <Text style={styles.collapsedTeaser} numberOfLines={1}>
             What should I drink tonight?
@@ -412,6 +424,18 @@ const styles = StyleSheet.create({
   eyebrow: {
     ...typography.body.caption,
     color: colors.accent.ink,
+  },
+  proBadge: {
+    backgroundColor: colors.accent.base,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  proBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    color: colors.neutral.ink,
   },
   flexSpacer: { flex: 1 },
   collapsedTeaser: {

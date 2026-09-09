@@ -153,7 +153,9 @@ export default function PaywallScreen() {
                   ? 'Exporting your tastings to CSV is part of Pro.'
                   : source === 'places'
                     ? 'Live winery ratings, hours and websites are part of Pro.'
-                    : 'Your journal stays free, forever. Pro unlocks the parts that think.'}
+                    : source === 'tonights_pick'
+                      ? "Tonight's Pick — a bottle from your own cellar, chosen by your sommelier — is part of Pro."
+                      : 'Your journal stays free, forever. Pro unlocks the parts that think.'}
         </Text>
 
         <View style={styles.benefits}>
