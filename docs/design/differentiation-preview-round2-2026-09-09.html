@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cork &amp; Note — re-theme directions, round 2: vibrant &amp; editorial (2026-09-09)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* Round 2 of the re-theme exploration (round 1: differentiation-preview-2026-09-09.html —
+     A Midnight Cellar / B Cork & Vine / C Ink & Terracotta). Nick asked for two more flavors:
+     vibrant/fun (D, E) and editorial/serious (F, G). Pick across BOTH rounds.
+     Body layout matches the chosen IA: Option 3 flat five-tab bar + Passport home. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; background: #ECEAE6; padding: 32px 24px 64px; color: #26241F; }
+  h1 { font-family: Georgia, serif; font-weight: 400; font-size: 26px; margin-bottom: 6px; }
+  .sub { color: #6E6E6E; font-size: 14px; margin-bottom: 28px; max-width: 780px; line-height: 1.5; }
+  .row { display: flex; gap: 28px; flex-wrap: wrap; align-items: flex-start; }
+  .col { width: 300px; }
+  .col h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .col p.note { font-size: 12px; color: #6E6E6E; line-height: 1.45; margin: 0 0 12px; min-height: 64px; }
+  .phone { width: 300px; height: 560px; border-radius: 34px; overflow: hidden; box-shadow: 0 12px 32px rgba(0,0,0,.18); display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,.08); }
+  .screen { flex: 1; padding: 18px 16px 8px; overflow: hidden; display: flex; flex-direction: column; gap: 11px; position: relative; }
+  .hdr { display: flex; justify-content: space-between; align-items: center; }
+  .kicker { font-size: 9px; letter-spacing: 1.4px; font-weight: 600; }
+  .name { font-size: 24px; line-height: 1.15; }
+  .avatar { width: 36px; height: 36px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; }
+  .card { border-radius: 14px; padding: 13px; }
+  .card .label { font-size: 9px; letter-spacing: 1.2px; font-weight: 700; margin-bottom: 6px; }
+  .card .t { font-size: 15px; line-height: 1.3; margin-bottom: 4px; }
+  .card .b { font-size: 11px; line-height: 1.45; }
+  .pill { display: inline-block; font-size: 11px; font-weight: 600; padding: 6px 11px; border-radius: 8px; margin-top: 8px; }
+  .prow { display: flex; gap: 7px; }
+  .mini { flex: 1; border-radius: 10px; padding: 8px; }
+  .mini .mt { font-size: 10px; font-weight: 700; }
+  .mini .mb { font-size: 9px; }
+  .strip { border-radius: 12px; padding: 10px 12px; font-size: 11px; display: flex; align-items: center; justify-content: space-between; border: 1px solid transparent; }
+  .minifab { position: absolute; right: 14px; bottom: 12px; border-radius: 22px; padding: 10px 15px; font-size: 12px; font-weight: 700; box-shadow: 0 5px 14px rgba(0,0,0,.28); }
+  .tabbar { height: 64px; display: flex; align-items: flex-start; padding-top: 9px; border-top: 1px solid transparent; }
+  .tab { flex: 1; text-align: center; font-size: 8.5px; font-weight: 600; }
+  .tab .ico { display: block; font-size: 16px; margin-bottom: 2px; }
+  .serif { font-family: Georgia, serif; }
+  .slab { font-family: "Courier New", Georgia, serif; font-weight: 700; letter-spacing: -.3px; } /* stand-in for a chunky display face */
+</style>
+</head>
+<body>
+  <h1>Re-theme round 2 — vibrant &amp; editorial directions</h1>
+  <p class="sub">
+    Four new directions to compare against round 1 (A Midnight Cellar · B Cork &amp; Vine · C Ink
+    &amp; Terracotta). <b>D and E are the vibrant/fun end; F and G are the editorial/serious
+    end.</b> All four are rendered on the chosen IA — flat five-tab bar (Option 3) with the
+    floating ＋ Log pill and the Passport home — so this is close to what would actually ship.
+    Display type is a stand-in; the real face gets chosen with the palette.
+  </p>
+
+  <div class="row">
+
+    <!-- D SPRITZ -->
+    <div class="col">
+      <h2>D — “Spritz” (vibrant · warm)</h2>
+      <p class="note">Sunset coral + apricot on warm ivory, plum ink. Golden-hour patio energy — fun without going neon, and still food-and-wine warm. Furthest you can get from burgundy while staying warm.</p>
+      <div class="phone" style="background:#FFF8F0;">
+        <div class="screen">
+          <div class="hdr">
+            <div><div class="kicker" style="color:#E4573D;">WELCOME BACK</div><div class="name serif" style="color:#3D2B3D;">Nick</div></div>
+            <div class="avatar" style="background:#E4573D;color:#FFF8F0;">N</div>
+          </div>
+          <div class="card" style="background:linear-gradient(135deg,#FFE8D6,#FFD9B8);">
+            <div class="label" style="color:#B03A24;">YOUR JOURNEY</div>
+            <div class="t serif" style="color:#3D2B3D;">14 wineries · 3 regions · 62 wines</div>
+            <div class="b" style="color:#7A5A4E;">Last visit: Early Mountain, Madison VA</div>
+            <span class="pill" style="background:#E4573D;color:#FFF;">Open your map ›</span>
+          </div>
+          <div class="card" style="background:#FFFFFF;border:1px solid #F2E2D2;">
+            <div class="label" style="color:#E4573D;">NEAR YOU · PRO</div>
+            <div class="prow">
+              <div class="mini" style="background:#FFF3E6;"><div class="mt" style="color:#3D2B3D;">Stone Tower</div><div class="mb" style="color:#9A7B6E;">★ 4.7 · 18 min</div></div>
+              <div class="mini" style="background:#FFF3E6;"><div class="mt" style="color:#3D2B3D;">Breaux</div><div class="mb" style="color:#9A7B6E;">★ 4.6 · 25 min</div></div>
+            </div>
+          </div>
+          <div class="card" style="background:#3D2B3D;">
+            <div class="label" style="color:#F4A259;">TONIGHT'S PICK</div>
+            <div class="t serif" style="color:#FFF8F0;">The 2021 Nebbiolo is ready.</div>
+          </div>
+          <div class="strip" style="background:#FFF;border-color:#F2E2D2;color:#7A5A4E;"><span><b style="color:#E4573D;">6 bottles</b> ready to drink</span><span style="color:#E4573D;">›</span></div>
+          <div class="minifab" style="background:#E4573D;color:#FFF;">＋ Log</div>
+        </div>
+        <div class="tabbar" style="background:#FFF8F0;border-top-color:#F2E2D2;">
+          <div class="tab" style="color:#E4573D;"><span class="ico">⌂</span>Home</div>
+          <div class="tab" style="color:#B09A8C;"><span class="ico">▤</span>Journal</div>
+          <div class="tab" style="color:#B09A8C;"><span class="ico">◎</span>Wineries</div>
+          <div class="tab" style="color:#B09A8C;"><span class="ico">🍷</span>Somm</div>
+          <div class="tab" style="color:#B09A8C;"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E JUICE -->
+    <div class="col">
+      <h2>E — “Juice” (vibrant · playful)</h2>
+      <p class="note">Grape violet + raspberry on a near-white lilac. Natural-wine-label, young-wine-club energy — the boldest personality change and the most social-media-friendly. Risk: may fight the refined Château voice.</p>
+      <div class="phone" style="background:#FAF8FF;">
+        <div class="screen">
+          <div class="hdr">
+            <div><div class="kicker" style="color:#6D4AC0;">WELCOME BACK</div><div class="name slab" style="color:#241E33;">Nick</div></div>
+            <div class="avatar" style="background:#6D4AC0;color:#FFF;">N</div>
+          </div>
+          <div class="card" style="background:#6D4AC0;">
+            <div class="label" style="color:#E9DFFF;">YOUR JOURNEY</div>
+            <div class="t slab" style="color:#FFF;">14 wineries · 3 regions · 62 wines</div>
+            <div class="b" style="color:#CDBDF2;">Last visit: Early Mountain, Madison VA</div>
+            <span class="pill" style="background:#D6336C;color:#FFF;">Open your map ›</span>
+          </div>
+          <div class="card" style="background:#FFF;border:1px solid #E6E0F5;">
+            <div class="label" style="color:#6D4AC0;">NEAR YOU · PRO</div>
+            <div class="prow">
+              <div class="mini" style="background:#F1EBFF;"><div class="mt" style="color:#241E33;">Stone Tower</div><div class="mb" style="color:#8A80A0;">★ 4.7 · 18 min</div></div>
+              <div class="mini" style="background:#F1EBFF;"><div class="mt" style="color:#241E33;">Breaux</div><div class="mb" style="color:#8A80A0;">★ 4.6 · 25 min</div></div>
+            </div>
+          </div>
+          <div class="card" style="background:#241E33;">
+            <div class="label" style="color:#D6336C;">TONIGHT'S PICK</div>
+            <div class="t slab" style="color:#FAF8FF;">The 2021 Nebbiolo is ready.</div>
+          </div>
+          <div class="strip" style="background:#FFF;border-color:#E6E0F5;color:#5A5470;"><span><b style="color:#D6336C;">6 bottles</b> ready to drink</span><span style="color:#6D4AC0;">›</span></div>
+          <div class="minifab" style="background:#D6336C;color:#FFF;">＋ Log</div>
+        </div>
+        <div class="tabbar" style="background:#FAF8FF;border-top-color:#E6E0F5;">
+          <div class="tab" style="color:#6D4AC0;"><span class="ico">⌂</span>Home</div>
+          <div class="tab" style="color:#A79FBC;"><span class="ico">▤</span>Journal</div>
+          <div class="tab" style="color:#A79FBC;"><span class="ico">◎</span>Wineries</div>
+          <div class="tab" style="color:#A79FBC;"><span class="ico">🍷</span>Somm</div>
+          <div class="tab" style="color:#A79FBC;"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F BROADSHEET -->
+    <div class="col">
+      <h2>F — “Broadsheet” (editorial · stark)</h2>
+      <p class="note">Near-black ink on paper white with one oxblood accent and hairline rules. The most serious option — a critic's field notebook. Maximum credibility, minimum decoration; nothing on the market looks like this.</p>
+      <div class="phone" style="background:#FCFBF7;">
+        <div class="screen">
+          <div class="hdr">
+            <div><div class="kicker" style="color:#7A2E2E;">WELCOME BACK</div><div class="name serif" style="color:#1A1A1A;">Nick</div></div>
+            <div class="avatar" style="background:#1A1A1A;color:#FCFBF7;">N</div>
+          </div>
+          <div class="card" style="background:#FCFBF7;border:1px solid #1A1A1A;">
+            <div class="label" style="color:#7A2E2E;">YOUR JOURNEY</div>
+            <div class="t serif" style="color:#1A1A1A;">14 wineries · 3 regions · 62 wines</div>
+            <div class="b" style="color:#5A5A55;">Last visit: Early Mountain, Madison VA</div>
+            <span class="pill" style="background:#1A1A1A;color:#FCFBF7;">Open your map ›</span>
+          </div>
+          <div class="card" style="background:#FCFBF7;border:1px solid #D9D6CC;">
+            <div class="label" style="color:#1A1A1A;">NEAR YOU · PRO</div>
+            <div class="prow">
+              <div class="mini" style="background:#F3F1E9;"><div class="mt" style="color:#1A1A1A;">Stone Tower</div><div class="mb" style="color:#807D74;">★ 4.7 · 18 min</div></div>
+              <div class="mini" style="background:#F3F1E9;"><div class="mt" style="color:#1A1A1A;">Breaux</div><div class="mb" style="color:#807D74;">★ 4.6 · 25 min</div></div>
+            </div>
+          </div>
+          <div class="card" style="background:#7A2E2E;">
+            <div class="label" style="color:#E8D9C4;">TONIGHT'S PICK</div>
+            <div class="t serif" style="color:#FCFBF7;">The 2021 Nebbiolo is ready.</div>
+          </div>
+          <div class="strip" style="background:#FCFBF7;border-color:#D9D6CC;color:#5A5A55;"><span><b style="color:#7A2E2E;">6 bottles</b> ready to drink</span><span style="color:#1A1A1A;">›</span></div>
+          <div class="minifab" style="background:#1A1A1A;color:#FCFBF7;">＋ Log</div>
+        </div>
+        <div class="tabbar" style="background:#FCFBF7;border-top-color:#1A1A1A;">
+          <div class="tab" style="color:#1A1A1A;"><span class="ico">⌂</span>Home</div>
+          <div class="tab" style="color:#9B988E;"><span class="ico">▤</span>Journal</div>
+          <div class="tab" style="color:#9B988E;"><span class="ico">◎</span>Wineries</div>
+          <div class="tab" style="color:#9B988E;"><span class="ico">🍷</span>Somm</div>
+          <div class="tab" style="color:#9B988E;"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- G LEDGER -->
+    <div class="col">
+      <h2>G — “Ledger” (editorial · warm-serious)</h2>
+      <p class="note">Slate-navy + brass on warm paper. A sommelier's ledger: serious and premium but warmer than Broadsheet — brass does the work gold used to, without reading “wine cliché.” Strong dark-mode potential later.</p>
+      <div class="phone" style="background:#F5F1E8;">
+        <div class="screen">
+          <div class="hdr">
+            <div><div class="kicker" style="color:#A67C3D;">WELCOME BACK</div><div class="name serif" style="color:#22303C;">Nick</div></div>
+            <div class="avatar" style="background:#22303C;color:#F5F1E8;">N</div>
+          </div>
+          <div class="card" style="background:#22303C;">
+            <div class="label" style="color:#C9A870;">YOUR JOURNEY</div>
+            <div class="t serif" style="color:#F5F1E8;">14 wineries · 3 regions · 62 wines</div>
+            <div class="b" style="color:#9FB0BE;">Last visit: Early Mountain, Madison VA</div>
+            <span class="pill" style="background:#A67C3D;color:#FFF;">Open your map ›</span>
+          </div>
+          <div class="card" style="background:#FFFFFF;border:1px solid #E2DCCB;">
+            <div class="label" style="color:#22303C;">NEAR YOU · PRO</div>
+            <div class="prow">
+              <div class="mini" style="background:#EFEADD;"><div class="mt" style="color:#22303C;">Stone Tower</div><div class="mb" style="color:#8A8574;">★ 4.7 · 18 min</div></div>
+              <div class="mini" style="background:#EFEADD;"><div class="mt" style="color:#22303C;">Breaux</div><div class="mb" style="color:#8A8574;">★ 4.6 · 25 min</div></div>
+            </div>
+          </div>
+          <div class="card" style="background:#FFFFFF;border:1px solid #E2DCCB;">
+            <div class="label" style="color:#A67C3D;">TONIGHT'S PICK</div>
+            <div class="t serif" style="color:#22303C;">The 2021 Nebbiolo is ready.</div>
+          </div>
+          <div class="strip" style="background:#FFF;border-color:#E2DCCB;color:#6B6656;"><span><b style="color:#A67C3D;">6 bottles</b> ready to drink</span><span style="color:#22303C;">›</span></div>
+          <div class="minifab" style="background:#22303C;color:#F5F1E8;">＋ Log</div>
+        </div>
+        <div class="tabbar" style="background:#F5F1E8;border-top-color:#E2DCCB;">
+          <div class="tab" style="color:#22303C;"><span class="ico">⌂</span>Home</div>
+          <div class="tab" style="color:#9B9482;"><span class="ico">▤</span>Journal</div>
+          <div class="tab" style="color:#9B9482;"><span class="ico">◎</span>Wineries</div>
+          <div class="tab" style="color:#9B9482;"><span class="ico">🍷</span>Somm</div>
+          <div class="tab" style="color:#9B9482;"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
