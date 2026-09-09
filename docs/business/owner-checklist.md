@@ -93,7 +93,7 @@ Everything here needs your identity, your accounts, or your money. Items are in 
 
 **Decided 2026-09-08:**
 
-- [x] **Launch wine region: Virginia.** Drivable from Maryland, ~300 wineries, and the app's seeded winery dataset is already Virginia. The go-to-market, the QR card copy and the outreach email are in launch plan §5 / [`virginia-launch.md`](virginia-launch.md).
+- [x] **Launch wine region: Virginia.** Drivable from Maryland, and dense enough to place cards in clusters. The go-to-market, the AVA targeting, the winery shortlist, the QR card copy and the outreach email are in launch plan §5 and [`virginia-launch.md`](virginia-launch.md). One thing to know going in: the app has **no Virginia winery data** — a shared Virginia catalog existed until June 2026 and was deliberately deleted when wineries became private per user, so a guest scanning a card in a tasting room types the winery's name in themselves. See [`region-model.md`](../research/region-model.md) §11.
 - [x] **Launch scope: v1 ships with the paywall.** Not free-first. That makes the bank account, the sandbox tester and the paywall screenshots submission blockers rather than fast-follows, and it means the chat metering deploys with the launch build.
 - [x] **AI spend cap: $100/month** (see §C).
 
