@@ -5,7 +5,10 @@
 // webhook ever said so, an unknown task must not buy the cheaper allowance, and
 // a webhook we do not understand must never silently revoke someone.
 import {
-  FREE_MONTHLY_LIMITS,
+  FAIR_USE_DAILY_CAPS,
+  FAIR_USE_MONTHLY_CHAT_CAP,
+  FREE_METER_WINDOWS,
+  FREE_TIER_LIMITS,
   entitlementUpdatesFromEvent,
   isEntitlementActive,
   isSupabaseUserId,
@@ -104,7 +107,14 @@ describe('meterDecision', () => {
     // Five scans must not spend the chat allowance, and vice versa.
     expect(meterDecision({ isPro: false, task: 'chat', used: 4 }).allowed).toBe(true);
     expect(meterDecision({ isPro: false, task: 'chat', used: 5 }).allowed).toBe(false);
-    expect(FREE_MONTHLY_LIMITS.chat).not.toBe(FREE_MONTHLY_LIMITS.label_scan);
+    expect(FREE_TIER_LIMITS.chat).not.toBe(FREE_TIER_LIMITS.label_scan);
+  });
+
+  it('spends scans for life but chat only for the month (rev. 2026-09-09)', () => {
+    // The window is what the caller counts over; pinning it here stops a
+    // refactor from quietly turning "3 scans to try" back into 36 a year.
+    expect(FREE_METER_WINDOWS.label_scan).toBe('lifetime');
+    expect(FREE_METER_WINDOWS.chat).toBe('month');
   });
 
   it('never reports negative remaining when usage overshot the limit', () => {
@@ -131,6 +141,24 @@ describe('meterDecision', () => {
       reason: 'free_limit_reached',
     });
     expect(meterDecision({ isPro: true, task: 'tonights_pick', used: 0 }).allowed).toBe(true);
+  });
+
+  it('never says "this month" about the lifetime scan meter', () => {
+    expect(limitReachedMessage('label_scan')).not.toMatch(/this month/);
+    expect(limitReachedMessage('chat')).toMatch(/this month/);
+  });
+});
+
+describe('fair-use caps', () => {
+  it('keeps the worst-case Pro abuser under control (§4.2 rev. 2026-09-09)', () => {
+    // ~50 Sonnet chats/day ≈ $18/month at absolute worst against $8.49 net,
+    // and the monthly ceiling stops a scripted grind. These are abuse guards:
+    // a human wine journaler never sees them.
+    expect(FAIR_USE_DAILY_CAPS.chat).toBe(50);
+    expect(FAIR_USE_DAILY_CAPS.label_scan).toBe(30);
+    expect(FAIR_USE_MONTHLY_CHAT_CAP).toBe(1000);
+    // The daily caps must genuinely bound the month for every task.
+    expect(FAIR_USE_DAILY_CAPS.chat * 31).toBeGreaterThan(FAIR_USE_MONTHLY_CHAT_CAP);
   });
 });
 

@@ -41,7 +41,7 @@ Everything here needs your identity, your accounts, or your money. Items are in 
 
 ## C. Third-party accounts
 
-- [x] **Anthropic spend cap** — ✅ set 2026-09-08 to **$100/month**. The free-tier meters (3 scans + 5 sommelier messages per month) are sized against that number; see launch plan §4.3.
+- [x] **Anthropic spend cap** — ✅ set 2026-09-08 to **$100/month**. The free-tier meters (3 lifetime scans + 5 sommelier messages per month, text-only) are sized against that number; see launch plan §4.3.
 - [x] **Google Maps key** — ✅ rotated 2026-09-08. The committed key is dead.
   *Hand back:* the new key, so it goes into the EAS `production` and `preview` environments as `GOOGLE_MAPS_API_KEY`. `app.config.js` already reads only that variable, so nothing in git needs to change — but **Android maps stay blank until the new key is in EAS**.
 - [x] **Support mailbox** — ✅ created 2026-09-08.
@@ -80,7 +80,7 @@ Everything here needs your identity, your accounts, or your money. Items are in 
   - App Store Connect → App Information → support contact, and `docs/business/app-store-listing.md` §8/§10, which still names `review@corkandnote.com` on a domain you do not own yet.
   Both documents' `updated` dates get bumped in the same change.
 - [ ] **Your read-through of the legal pages** — the last legal item, and it blocks submission. Read <https://cork-and-note.vercel.app/privacy> and `/terms` end to end now that the names and the governing law are real. Worth a lawyer's glance. They already disclose that chat text and photos go to Anthropic, that location is foreground-only, and how deletion works.
-- [ ] **Deploy the metering half of the chat function — with the paywall build, not before.** The Pro tier's server-side meters (3 scans and 5 sommelier messages a month) are written and tested but deliberately NOT deployed: turning them on now would wall testers on build 11, which has no paywall to buy your way past. Ship it with the first build that has one:
+- [ ] **Deploy the metering half of the chat function — with the paywall build, not before.** The Pro tier's server-side meters (3 lifetime scans, 5 text-only sommelier messages a month, Pro fair-use caps) are written and tested but deliberately NOT deployed: turning them on now would wall testers on build 11, which has no paywall to buy your way past. Ship it with the first build that has one:
   ```
   supabase functions deploy chat --project-ref ixecayqpogkiawempzgc
   ```
@@ -107,7 +107,7 @@ Still undecided and parked: the **domain name** (see §C — it is a branding ch
 
 ---
 
-**Decided so far:** Pro at $9.99/mo and $59.99/yr with a 7-day trial on annual only, no lifetime unlock · Free tier: unlimited logging, 3 scans + 5 sommelier messages a month, 25-bottle cellar cap · iOS only for v1 · **v1 ships with the paywall** · **launch region Virginia** · **Anthropic capped at $100/mo** · **no LLC, Maryland law**.
+**Decided so far:** Pro at $9.99/mo and $59.99/yr with a 7-day trial on annual only, no lifetime unlock · Free tier: unlimited logging, 3 lifetime scans + 5 text-only sommelier messages a month, 25-bottle cellar cap · iOS only for v1 · **v1 ships with the paywall** · **launch region Virginia** · **Anthropic capped at $100/mo** · **no LLC, Maryland law**.
 
 **Owner work completed 2026-09-08:** Anthropic cap set · App Privacy questionnaire · age ratings · W-9 · Small Business Program enrolment · Apple membership confirmed · two stray non-consumable IAPs deleted · Google Maps key rotated · support mailbox created · subscriptions created in App Store Connect · RevenueCat project, entitlement, products and offering wired · In-App Purchase key generated and verified · governing law and legal name answered · launch region and launch scope decided.
 

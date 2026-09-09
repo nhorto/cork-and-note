@@ -27,7 +27,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePro } from '../hooks/usePro';
 import {
   FREE_CELLAR_BOTTLE_LIMIT,
-  FREE_MONTHLY_LIMITS,
+  FREE_TIER_LIMITS,
   PRIVACY_URL,
   TERMS_URL,
   packagePeriod,
@@ -144,9 +144,9 @@ export default function PaywallScreen() {
         <Text style={styles.title}>Cork &amp; Note Pro</Text>
         <Text style={styles.subtitle}>
           {source === 'label_scan'
-            ? `You get ${FREE_MONTHLY_LIMITS.label_scan} free scans a month. Pro reads as many labels as you can point a camera at.`
+            ? `You get ${FREE_TIER_LIMITS.label_scan} free scans to try. Pro reads as many labels as you can point a camera at.`
             : source === 'chat'
-              ? `You get ${FREE_MONTHLY_LIMITS.chat} free sommelier messages a month. Pro never counts.`
+              ? `You get ${FREE_TIER_LIMITS.chat} free sommelier messages a month. Pro never counts, and photos come along.`
               : source === 'cellar'
                 ? `A free cellar holds ${FREE_CELLAR_BOTTLE_LIMIT} bottles. Pro holds your whole collection.`
                 : source === 'export'

@@ -28,7 +28,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.65;
 
 export default function WineChatModal({ visible, onClose, onUseSuggestions, onConversationStarted, onDismiss, existingConversationId, currentWineData }) {
-  const { gate } = usePro();
+  const { gate, isPro, presentPaywall } = usePro();
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [sending, setSending] = useState(false);
@@ -292,7 +292,12 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
 
           {/* Input */}
           <MeterHint task="chat" style={styles.meterHint} />
-          <ChatInput onSend={handleSend} disabled={sending} />
+          <ChatInput
+            onSend={handleSend}
+            disabled={sending}
+            photosLocked={!isPro}
+            onLockedPhotoPress={() => presentPaywall('chat')}
+          />
         </KeyboardAvoidingView>
       </View>
     </Modal>

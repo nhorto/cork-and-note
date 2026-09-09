@@ -1,12 +1,13 @@
 // Unit tests for lib/pro.js — the client's mirror of the Pro tier.
 //
 // The most valuable test in this file is the last one: lib/pro.js duplicates the
-// free-tier numbers so the app can render "3 free scans left this month" without
-// asking the server, and a silent drift between the two copies would show users a
-// promise the server then refuses to keep.
+// free-tier numbers so the app can render "2 free scans left" without asking the
+// server, and a silent drift between the two copies would show users a promise
+// the server then refuses to keep.
 import {
   FREE_CELLAR_BOTTLE_LIMIT,
-  FREE_MONTHLY_LIMITS,
+  FREE_METER_WINDOWS,
+  FREE_TIER_LIMITS,
   PRO_ENTITLEMENT_ID,
   canAddBottle,
   cellarHint,
@@ -47,8 +48,9 @@ describe('meterHint', () => {
   });
 
   it('warns before the wall, in the feature the user is looking at', () => {
+    // Scans are a lifetime meter, so their hint must not promise a monthly reset.
     expect(meterHint({ isPro: false, task: 'label_scan', remaining: 3 })).toBe(
-      '3 free scans left this month'
+      '3 free scans left'
     );
     expect(meterHint({ isPro: false, task: 'chat', remaining: 5 })).toBe(
       '5 free sommelier messages left this month'
@@ -57,7 +59,7 @@ describe('meterHint', () => {
 
   it('gets the singular right, because "1 free scans left" reads as a bug', () => {
     expect(meterHint({ isPro: false, task: 'label_scan', remaining: 1 })).toBe(
-      '1 free scan left this month'
+      '1 free scan left'
     );
     expect(meterHint({ isPro: false, task: 'chat', remaining: 1 })).toBe(
       '1 free sommelier message left this month'
@@ -156,14 +158,15 @@ describe('meter bus', () => {
 describe('client mirror matches the server', () => {
   it('uses the same free allowances the edge function enforces', () => {
     // If this fails, the app is promising an allowance the server will refuse.
-    expect(FREE_MONTHLY_LIMITS).toEqual({ ...server.FREE_MONTHLY_LIMITS });
+    expect(FREE_TIER_LIMITS).toEqual({ ...server.FREE_TIER_LIMITS });
+    expect(FREE_METER_WINDOWS).toEqual({ ...server.FREE_METER_WINDOWS });
     expect(FREE_CELLAR_BOTTLE_LIMIT).toBe(server.FREE_CELLAR_BOTTLE_LIMIT);
     expect(PRO_ENTITLEMENT_ID).toBe(server.PRO_ENTITLEMENT_ID);
   });
 
   it('agrees with the server on whether a given call is allowed', () => {
-    for (const task of Object.keys(FREE_MONTHLY_LIMITS)) {
-      for (let used = 0; used <= FREE_MONTHLY_LIMITS[task] + 1; used++) {
+    for (const task of Object.keys(FREE_TIER_LIMITS)) {
+      for (let used = 0; used <= FREE_TIER_LIMITS[task] + 1; used++) {
         expect(remainingFree(task, used)).toBe(
           server.meterDecision({ isPro: false, task, used }).remaining
         );

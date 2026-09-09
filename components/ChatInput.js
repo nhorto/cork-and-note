@@ -17,7 +17,11 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
-export default function ChatInput({ onSend, disabled }) {
+// `photosLocked` keeps the camera button visible but routes a tap to
+// `onLockedPhotoPress` (the paywall) instead of the picker: free chat is
+// text-only, because a photo in chat is a label scan by the back door. The
+// server refuses it too — this prop is the courtesy, not the enforcement.
+export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhotoPress }) {
   const [text, setText] = useState('');
   const [photos, setPhotos] = useState([]);
   const [sending, setSending] = useState(false);
@@ -82,6 +86,10 @@ export default function ChatInput({ onSend, disabled }) {
   };
 
   const showPhotoOptions = () => {
+    if (photosLocked) {
+      onLockedPhotoPress?.();
+      return;
+    }
     Alert.alert(
       'Add Photo',
       'Choose a source',

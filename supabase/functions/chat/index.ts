@@ -11,6 +11,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 import {
+  FAIR_USE_DAILY_CAPS,
+  FAIR_USE_MONTHLY_CHAT_CAP,
+  FREE_METER_WINDOWS,
+  PHOTO_CHAT_PRO_MESSAGE,
   isEntitlementActive,
   limitReachedMessage,
   meterDecision,
@@ -27,10 +31,11 @@ const MAX_IMAGE_B64_CHARS = 5_000_000; // ~3.7MB decoded per image
 const ALLOWED_MEDIA_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const ALLOWED_ROLES = ["user", "assistant"];
 
-// Rate limits (per authenticated user)
+// Rate limits (per authenticated user). The burst cap is global; the daily and
+// monthly fair-use caps are per task and live in _shared/entitlements.ts so the
+// tests and the client can see the same numbers.
 const SHORT_WINDOW_MIN = 5;
-const MAX_REQUESTS_SHORT = 15; // ≤15 requests / 5 min
-const MAX_REQUESTS_DAY = 150; // ≤150 requests / 24h
+const MAX_REQUESTS_SHORT = 15; // ≤15 requests / 5 min, any task
 
 Deno.serve(async (req: Request) => {
   const cors = corsHeaders(req);
@@ -124,7 +129,10 @@ Deno.serve(async (req: Request) => {
     }
 
     // ── Rate limiting (per user, append-only chat_usage) ──────────────
+    // The fair-use caps are per task (§4.2): normalizeTask sends anything
+    // unrecognised to the stricter, more expensive chat bucket.
     const now = Date.now();
+    const meteredTask = normalizeTask(task);
     const shortWindowStart = new Date(now - SHORT_WINDOW_MIN * 60_000).toISOString();
     const dayStart = new Date(now - 24 * 60 * 60_000).toISOString();
 
@@ -136,6 +144,7 @@ Deno.serve(async (req: Request) => {
       supabaseClient
         .from("chat_usage")
         .select("id", { count: "exact", head: true })
+        .eq("task", meteredTask)
         .gte("created_at", dayStart),
     ]);
 
@@ -152,17 +161,14 @@ Deno.serve(async (req: Request) => {
         429
       );
     }
-    if ((dayRes.count ?? 0) >= MAX_REQUESTS_DAY) {
-      return json({ error: "Daily limit reached. Please try again tomorrow." }, 429);
+    if ((dayRes.count ?? 0) >= FAIR_USE_DAILY_CAPS[meteredTask]) {
+      return json(
+        { error: "Daily fair-use limit reached. Please try again tomorrow." },
+        429
+      );
     }
 
-    // ── Free-tier meter (Pro gate) ────────────────────────────────────
-    // The abuse caps above apply to everyone; this is the monetisation gate.
-    // `task` decides which meter is spent — scans and sommelier messages have
-    // separate monthly allowances (§4.2) — and normalizeTask sends anything
-    // unrecognised to the stricter chat meter.
-    const meteredTask = normalizeTask(task);
-
+    // ── Free-tier meter + Pro fair use (the monetisation gate) ────────
     const { data: entitlement, error: entitlementError } = await supabaseClient
       .from("entitlements")
       .select("is_pro, expires_at")
@@ -177,21 +183,49 @@ Deno.serve(async (req: Request) => {
 
     const isPro = isEntitlementActive(entitlement, now);
 
-    let usedThisMonth = 0;
-    if (!isPro) {
-      const monthRes = await supabaseClient
-        .from("chat_usage")
-        .select("id", { count: "exact", head: true })
-        .eq("task", meteredTask)
-        .gte("created_at", monthWindowStart(now));
-      if (monthRes.error) {
-        console.error("Monthly meter read error:", monthRes.error);
-        return json({ error: "Service temporarily unavailable" }, 503);
+    // Free chat is text-only: a photo in chat would be a free label scan by the
+    // back door, on the more expensive model. The paywall code makes the app
+    // treat this exactly like a spent meter.
+    if (!isPro && meteredTask === "chat") {
+      const hasImages = (messages as Array<Record<string, unknown>>).some(
+        (m) => Array.isArray(m.images) && m.images.length > 0
+      );
+      if (hasImages) {
+        return json({ error: PHOTO_CHAT_PRO_MESSAGE, code: "free_limit_reached" }, 402);
       }
-      usedThisMonth = monthRes.count ?? 0;
     }
 
-    const meter = meterDecision({ isPro, task: meteredTask, used: usedThisMonth });
+    // Usage over the task's window — lifetime for scans, calendar month for
+    // chat (§4.2). The free meter and Pro's monthly chat ceiling read the same
+    // count; Pro scans need no count at all, the daily cap already bounds them.
+    let windowUsed = 0;
+    if (!isPro || meteredTask === "chat") {
+      let usageQuery = supabaseClient
+        .from("chat_usage")
+        .select("id", { count: "exact", head: true })
+        .eq("task", meteredTask);
+      if (FREE_METER_WINDOWS[meteredTask] === "month") {
+        usageQuery = usageQuery.gte("created_at", monthWindowStart(now));
+      }
+      const usageRes = await usageQuery;
+      if (usageRes.error) {
+        console.error("Usage meter read error:", usageRes.error);
+        return json({ error: "Service temporarily unavailable" }, 503);
+      }
+      windowUsed = usageRes.count ?? 0;
+    }
+
+    if (isPro && meteredTask === "chat" && windowUsed >= FAIR_USE_MONTHLY_CHAT_CAP) {
+      return json(
+        {
+          error:
+            "You've reached this month's fair-use limit for the sommelier. It resets on the 1st.",
+        },
+        429
+      );
+    }
+
+    const meter = meterDecision({ isPro, task: meteredTask, used: windowUsed });
     if (!meter.allowed) {
       // 402 rather than 429: this is a paywall, not a slow-down, and the app
       // opens the RevenueCat paywall on exactly this status.
@@ -321,7 +355,7 @@ Deno.serve(async (req: Request) => {
     if (usageError) console.error("Failed to record chat_usage:", usageError);
 
     // Hand back the meter this call just spent, so the app can update its
-    // "2 free scans left this month" hint without a second round-trip.
+    // "2 free scans left" hint without a second round-trip.
     return json({
       response: responseText,
       usage: claudeData.usage,
