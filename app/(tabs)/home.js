@@ -17,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import LogFab from '../../components/LogFab';
+import NearYouRow from '../../components/NearYouRow';
 import TonightsPickCard from '../../components/TonightsPickCard';
 import { DRINK_WINDOW_META, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
@@ -176,6 +177,10 @@ export default function HomeScreen() {
           onPressPlaces={() => router.push('/places')}
           onPressWishlist={() => router.push('/wishlist')}
         />
+
+        {/* Near You — Pro winery discovery from our own directory (#203 P2).
+            Hides itself entirely when location is denied or nothing is near. */}
+        <NearYouRow />
 
         {/* Tonight's pick — AI sommelier grounded in the user's own cellar (#51) */}
         <View style={styles.tonightsPick}>
