@@ -7,9 +7,9 @@
 // winery_id to dedupe. Everything else is tucked behind a "More details" expander, and the
 // form ships with smart defaults (qty 1, 750ml, purchase date = today).
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { canonicalizeRegion, normalizeRegion } from '../lib/cellarRegion';
+import { canonicalizeRegion, normalizeRegion, regionSuggestions } from '../lib/cellarRegion';
 import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
 import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal, varietalText } from '../lib/varietals';
 import theme from '../styles/theme';
@@ -115,8 +115,9 @@ export default function CellarBottleForm({
   // #62 location reuse: distinct storage locations the user has already typed, so
   // "Wine fridge" isn't re-entered three slightly-different ways. [{ name }] shape.
   locationOptions = [],
-  // #88 Stage 1: regions already in the cellar, so "Napa Valley" isn't also
-  // stored as "napa valley" and split across two filter chips. Plain strings.
+  // #88: regions already in the cellar, as plain strings. The curated reference
+  // list is unioned on top of them below, so this may be empty and the field
+  // still suggests.
   regionOptions = [],
   // #53 smart default: prefill purchase date with today (add screen opts in).
   defaultPurchaseToday = false,
@@ -124,6 +125,9 @@ export default function CellarBottleForm({
   const [form, setForm] = useState(() =>
     initialState(initialValues, { defaultPurchaseToday })
   );
+  // The user's own regions first, then every reference region they haven't used
+  // (#88). Recomputed only when their cellar's regions change.
+  const regionItems = useMemo(() => regionSuggestions(regionOptions), [regionOptions]);
   const [error, setError] = useState(null);
   const [showMore, setShowMore] = useState(() =>
     hasDetails(initialState(initialValues, { defaultPurchaseToday }))
@@ -252,11 +256,11 @@ export default function CellarBottleForm({
       return;
     }
     setError(null);
-    // Adopt the user's own existing spelling for a region they've already used
-    // (#88) — the one place we're allowed to rewrite what they typed, and only
-    // ever to something they typed themselves.
+    // Re-spell the region as one of the suggestions on offer (#88) — the one
+    // place we're allowed to rewrite what they typed, and only ever into a name
+    // they were already being offered.
     onSubmit(
-      toBottlePayload({ ...form, region: canonicalizeRegion(form.region, regionOptions) })
+      toBottlePayload({ ...form, region: canonicalizeRegion(form.region, regionItems) })
     );
   };
 
@@ -373,16 +377,19 @@ export default function CellarBottleForm({
           />
           <Field label="Type" value={form.wine_type} onChangeText={set('wine_type')} placeholder="Red, White…" />
 
-          {/* Region reuses regions already typed (#88) — same trick as Location
-              below, so "Napa Valley" doesn't also become "napa valley" and split
-              into two filter chips. Free text stays valid: the list only suggests. */}
+          {/* Region suggests from the user's own cellar AND the curated reference
+              list (#88), so the first Virginia bottle gets suggestions too. The
+              subtitle is the parent chain, which is what separates the Shenandoah
+              Valley in Virginia from the one in the Sierra Foothills. Free text
+              stays valid: the list only ever suggests. */}
           <AutocompleteInput
             label="Region"
             value={form.region}
             onChangeText={set('region')}
             onSelect={(item) => set('region')(item.name)}
-            items={regionOptions.map((name) => ({ name }))}
+            items={regionItems}
             getLabel={(r) => r.name}
+            getSubtitle={(r) => r.subtitle}
             placeholder="Napa Valley…"
           />
 
