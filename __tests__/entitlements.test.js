@@ -68,6 +68,10 @@ describe('normalizeTask', () => {
     expect(normalizeTask('label_scan')).toBe('label_scan');
   });
 
+  it('recognises tonights_pick', () => {
+    expect(normalizeTask('tonights_pick')).toBe('tonights_pick');
+  });
+
   it('sends anything unrecognised to the stricter chat meter', () => {
     // A client that invents a task must not thereby buy the larger allowance.
     for (const task of ['chat', 'scan', '', null, undefined, 42, { task: 'chat' }]) {
@@ -115,6 +119,18 @@ describe('meterDecision', () => {
   it('names the right feature in the wall copy', () => {
     expect(limitReachedMessage('label_scan')).toMatch(/scans/);
     expect(limitReachedMessage('chat')).toMatch(/sommelier messages/);
+    expect(limitReachedMessage('tonights_pick')).toMatch(/Tonight's Pick/);
+  });
+
+  it("blocks Tonight's Pick for free users at any usage — it is Pro-only", () => {
+    // Owner decision 2026-09-09: the site said Pro-only; the meter now agrees.
+    expect(meterDecision({ isPro: false, task: 'tonights_pick', used: 0 })).toMatchObject({
+      allowed: false,
+      limit: 0,
+      remaining: 0,
+      reason: 'free_limit_reached',
+    });
+    expect(meterDecision({ isPro: true, task: 'tonights_pick', used: 0 }).allowed).toBe(true);
   });
 });
 

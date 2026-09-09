@@ -8,10 +8,13 @@
 // callers pass `nowMs` — because a gate that depends on ambient state is a gate
 // nobody can test.
 
-/** Free-tier monthly allowances, by `chat_usage.task` (launch plan §4.2). */
+/** Free-tier monthly allowances, by `chat_usage.task` (launch plan §4.2).
+ * tonights_pick is 0 on purpose: Tonight's Pick is Pro-only (owner decision
+ * 2026-09-09 — the marketing site always said so; the code now agrees). */
 export const FREE_MONTHLY_LIMITS = {
   label_scan: 3,
   chat: 5,
+  tonights_pick: 0,
 } as const;
 
 /** Free-tier cellar size. Enforced client-side; bottles cost us nothing to store. */
@@ -28,7 +31,9 @@ export const PRO_ENTITLEMENT_ID = "pro";
  * meter — an unrecognised task must never buy a cheaper allowance.
  */
 export function normalizeTask(task: unknown): MeteredTask {
-  return task === "label_scan" ? "label_scan" : "chat";
+  if (task === "label_scan") return "label_scan";
+  if (task === "tonights_pick") return "tonights_pick";
+  return "chat";
 }
 
 export type EntitlementRow = {
@@ -113,9 +118,13 @@ export function meterDecision(input: {
 
 /** User-facing copy for a spent meter, so the app and the API agree on wording. */
 export function limitReachedMessage(task: MeteredTask): string {
-  return task === "label_scan"
-    ? `You've used all ${FREE_MONTHLY_LIMITS.label_scan} free scans this month. Upgrade to Pro for unlimited label and tasting-card scans.`
-    : `You've used all ${FREE_MONTHLY_LIMITS.chat} free sommelier messages this month. Upgrade to Pro for unlimited chat.`;
+  if (task === "label_scan") {
+    return `You've used all ${FREE_MONTHLY_LIMITS.label_scan} free scans this month. Upgrade to Pro for unlimited label and tasting-card scans.`;
+  }
+  if (task === "tonights_pick") {
+    return "Tonight's Pick is part of Pro — upgrade and the sommelier will choose from your own cellar.";
+  }
+  return `You've used all ${FREE_MONTHLY_LIMITS.chat} free sommelier messages this month. Upgrade to Pro for unlimited chat.`;
 }
 
 // ── RevenueCat webhook → entitlement rows ──────────────────────────────────
