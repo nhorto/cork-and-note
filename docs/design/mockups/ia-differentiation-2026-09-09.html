@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cork &amp; Note — IA &amp; home mockups: journal, sommelier, wineries (2026-09-09)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  /* Mockup round for the Sommo-differentiation IA work (docs/research/sommo-differentiation.md).
+     Color scheme is PARKED — everything here uses the current Château palette on purpose,
+     so the comparison is about structure, not paint. */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; background: #ECEAE6; padding: 32px 24px 64px; color: #2C2C2C; }
+  h1 { font-family: Georgia, serif; font-weight: 400; font-size: 26px; margin-bottom: 6px; }
+  h2.sec { font-family: Georgia, serif; font-weight: 400; font-size: 20px; margin: 40px 0 4px; }
+  .sub { color: #6E6E6E; font-size: 14px; margin-bottom: 20px; max-width: 780px; line-height: 1.5; }
+  .row { display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-start; }
+  .col { width: 288px; }
+  .col h3 { font-size: 14px; font-weight: 700; margin: 0 0 2px; }
+  .col p.note { font-size: 12px; color: #6E6E6E; line-height: 1.45; margin: 0 0 10px; min-height: 66px; }
+  .col p.verdict { font-size: 11px; line-height: 1.4; margin: 8px 0 0; color: #4A4A4A; }
+  .verdict b.plus { color: #5B7B5B; } .verdict b.minus { color: #9B3B3B; }
+  .phone { width: 288px; height: 560px; border-radius: 32px; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,.16); display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,.08); background: #FAF8F5; position: relative; }
+  .screen { flex: 1; padding: 16px 14px 8px; overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+  .hdr { display: flex; justify-content: space-between; align-items: center; }
+  .kicker { font-size: 8px; letter-spacing: 1.3px; font-weight: 600; color: #7E6430; }
+  .name { font-family: Georgia, serif; font-size: 21px; color: #2C2C2C; }
+  .avatar { width: 32px; height: 32px; border-radius: 16px; background: #722F37; color: #FAF8F5; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+  .card { border-radius: 12px; padding: 12px; background: #F5F2ED; border: 1px solid #D8D2C8; }
+  .card .label { font-size: 8px; letter-spacing: 1.1px; font-weight: 700; color: #7E6430; margin-bottom: 5px; }
+  .card .t { font-family: Georgia, serif; font-size: 14px; color: #2C2C2C; margin-bottom: 3px; line-height: 1.3; }
+  .card .b { font-size: 10px; color: #6E6E6E; line-height: 1.45; }
+  .card.burg { background: #722F37; border-color: #722F37; }
+  .card.burg .label { color: #C9A962; } .card.burg .t { color: #FAF8F5; } .card.burg .b { color: #E8DCC8; }
+  .pill { display: inline-block; font-size: 10px; font-weight: 600; padding: 5px 10px; border-radius: 7px; margin-top: 7px; }
+  .pill.gold { background: #C9A962; color: #2C2C2C; }
+  .pill.burg { background: #722F37; color: #FAF8F5; }
+  .pill.line { border: 1px solid #D8D2C8; color: #4A4A4A; }
+  .prow { display: flex; gap: 6px; }
+  .strip { border-radius: 11px; padding: 9px 11px; font-size: 10px; background: #FFF; border: 1px solid #E0DDD3; color: #4A4A4A; display: flex; justify-content: space-between; align-items: center; }
+  .strip b { color: #722F37; }
+  .probadge { font-size: 7px; font-weight: 800; letter-spacing: .6px; background: #C9A962; color: #2C2C2C; border-radius: 4px; padding: 2px 4px; vertical-align: middle; margin-left: 4px; }
+  /* tab bars */
+  .tabbar { height: 62px; display: flex; align-items: flex-start; padding-top: 8px; position: relative; background: #FAF8F5; border-top: 1px solid #D4C4A8; }
+  .tab { flex: 1; text-align: center; font-size: 8.5px; font-weight: 600; color: #6E6E6E; }
+  .tab.on { color: #722F37; }
+  .tab .ico { display: block; font-size: 16px; margin-bottom: 2px; }
+  .center-slot { flex: 1; position: relative; }
+  .fab { position: absolute; left: 50%; transform: translateX(-50%); top: -22px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 21px; box-shadow: 0 5px 12px rgba(0,0,0,.26); border: 3px solid #FAF8F5; }
+  .fab.stamp { border-radius: 14px; background: #722F37; color: #FAF8F5; }
+  .fab.somm { border-radius: 14px; background: #C9A962; color: #5C1A1A; font-size: 15px; }
+  .minifab { position: absolute; right: 12px; bottom: 74px; background: #722F37; color: #FAF8F5; border-radius: 20px; padding: 9px 14px; font-size: 11px; font-weight: 700; box-shadow: 0 5px 12px rgba(0,0,0,.28); }
+  /* hub sheet */
+  .sheet { position: absolute; left: 10px; right: 10px; bottom: 70px; background: #FFF; border: 1px solid #E0DDD3; border-radius: 16px; padding: 12px; box-shadow: 0 -8px 30px rgba(0,0,0,.18); }
+  .sheet .srow { display: flex; align-items: center; gap: 9px; padding: 7px 4px; font-size: 11px; font-weight: 600; color: #2C2C2C; border-bottom: 1px solid #F0EDE6; }
+  .sheet .srow:last-child { border-bottom: none; }
+  .sheet .sico { width: 26px; height: 26px; border-radius: 8px; background: #F5F2ED; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  /* winery page bits */
+  .photo { height: 120px; border-radius: 12px; background: linear-gradient(135deg, #8A9A7B, #5B7B5B 60%, #3E5843); position: relative; }
+  .photo .attr { position: absolute; right: 7px; bottom: 6px; font-size: 7px; color: #FFFFFFCC; background: rgba(0,0,0,.35); padding: 2px 5px; border-radius: 4px; }
+  .wname { font-family: Georgia, serif; font-size: 19px; color: #2C2C2C; }
+  .wsub { font-size: 10px; color: #6E6E6E; }
+  .facts { display: flex; gap: 8px; flex-wrap: wrap; font-size: 10px; color: #4A4A4A; align-items: center; }
+  .facts .star { color: #B8976A; font-weight: 700; }
+  .hours { display: flex; gap: 4px; font-size: 8px; color: #6E6E6E; }
+  .hours span { background: #F5F2ED; border: 1px solid #E0DDD3; border-radius: 5px; padding: 3px 5px; }
+  .photostrip { display: flex; gap: 6px; }
+  .photostrip div { flex: 1; height: 44px; border-radius: 8px; background: #D8D2C8; }
+  .callout { background: #FFF8EC; border: 1px solid #E8DCC8; border-radius: 10px; padding: 10px 12px; font-size: 12px; line-height: 1.5; color: #4A4A4A; max-width: 780px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+  <h1>Home &amp; tab-bar directions — journal and sommelier up front, wineries leaned in</h1>
+  <p class="sub">
+    Goal: make the Journal and Sommelier reachable without hiding the Cellar, lean into the
+    winery/tasting identity, and stop resembling Sommo's bar (Today · Cellar · <b>raised burgundy
+    scan circle</b> · Journal · Explore). Palette unchanged on purpose — this round is about
+    structure. In every option, <b>Profile leaves the bar</b> (it lives on the Home avatar, top
+    right, like every modern app) — that's the slot that frees the Journal.
+  </p>
+
+  <h2 class="sec">1 · Four tab-bar options</h2>
+  <p class="sub">Mix and match — the bars are independent of the home layouts in section 2.</p>
+  <div class="row">
+
+    <!-- OPTION 1 -->
+    <div class="col">
+      <h3>Option 1 — Keep the ＋, restyled</h3>
+      <p class="note">Journal gets Profile's slot; Explore becomes <b>Wineries</b>; the raised circle becomes a square "cork stamp." Sommelier via Home cards, winery pages, and the hub. Smallest change.</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="hdr"><div><div class="kicker">WELCOME BACK</div><div class="name">Nick</div></div><div class="avatar">N</div></div>
+          <div class="card burg"><div class="label">TONIGHT'S PICK</div><div class="t">The 2021 Nebbiolo is ready.</div><div class="b">From your cellar · peak through 2027.</div></div>
+          <div class="strip"><span><b>6 bottles</b> ready to drink</span><span>›</span></div>
+          <div class="card"><div class="label">YOUR JOURNEY</div><div class="b">14 wineries · 3 regions · 62 wines</div></div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><span class="ico">⌂</span>Home</div>
+          <div class="tab"><span class="ico">▤</span>Journal</div>
+          <div class="center-slot"><div class="fab stamp">＋</div></div>
+          <div class="tab"><span class="ico">◎</span>Wineries</div>
+          <div class="tab"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+      <p class="verdict"><b class="plus">＋</b> one-tap everything; keeps the hub's great UX. <b class="minus">−</b> bar contents now read even closer to Sommo's set; the raise survives (restyled).</p>
+    </div>
+
+    <!-- OPTION 2 -->
+    <div class="col">
+      <h3>Option 2 — Sommelier takes the center</h3>
+      <p class="note">The thumb spot goes to our headline feature: a gold sommelier button. Logging moves to the Home hero, "Log a tasting here" on winery pages, and ＋ in the Journal header.</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="hdr"><div><div class="kicker">WELCOME BACK</div><div class="name">Nick</div></div><div class="avatar">N</div></div>
+          <div class="card burg"><div class="label">LOG A WINE</div><div class="t">Had something good?</div><div class="b">Capture it before the name fades.</div><span class="pill gold">＋ Log a tasting</span></div>
+          <div class="strip"><span><b>6 bottles</b> ready to drink</span><span>›</span></div>
+          <div class="card"><div class="label">YOUR JOURNEY</div><div class="b">14 wineries · 3 regions · 62 wines</div></div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><span class="ico">⌂</span>Home</div>
+          <div class="tab"><span class="ico">▤</span>Journal</div>
+          <div class="center-slot"><div class="fab somm">🍷</div></div>
+          <div class="tab"><span class="ico">◎</span>Wineries</div>
+          <div class="tab"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+      <p class="verdict"><b class="plus">＋</b> nobody centers an AI sommelier — instantly not-Sommo, and it sells Pro. <b class="minus">−</b> logging loses its dedicated thumb spot.</p>
+    </div>
+
+    <!-- OPTION 3 -->
+    <div class="col">
+      <h3>Option 3 — Flat five, floating Log</h3>
+      <p class="note">No raised center at all — the most-copied element disappears. Sommelier becomes a real tab. Logging is a floating "＋ Log" pill on Home, Journal, and winery pages.</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="hdr"><div><div class="kicker">WELCOME BACK</div><div class="name">Nick</div></div><div class="avatar">N</div></div>
+          <div class="card burg"><div class="label">TONIGHT'S PICK</div><div class="t">The 2021 Nebbiolo is ready.</div><div class="b">From your cellar · peak through 2027.</div></div>
+          <div class="strip"><span><b>6 bottles</b> ready to drink</span><span>›</span></div>
+          <div class="card"><div class="label">YOUR JOURNEY</div><div class="b">14 wineries · 3 regions · 62 wines</div></div>
+        </div>
+        <div class="minifab">＋ Log</div>
+        <div class="tabbar">
+          <div class="tab on"><span class="ico">⌂</span>Home</div>
+          <div class="tab"><span class="ico">▤</span>Journal</div>
+          <div class="tab"><span class="ico">◎</span>Wineries</div>
+          <div class="tab"><span class="ico">🍷</span>Somm</div>
+          <div class="tab"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+      <p class="verdict"><b class="plus">＋</b> cleanest break from Sommo; journal + sommelier + wineries all first-class. <b class="minus">−</b> loses the hub; floating pill can cover content.</p>
+    </div>
+
+    <!-- OPTION 4 -->
+    <div class="col">
+      <h3>Option 4 — Hub keeps the slot (shown open)</h3>
+      <p class="note">Like Option 1, but the point is what the ＋ opens: not a scanner — a quick-actions hub, now including the sommelier. Shown mid-open. The stamp form + hub behavior is the differentiation.</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="hdr"><div><div class="kicker">WELCOME BACK</div><div class="name">Nick</div></div><div class="avatar">N</div></div>
+          <div class="card burg"><div class="label">TONIGHT'S PICK</div><div class="t">The 2021 Nebbiolo is ready.</div><div class="b">From your cellar · peak through 2027.</div></div>
+          <div class="strip"><span><b>6 bottles</b> ready to drink</span><span>›</span></div>
+        </div>
+        <div class="sheet">
+          <div class="srow"><span class="sico">🍷</span>Log a tasting</div>
+          <div class="srow"><span class="sico">📷</span>Scan a label</div>
+          <div class="srow"><span class="sico">🧺</span>Add a bottle to the cellar</div>
+          <div class="srow"><span class="sico">💬</span>Ask the sommelier</div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><span class="ico">⌂</span>Home</div>
+          <div class="tab"><span class="ico">◎</span>Wineries</div>
+          <div class="center-slot"><div class="fab stamp">＋</div></div>
+          <div class="tab"><span class="ico">▤</span>Journal</div>
+          <div class="tab"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+      <p class="verdict"><b class="plus">＋</b> everything reachable in two taps; hub ≠ scan is a real functional difference. <b class="minus">−</b> sommelier still behind a tap; silhouette still cousin-close to Sommo.</p>
+    </div>
+  </div>
+
+  <h2 class="sec">2 · Two home-screen directions</h2>
+  <div class="row">
+    <!-- HOME V1 -->
+    <div class="col">
+      <h3>Home A — “The Passport” (journey-first)</h3>
+      <p class="note">Leads with where you've been and what's near you (the module Sommo can't copy), then the cellar. Nearby wineries is the new Google-powered Pro surface.</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="hdr"><div><div class="kicker">WELCOME BACK</div><div class="name">Nick</div></div><div class="avatar">N</div></div>
+          <div class="card" style="background:linear-gradient(135deg,#EDE8E0,#E2DECF);">
+            <div class="label">YOUR JOURNEY</div>
+            <div class="t">14 wineries · 3 regions · 62 wines</div>
+            <div class="b">Last visit: Early Mountain Vineyards, Madison VA</div>
+            <span class="pill line">Open your map ›</span>
+          </div>
+          <div class="card">
+            <div class="label">NEAR YOU <span class="probadge">PRO</span></div>
+            <div class="prow">
+              <div style="flex:1;background:#FFF;border:1px solid #E0DDD3;border-radius:9px;padding:8px;">
+                <div style="font-size:10px;font-weight:700;">Stone Tower</div>
+                <div style="font-size:9px;color:#6E6E6E;">★ 4.7 · 18 min · Open</div>
+              </div>
+              <div style="flex:1;background:#FFF;border:1px solid #E0DDD3;border-radius:9px;padding:8px;">
+                <div style="font-size:10px;font-weight:700;">Breaux</div>
+                <div style="font-size:9px;color:#6E6E6E;">★ 4.6 · 25 min · Open</div>
+              </div>
+            </div>
+          </div>
+          <div class="card burg"><div class="label">TONIGHT'S PICK</div><div class="t">The 2021 Nebbiolo is ready.</div></div>
+          <div class="strip"><span><b>6 bottles</b> ready to drink</span><span>›</span></div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><span class="ico">⌂</span>Home</div>
+          <div class="tab"><span class="ico">▤</span>Journal</div>
+          <div class="center-slot"><div class="fab stamp">＋</div></div>
+          <div class="tab"><span class="ico">◎</span>Wineries</div>
+          <div class="tab"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOME V2 -->
+    <div class="col">
+      <h3>Home B — “Tasting day” (context-aware)</h3>
+      <p class="note">When you're at/near a logged or known winery, Home leads with the moment: log a tasting here. Otherwise this card yields to the journal. Recent entries surface the journal on Home itself.</p>
+      <div class="phone">
+        <div class="screen">
+          <div class="hdr"><div><div class="kicker">SATURDAY · MADISON, VA</div><div class="name">Nick</div></div><div class="avatar">N</div></div>
+          <div class="card burg">
+            <div class="label">YOU'RE AT EARLY MOUNTAIN</div>
+            <div class="t">Pour one? Log it while it's in the glass.</div>
+            <span class="pill gold">＋ Log a tasting here</span>
+          </div>
+          <div class="card">
+            <div class="label">RECENT ENTRIES</div>
+            <div class="t" style="font-size:12px;">2022 Petit Manseng — “honey but dry?!” ★★★★</div>
+            <div class="b">Yesterday · Early Mountain</div>
+          </div>
+          <div class="card"><div class="label">YOUR JOURNEY</div><div class="b">14 wineries · 3 regions · 62 wines</div></div>
+          <div class="strip"><span><b>6 bottles</b> ready to drink</span><span>›</span></div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><span class="ico">⌂</span>Home</div>
+          <div class="tab"><span class="ico">▤</span>Journal</div>
+          <div class="center-slot"><div class="fab stamp">＋</div></div>
+          <div class="tab"><span class="ico">◎</span>Wineries</div>
+          <div class="tab"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WINERY PAGE -->
+    <div class="col">
+      <h3>3 · Winery page with Google enrichment</h3>
+      <p class="note">The winery-lean centerpiece: your history + live Google data (rating, hours, photos, about) on one page. Enriched rows are Pro. Google data needs attribution and can't be stored long-term.</p>
+      <div class="phone">
+        <div class="screen" style="gap:8px;">
+          <div class="photo"><div class="attr">Photo · Google</div></div>
+          <div>
+            <div class="wname">Early Mountain Vineyards</div>
+            <div class="wsub">Madison, Virginia · Monticello AVA</div>
+          </div>
+          <div class="facts"><span class="star">★ 4.8</span><span>(312 on Google)</span><span>·</span><span>Open until 6 PM</span><span>·</span><span>34 min away</span><span class="probadge">PRO</span></div>
+          <div class="prow">
+            <span class="pill burg" style="margin-top:0;">🍷 Log a tasting here</span>
+            <span class="pill line" style="margin-top:0;">Directions</span>
+            <span class="pill line" style="margin-top:0;">Website</span>
+          </div>
+          <div class="card" style="padding:10px;">
+            <div class="label">YOUR HISTORY</div>
+            <div class="b" style="color:#4A4A4A;"><b>2 visits · 9 wines.</b> Last time: “the Petit Manseng — buy this again.”</div>
+          </div>
+          <div class="card" style="padding:10px;">
+            <div class="label">ABOUT <span class="probadge">PRO</span></div>
+            <div class="b">Destination winery with a tasting room overlooking the Blue Ridge; known for Petit Manseng and Bordeaux-style blends.</div>
+          </div>
+          <div class="photostrip"><div></div><div></div><div></div></div>
+          <span class="pill line">💬 Ask the sommelier about their wines</span>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><span class="ico">⌂</span>Home</div>
+          <div class="tab"><span class="ico">▤</span>Journal</div>
+          <div class="center-slot"><div class="fab stamp">＋</div></div>
+          <div class="tab on"><span class="ico">◎</span>Wineries</div>
+          <div class="tab"><span class="ico">☰</span>Cellar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:24px"></div>
+  <div class="callout">
+    <b>How to read this round:</b> pick a bar (1–4), a home (A/B — they can blend: B's context card
+    can sit atop A when location fires), and thumbs-up/down the winery page. The Wineries tab in
+    all options = map + your visited list + nearby search in one place. Notes: Option 2's gold
+    center and Option 3's flat bar are the two strongest "not Sommo" statements; Options 1/4 are
+    the smallest engineering changes. Google-data rows are gated Pro and require Google
+    attribution; hours/ratings are fetched live (their terms limit caching), so those rows degrade
+    gracefully offline.
+  </div>
+</body>
+</html>
