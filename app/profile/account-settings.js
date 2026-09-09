@@ -13,6 +13,7 @@ import {
   View
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
+import { usePro } from '../../hooks/usePro';
 import { accountService } from '../../lib/account';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
@@ -22,11 +23,31 @@ const SERIF = typography.fonts.serif;
 export default function AccountSettingsScreen() {
   const router = useRouter();
   const { user, signOut } = useContext(AuthContext);
+  const { isPro, purchasesAvailable, restore, presentPaywall } = usePro();
 
   // Local state for settings
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locationPermissionStatus, setLocationPermissionStatus] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+
+  // Required on the paywall AND in Settings by App Store guideline 3.1.2. It is
+  // also the only way back for someone who reinstalled or changed device, so it
+  // must be here even when we believe they are already Pro.
+  const handleRestore = async () => {
+    if (restoring) return;
+    setRestoring(true);
+    const result = await restore();
+    setRestoring(false);
+    if (result.isPro) {
+      Alert.alert('Welcome back', 'Your Cork & Note Pro subscription has been restored.');
+      return;
+    }
+    Alert.alert(
+      'Nothing to restore',
+      result.error || 'We could not find a previous purchase for this Apple Account.'
+    );
+  };
 
   const handleDeleteAccount = async () => {
     if (deleting) return;
@@ -132,6 +153,45 @@ export default function AccountSettingsScreen() {
               thumbColor={colors.neutral.cream}
             />
           </View>
+        </View>
+
+        {/* Subscription Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Subscription</Text>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Plan:</Text>
+            <Text style={styles.infoValue}>{isPro ? 'Cork & Note Pro' : 'Free'}</Text>
+          </View>
+
+          {!isPro && purchasesAvailable ? (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => presentPaywall('settings')}
+              accessibilityRole="button"
+            >
+              <Ionicons name="sparkles" size={20} color={colors.primary.burgundy} />
+              <Text style={styles.actionButtonText}>Upgrade to Pro</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+          ) : null}
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.lastButton]}
+            disabled={restoring}
+            onPress={handleRestore}
+            accessibilityRole="button"
+          >
+            <Ionicons name="refresh" size={20} color={colors.primary.burgundy} />
+            <Text style={styles.actionButtonText}>
+              {restoring ? 'Restoring…' : 'Restore purchases'}
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+          </TouchableOpacity>
+
+          <Text style={styles.infoNote}>
+            Subscriptions are billed to your Apple Account and can be managed or cancelled there.
+          </Text>
         </View>
 
         {/* Account Actions Section */}
@@ -256,6 +316,10 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   dangerButton: {
+    borderBottomWidth: 0,
+  },
+  // The last row in a section drops the divider hairline.
+  lastButton: {
     borderBottomWidth: 0,
   },
   dangerText: {
