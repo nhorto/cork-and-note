@@ -35,11 +35,20 @@ create policy "own entitlement select" on public.entitlements
 
 -- ── public.chat_usage.task ─────────────────────────────────────────────────
 -- The free tier meters scans (3/month) and sommelier messages (5/month)
--- separately, so usage rows need to say which one they were. Existing rows
--- predate the Pro tier and take the 'chat' default, the conservative choice:
--- it can only make the current month's chat meter stricter, never looser.
-alter table public.chat_usage
-  add column if not exists task text not null default 'chat';
+-- separately, so usage rows need to say which one they were.
+--
+-- Rows written before this migration did not record a task, and guessing one
+-- would be a fabrication that retroactively spends a meter the user never agreed
+-- to — an existing tester could open the app to an exhausted allowance. They are
+-- marked 'legacy', which matches neither meter, so metering starts the day the
+-- tier ships. New rows default to 'chat', the stricter of the two, so a caller
+-- that forgets to say what it was cannot land in the cheaper bucket.
+alter table public.chat_usage add column if not exists task text;
+
+update public.chat_usage set task = 'legacy' where task is null;
+
+alter table public.chat_usage alter column task set default 'chat';
+alter table public.chat_usage alter column task set not null;
 
 create index if not exists chat_usage_user_task_time_idx
   on public.chat_usage (user_id, task, created_at desc);
