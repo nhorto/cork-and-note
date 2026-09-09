@@ -62,7 +62,7 @@ export default function ForgotPasswordScreen() {
         accessibilityLabel="Go back"
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
       >
-        <Ionicons name="arrow-back" size={24} color={colors.neutral.charcoal} />
+        <Ionicons name="arrow-back" size={24} color={colors.neutral.ink} />
       </TouchableOpacity>
 
       <View style={styles.contentContainer}>
@@ -96,7 +96,7 @@ export default function ForgotPasswordScreen() {
             </Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="mail" size={20} color={colors.primary.burgundy} style={styles.inputIcon} />
+              <Ionicons name="mail" size={20} color={colors.primary.base} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Email address"
@@ -104,7 +104,7 @@ export default function ForgotPasswordScreen() {
                 onChangeText={setEmail}
                 autoCapitalize="none"
                 keyboardType="email-address"
-                placeholderTextColor={colors.neutral.silver}
+                placeholderTextColor={colors.neutral.placeholder}
               />
             </View>
 
@@ -114,7 +114,7 @@ export default function ForgotPasswordScreen() {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color={colors.neutral.cream} />
+                <ActivityIndicator color={colors.neutral.bg} />
               ) : (
                 <Text style={styles.resetButtonText}>Send reset link</Text>
               )}
@@ -136,7 +136,7 @@ export default function ForgotPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   backButton: {
     position: 'absolute',
@@ -165,14 +165,14 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 26,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: spacing.sm,
     textAlign: 'center',
     letterSpacing: 0.3,
   },
   subtitle: {
     fontSize: 15,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -181,11 +181,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: 12,
     marginBottom: spacing.lg,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     height: 52,
   },
   inputIcon: {
@@ -194,10 +194,10 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   resetButton: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     height: 52,
     justifyContent: 'center',
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   resetButtonText: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   cancelText: {
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontSize: 16,
   },
   successContainer: {
@@ -226,18 +226,18 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 24,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
   successText: {
     fontSize: 15,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     textAlign: 'center',
     marginBottom: 30,
   },
   backToLoginButton: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     height: 52,
     justifyContent: 'center',
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   backToLoginText: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,

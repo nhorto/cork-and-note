@@ -57,7 +57,7 @@ export default function CellarInsightsScreen() {
 
       {!loaded ? (
         <View style={styles.center}>
-          <ActivityIndicator color={colors.primary.burgundy} />
+          <ActivityIndicator color={colors.primary.base} />
         </View>
       ) : !insights || insights.isEmpty ? (
         <EmptyState onAdd={() => router.push('/cellar/add')} />
@@ -138,14 +138,14 @@ function Section({ title, caption, children }) {
 function EmptyState({ onAdd }) {
   return (
     <View style={styles.empty}>
-      <Ionicons name="analytics-outline" size={40} color={colors.gold.shimmer} />
+      <Ionicons name="analytics-outline" size={40} color={colors.accent.strong} />
       <Text style={styles.emptyTitle}>Your collection, at a glance</Text>
       <Text style={styles.emptyText}>
         Add a few bottles and we&apos;ll show how your cellar breaks down by type, region and
         vintage — plus what you&apos;ve been enjoying lately.
       </Text>
       <TouchableOpacity style={styles.emptyBtn} activeOpacity={0.9} onPress={onAdd}>
-        <Ionicons name="add" size={18} color={colors.neutral.cream} />
+        <Ionicons name="add" size={18} color={colors.neutral.bg} />
         <Text style={styles.emptyBtnText}>Add a bottle</Text>
       </TouchableOpacity>
     </View>
@@ -153,7 +153,7 @@ function EmptyState({ onAdd }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
 
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
@@ -163,34 +163,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     paddingVertical: spacing.lg,
     paddingHorizontal: spacing.md,
   },
   totalCard: { flex: 1, alignItems: 'center' },
-  totalNum: { fontFamily: SERIF, fontSize: 34, color: colors.primary.burgundy },
-  totalLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginTop: 2 },
-  totalDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.neutral.stone },
+  totalNum: { fontFamily: SERIF, fontSize: 34, color: colors.primary.base },
+  totalLabel: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginTop: 2 },
+  totalDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.neutral.border },
   breadth: {
     width: '100%',
     textAlign: 'center',
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: spacing.md,
   },
 
   // Sections
   section: { marginTop: spacing.xl },
-  sectionLabel: { ...typography.body.caption, color: colors.gold.text },
-  sectionCaption: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
+  sectionLabel: { ...typography.body.caption, color: colors.accent.ink },
+  sectionCaption: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 2 },
   sectionBody: {
     marginTop: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
   },
@@ -204,14 +204,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: spacing.md,
     textAlign: 'center',
   },
   emptyText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     marginTop: spacing.sm,
     lineHeight: 22,
@@ -220,11 +220,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     marginTop: spacing.lg,
   },
-  emptyBtnText: { ...typography.body.regular, color: colors.neutral.cream, fontWeight: '600' },
+  emptyBtnText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
 });

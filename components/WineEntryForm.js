@@ -628,7 +628,7 @@ export default function WineEntryForm({
                   activeOpacity={0.7}
                 >
                   <Text style={styles.varietalChipText}>{g}</Text>
-                  <Ionicons name="close" size={14} color={colors.primary.burgundy} />
+                  <Ionicons name="close" size={14} color={colors.primary.base} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -653,7 +653,7 @@ export default function WineEntryForm({
               accessibilityRole="button"
               accessibilityLabel="Add"
             >
-              <Ionicons name="add" size={22} color={colors.neutral.cream} />
+              <Ionicons name="add" size={22} color={colors.neutral.bg} />
             </TouchableOpacity>
           </View>
         </View>
@@ -711,9 +711,9 @@ export default function WineEntryForm({
           style={styles.sommelierButton}
           onPress={() => setShowChatModal(true)}
         >
-          <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
+          <Ionicons name="sparkles" size={18} color={colors.accent.base} />
           <Text style={styles.sommelierButtonText}>Ask the sommelier</Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.gold.shimmer} />
+          <Ionicons name="chevron-forward" size={16} color={colors.accent.strong} />
         </TouchableOpacity>
       </View>
 
@@ -747,12 +747,12 @@ export default function WineEntryForm({
         {/* Photo buttons */}
         <View style={styles.photoButtons}>
           <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
-            <Ionicons name="camera" size={20} color={colors.neutral.cream} />
+            <Ionicons name="camera" size={20} color={colors.neutral.bg} />
             <Text style={styles.photoButtonText}>Take photo</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-            <Ionicons name="images" size={20} color={colors.neutral.cream} />
+            <Ionicons name="images" size={20} color={colors.neutral.bg} />
             <Text style={styles.photoButtonText}>Choose photos</Text>
           </TouchableOpacity>
         </View>
@@ -835,7 +835,7 @@ export default function WineEntryForm({
                     {type}
                   </Text>
                   {wineType === type && (
-                    <Ionicons name="checkmark" size={20} color={colors.primary.wine} />
+                    <Ionicons name="checkmark" size={20} color={colors.primary.deep} />
                   )}
                 </TouchableOpacity>
               ))}
@@ -877,7 +877,7 @@ export default function WineEntryForm({
           <View style={styles.confirmContent}>
             <View style={styles.modalHeader}>
               <View style={styles.confirmHeaderLeft}>
-                <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
+                <Ionicons name="sparkles" size={18} color={colors.accent.base} />
                 <Text style={styles.modalTitle}>Review suggestions</Text>
               </View>
               <TouchableOpacity
@@ -906,7 +906,7 @@ export default function WineEntryForm({
                   <Ionicons
                     name={field.apply ? 'checkbox' : 'square-outline'}
                     size={22}
-                    color={field.apply ? colors.primary.burgundy : colors.neutral.silver}
+                    color={field.apply ? colors.primary.base : colors.neutral.placeholder}
                     style={styles.confirmCheckbox}
                   />
                   <View style={styles.confirmRowBody}>
@@ -984,7 +984,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     padding: spacing.lg,
   },
   // Extra bottom room so the keyboard-driven scroll can lift the last field
@@ -997,7 +997,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.md,
   },
@@ -1006,17 +1006,17 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginBottom: spacing.sm,
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     ...typography.body.regular,
-    backgroundColor: colors.neutral.parchment,
-    color: colors.neutral.charcoal,
+    backgroundColor: colors.neutral.surface,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
   textArea: {
@@ -1028,17 +1028,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
   },
   selectorText: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   selectorPlaceholder: {
-    color: colors.neutral.silver,
+    color: colors.neutral.placeholder,
   },
 
   // Multi-varietal chips + add row (#135)
@@ -1055,13 +1055,13 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.full,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   varietalChipText: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
   varietalAddRow: {
@@ -1076,7 +1076,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1092,15 +1092,15 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.md,
     marginTop: spacing.sm,
   },
   sommelierButtonText: {
     ...typography.body.regular,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     fontWeight: '600',
     fontFamily: SERIF,
     flex: 1,
@@ -1120,34 +1120,34 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     padding: spacing.md,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
   },
   photoButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '500',
   },
   noPhotosContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.xl,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderStyle: 'dashed',
   },
   noPhotosText: {
     ...typography.body.small,
     marginTop: spacing.sm,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   photoGallery: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     padding: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   photoContainer: {
     position: 'relative',
@@ -1158,13 +1158,13 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   removePhotoButton: {
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: 12,
   },
 
@@ -1183,7 +1183,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     maxHeight: '80%',
@@ -1194,11 +1194,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   modalTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
   typeOption: {
@@ -1207,23 +1207,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   selectedTypeOption: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
   },
   typeOptionText: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   selectedTypeOptionText: {
     fontWeight: '600',
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
   },
 
   // AI Suggestions Confirmation Modal
   confirmContent: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     maxHeight: '85%',
@@ -1236,7 +1236,7 @@ const styles = StyleSheet.create({
   },
   confirmSubtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     paddingBottom: spacing.sm,
@@ -1250,7 +1250,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   confirmCheckbox: {
     marginTop: 2,
@@ -1261,16 +1261,16 @@ const styles = StyleSheet.create({
   },
   confirmFieldLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginBottom: spacing.xs,
   },
   confirmCurrent: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   confirmSuggested: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: 2,
   },
@@ -1317,6 +1317,6 @@ const styles = StyleSheet.create({
   },
   photoModalText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
 });

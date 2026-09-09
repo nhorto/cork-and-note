@@ -390,10 +390,10 @@ export default function LogSessionForm({
   const renderWineCard = (wine, index) => {
     const typeColor =
       wine.type?.toLowerCase() === 'red'
-        ? colors.primary.burgundy
+        ? colors.primary.base
         : wine.type?.toLowerCase() === 'white'
-        ? colors.gold.rich
-        : colors.primary.rosé;
+        ? colors.accent.base
+        : colors.primary.soft;
     return (
       // Wines are removable, so an index key would misalign rows after a delete.
       <View key={wine.id ?? `draft-${index}-${wine.name ?? ''}`} style={styles.wineCard}>
@@ -408,7 +408,7 @@ export default function LogSessionForm({
             </Text>
             {priorFlags[index] ? (
               <View style={styles.priorTag}>
-                <Ionicons name="time-outline" size={10} color={colors.primary.burgundy} />
+                <Ionicons name="time-outline" size={10} color={colors.primary.base} />
                 <Text style={styles.priorTagText}>
                   {priorFlags[index].tier === TIER.RELATED && priorFlags[index].otherVintage
                     ? `You've tasted the ${priorFlags[index].otherVintage}`
@@ -419,14 +419,14 @@ export default function LogSessionForm({
           </View>
           {wine.overallRating ? (
             <View style={styles.scorePill}>
-              <Ionicons name="star" size={13} color={colors.gold.rich} />
+              <Ionicons name="star" size={13} color={colors.accent.base} />
               <Text style={styles.scoreText}>{Number(wine.overallRating).toFixed(1)}</Text>
             </View>
           ) : null}
         </View>
         <View style={styles.wineActions}>
           <TouchableOpacity style={styles.actionLink} onPress={() => handleEditWine(index)}>
-            <Ionicons name="pencil-outline" size={15} color={colors.primary.burgundy} />
+            <Ionicons name="pencil-outline" size={15} color={colors.primary.base} />
             <Text style={styles.actionLinkText}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionLink} onPress={() => handleDeleteWine(index)}>
@@ -446,14 +446,14 @@ export default function LogSessionForm({
           onPress={() => setShowPlacePicker(true)}
           activeOpacity={0.85}
         >
-          <Ionicons name="location-outline" size={20} color={colors.primary.burgundy} />
+          <Ionicons name="location-outline" size={20} color={colors.primary.base} />
           <View style={styles.addPlaceText}>
             <Text style={styles.addPlaceTitle}>
               Add a place <Text style={styles.optTag}>· optional</Text>
             </Text>
             <Text style={styles.addPlaceSub}>Say where you had it, and drop a pin.</Text>
           </View>
-          <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+          <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
         </TouchableOpacity>
       );
     }
@@ -462,7 +462,7 @@ export default function LogSessionForm({
     return (
       <View style={styles.placeCard}>
         <View style={styles.placeIcon}>
-          <Ionicons name={meta.icon} size={20} color={colors.primary.burgundy} />
+          <Ionicons name={meta.icon} size={20} color={colors.primary.base} />
         </View>
         <View style={styles.placeBody}>
           <Text style={styles.placeName} numberOfLines={1}>
@@ -486,7 +486,7 @@ export default function LogSessionForm({
             accessibilityLabel="Edit"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="pencil-outline" size={16} color={colors.primary.burgundy} />
+            <Ionicons name="pencil-outline" size={16} color={colors.primary.base} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setPlace(null)}
@@ -495,7 +495,7 @@ export default function LogSessionForm({
             accessibilityLabel="Remove"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="close" size={18} color={colors.neutral.pewter} />
+            <Ionicons name="close" size={18} color={colors.neutral.inkTertiary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -513,7 +513,7 @@ export default function LogSessionForm({
           accessibilityRole="button"
           accessibilityLabel="Close"
         >
-          <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
+          <Ionicons name="close" size={24} color={colors.neutral.ink} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>
@@ -535,7 +535,7 @@ export default function LogSessionForm({
         {/* Wines */}
         {wines.length === 0 ? (
           <View style={styles.emptyWines}>
-            <Ionicons name="wine-outline" size={28} color={colors.neutral.silver} />
+            <Ionicons name="wine-outline" size={28} color={colors.neutral.placeholder} />
             <Text style={styles.emptyWinesText}>No wines yet</Text>
           </View>
         ) : (
@@ -543,7 +543,7 @@ export default function LogSessionForm({
         )}
 
         <TouchableOpacity style={styles.addWineBtn} onPress={handleAddWine} activeOpacity={0.85}>
-          <Ionicons name="add" size={20} color={colors.neutral.cream} />
+          <Ionicons name="add" size={20} color={colors.neutral.bg} />
           <Text style={styles.addWineBtnText}>
             {wines.length === 0 ? 'Add wine' : 'Add another wine'}
           </Text>
@@ -560,8 +560,8 @@ export default function LogSessionForm({
           value={visitDate}
           onChangeText={setVisitDate}
           placeholder="YYYY-MM-DD"
-          placeholderTextColor={colors.neutral.silver}
-          selectionColor={colors.primary.burgundy}
+          placeholderTextColor={colors.neutral.placeholder}
+          selectionColor={colors.primary.base}
         />
         <Text
           style={[
@@ -580,10 +580,10 @@ export default function LogSessionForm({
           value={notes}
           onChangeText={setNotes}
           placeholder="Anything about the occasion (optional)…"
-          placeholderTextColor={colors.neutral.silver}
+          placeholderTextColor={colors.neutral.placeholder}
           multiline
           textAlignVertical="top"
-          selectionColor={colors.primary.burgundy}
+          selectionColor={colors.primary.base}
         />
 
         {/* Visit photos (#137) — a shot of the tasting card or the visit itself. */}
@@ -616,7 +616,7 @@ export default function LogSessionForm({
             onPress={addVisitPhotoFromCamera}
             activeOpacity={0.85}
           >
-            <Ionicons name="camera-outline" size={18} color={colors.primary.burgundy} />
+            <Ionicons name="camera-outline" size={18} color={colors.primary.base} />
             <Text style={styles.visitPhotoBtnText}>Take photo</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -624,7 +624,7 @@ export default function LogSessionForm({
             onPress={addVisitPhotosFromLibrary}
             activeOpacity={0.85}
           >
-            <Ionicons name="images-outline" size={18} color={colors.primary.burgundy} />
+            <Ionicons name="images-outline" size={18} color={colors.primary.base} />
             <Text style={styles.visitPhotoBtnText}>Choose photos</Text>
           </TouchableOpacity>
         </View>
@@ -654,7 +654,7 @@ export default function LogSessionForm({
               accessibilityRole="button"
               accessibilityLabel="Close"
             >
-              <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
+              <Ionicons name="close" size={24} color={colors.neutral.ink} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>
               {currentWineIndex !== null ? 'Edit wine' : 'Add wine'}
@@ -684,32 +684,32 @@ export default function LogSessionForm({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   headerContent: { flex: 1, alignItems: 'center' },
   headerTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
-  headerSubtitle: { ...typography.body.small, color: colors.neutral.pewter },
+  headerSubtitle: { ...typography.body.small, color: colors.neutral.inkTertiary },
   headerSpacer: { width: 40 },
 
   body: { flex: 1 },
@@ -718,21 +718,21 @@ const styles = StyleSheet.create({
   emptyWines: {
     alignItems: 'center',
     paddingVertical: spacing.xl,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderStyle: 'dashed',
   },
-  emptyWinesText: { ...typography.body.small, color: colors.neutral.pewter, marginTop: spacing.sm },
+  emptyWinesText: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: spacing.sm },
 
   wineCard: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     ...shadows.soft,
   },
   wineCardHeader: { flexDirection: 'row', alignItems: 'center' },
@@ -745,34 +745,34 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
     paddingHorizontal: spacing.xs,
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   // body.small, not body.caption — caption uppercases (it's the label style), so
   // a vintage-aware badge would read "YOU'VE TASTED THE 2019".
-  priorTagText: { ...typography.body.small, fontSize: 11, color: colors.primary.burgundy },
+  priorTagText: { ...typography.body.small, fontSize: 11, color: colors.primary.base },
   wineTypeBar: { width: 4, height: 40, borderRadius: 2, marginRight: spacing.md },
   wineInfo: { flex: 1 },
   wineName: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
     fontFamily: SERIF,
   },
-  wineMeta: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
+  wineMeta: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 2 },
   scorePill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
-  scoreText: { ...typography.body.small, color: colors.neutral.charcoal, fontWeight: '600' },
+  scoreText: { ...typography.body.small, color: colors.neutral.ink, fontWeight: '600' },
   wineActions: {
     flexDirection: 'row',
     gap: spacing.lg,
@@ -780,11 +780,11 @@ const styles = StyleSheet.create({
     marginLeft: spacing.lg,
   },
   actionLink: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  actionLinkText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '500' },
+  actionLinkText: { ...typography.body.small, color: colors.primary.base, fontWeight: '500' },
 
   addWineBtn: {
     flexDirection: 'row',
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     alignItems: 'center',
@@ -792,11 +792,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.xs,
   },
-  addWineBtnText: { ...typography.body.regular, color: colors.neutral.cream, fontWeight: '600' },
+  addWineBtnText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
 
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
@@ -808,14 +808,14 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderStyle: 'dashed',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
   },
   addPlaceText: { flex: 1 },
-  addPlaceTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  addPlaceSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
-  optTag: { ...typography.body.small, color: colors.neutral.pewter, fontWeight: '400' },
+  addPlaceTitle: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  addPlaceSub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 2 },
+  optTag: { ...typography.body.small, color: colors.neutral.inkTertiary, fontWeight: '400' },
 
   placeCard: {
     flexDirection: 'row',
@@ -824,29 +824,29 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.surface,
     ...shadows.soft,
   },
   placeIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   placeBody: { flex: 1 },
   placeName: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
     fontFamily: SERIF,
   },
   placeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: 2 },
-  placeMeta: { ...typography.body.small, color: colors.neutral.pewter },
+  placeMeta: { ...typography.body.small, color: colors.neutral.inkTertiary },
   pinChip: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   pinChipText: { ...typography.body.small, color: colors.status.success },
   placeActions: { flexDirection: 'row', gap: spacing.xs },
@@ -859,18 +859,18 @@ const styles = StyleSheet.create({
   },
 
   input: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   textArea: { height: 100, textAlignVertical: 'top' },
   datePreview: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     marginTop: spacing.xs,
   },
@@ -888,13 +888,13 @@ const styles = StyleSheet.create({
     height: 84,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   visitPhotoRemove: {
     position: 'absolute',
     top: -8,
     right: -8,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: 12,
   },
   visitPhotoButtons: {
@@ -911,12 +911,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.neutral.surface,
   },
   visitPhotoBtnText: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
 
@@ -924,32 +924,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.linen,
-    backgroundColor: colors.neutral.cream,
+    borderTopColor: colors.neutral.divider,
+    backgroundColor: colors.neutral.bg,
   },
 
-  modalContainer: { flex: 1, backgroundColor: colors.neutral.cream },
+  modalContainer: { flex: 1, backgroundColor: colors.neutral.bg },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   modalClose: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   modalTitle: {
     flex: 1,
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     textAlign: 'center',
   },

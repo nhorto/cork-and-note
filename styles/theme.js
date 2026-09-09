@@ -4,41 +4,40 @@
 
 import { Platform } from 'react-native';
 
-// NOTE: Token *names* below are legacy "Château Label" names (burgundy, gold,
-// parchment, charcoal, etc.). As of the "Spritz" re-theme (direction D — sunset
-// coral + apricot on warm ivory, plum ink) the VALUES no longer match those
-// names. Keys are left as-is on purpose: screens/components reference these
-// key paths throughout the app, and renaming them is a deliberate follow-up,
-// not part of this pass. Read the comments for what each token actually is now.
+// NOTE: Token *names* below are role-based (base/deep/darkest/soft, accent
+// base/border/surface/strong/ink, neutral bg/surface/divider/border/ink/
+// inkSecondary/inkTertiary/placeholder) so future re-themes only need new
+// VALUES, not a rename. Values below are the "Spritz" palette (direction D —
+// sunset coral + apricot on warm ivory, plum ink).
 export const colors = {
-  // Primary - Spritz coral family (was: deep Bordeaux wines)
+  // Primary - Spritz coral family
   primary: {
-    burgundy: '#E4573D',      // Main accent - sunset coral
-    wine: '#B03A24',          // Deeper, pressed coral-red for highlights/active states
-    merlot: '#6B2A3A',        // Deepest variant - coral-plum, for depth
-    rosé: '#F0A99A',          // Soft coral-pink for subtle accents
+    base: '#E4573D',          // Main accent - sunset coral
+    deep: '#B03A24',          // Deeper, pressed coral-red for highlights/active states
+    darkest: '#6B2A3A',       // Deepest variant - coral-plum, for depth
+    soft: '#F0A99A',          // Soft coral-pink for subtle accents
   },
 
-  // Secondary - Spritz apricot accents (was: estate gold)
-  gold: {
-    rich: '#F4A259',          // Primary apricot - warm, golden-hour
-    muted: '#F8CBA0',         // Subtle apricot for borders
-    light: '#FDE9D2',         // Very light apricot for backgrounds
-    shimmer: '#C97A3D',       // Darker apricot/amber for contrast
-    text: '#8C5A12',          // Readable amber for ink — AA on ivory (5.56:1)
-    // Use rich/muted/light/shimmer for rules, borders, icons, stars only — never as small text.
+  // Accent - Spritz apricot accents
+  accent: {
+    base: '#F4A259',          // Primary apricot - warm, golden-hour
+    border: '#F8CBA0',        // Subtle apricot for borders
+    surface: '#FDE9D2',       // Very light apricot for backgrounds
+    strong: '#C97A3D',        // Darker apricot/amber for contrast
+    ink: '#8C5A12',           // Readable amber for ink — AA on ivory (5.56:1)
+    // Use base/border/surface/strong for rules, borders, icons, stars only — never as small text.
   },
 
-  // Neutrals - Warm ivory tones (was: warm paper tones)
+  // Neutrals - Warm ivory tones
   neutral: {
-    cream: '#FFF8F0',         // Primary background - warm ivory
-    parchment: '#FFF3E6',     // Card backgrounds
-    linen: '#F2E2D2',         // Subtle dividers
-    stone: '#DCC0AC',         // Borders and muted elements
-    charcoal: '#3D2B3D',      // Primary text - plum ink
-    graphite: '#5A4550',      // Secondary text - plum-tinted gray
-    pewter: '#7A5A4E',        // Tertiary text — AA on ivory (5.86:1)
-    silver: '#B09A8C',        // Placeholder text (decorative / non-essential only)
+    bg: '#FFF8F0',             // Primary background - warm ivory
+    surface: '#FFF3E6',        // Card backgrounds
+    divider: '#F2E2D2',        // Subtle dividers
+    border: '#DCC0AC',         // Borders and muted elements
+    ink: '#3D2B3D',            // Primary text - plum ink
+    inkSecondary: '#5A4550',   // Secondary text - plum-tinted gray
+    inkTertiary: '#7A5A4E',    // Tertiary text — AA on ivory (5.86:1)
+    placeholder: '#B09A8C',    // Placeholder text (decorative / non-essential only)
   },
 
   // Status colors - kept distinguishable from the new coral primary
@@ -149,21 +148,21 @@ export const borderRadius = {
 export const shadows = {
   // Subtle, elegant shadows
   soft: {
-    shadowColor: colors.neutral.charcoal,
+    shadowColor: colors.neutral.ink,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
   },
   medium: {
-    shadowColor: colors.neutral.charcoal,
+    shadowColor: colors.neutral.ink,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
   },
   strong: {
-    shadowColor: colors.neutral.charcoal,
+    shadowColor: colors.neutral.ink,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 24,
@@ -176,28 +175,28 @@ export const decorative = {
   // Thin gold rule/divider
   goldRule: {
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   // Double line divider (classic wine label style)
   doubleLine: {
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     height: 5,
     marginVertical: spacing.md,
   },
   // Corner flourish placeholder
-  flourishColor: colors.gold.rich,
+  flourishColor: colors.accent.base,
 };
 
 // Common component styles
 export const components = {
   // Refined card style
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     padding: spacing.lg,
     ...shadows.soft,
   },
@@ -205,7 +204,7 @@ export const components = {
   // Elegant button base
   button: {
     primary: {
-      backgroundColor: colors.primary.burgundy,
+      backgroundColor: colors.primary.base,
       paddingVertical: spacing.md,
       paddingHorizontal: spacing.lg,
       borderRadius: borderRadius.sm,
@@ -213,7 +212,7 @@ export const components = {
     secondary: {
       backgroundColor: 'transparent',
       borderWidth: 1,
-      borderColor: colors.primary.burgundy,
+      borderColor: colors.primary.base,
       paddingVertical: spacing.md,
       paddingHorizontal: spacing.lg,
       borderRadius: borderRadius.sm,
@@ -227,14 +226,14 @@ export const components = {
 
   // Input field style
   input: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     fontSize: typography.body.regular.fontSize,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
 
   // Badge styles

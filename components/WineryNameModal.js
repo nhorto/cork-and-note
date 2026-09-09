@@ -75,7 +75,7 @@ const WineryNameModal = ({
               {/* Header */}
               <View style={styles.header}>
                 <View style={styles.headerIcon}>
-                  <Ionicons name="location" size={22} color={colors.primary.burgundy} />
+                  <Ionicons name="location" size={22} color={colors.primary.base} />
                 </View>
                 <View style={styles.headerText}>
                   <Text style={styles.title}>Drop a pin</Text>
@@ -96,20 +96,20 @@ const WineryNameModal = ({
                 <TextInput
                   style={styles.input}
                   placeholder="e.g., Château Margaux"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                   value={name}
                   onChangeText={setName}
                   autoFocus={true}
                   returnKeyType="done"
                   onSubmitEditing={handleSave}
-                  selectionColor={colors.primary.burgundy}
+                  selectionColor={colors.primary.base}
                 />
               </View>
 
               {/* Coordinates */}
               {coordinate && (
                 <View style={styles.coordinatesContainer}>
-                  <Ionicons name="navigate-outline" size={14} color={colors.neutral.pewter} />
+                  <Ionicons name="navigate-outline" size={14} color={colors.neutral.inkTertiary} />
                   <Text style={styles.coordinates}>
                     {coordinate.latitude.toFixed(4)}°, {coordinate.longitude.toFixed(4)}°
                   </Text>
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: borderRadius.xl,
     padding: spacing.lg,
     width: 320,
@@ -167,24 +167,24 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 14,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   headerText: {
     flex: 1,
   },
   title: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
   subtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
   },
 
@@ -197,12 +197,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   dividerDiamond: {
     width: 6,
     height: 6,
-    backgroundColor: colors.gold.rich,
+    backgroundColor: colors.accent.base,
     transform: [{ rotate: '45deg' }],
     marginHorizontal: spacing.sm,
   },
@@ -213,17 +213,17 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginBottom: spacing.sm,
   },
   input: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     fontSize: typography.body.regular.fontSize,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
 
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   },
   coordinates: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 
   // Buttons

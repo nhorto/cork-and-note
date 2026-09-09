@@ -151,7 +151,7 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
             accessibilityRole="button"
             accessibilityLabel="Close"
           >
-            <Ionicons name="chevron-back" size={24} color={colors.neutral.charcoal} />
+            <Ionicons name="chevron-back" size={24} color={colors.neutral.ink} />
           </TouchableOpacity>
           <View style={styles.headerContent}>
             <Text style={styles.headerTitle}>Where?</Text>
@@ -189,8 +189,8 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                 value={placeName}
                 onChangeText={onChangePlaceName}
                 placeholder={placeType === 'winery' ? 'Search or type a winery' : 'Restaurant name'}
-                placeholderTextColor={colors.neutral.silver}
-                selectionColor={colors.primary.burgundy}
+                placeholderTextColor={colors.neutral.placeholder}
+                selectionColor={colors.primary.base}
               />
               {wineryId && (
                 <Text style={styles.matchedHint}>
@@ -207,7 +207,7 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                       onPress={() => selectKnownWinery(w)}
                       activeOpacity={0.7}
                     >
-                      <Ionicons name="location-outline" size={16} color={colors.primary.burgundy} />
+                      <Ionicons name="location-outline" size={16} color={colors.primary.base} />
                       <Text style={styles.suggestionText} numberOfLines={1}>{w.name}</Text>
                     </TouchableOpacity>
                   ))}
@@ -252,7 +252,7 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                     accessibilityLabel="Remove pin"
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Ionicons name="close" size={16} color={colors.neutral.cream} />
+                    <Ionicons name="close" size={16} color={colors.neutral.bg} />
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -263,9 +263,9 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                   disabled={locating}
                 >
                   {locating ? (
-                    <ActivityIndicator size="small" color={colors.primary.burgundy} />
+                    <ActivityIndicator size="small" color={colors.primary.base} />
                   ) : (
-                    <Ionicons name="navigate" size={18} color={colors.primary.burgundy} />
+                    <Ionicons name="navigate" size={18} color={colors.primary.base} />
                   )}
                   <Text style={styles.locButtonText}>
                     {locating ? 'Locating…' : 'Use my current location'}
@@ -292,33 +292,33 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   closeButton: {
     // 44pt minimum touch target (launch plan §3.3)
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   headerContent: { flex: 1, alignItems: 'center' },
   headerTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
-  headerSubtitle: { ...typography.body.small, color: colors.neutral.pewter },
+  headerSubtitle: { ...typography.body.small, color: colors.neutral.inkTertiary },
   headerSpacer: { width: 40 },
 
   body: { flex: 1 },
@@ -326,23 +326,23 @@ const styles = StyleSheet.create({
 
   label: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginBottom: spacing.sm,
     marginTop: spacing.md,
   },
   hint: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: spacing.xs,
   },
   matchedHint: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: spacing.xs,
   },
   elsewhereNote: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     marginTop: spacing.sm,
   },
@@ -353,30 +353,30 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
   },
-  segItemOn: { backgroundColor: colors.primary.burgundy, borderColor: colors.primary.burgundy },
-  segText: { ...typography.body.regular, color: colors.neutral.graphite, fontWeight: '500' },
-  segTextOn: { color: colors.neutral.cream, fontWeight: '600' },
+  segItemOn: { backgroundColor: colors.primary.base, borderColor: colors.primary.base },
+  segText: { ...typography.body.regular, color: colors.neutral.inkSecondary, fontWeight: '500' },
+  segTextOn: { color: colors.neutral.bg, fontWeight: '600' },
 
   input: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
 
   suggestions: {
     marginTop: spacing.sm,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     overflow: 'hidden',
   },
   suggestionRow: {
@@ -386,19 +386,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
-  suggestionText: { ...typography.body.regular, color: colors.neutral.charcoal, flex: 1 },
+  suggestionText: { ...typography.body.regular, color: colors.neutral.ink, flex: 1 },
 
   pinHeader: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm },
-  optTag: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic' },
+  optTag: { ...typography.body.small, color: colors.neutral.inkTertiary, fontStyle: 'italic' },
 
   mapWrap: {
     height: 150,
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     ...shadows.soft,
   },
   map: { ...StyleSheet.absoluteFillObject },
@@ -422,16 +422,16 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderStyle: 'dashed',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
   },
-  locButtonText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
+  locButtonText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
 
   footer: {
     padding: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.linen,
-    backgroundColor: colors.neutral.cream,
+    borderTopColor: colors.neutral.divider,
+    backgroundColor: colors.neutral.bg,
   },
 });

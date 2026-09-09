@@ -31,7 +31,7 @@ export default function LogFab() {
           setHubOpen(true);
         }}
       >
-        <Ionicons name="add" size={22} color={colors.neutral.cream} />
+        <Ionicons name="add" size={22} color={colors.neutral.bg} />
         <Text style={styles.label}>Log</Text>
       </TouchableOpacity>
       <HubMenu visible={hubOpen} onClose={() => setHubOpen(false)} />
@@ -51,12 +51,12 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.md,
     paddingRight: spacing.lg,
     borderRadius: 24,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     ...shadows.strong,
   },
   label: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
 });

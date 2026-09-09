@@ -107,7 +107,7 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
             <Image source={{ uri: value }} style={styles.thumb} />
             {uploading && (
               <View style={styles.thumbOverlay}>
-                <ActivityIndicator size="small" color={colors.neutral.cream} />
+                <ActivityIndicator size="small" color={colors.neutral.bg} />
               </View>
             )}
           </View>
@@ -118,7 +118,7 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
               disabled={disabled || uploading}
               activeOpacity={0.85}
             >
-              <Ionicons name="camera-outline" size={16} color={colors.primary.burgundy} />
+              <Ionicons name="camera-outline" size={16} color={colors.primary.base} />
               <Text style={styles.actionText}>Replace</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -141,9 +141,9 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
           activeOpacity={0.85}
         >
           {uploading ? (
-            <ActivityIndicator size="small" color={colors.primary.burgundy} />
+            <ActivityIndicator size="small" color={colors.primary.base} />
           ) : (
-            <Ionicons name="camera-outline" size={22} color={colors.primary.burgundy} />
+            <Ionicons name="camera-outline" size={22} color={colors.primary.base} />
           )}
           <Text style={styles.addText}>{uploading ? 'Uploading…' : 'Add a photo'}</Text>
         </TouchableOpacity>
@@ -154,7 +154,7 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
 
 const styles = StyleSheet.create({
   container: { marginBottom: spacing.md },
-  label: { ...typography.body.caption, color: colors.neutral.pewter, marginBottom: spacing.xs },
+  label: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginBottom: spacing.xs },
 
   // Empty-state dashed tap target.
   addTile: {
@@ -166,10 +166,10 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.neutral.surface,
   },
-  addText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
+  addText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
 
   // Filled-state thumbnail + actions.
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   thumb: { width: '100%', height: '100%' },
   thumbOverlay: {
@@ -198,9 +198,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.round,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.neutral.surface,
   },
-  actionText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
+  actionText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
   removeText: { color: colors.status.error },
 });

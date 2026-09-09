@@ -2,11 +2,11 @@
 // Canonical button for the app. Replaces the three drifted primary-button
 // recipes (radius 4 + sans / radius 8 + Georgia / radius 8 + h3 serif) and the
 // three cancel recipes with one set of variants:
-//   primary   — burgundy fill, cream label (the main CTA)
-//   secondary — parchment fill, stone border, graphite label (Cancel / muted,
+//   primary   — primary.base fill, neutral.bg label (the main CTA)
+//   secondary — neutral.surface fill, neutral.border border, neutral.inkSecondary label (Cancel / muted,
 //               subordinate to a primary it sits beside)
-//   outline   — burgundy outline + label (a branded secondary action)
-//   ghost     — text-only, burgundy label
+//   outline   — primary.base outline + label (a branded secondary action)
+//   ghost     — text-only, primary.base label
 // Labels are sans (System) weight 600; serif is reserved for headings/titles.
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -14,10 +14,10 @@ import { borderRadius, colors, spacing } from '../styles/theme';
 
 // Ink (label + icon + spinner) color per variant.
 const INK = {
-  primary: colors.neutral.cream,
-  secondary: colors.neutral.graphite,
-  outline: colors.primary.burgundy,
-  ghost: colors.primary.burgundy,
+  primary: colors.neutral.bg,
+  secondary: colors.neutral.inkSecondary,
+  outline: colors.primary.base,
+  ghost: colors.primary.base,
 };
 
 export default function Button({
@@ -90,17 +90,17 @@ const styles = StyleSheet.create({
   },
 
   primary: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
   },
   secondary: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
   },
   ghost: {
     backgroundColor: 'transparent',

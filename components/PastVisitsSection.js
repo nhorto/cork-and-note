@@ -147,7 +147,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
     return (
       <View style={styles.loadingContainer}>
         <View style={styles.loadingIcon}>
-          <Ionicons name="wine-outline" size={24} color={colors.gold.muted} />
+          <Ionicons name="wine-outline" size={24} color={colors.accent.border} />
         </View>
         <Text style={styles.loadingText}>Loading your past visits...</Text>
       </View>
@@ -159,7 +159,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
     return (
       <View style={styles.emptyContainer}>
         <View style={styles.emptyIcon}>
-          <Ionicons name="calendar-outline" size={32} color={colors.gold.muted} />
+          <Ionicons name="calendar-outline" size={32} color={colors.accent.border} />
         </View>
         <Text style={styles.emptyText}>
           You haven’t logged any visits to this winery yet.
@@ -176,7 +176,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
           }
           activeOpacity={0.7}
         >
-          <Ionicons name="add" size={18} color={colors.neutral.cream} />
+          <Ionicons name="add" size={18} color={colors.neutral.bg} />
           <Text style={styles.addVisitButtonText}>Log your first visit</Text>
         </TouchableOpacity>
       </View>
@@ -214,7 +214,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
             <Ionicons
               name={expandedVisit === visit.id ? "chevron-up" : "chevron-down"}
               size={20}
-              color={colors.primary.burgundy}
+              color={colors.primary.base}
             />
           </TouchableOpacity>
 
@@ -246,7 +246,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
                     onPress={() => router.push(`/log-session?editVisitId=${visit.id}`)}
                     accessibilityLabel="Edit log"
                   >
-                    <Ionicons name="pencil-outline" size={15} color={colors.primary.burgundy} />
+                    <Ionicons name="pencil-outline" size={15} color={colors.primary.base} />
                     <Text style={styles.editLogLinkText}>Edit log</Text>
                   </TouchableOpacity>
                 </View>
@@ -282,13 +282,13 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
                       <View style={styles.wineRating}>
                         {wine.overall_rating > 0 && (
                           <>
-                            <Ionicons name="star" size={16} color={colors.gold.rich} />
+                            <Ionicons name="star" size={16} color={colors.accent.base} />
                             <Text style={styles.ratingText}>
                               {wine.overall_rating.toFixed(1)}
                             </Text>
                           </>
                         )}
-                        <Ionicons name="chevron-forward" size={16} color={colors.primary.burgundy} />
+                        <Ionicons name="chevron-forward" size={16} color={colors.primary.base} />
                       </View>
                     </TouchableOpacity>
                   ))
@@ -353,11 +353,11 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     ...shadows.soft,
   },
 
@@ -370,16 +370,16 @@ const styles = StyleSheet.create({
   decorativeLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginHorizontal: spacing.md,
   },
   visitCount: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     marginBottom: spacing.lg,
   },
@@ -393,16 +393,16 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   loadingText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
   },
 
@@ -410,25 +410,25 @@ const styles = StyleSheet.create({
   emptyContainer: {
     padding: spacing.xl,
     alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   emptyIcon: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   emptyText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     marginBottom: spacing.lg,
     maxWidth: 260,
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
   addVisitButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.md,
@@ -444,17 +444,17 @@ const styles = StyleSheet.create({
   },
   addVisitButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
 
   // Visit Card
   visitCard: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: borderRadius.lg,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     overflow: 'hidden',
   },
   visitHeader: {
@@ -469,18 +469,18 @@ const styles = StyleSheet.create({
   visitDate: {
     ...typography.body.regular,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.xs,
   },
   wineCount: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: 2,
   },
   photoCount: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontSize: 12,
   },
 
@@ -489,12 +489,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.linen,
+    borderTopColor: colors.neutral.divider,
   },
   photosSectionTitle: {
     ...typography.body.small,
     fontWeight: '500',
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: spacing.sm,
     marginTop: spacing.sm,
   },
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   moreThumbnailContainer: {
     justifyContent: 'center',
@@ -525,28 +525,28 @@ const styles = StyleSheet.create({
   },
   moreThumbnailText: {
     ...typography.body.small,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
 
   // Expanded Content
   expandedContent: {
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.linen,
+    borderTopColor: colors.neutral.divider,
   },
   notesSection: {
     padding: spacing.md,
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
   },
   notesTitle: {
     ...typography.body.small,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: spacing.sm,
   },
   notesText: {
     ...typography.body.regular,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     lineHeight: 22,
   },
 
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
   winesSectionTitle: {
     ...typography.body.regular,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   editLogLink: {
     flexDirection: 'row',
@@ -572,18 +572,18 @@ const styles = StyleSheet.create({
   },
   editLogLinkText: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
   wineItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     padding: spacing.md,
     borderRadius: borderRadius.md,
     marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   wineInfo: {
     flex: 1,
@@ -591,13 +591,13 @@ const styles = StyleSheet.create({
   wineName: {
     ...typography.body.regular,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.xs,
   },
   wineDetails: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: spacing.xs,
   },
   winePhotosPreview: {
@@ -611,12 +611,12 @@ const styles = StyleSheet.create({
   ratingText: {
     ...typography.body.small,
     fontWeight: '500',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginRight: spacing.xs,
   },
   noWinesText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     textAlign: 'center',
     padding: spacing.lg,
@@ -637,7 +637,7 @@ const styles = StyleSheet.create({
   },
   photoModalTitle: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
     flex: 1,
   },
@@ -666,7 +666,7 @@ const styles = StyleSheet.create({
   },
   photoModalText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
 });
 

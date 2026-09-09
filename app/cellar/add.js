@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
   cellarHint: {
     marginBottom: spacing.sm,
   },
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
   flex: { flex: 1 },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
 
@@ -240,12 +240,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.neutral.surface,
   },
   addedText: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     flex: 1,
   },
 });

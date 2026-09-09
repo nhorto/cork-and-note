@@ -129,7 +129,7 @@ export default function ChatInput({ onSend, disabled }) {
           <Ionicons
             name="camera"
             size={22}
-            color={disabled ? colors.neutral.silver : colors.primary.burgundy}
+            color={disabled ? colors.neutral.placeholder : colors.primary.base}
           />
         </TouchableOpacity>
 
@@ -138,7 +138,7 @@ export default function ChatInput({ onSend, disabled }) {
           value={text}
           onChangeText={setText}
           placeholder="Ask the sommelier..."
-          placeholderTextColor={colors.neutral.silver}
+          placeholderTextColor={colors.neutral.placeholder}
           multiline
           maxLength={2000}
           editable={!disabled}
@@ -154,7 +154,7 @@ export default function ChatInput({ onSend, disabled }) {
           <Ionicons
             name="send"
             size={18}
-            color={hasContent && !disabled && !sending ? colors.neutral.cream : colors.neutral.silver}
+            color={hasContent && !disabled && !sending ? colors.neutral.bg : colors.neutral.placeholder}
           />
         </TouchableOpacity>
       </View>
@@ -165,8 +165,8 @@ export default function ChatInput({ onSend, disabled }) {
 const styles = StyleSheet.create({
   container: {
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.cream,
+    borderTopColor: colors.neutral.border,
+    backgroundColor: colors.neutral.bg,
     paddingBottom: Platform.OS === 'ios' ? spacing.lg : spacing.sm,
   },
   photoStrip: {
@@ -183,13 +183,13 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   removePhoto: {
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: 9,
   },
   inputRow: {
@@ -205,15 +205,15 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     paddingHorizontal: spacing.md,
     paddingTop: Platform.OS === 'ios' ? spacing.sm + 2 : spacing.sm,
     paddingBottom: Platform.OS === 'ios' ? spacing.sm + 2 : spacing.sm,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     maxHeight: 100,
     minHeight: 40,
   },
@@ -221,12 +221,12 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 2,
   },
   sendButtonActive: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
   },
 });

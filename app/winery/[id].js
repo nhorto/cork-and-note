@@ -122,7 +122,7 @@ export default function WineryDetail() {
       <SafeAreaView style={styles.container}>
         <View style={styles.centerContainer}>
           <View style={styles.loadingIcon}>
-            <Ionicons name="wine-outline" size={32} color={colors.gold.muted} />
+            <Ionicons name="wine-outline" size={32} color={colors.accent.border} />
           </View>
           <Text style={styles.loadingText}>Loading winery...</Text>
         </View>
@@ -137,7 +137,7 @@ export default function WineryDetail() {
         <ScreenHeader title="Winery" onBack={() => navigation.goBack()} />
         <View style={styles.centerContainer}>
           <View style={styles.emptyIcon}>
-            <Ionicons name="wine-outline" size={48} color={colors.gold.muted} />
+            <Ionicons name="wine-outline" size={48} color={colors.accent.border} />
           </View>
           <Text style={styles.emptyTitle}>Winery not found</Text>
           <Text style={styles.emptySubtitle}>This winery may have been removed</Text>
@@ -159,7 +159,7 @@ export default function WineryDetail() {
           <View style={styles.heroDecoration}>
             <View style={styles.decorativeLine} />
             <View style={styles.heroIcon}>
-              <Ionicons name="wine" size={28} color={colors.primary.burgundy} />
+              <Ionicons name="wine" size={28} color={colors.primary.base} />
             </View>
             <View style={styles.decorativeLine} />
           </View>
@@ -195,8 +195,8 @@ export default function WineryDetail() {
               onPress={handleLogVisit}
               activeOpacity={0.7}
             >
-              <View style={[styles.actionIcon, { backgroundColor: colors.primary.burgundy }]}>
-                <Ionicons name="wine" size={22} color={colors.neutral.cream} />
+              <View style={[styles.actionIcon, { backgroundColor: colors.primary.base }]}>
+                <Ionicons name="wine" size={22} color={colors.neutral.bg} />
               </View>
               <Text style={styles.actionLabel}>Log visit</Text>
             </TouchableOpacity>
@@ -207,7 +207,7 @@ export default function WineryDetail() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: colors.status.visited }]}>
-                <Ionicons name="navigate" size={22} color={colors.neutral.cream} />
+                <Ionicons name="navigate" size={22} color={colors.neutral.bg} />
               </View>
               <Text style={styles.actionLabel}>Directions</Text>
             </TouchableOpacity>
@@ -240,7 +240,7 @@ export default function WineryDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
 
   // Scroll Content
@@ -260,38 +260,38 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   loadingText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
   },
   emptyIcon: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   emptyTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.xs,
   },
   emptySubtitle: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 
   // Hero Section
@@ -309,29 +309,29 @@ const styles = StyleSheet.create({
   decorativeLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   heroIcon: {
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: spacing.md,
     borderWidth: 2,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   wineryName: {
     ...typography.heading.hero,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     textAlign: 'center',
     marginBottom: spacing.sm,
   },
   wineryAddress: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
   },
   badgesContainer: {
@@ -340,12 +340,12 @@ const styles = StyleSheet.create({
 
   // Content Card
   contentCard: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     marginHorizontal: spacing.md,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     ...shadows.soft,
   },
 
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   },
   actionLabel: {
     ...typography.body.small,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '500',
   },
 
@@ -382,12 +382,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   dividerDiamond: {
     width: 6,
     height: 6,
-    backgroundColor: colors.gold.rich,
+    backgroundColor: colors.accent.base,
     transform: [{ rotate: '45deg' }],
     marginHorizontal: spacing.sm,
   },

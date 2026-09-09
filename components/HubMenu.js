@@ -43,14 +43,14 @@ export default function HubMenu({ visible, onClose }) {
 
           <Action
             icon="wine"
-            color={colors.primary.burgundy}
+            color={colors.primary.base}
             title="Log a wine"
             subtitle="Capture a wine you tasted"
             onPress={() => go('/(tabs)/log')}
           />
           <Action
             icon="file-tray-stacked"
-            color={colors.gold.rich}
+            color={colors.accent.base}
             title="Add a bottle"
             subtitle="Add a bottle to your cellar"
             onPress={() => go('/cellar/add')}
@@ -77,13 +77,13 @@ function Action({ icon, color, title, subtitle, onPress, last }) {
       onPress={onPress}
     >
       <View style={[styles.itemIcon, { backgroundColor: color }]}>
-        <Ionicons name={icon} size={20} color={colors.neutral.cream} />
+        <Ionicons name={icon} size={20} color={colors.neutral.bg} />
       </View>
       <View style={styles.itemText}>
         <Text style={styles.itemTitle}>{title}</Text>
         <Text style={styles.itemSub}>{subtitle}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.neutral.silver} />
+      <Ionicons name="chevron-forward" size={18} color={colors.neutral.placeholder} />
     </TouchableOpacity>
   );
 }
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     paddingHorizontal: spacing.lg,
@@ -110,13 +110,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
     alignSelf: 'center',
     marginBottom: spacing.md,
   },
   title: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   itemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   itemIcon: {
     width: 44,
@@ -140,12 +140,12 @@ const styles = StyleSheet.create({
   itemText: { flex: 1 },
   itemTitle: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
   },
   itemSub: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
 });

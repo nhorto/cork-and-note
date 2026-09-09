@@ -138,7 +138,7 @@ export default function LabelScanner({ onScanned }) {
   return (
     <View style={styles.card}>
       <View style={styles.headerRow}>
-        <Ionicons name="scan" size={18} color={colors.gold.rich} />
+        <Ionicons name="scan" size={18} color={colors.accent.base} />
         <Text style={styles.eyebrow}>SCAN A LABEL</Text>
       </View>
 
@@ -152,7 +152,7 @@ export default function LabelScanner({ onScanned }) {
         <View style={styles.reading}>
           {imageUri ? <Image source={{ uri: imageUri }} style={styles.thumb} /> : null}
           <View style={styles.readingMeta}>
-            <ActivityIndicator color={colors.primary.burgundy} size="small" />
+            <ActivityIndicator color={colors.primary.base} size="small" />
             <Text style={styles.readingText}>Reading the label…</Text>
           </View>
         </View>
@@ -168,7 +168,7 @@ export default function LabelScanner({ onScanned }) {
               onPress={scanWithCamera}
               activeOpacity={0.85}
             >
-              <Ionicons name="camera-outline" size={16} color={colors.primary.burgundy} />
+              <Ionicons name="camera-outline" size={16} color={colors.primary.base} />
               <Text style={styles.secondaryBtnText}>Retry scan</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -188,7 +188,7 @@ export default function LabelScanner({ onScanned }) {
             onPress={scanWithCamera}
             activeOpacity={0.9}
           >
-            <Ionicons name="camera" size={16} color={colors.neutral.cream} />
+            <Ionicons name="camera" size={16} color={colors.neutral.bg} />
             <Text style={styles.primaryBtnText}>Scan a label</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -196,7 +196,7 @@ export default function LabelScanner({ onScanned }) {
             onPress={scanFromLibrary}
             activeOpacity={0.85}
           >
-            <Ionicons name="image-outline" size={16} color={colors.primary.burgundy} />
+            <Ionicons name="image-outline" size={16} color={colors.primary.base} />
             <Text style={styles.secondaryBtnText}>Choose from library</Text>
           </TouchableOpacity>
         </View>
@@ -215,10 +215,10 @@ const SERIF = Platform.OS === 'ios' ? 'Georgia' : 'serif';
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
@@ -230,18 +230,18 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
   },
 
   title: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: spacing.sm,
   },
   subtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
   },
 
@@ -258,14 +258,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.sm + 2,
     paddingHorizontal: spacing.sm,
   },
   primaryBtnText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '700',
   },
   secondaryBtn: {
@@ -277,13 +277,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.gold.light,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.accent.surface,
   },
   secondaryBtnFlex: { flex: 1 },
   secondaryBtnText: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
 
@@ -302,14 +302,14 @@ const styles = StyleSheet.create({
   },
   readingText: {
     ...typography.body.regular,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
   },
   thumb: {
     width: 56,
     height: 56,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
 
   // Error (fail soft)
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
 
   disclaimer: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     marginTop: spacing.md,
     textAlign: 'center',

@@ -65,7 +65,7 @@ export default function ProfileScreen() {
             accessibilityLabel="Go back"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
+            <Ionicons name="chevron-back" size={24} color={colors.primary.base} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Profile</Text>
           <TouchableOpacity
@@ -74,7 +74,7 @@ export default function ProfileScreen() {
             accessibilityRole="button"
             accessibilityLabel="Settings"
           >
-            <Ionicons name="settings-outline" size={22} color={colors.neutral.charcoal} />
+            <Ionicons name="settings-outline" size={22} color={colors.neutral.ink} />
           </TouchableOpacity>
         </View>
         <View style={styles.headerBorder} />
@@ -126,13 +126,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="wine" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="wine" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Your tastings</Text>
                 <Text style={styles.menuSubtext}>Every wine you&apos;ve logged</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -141,13 +141,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="location-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="location-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Your places</Text>
                 <Text style={styles.menuSubtext}>Wineries and spots you&apos;ve visited</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -156,13 +156,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="bookmark-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="bookmark-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Wishlist</Text>
                 <Text style={styles.menuSubtext}>Places you want to visit</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -171,13 +171,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Cellar</Text>
                 <Text style={styles.menuSubtext}>The bottles you own</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
           </View>
         </View>
@@ -195,13 +195,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="sparkles" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="sparkles" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Ask the sommelier</Text>
                 <Text style={styles.menuSubtext}>Personalized to the wines you&apos;ve rated</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
           </View>
         </View>
@@ -219,13 +219,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="settings-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="settings-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Account settings</Text>
                 <Text style={styles.menuSubtext}>Manage your account preferences</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -234,13 +234,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="notifications-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="notifications-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Cellar reminders</Text>
                 <Text style={styles.menuSubtext}>Gentle nudges when bottles hit their peak</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -249,13 +249,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="help-circle-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="help-circle-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Help & support</Text>
                 <Text style={styles.menuSubtext}>Get assistance and FAQs</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -264,13 +264,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="chatbubble-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="chatbubble-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Feedback</Text>
                 <Text style={styles.menuSubtext}>Share your thoughts with us</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -279,13 +279,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Privacy policy</Text>
                 <Text style={styles.menuSubtext}>How your data is handled</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -294,13 +294,13 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="document-text-outline" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="document-text-outline" size={20} color={colors.primary.base} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Terms of use</Text>
                 <Text style={styles.menuSubtext}>The agreement for using Cork & Note</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
             </TouchableOpacity>
           </View>
         </View>
@@ -336,12 +336,12 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
 
   // Custom Header
   header: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     paddingTop: 60, // Safe area for iOS
   },
   headerContent: {
@@ -355,15 +355,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   headerTitle: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
   headerRight: {
@@ -371,15 +371,15 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   headerBorder: {
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
     marginHorizontal: spacing.lg,
   },
 
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
     height: 108,
     borderRadius: 54,
     borderWidth: 2,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 4,
@@ -410,27 +410,27 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
     fontSize: 32,
     fontWeight: '300',
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontFamily: SERIF,
     letterSpacing: 2,
   },
   name: {
     ...typography.heading.h1,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.xs,
     textAlign: 'center',
   },
   email: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: spacing.lg,
   },
 
@@ -443,12 +443,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   dividerDiamond: {
     width: 6,
     height: 6,
-    backgroundColor: colors.gold.rich,
+    backgroundColor: colors.accent.base,
     transform: [{ rotate: '45deg' }],
     marginHorizontal: spacing.sm,
   },
@@ -468,15 +468,15 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
   },
 
   // Menu Container
   menuContainer: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     overflow: 'hidden',
     ...shadows.soft,
   },
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   menuItemLast: {
     borderBottomWidth: 0,
@@ -494,25 +494,25 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   menuContent: {
     flex: 1,
   },
   menuText: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '500',
     marginBottom: 2,
   },
   menuSubtext: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 
   // Sign Out Button
@@ -521,7 +521,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
     borderColor: colors.status.error,
@@ -541,13 +541,13 @@ const styles = StyleSheet.create({
   },
   footerText: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontFamily: SERIF,
     fontStyle: 'italic',
   },
   footerVersion: {
     ...typography.body.caption,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: spacing.xs,
   },
 });

@@ -312,7 +312,7 @@ export default function MapScreen() {
   const getMarkerColor = (pin) => {
     if (pin.hasVisit) return colors.status.visited;
     if (pin.inWishlist) return colors.status.wishlist;
-    return colors.primary.burgundy;
+    return colors.primary.base;
   };
 
   const renderPinMarker = (pin) => {
@@ -353,7 +353,7 @@ export default function MapScreen() {
             pin.hasVisit && styles.visitedMarker,
             pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
           ]}>
-            <Ionicons name="wine" size={16} color={colors.neutral.cream} />
+            <Ionicons name="wine" size={16} color={colors.neutral.bg} />
           </View>
         </View>
       </Marker>
@@ -378,7 +378,7 @@ export default function MapScreen() {
         {tempPin && (
           <Marker
             coordinate={tempPin}
-            pinColor={colors.primary.burgundy}
+            pinColor={colors.primary.base}
           />
         )}
       </MapView>
@@ -395,11 +395,11 @@ export default function MapScreen() {
             setShowPlacesList(true);
           }}
         >
-          <Ionicons name="search" size={18} color={colors.neutral.pewter} />
+          <Ionicons name="search" size={18} color={colors.neutral.inkTertiary} />
           <Text style={styles.searchPillText} numberOfLines={1}>
             Your places &amp; wishlist
           </Text>
-          <Ionicons name="list" size={18} color={colors.primary.burgundy} />
+          <Ionicons name="list" size={18} color={colors.primary.base} />
         </TouchableOpacity>
       )}
 
@@ -414,7 +414,7 @@ export default function MapScreen() {
         <Ionicons
           name={showFabMenu ? "close" : "add"}
           size={28}
-          color={colors.neutral.cream}
+          color={colors.neutral.bg}
         />
       </TouchableOpacity>
 
@@ -434,8 +434,8 @@ export default function MapScreen() {
             }}
             activeOpacity={0.7}
           >
-            <View style={[styles.fabMenuIcon, { backgroundColor: colors.primary.burgundy }]}>
-              <Ionicons name="wine" size={18} color={colors.neutral.cream} />
+            <View style={[styles.fabMenuIcon, { backgroundColor: colors.primary.base }]}>
+              <Ionicons name="wine" size={18} color={colors.neutral.bg} />
             </View>
             <View style={styles.fabMenuContent}>
               <Text style={styles.fabMenuText}>Log visit</Text>
@@ -453,7 +453,7 @@ export default function MapScreen() {
             activeOpacity={0.7}
           >
             <View style={[styles.fabMenuIcon, { backgroundColor: colors.status.wishlist }]}>
-              <Ionicons name="bookmark" size={18} color={colors.neutral.cream} />
+              <Ionicons name="bookmark" size={18} color={colors.neutral.bg} />
             </View>
             <View style={styles.fabMenuContent}>
               <Text style={styles.fabMenuText}>Add to wishlist</Text>
@@ -469,7 +469,7 @@ export default function MapScreen() {
             activeOpacity={0.7}
           >
             <View style={[styles.fabMenuIcon, { backgroundColor: colors.status.visited }]}>
-              <Ionicons name="location" size={18} color={colors.neutral.cream} />
+              <Ionicons name="location" size={18} color={colors.neutral.bg} />
             </View>
             <View style={styles.fabMenuContent}>
               <Text style={styles.fabMenuText}>Drop pin here</Text>
@@ -487,7 +487,7 @@ export default function MapScreen() {
         accessibilityRole="button"
         accessibilityLabel="Center on my location"
       >
-        <Ionicons name="locate" size={22} color={colors.primary.burgundy} />
+        <Ionicons name="locate" size={22} color={colors.primary.base} />
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -497,7 +497,7 @@ export default function MapScreen() {
         accessibilityRole="button"
         accessibilityLabel="How to use the map"
       >
-        <Ionicons name="help" size={20} color={colors.primary.burgundy} />
+        <Ionicons name="help" size={20} color={colors.primary.base} />
       </TouchableOpacity>
 
       {/* Re-shown hint via the "?" button — dismissable by tapping it. */}
@@ -508,7 +508,7 @@ export default function MapScreen() {
           onPress={() => setShowHelpHint(false)}
         >
           <View style={styles.hintIcon}>
-            <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+            <Ionicons name="wine-outline" size={20} color={colors.neutral.bg} />
           </View>
           <View style={styles.hintContent}>
             <Text style={styles.hintTitle}>Getting around</Text>
@@ -529,7 +529,7 @@ export default function MapScreen() {
             onPress={loadUserPins}
           >
             <View style={styles.hintIcon}>
-              <Ionicons name="cloud-offline-outline" size={20} color={colors.neutral.cream} />
+              <Ionicons name="cloud-offline-outline" size={20} color={colors.neutral.bg} />
             </View>
             <View style={styles.hintContent}>
               <Text style={styles.hintTitle}>Couldn&apos;t load your places</Text>
@@ -539,7 +539,7 @@ export default function MapScreen() {
         ) : (
           <View style={styles.hintContainer}>
             <View style={styles.hintIcon}>
-              <Ionicons name="wine-outline" size={20} color={colors.neutral.cream} />
+              <Ionicons name="wine-outline" size={20} color={colors.neutral.bg} />
             </View>
             <View style={styles.hintContent}>
               <Text style={styles.hintTitle}>Welcome</Text>
@@ -608,7 +608,7 @@ export default function MapScreen() {
                 accessibilityLabel="Close"
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="close" size={24} color={colors.neutral.charcoal} />
+                <Ionicons name="close" size={24} color={colors.neutral.ink} />
               </TouchableOpacity>
             </View>
 
@@ -635,16 +635,16 @@ export default function MapScreen() {
             </View>
 
             <View style={styles.searchBox}>
-              <Ionicons name="search" size={18} color={colors.neutral.pewter} />
+              <Ionicons name="search" size={18} color={colors.neutral.inkTertiary} />
               <TextInput
                 style={styles.searchInput}
                 placeholder={listTab === 'wishlist' ? 'Search your wishlist' : "Search wineries you've visited"}
-                placeholderTextColor={colors.neutral.silver}
+                placeholderTextColor={colors.neutral.placeholder}
                 value={placeSearch}
                 onChangeText={setPlaceSearch}
                 autoCorrect={false}
                 returnKeyType="search"
-                selectionColor={colors.primary.burgundy}
+                selectionColor={colors.primary.base}
               />
               {placeSearch.length > 0 && (
                 <TouchableOpacity
@@ -653,7 +653,7 @@ export default function MapScreen() {
                   accessibilityLabel="Clear"
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons name="close-circle" size={18} color={colors.neutral.silver} />
+                  <Ionicons name="close-circle" size={18} color={colors.neutral.placeholder} />
                 </TouchableOpacity>
               )}
             </View>
@@ -674,7 +674,7 @@ export default function MapScreen() {
                     <Ionicons
                       name={listTab === 'wishlist' ? 'bookmark' : 'location'}
                       size={18}
-                      color={listTab === 'wishlist' ? colors.status.wishlist : colors.primary.burgundy}
+                      color={listTab === 'wishlist' ? colors.status.wishlist : colors.primary.base}
                     />
                   </View>
                   <View style={styles.placeMeta}>
@@ -683,12 +683,12 @@ export default function MapScreen() {
                       <Text style={styles.placeAddress} numberOfLines={1}>{item.address}</Text>
                     ) : null}
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+                  <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
                 </TouchableOpacity>
               )}
               ListEmptyComponent={
                 <View style={styles.listEmpty}>
-                  <Ionicons name="wine-outline" size={28} color={colors.gold.muted} />
+                  <Ionicons name="wine-outline" size={28} color={colors.accent.border} />
                   <Text style={styles.listEmptyText}>
                     {placeSearch.trim()
                       ? 'No matches for your search'
@@ -722,29 +722,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   markerLabelContainer: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
     marginBottom: 4,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     maxWidth: 140,
     ...shadows.soft,
   },
   markerLabel: {
     fontSize: 11,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     textAlign: 'center',
     fontFamily: SERIF,
   },
   wineryMarker: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     padding: 6,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: colors.neutral.cream,
+    borderColor: colors.neutral.bg,
     width: 32,
     height: 32,
     alignItems: 'center',
@@ -768,14 +768,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: MAP_CONTROL_BOTTOM,
     left: 16,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     width: 56,
     height: 56,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     ...shadows.medium,
   },
 
@@ -792,11 +792,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: MAP_CONTROL_BOTTOM + 56 + spacing.md, // clears the 56pt FAB below it
     left: 16,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: borderRadius.lg,
     padding: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     width: 272,
     ...shadows.strong,
   },
@@ -804,12 +804,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
     marginBottom: spacing.xs,
   },
   fabMenuTitle: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
   },
   fabMenuItem: {
     flexDirection: 'row',
@@ -831,19 +831,19 @@ const styles = StyleSheet.create({
   },
   fabMenuText: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '500',
   },
   fabMenuSubtext: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
   // Inset separator so it doesn't run into the menu's rounded corners and the
   // "Drop Pin Here" action below sits evenly with the others (#107).
   fabMenuDivider: {
     height: 1,
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
     marginVertical: spacing.xs,
     marginHorizontal: spacing.md,
   },
@@ -853,28 +853,28 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: MAP_CONTROL_BOTTOM, // stays level with the FAB (see fabButton)
     right: 16,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     width: 48,
     height: 48,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     ...shadows.soft,
   },
   helpButton: {
     position: 'absolute',
     bottom: MAP_CONTROL_BOTTOM + 48 + spacing.sm, // stacked above the locate button
     right: 16,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     width: 48,
     height: 48,
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     ...shadows.soft,
   },
 
@@ -887,18 +887,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: borderRadius.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     ...shadows.medium,
   },
   searchPillText: {
     flex: 1,
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 
   // Places list sheet (#101)
@@ -911,7 +911,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   listSheet: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     paddingHorizontal: spacing.lg,
@@ -922,7 +922,7 @@ const styles = StyleSheet.create({
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: spacing.md,
@@ -935,16 +935,16 @@ const styles = StyleSheet.create({
   },
   listTitle: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
   // Visited / Wishlist segmented control (#97)
   segment: {
     flexDirection: 'row',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     padding: 3,
     marginBottom: spacing.md,
   },
@@ -955,23 +955,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   segmentBtnActive: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
   },
   segmentText: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     fontWeight: '600',
   },
   segmentTextActive: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -980,7 +980,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     padding: 0,
   },
   listScroll: {
@@ -988,7 +988,7 @@ const styles = StyleSheet.create({
   },
   listSeparator: {
     height: 1,
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
   },
   placeRow: {
     flexDirection: 'row',
@@ -1000,19 +1000,19 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   placeMeta: { flex: 1 },
   placeName: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
   },
   placeAddress: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
   listEmpty: {
@@ -1022,7 +1022,7 @@ const styles = StyleSheet.create({
   },
   listEmptyText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 
   // Hint Container
@@ -1031,13 +1031,13 @@ const styles = StyleSheet.create({
     top: 60,
     left: 16,
     right: 16,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     ...shadows.medium,
   },
   hintIcon: {
@@ -1054,13 +1054,13 @@ const styles = StyleSheet.create({
   },
   hintTitle: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
     fontFamily: SERIF,
     marginBottom: 2,
   },
   hintText: {
     ...typography.body.small,
-    color: colors.primary.rosé,
+    color: colors.primary.soft,
   },
 });

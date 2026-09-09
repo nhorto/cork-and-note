@@ -219,7 +219,7 @@ export default function BottleDetailScreen() {
   if (!loaded) {
     return (
       <View style={[styles.container, styles.center]}>
-        <ActivityIndicator color={colors.primary.burgundy} />
+        <ActivityIndicator color={colors.primary.base} />
       </View>
     );
   }
@@ -256,7 +256,7 @@ export default function BottleDetailScreen() {
               accessibilityRole="button"
               accessibilityLabel="Edit"
             >
-              <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
+              <Ionicons name="create-outline" size={22} color={colors.primary.base} />
             </TouchableOpacity>
           ) : null
         }
@@ -289,7 +289,7 @@ export default function BottleDetailScreen() {
                   </View>
                 )}
                 {removed && (
-                  <View style={[styles.badge, { backgroundColor: colors.neutral.pewter }]}>
+                  <View style={[styles.badge, { backgroundColor: colors.neutral.inkTertiary }]}>
                     <Text style={styles.badgeText}>{bottle.status}</Text>
                   </View>
                 )}
@@ -305,7 +305,7 @@ export default function BottleDetailScreen() {
                 </View>
                 {!removed && (
                   <TouchableOpacity style={styles.adjustBtn} onPress={openAdjustSheet} hitSlop={8}>
-                    <Ionicons name="create-outline" size={15} color={colors.primary.burgundy} />
+                    <Ionicons name="create-outline" size={15} color={colors.primary.base} />
                     <Text style={styles.adjustBtnText}>Adjust</Text>
                   </TouchableOpacity>
                 )}
@@ -370,7 +370,7 @@ export default function BottleDetailScreen() {
               {!removed && bottle.quantity > 0 && (
                 <>
                   <TouchableOpacity style={styles.openBtn} activeOpacity={0.9} onPress={() => openOpenSheet('open')}>
-                    <Ionicons name="wine" size={20} color={colors.neutral.cream} />
+                    <Ionicons name="wine" size={20} color={colors.neutral.bg} />
                     <Text style={styles.openBtnText}>Open a bottle</Text>
                   </TouchableOpacity>
                   <Button
@@ -415,7 +415,7 @@ export default function BottleDetailScreen() {
                       accessibilityRole="button"
                       accessibilityLabel="Decrease"
                     >
-                      <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
+                      <Ionicons name="remove" size={20} color={colors.primary.base} />
                     </TouchableOpacity>
                     <Text style={styles.stepValue}>{openQty}</Text>
                     <TouchableOpacity
@@ -424,7 +424,7 @@ export default function BottleDetailScreen() {
                       accessibilityRole="button"
                       accessibilityLabel="Increase"
                     >
-                      <Ionicons name="add" size={20} color={colors.primary.burgundy} />
+                      <Ionicons name="add" size={20} color={colors.primary.base} />
                     </TouchableOpacity>
                   </View>
 
@@ -449,8 +449,8 @@ export default function BottleDetailScreen() {
                       <Switch
                         value={logTasting}
                         onValueChange={setLogTasting}
-                        trackColor={{ true: colors.primary.burgundy, false: colors.neutral.stone }}
-                        thumbColor={colors.neutral.cream}
+                        trackColor={{ true: colors.primary.base, false: colors.neutral.border }}
+                        thumbColor={colors.neutral.bg}
                       />
                     </View>
                   )}
@@ -483,7 +483,7 @@ export default function BottleDetailScreen() {
                         <Ionicons
                           name={n <= openRating ? 'star' : 'star-outline'}
                           size={28}
-                          color={n <= openRating ? colors.gold.rich : colors.neutral.stone}
+                          color={n <= openRating ? colors.accent.base : colors.neutral.border}
                         />
                       </TouchableOpacity>
                     ))}
@@ -495,7 +495,7 @@ export default function BottleDetailScreen() {
                     value={openNote}
                     onChangeText={setOpenNote}
                     placeholder="How was it? With whom, where…"
-                    placeholderTextColor={colors.neutral.pewter}
+                    placeholderTextColor={colors.neutral.inkTertiary}
                     multiline
                   />
                   <Text style={styles.editHint}>
@@ -535,7 +535,7 @@ export default function BottleDetailScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Decrease"
               >
-                <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="remove" size={20} color={colors.primary.base} />
               </TouchableOpacity>
               <Text style={styles.stepValue}>{adjustQty}</Text>
               <TouchableOpacity
@@ -544,7 +544,7 @@ export default function BottleDetailScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Increase"
               >
-                <Ionicons name="add" size={20} color={colors.primary.burgundy} />
+                <Ionicons name="add" size={20} color={colors.primary.base} />
               </TouchableOpacity>
             </View>
             {adjustQty <= 0 && (
@@ -577,11 +577,11 @@ function DetailRow({ label, value, last }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
   flex: { flex: 1 },
   center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
-  missing: { ...typography.body.regular, color: colors.neutral.graphite },
-  link: { ...typography.body.regular, color: colors.primary.burgundy },
+  missing: { ...typography.body.regular, color: colors.neutral.inkSecondary },
+  link: { ...typography.body.regular, color: colors.primary.base },
 
   iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
@@ -591,30 +591,30 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.surface,
     marginBottom: spacing.lg,
   },
-  wineName: { ...typography.heading.h1, color: colors.neutral.charcoal, fontFamily: SERIF },
-  producer: { ...typography.body.large, color: colors.neutral.graphite, marginTop: 2 },
+  wineName: { ...typography.heading.h1, color: colors.neutral.ink, fontFamily: SERIF },
+  producer: { ...typography.body.large, color: colors.neutral.inkSecondary, marginTop: 2 },
   badgeRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   badge: { paddingVertical: 3, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  badgeText: { ...typography.body.caption, color: colors.neutral.cream },
+  badgeText: { ...typography.body.caption, color: colors.neutral.bg },
 
   qtyCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.lg,
   },
   qtyMain: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm, flexShrink: 1 },
-  qtyNum: { fontFamily: SERIF, fontSize: 32, color: colors.primary.burgundy },
-  qtyLabel: { ...typography.body.regular, color: colors.neutral.graphite },
+  qtyNum: { fontFamily: SERIF, fontSize: 32, color: colors.primary.base },
+  qtyLabel: { ...typography.body.regular, color: colors.neutral.inkSecondary },
   adjustBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -623,46 +623,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.round,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.neutral.cream,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.neutral.bg,
   },
-  adjustBtnText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
+  adjustBtnText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
 
   detailCard: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     paddingHorizontal: spacing.md,
     marginTop: spacing.lg,
   },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.md },
-  detailRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.neutral.linen },
-  detailLabel: { ...typography.body.small, color: colors.neutral.pewter },
-  detailValue: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '500', flexShrink: 1, textAlign: 'right', marginLeft: spacing.md },
+  detailRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.neutral.divider },
+  detailLabel: { ...typography.body.small, color: colors.neutral.inkTertiary },
+  detailValue: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '500', flexShrink: 1, textAlign: 'right', marginLeft: spacing.md },
 
   notesCard: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  notesLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.xs },
-  notesText: { ...typography.body.regular, color: colors.neutral.charcoal, lineHeight: 22 },
+  notesLabel: { ...typography.body.caption, color: colors.accent.ink, marginBottom: spacing.xs },
+  notesText: { ...typography.body.regular, color: colors.neutral.ink, lineHeight: 22 },
 
   openBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.sm,
     marginTop: spacing.xl,
   },
-  openBtnText: { ...typography.body.large, color: colors.neutral.cream, fontWeight: '600' },
+  openBtnText: { ...typography.body.large, color: colors.neutral.bg, fontWeight: '600' },
   tasteBtn: { marginTop: spacing.sm },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.md, marginTop: spacing.sm },
   deleteText: { ...typography.body.regular, color: colors.status.error },
@@ -670,29 +670,29 @@ const styles = StyleSheet.create({
   // Modal / sheet
   modalBackdrop: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
     ...shadows.strong,
   },
-  sheetTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: SERIF, marginBottom: spacing.sm },
-  sheetIntro: { ...typography.body.small, color: colors.neutral.graphite, marginBottom: spacing.sm, lineHeight: 19 },
-  sheetLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginBottom: spacing.sm, marginTop: spacing.md },
+  sheetTitle: { ...typography.heading.h2, color: colors.neutral.ink, fontFamily: SERIF, marginBottom: spacing.sm },
+  sheetIntro: { ...typography.body.small, color: colors.neutral.inkSecondary, marginBottom: spacing.sm, lineHeight: 19 },
+  sheetLabel: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginBottom: spacing.sm, marginTop: spacing.md },
 
   ratingHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  clearRating: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600', marginTop: spacing.md },
+  clearRating: { ...typography.body.small, color: colors.primary.base, fontWeight: '600', marginTop: spacing.md },
   starsRow: { flexDirection: 'row', gap: spacing.xs, alignSelf: 'flex-start' },
   // 44pt touch target (§3.3) — sized, not hitSlopped, so adjacent stars can't overlap
   starBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 
   noteInput: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
     minHeight: 72,
     textAlignVertical: 'top',
   },
-  editHint: { ...typography.body.small, color: colors.neutral.pewter, marginTop: spacing.sm, lineHeight: 18 },
+  editHint: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: spacing.sm, lineHeight: 18 },
 
   adjustStepper: { marginTop: spacing.sm },
 
@@ -709,23 +709,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
   },
   stepBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-  stepValue: { width: 56, textAlign: 'center', fontSize: 18, fontFamily: SERIF, color: colors.neutral.charcoal },
+  stepValue: { width: 56, textAlign: 'center', fontSize: 18, fontFamily: SERIF, color: colors.neutral.ink },
 
   reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 
   tastingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginTop: spacing.lg },
-  tastingTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  tastingSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
+  tastingTitle: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  tastingSub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
 
   sheetActions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl },
-  sheetCancel: { flex: 1, paddingVertical: spacing.md, borderRadius: borderRadius.sm, borderWidth: 1, borderColor: colors.primary.burgundy, alignItems: 'center' },
-  sheetCancelText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
-  sheetConfirm: { flex: 1, paddingVertical: spacing.md, borderRadius: borderRadius.sm, backgroundColor: colors.primary.burgundy, alignItems: 'center' },
-  sheetConfirmText: { ...typography.body.regular, color: colors.neutral.cream, fontWeight: '600' },
+  sheetCancel: { flex: 1, paddingVertical: spacing.md, borderRadius: borderRadius.sm, borderWidth: 1, borderColor: colors.primary.base, alignItems: 'center' },
+  sheetCancelText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
+  sheetConfirm: { flex: 1, paddingVertical: spacing.md, borderRadius: borderRadius.sm, backgroundColor: colors.primary.base, alignItems: 'center' },
+  sheetConfirmText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
   submitDisabled: { opacity: 0.6 },
 });

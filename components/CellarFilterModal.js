@@ -179,7 +179,7 @@ export default function CellarFilterModal({
                   value={minPriceStr}
                   onChangeText={setPrice('minPrice', setMinPriceStr)}
                   placeholder="$0"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                   keyboardType="decimal-pad"
                 />
               </View>
@@ -190,7 +190,7 @@ export default function CellarFilterModal({
                   value={maxPriceStr}
                   onChangeText={setPrice('maxPrice', setMaxPriceStr)}
                   placeholder="Any"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                   keyboardType="decimal-pad"
                 />
               </View>
@@ -251,7 +251,7 @@ function FacetSection({ title, options, selected = [], onToggle, searchable = fa
           value={query}
           onChangeText={setQuery}
           placeholder={`Search ${title.toLowerCase()}…`}
-          placeholderTextColor={colors.neutral.silver}
+          placeholderTextColor={colors.neutral.placeholder}
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -284,7 +284,7 @@ function Chip({ label, active, onPress }) {
         <Ionicons
           name="checkmark"
           size={13}
-          color={colors.neutral.cream}
+          color={colors.neutral.bg}
           style={styles.chipCheck}
         />
       )}
@@ -298,7 +298,7 @@ function Chip({ label, active, onPress }) {
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     paddingHorizontal: spacing.lg,
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: spacing.md,
@@ -321,34 +321,34 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.sm,
   },
-  title: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: SERIF },
-  clearAll: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
-  clearAllDisabled: { color: colors.neutral.silver },
+  title: { ...typography.heading.h2, color: colors.neutral.ink, fontFamily: SERIF },
+  clearAll: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  clearAllDisabled: { color: colors.neutral.placeholder },
 
   scroll: { flexGrow: 0 },
   scrollContent: { paddingBottom: spacing.md },
 
   sectionTitle: {
     ...typography.body.caption,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
 
   facetSearch: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     fontSize: typography.body.small.fontSize,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: spacing.sm,
   },
   facetEmpty: {
     ...typography.body.small,
-    color: colors.neutral.silver,
+    color: colors.neutral.placeholder,
     fontStyle: 'italic',
   },
 
@@ -360,26 +360,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.round,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.surface,
     maxWidth: '100%',
   },
-  chipActive: { backgroundColor: colors.primary.burgundy, borderColor: colors.primary.burgundy },
+  chipActive: { backgroundColor: colors.primary.base, borderColor: colors.primary.base },
   chipCheck: { marginRight: 4 },
-  chipText: { ...typography.body.small, color: colors.neutral.graphite, flexShrink: 1 },
-  chipTextActive: { color: colors.neutral.cream },
+  chipText: { ...typography.body.small, color: colors.neutral.inkSecondary, flexShrink: 1 },
+  chipTextActive: { color: colors.neutral.bg },
 
   rangeRow: { flexDirection: 'row', gap: spacing.md },
   rangeField: { flex: 1 },
-  rangeLabel: { ...typography.body.small, color: colors.neutral.pewter, marginBottom: spacing.xs },
+  rangeLabel: { ...typography.body.small, color: colors.neutral.inkTertiary, marginBottom: spacing.xs },
   rangeInput: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     fontSize: typography.body.regular.fontSize,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
 });

@@ -61,11 +61,11 @@ function TastingRow({ wine, badge, onPress, disabled }) {
       ) : null}
       {rating ? (
         <View style={styles.rowRating}>
-          <Ionicons name="star" size={12} color={colors.gold.rich} />
+          <Ionicons name="star" size={12} color={colors.accent.base} />
           <Text style={styles.rowRatingText}>{rating}</Text>
         </View>
       ) : null}
-      <Ionicons name="chevron-forward" size={16} color={colors.gold.shimmer} />
+      <Ionicons name="chevron-forward" size={16} color={colors.accent.strong} />
     </TouchableOpacity>
   );
 }
@@ -148,7 +148,7 @@ export default function TastingLinkCard({ bottle, tastedWines = [], onLink, onUn
         </>
       ) : (
         <TouchableOpacity style={styles.linkBtn} onPress={openPicker} disabled={linking} activeOpacity={0.85}>
-          <Ionicons name="link-outline" size={16} color={colors.primary.burgundy} />
+          <Ionicons name="link-outline" size={16} color={colors.primary.base} />
           <Text style={styles.linkBtnText}>Link to a tasting</Text>
         </TouchableOpacity>
       )}
@@ -165,8 +165,8 @@ export default function TastingLinkCard({ bottle, tastedWines = [], onLink, onUn
               value={query}
               onChangeText={setQuery}
               placeholder="Search your tastings…"
-              placeholderTextColor={colors.neutral.silver}
-              selectionColor={colors.primary.burgundy}
+              placeholderTextColor={colors.neutral.placeholder}
+              selectionColor={colors.primary.base}
               autoCorrect={false}
             />
 
@@ -200,15 +200,15 @@ export default function TastingLinkCard({ bottle, tastedWines = [], onLink, onUn
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  cardLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.sm },
-  prompt: { ...typography.body.small, color: colors.neutral.graphite, marginBottom: spacing.sm, lineHeight: 19 },
+  cardLabel: { ...typography.body.caption, color: colors.accent.ink, marginBottom: spacing.sm },
+  prompt: { ...typography.body.small, color: colors.neutral.inkSecondary, marginBottom: spacing.sm, lineHeight: 19 },
 
   row: {
     flexDirection: 'row',
@@ -217,25 +217,25 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   rowBody: { flex: 1 },
-  rowName: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  rowMeta: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
+  rowName: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  rowMeta: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
   rowRating: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  rowRatingText: { ...typography.body.small, color: colors.neutral.charcoal, fontWeight: '600' },
+  rowRatingText: { ...typography.body.small, color: colors.neutral.ink, fontWeight: '600' },
 
   matchTag: {
     paddingVertical: 2,
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.sm,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
-  matchTagText: { ...typography.body.caption, color: colors.primary.burgundy },
+  matchTagText: { ...typography.body.caption, color: colors.primary.base },
 
   linkedActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
-  linkAction: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
+  linkAction: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
   unlink: { color: colors.status.error },
-  dot: { color: colors.neutral.silver },
+  dot: { color: colors.neutral.placeholder },
   chooseAnother: { marginTop: spacing.sm },
 
   linkBtn: {
@@ -246,44 +246,44 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.gold.light,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.accent.surface,
   },
-  linkBtnText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
+  linkBtnText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
 
   // Picker sheet
   backdrop: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     padding: spacing.lg,
     paddingBottom: spacing.xxl,
     maxHeight: '80%',
   },
-  sheetTitle: { ...typography.heading.h2, color: colors.neutral.charcoal, fontFamily: SERIF, marginBottom: spacing.xs },
-  sheetIntro: { ...typography.body.small, color: colors.neutral.graphite, marginBottom: spacing.md },
+  sheetTitle: { ...typography.heading.h2, color: colors.neutral.ink, fontFamily: SERIF, marginBottom: spacing.xs },
+  sheetIntro: { ...typography.body.small, color: colors.neutral.inkSecondary, marginBottom: spacing.md },
   search: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: spacing.sm,
   },
   pickerScroll: { flexGrow: 0 },
-  empty: { ...typography.body.regular, color: colors.neutral.pewter, textAlign: 'center', paddingVertical: spacing.xl },
+  empty: { ...typography.body.regular, color: colors.neutral.inkTertiary, textAlign: 'center', paddingVertical: spacing.xl },
 
   sheetCancel: {
     marginTop: spacing.md,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
     alignItems: 'center',
   },
-  sheetCancelText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
+  sheetCancelText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
 });

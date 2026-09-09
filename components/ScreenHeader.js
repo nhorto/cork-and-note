@@ -36,7 +36,7 @@ export default function ScreenHeader({
             accessibilityLabel={backAccessibilityLabel}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="chevron-back" size={26} color={colors.primary.burgundy} />
+            <Ionicons name="chevron-back" size={26} color={colors.primary.base} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -63,9 +63,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.sm,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
+    borderBottomColor: colors.accent.border,
   },
   side: {
     width: HIT,
@@ -91,13 +91,13 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 20,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     letterSpacing: 0.3,
     textAlign: 'center',
   },
   subtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
     textAlign: 'center',
   },

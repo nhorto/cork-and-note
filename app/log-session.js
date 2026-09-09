@@ -157,7 +157,7 @@ export default function LogSessionScreen() {
   if (isEditing && loadingSession) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.primary.burgundy} />
+        <ActivityIndicator size="large" color={colors.primary.base} />
       </View>
     );
   }
@@ -178,6 +178,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
 });

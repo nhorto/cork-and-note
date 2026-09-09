@@ -83,7 +83,7 @@ export default function PriorTastingBanner({ result, variant = 'prior', onDismis
         <Ionicons
           name={variant === 'session' ? 'alert-circle' : 'wine'}
           size={18}
-          color={colors.primary.burgundy}
+          color={colors.primary.base}
         />
         <View style={styles.headBody}>
           <Text style={styles.headline}>{headline(result, variant)}</Text>
@@ -98,7 +98,7 @@ export default function PriorTastingBanner({ result, variant = 'prior', onDismis
             accessibilityRole="button"
             accessibilityLabel="Dismiss"
           >
-            <Ionicons name="close" size={16} color={colors.neutral.pewter} />
+            <Ionicons name="close" size={16} color={colors.neutral.inkTertiary} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -114,7 +114,7 @@ export default function PriorTastingBanner({ result, variant = 'prior', onDismis
         <View style={styles.note}>
           {rating ? (
             <View style={styles.ratingRow}>
-              <Ionicons name="star" size={12} color={colors.gold.rich} />
+              <Ionicons name="star" size={12} color={colors.accent.base} />
               <Text style={styles.ratingText}>{rating}</Text>
             </View>
           ) : null}
@@ -135,32 +135,32 @@ export default function PriorTastingBanner({ result, variant = 'prior', onDismis
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.md,
     padding: spacing.sm + 2,
     marginBottom: spacing.md,
   },
   bannerSession: {
-    backgroundColor: colors.neutral.parchment,
-    borderColor: colors.primary.burgundy,
+    backgroundColor: colors.neutral.surface,
+    borderColor: colors.primary.base,
   },
   head: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   headBody: { flex: 1 },
   headline: {
     ...typography.body.small,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
   },
   // NOT typography.body.caption — that's a LABEL style (uppercase + letterspaced,
   // as used for "WINEMAKER" / "YEAR"). Running a wine name through it renders
   // "BOURBON BARREL AGED CAB", which is unreadable and unlike how the name shows
   // everywhere else.
-  sub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
+  sub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
   reveal: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
     marginTop: spacing.sm,
   },
@@ -168,15 +168,15 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     paddingTop: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.gold.muted,
+    borderTopColor: colors.accent.border,
     gap: spacing.xs,
   },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   ratingText: {
     ...typography.body.small,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
   },
-  noteText: { ...typography.body.small, color: colors.neutral.graphite, lineHeight: 19 },
-  noteEmpty: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic' },
+  noteText: { ...typography.body.small, color: colors.neutral.inkSecondary, lineHeight: 19 },
+  noteEmpty: { ...typography.body.small, color: colors.neutral.inkTertiary, fontStyle: 'italic' },
 });

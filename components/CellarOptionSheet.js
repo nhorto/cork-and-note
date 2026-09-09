@@ -29,7 +29,7 @@ export default function CellarOptionSheet({ visible, title, options = [], select
                 >
                   <Text style={[styles.rowLabel, active && styles.rowLabelActive]}>{opt.label}</Text>
                   {active && (
-                    <Ionicons name="checkmark" size={20} color={colors.primary.burgundy} />
+                    <Ionicons name="checkmark" size={20} color={colors.primary.base} />
                   )}
                 </TouchableOpacity>
               );
@@ -44,7 +44,7 @@ export default function CellarOptionSheet({ visible, title, options = [], select
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
   sheet: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     paddingHorizontal: spacing.lg,
@@ -54,14 +54,14 @@ const styles = StyleSheet.create({
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: spacing.md,
   },
   title: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
-  rowLabel: { ...typography.body.regular, color: colors.neutral.graphite },
-  rowLabelActive: { color: colors.primary.burgundy, fontWeight: '600' },
+  rowLabel: { ...typography.body.regular, color: colors.neutral.inkSecondary },
+  rowLabelActive: { color: colors.primary.base, fontWeight: '600' },
 });

@@ -172,7 +172,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Enter your current password"
                 secureTextEntry={!showCurrentPassword}
                 autoCapitalize="none"
-                placeholderTextColor={colors.neutral.silver}
+                placeholderTextColor={colors.neutral.placeholder}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -184,7 +184,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showCurrentPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color={colors.primary.burgundy}
+                  color={colors.primary.base}
                 />
               </TouchableOpacity>
             </View>
@@ -201,7 +201,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Enter your new password"
                 secureTextEntry={!showNewPassword}
                 autoCapitalize="none"
-                placeholderTextColor={colors.neutral.silver}
+                placeholderTextColor={colors.neutral.placeholder}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -213,7 +213,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showNewPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color={colors.primary.burgundy}
+                  color={colors.primary.base}
                 />
               </TouchableOpacity>
             </View>
@@ -252,7 +252,7 @@ export default function ChangePasswordScreen() {
                 placeholder="Confirm your new password"
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
-                placeholderTextColor={colors.neutral.silver}
+                placeholderTextColor={colors.neutral.placeholder}
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -264,7 +264,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color={colors.primary.burgundy}
+                  color={colors.primary.base}
                 />
               </TouchableOpacity>
             </View>
@@ -298,7 +298,7 @@ export default function ChangePasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   content: {
     flex: 1,
@@ -312,39 +312,39 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: 8,
   },
   passwordContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   passwordInput: {
     flex: 1,
     paddingHorizontal: 15,
     paddingVertical: 12,
     fontSize: 16,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   eyeButton: {
     padding: 15,
   },
   requirementsContainer: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     padding: 15,
     borderRadius: 8,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   requirementsTitle: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: 10,
   },
   requirementRow: {
@@ -364,16 +364,16 @@ const styles = StyleSheet.create({
   securityNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     padding: 15,
     borderRadius: 8,
     marginTop: 20,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   securityNoteText: {
     fontSize: 13,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     marginLeft: 10,
     flex: 1,
     lineHeight: 18,

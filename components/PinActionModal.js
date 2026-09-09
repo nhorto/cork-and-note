@@ -44,7 +44,7 @@ const PinActionModal = ({
               <View style={styles.headerDecoration}>
                 <View style={styles.decorativeLine} />
                 <View style={styles.headerIcon}>
-                  <Ionicons name="wine" size={20} color={colors.primary.burgundy} />
+                  <Ionicons name="wine" size={20} color={colors.primary.base} />
                 </View>
                 <View style={styles.decorativeLine} />
               </View>
@@ -66,13 +66,13 @@ const PinActionModal = ({
                   activeOpacity={0.7}
                 >
                   <View style={[styles.iconContainer, { backgroundColor: colors.status.visited }]}>
-                    <Ionicons name="reader" size={20} color={colors.neutral.cream} />
+                    <Ionicons name="reader" size={20} color={colors.neutral.bg} />
                   </View>
                   <View style={styles.optionTextContainer}>
                     <Text style={styles.optionText}>View winery & your notes</Text>
                     <Text style={styles.optionSubtext}>Past visits and the wines you logged</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+                  <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
                 </TouchableOpacity>
               )}
 
@@ -81,14 +81,14 @@ const PinActionModal = ({
                 onPress={onLogVisit}
                 activeOpacity={0.7}
               >
-                <View style={[styles.iconContainer, { backgroundColor: colors.primary.burgundy }]}>
-                  <Ionicons name="wine" size={20} color={colors.neutral.cream} />
+                <View style={[styles.iconContainer, { backgroundColor: colors.primary.base }]}>
+                  <Ionicons name="wine" size={20} color={colors.neutral.bg} />
                 </View>
                 <View style={styles.optionTextContainer}>
                   <Text style={styles.optionText}>Log a visit here</Text>
                   <Text style={styles.optionSubtext}>Record wines and tasting notes</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+                <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -97,13 +97,13 @@ const PinActionModal = ({
                 activeOpacity={0.7}
               >
                 <View style={[styles.iconContainer, { backgroundColor: colors.status.wishlist }]}>
-                  <Ionicons name="bookmark" size={20} color={colors.neutral.cream} />
+                  <Ionicons name="bookmark" size={20} color={colors.neutral.bg} />
                 </View>
                 <View style={styles.optionTextContainer}>
                   <Text style={styles.optionText}>Add to wishlist</Text>
                   <Text style={styles.optionSubtext}>Save for a future visit</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+                <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
               </TouchableOpacity>
 
               {/* Divider before destructive action */}
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     padding: spacing.lg,
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: spacing.lg,
@@ -169,38 +169,38 @@ const styles = StyleSheet.create({
   decorativeLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   headerIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   title: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     textAlign: 'center',
     marginBottom: spacing.xs,
   },
   address: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
   },
 
   // Options
   options: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     overflow: 'hidden',
     marginBottom: spacing.md,
     ...shadows.soft,
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   iconContainer: {
     width: 44,
@@ -225,19 +225,19 @@ const styles = StyleSheet.create({
   },
   optionText: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '500',
     marginBottom: 2,
   },
   optionSubtext: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 
   // Destructive
   destructiveDivider: {
     height: spacing.sm,
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
   },
   destructiveOption: {
     borderBottomWidth: 0,

@@ -141,16 +141,16 @@ export default function Wines() {
     switch (type?.toLowerCase()) {
       case 'red':
       case 'red blend':
-        return colors.primary.burgundy;
+        return colors.primary.base;
       case 'white':
       case 'white blend':
-        return colors.gold.rich;
+        return colors.accent.base;
       case 'rosé':
-        return colors.primary.rosé;
+        return colors.primary.soft;
       case 'sparkling':
-        return colors.gold.shimmer;
+        return colors.accent.strong;
       default:
-        return colors.neutral.pewter;
+        return colors.neutral.inkTertiary;
     }
   };
 
@@ -167,7 +167,7 @@ export default function Wines() {
             <Ionicons
               name="wine"
               size={22}
-              color={item.wine_type === 'White' ? colors.neutral.charcoal : colors.neutral.cream}
+              color={item.wine_type === 'White' ? colors.neutral.ink : colors.neutral.bg}
             />
           </View>
         </View>
@@ -190,7 +190,7 @@ export default function Wines() {
           {/* Badge: this tasted wine is also in the cellar (#117). */}
           {item.cellarMatch ? (
             <View style={styles.cellarBadge}>
-              <Ionicons name="file-tray-stacked" size={11} color={colors.gold.rich} />
+              <Ionicons name="file-tray-stacked" size={11} color={colors.accent.base} />
               <Text style={styles.cellarBadgeText}>
                 {item.cellarMatch.relation === 'same' ? 'In your cellar' : 'In cellar · other vintage'}
               </Text>
@@ -210,7 +210,7 @@ export default function Wines() {
                       : 'star-outline'
                   }
                   size={14}
-                  color={colors.gold.rich}
+                  color={colors.accent.base}
                 />
               ))}
             </View>
@@ -230,7 +230,7 @@ export default function Wines() {
     return (
       <View style={styles.loadingContainer}>
         <View style={styles.loadingIcon}>
-          <Ionicons name="wine-outline" size={32} color={colors.gold.muted} />
+          <Ionicons name="wine-outline" size={32} color={colors.accent.border} />
         </View>
         <Text style={styles.loadingText}>Loading your wines...</Text>
       </View>
@@ -264,7 +264,7 @@ export default function Wines() {
             <Ionicons
               name="options-outline"
               size={20}
-              color={filterCount > 0 ? colors.neutral.cream : colors.neutral.charcoal}
+              color={filterCount > 0 ? colors.neutral.bg : colors.neutral.ink}
             />
             {filterCount > 0 && (
               <View style={styles.filterBadge}>
@@ -278,14 +278,14 @@ export default function Wines() {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={18} color={colors.primary.burgundy} style={styles.searchIcon} />
+          <Ionicons name="search" size={18} color={colors.primary.base} style={styles.searchIcon} />
           <TextInput
             placeholder="Search wines or wineries..."
             value={search}
             onChangeText={setSearch}
             style={styles.searchInput}
-            placeholderTextColor={colors.neutral.silver}
-            selectionColor={colors.primary.burgundy}
+            placeholderTextColor={colors.neutral.placeholder}
+            selectionColor={colors.primary.base}
           />
           {search.length > 0 && (
             <TouchableOpacity
@@ -295,7 +295,7 @@ export default function Wines() {
               accessibilityLabel="Clear"
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Ionicons name="close-circle" size={20} color={colors.neutral.pewter} />
+              <Ionicons name="close-circle" size={20} color={colors.neutral.inkTertiary} />
             </TouchableOpacity>
           )}
         </View>
@@ -331,7 +331,7 @@ export default function Wines() {
           error ? (
             <View style={styles.emptyContainer}>
               <View style={styles.emptyIcon}>
-                <Ionicons name="cloud-offline-outline" size={40} color={colors.gold.muted} />
+                <Ionicons name="cloud-offline-outline" size={40} color={colors.accent.border} />
               </View>
               <Text style={styles.emptyTitle}>Couldn&apos;t load your wines</Text>
               <Text style={styles.emptyText}>
@@ -344,7 +344,7 @@ export default function Wines() {
           ) : (
             <View style={styles.emptyContainer}>
               <View style={styles.emptyIcon}>
-                <Ionicons name="wine-outline" size={40} color={colors.gold.muted} />
+                <Ionicons name="wine-outline" size={40} color={colors.accent.border} />
               </View>
               <Text style={styles.emptyTitle}>No wines found</Text>
               <Text style={styles.emptyText}>
@@ -377,22 +377,22 @@ export default function Wines() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
 
   filterHeaderButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   filterHeaderButtonActive: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
+    borderColor: colors.primary.base,
   },
   filterBadge: {
     position: 'absolute',
@@ -401,14 +401,14 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: colors.gold.rich,
+    backgroundColor: colors.accent.base,
     alignItems: 'center',
     justifyContent: 'center',
   },
   filterBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
 
   // Loading
@@ -416,22 +416,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   loadingIcon: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   loadingText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
   },
 
@@ -439,15 +439,15 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     paddingHorizontal: spacing.md,
   },
   searchIcon: {
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 44,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   clearButton: {
     padding: spacing.xs,
@@ -470,11 +470,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   resultsCount: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   sortRow: {
     flexDirection: 'row',
@@ -485,16 +485,16 @@ const styles = StyleSheet.create({
   wineList: {
     padding: spacing.lg,
     paddingTop: spacing.sm,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   wineCard: {
     flexDirection: 'row',
     padding: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     ...shadows.soft,
     overflow: 'hidden',
   },
@@ -514,24 +514,24 @@ const styles = StyleSheet.create({
   wineName: {
     ...typography.body.regular,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: 2,
   },
   wineVarietal: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '500',
     marginBottom: 2,
   },
   wineryName: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: 2,
   },
   visitDate: {
     ...typography.body.caption,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: spacing.xs,
   },
   cellarBadge: {
@@ -539,9 +539,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 4,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.sm,
     paddingHorizontal: spacing.xs,
     paddingVertical: 2,
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
   },
   cellarBadgeText: {
     ...typography.body.caption,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
   },
   ratingContainer: {
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
   },
   ratingText: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     fontWeight: '500',
   },
   wineTypeIndicator: {
@@ -584,36 +584,36 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   emptyTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
   emptyText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     paddingHorizontal: spacing.xl,
     maxWidth: 280,
   },
   retryButton: {
     marginTop: spacing.md,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.md,
   },
   retryButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
 

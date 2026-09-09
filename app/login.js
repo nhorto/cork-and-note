@@ -70,7 +70,7 @@ export default function LoginScreen() {
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color={colors.primary.burgundy} style={styles.inputIcon} />
+            <Ionicons name="mail" size={20} color={colors.primary.base} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email address"
@@ -78,19 +78,19 @@ export default function LoginScreen() {
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
-              placeholderTextColor={colors.neutral.silver}
+              placeholderTextColor={colors.neutral.placeholder}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color={colors.primary.burgundy} style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color={colors.primary.base} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
-              placeholderTextColor={colors.neutral.silver}
+              placeholderTextColor={colors.neutral.placeholder}
             />
             <TouchableOpacity
               style={styles.visibilityIcon}
@@ -102,7 +102,7 @@ export default function LoginScreen() {
               <Ionicons
                 name={showPassword ? 'eye-off' : 'eye'}
                 size={20}
-                color={colors.primary.burgundy}
+                color={colors.primary.base}
               />
             </TouchableOpacity>
           </View>
@@ -119,7 +119,7 @@ export default function LoginScreen() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color={colors.neutral.cream} />
+              <ActivityIndicator color={colors.neutral.bg} />
             ) : (
               <Text style={styles.loginButtonText}>Log in</Text>
             )}
@@ -142,7 +142,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   scrollContent: {
     flexGrow: 1,
@@ -168,14 +168,14 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 26,
     fontWeight: '600',
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     marginBottom: spacing.sm,
     textAlign: 'center',
     letterSpacing: 0.3,
   },
   tagline: {
     fontSize: 15,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     textAlign: 'center',
   },
   formContainer: {
@@ -186,11 +186,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: 12,
     marginBottom: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     height: 52,
   },
   inputIcon: {
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   visibilityIcon: {
     padding: 8,
@@ -209,12 +209,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   forgotPasswordText: {
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontSize: 14,
     fontWeight: '500',
   },
   loginButton: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     height: 52,
     justifyContent: 'center',
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   loginButtonText: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,
@@ -234,11 +234,11 @@ const styles = StyleSheet.create({
   },
   registerText: {
     fontSize: 14,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
   },
   registerLink: {
     fontSize: 14,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '700',
   },
 });

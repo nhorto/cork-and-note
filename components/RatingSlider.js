@@ -44,14 +44,14 @@ const RatingSlider = ({
 
     for (let i = 0; i < 5; i++) {
       let iconName = 'star-outline';
-      let iconColor = colors.neutral.silver; // Light for empty stars
+      let iconColor = colors.neutral.placeholder; // Light for empty stars
 
       if (i < fullStars) {
         iconName = 'star';
-        iconColor = colors.gold.rich; // Gold for filled stars
+        iconColor = colors.accent.base; // Gold for filled stars
       } else if (i === fullStars && hasHalfStar) {
         iconName = 'star-half';
-        iconColor = colors.gold.rich; // Gold for half stars
+        iconColor = colors.accent.base; // Gold for half stars
       }
 
       stars.push(
@@ -85,8 +85,8 @@ const RatingSlider = ({
           onValueChange={handleValueChange}
           thumbStyle={styles.thumb}
           trackStyle={styles.track}
-          minimumTrackTintColor={colors.primary.burgundy}
-          maximumTrackTintColor={colors.neutral.linen}
+          minimumTrackTintColor={colors.primary.base}
+          maximumTrackTintColor={colors.neutral.divider}
           containerStyle={styles.sliderWrapper}
         />
       </View>
@@ -109,12 +109,12 @@ const styles = StyleSheet.create({
   label: {
     ...typography.body.regular,
     fontWeight: '500',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   valueText: {
     ...typography.body.regular,
     fontWeight: 'bold',
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
   },
   sliderContainer: {
     height: 40,
@@ -132,25 +132,25 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 3,
     elevation: 4,
     borderWidth: 2,
-    borderColor: colors.neutral.cream,
+    borderColor: colors.neutral.bg,
   },
   starsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.full,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   starWrapper: {
     marginHorizontal: 3,

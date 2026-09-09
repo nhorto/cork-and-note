@@ -32,7 +32,7 @@ export default function LegalDocScreen({ doc }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   content: {
     flex: 1,
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   },
   updated: {
     fontSize: 13,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: 20,
   },
   section: {
@@ -52,13 +52,13 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 17,
     fontWeight: '600',
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     marginBottom: 8,
   },
   paragraph: {
     fontSize: 15,
     lineHeight: 22,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: 10,
   },
 });

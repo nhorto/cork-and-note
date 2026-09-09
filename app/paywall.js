@@ -131,7 +131,7 @@ export default function PaywallScreen() {
           accessibilityLabel="Close"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="close" size={26} color={colors.primary.burgundy} />
+          <Ionicons name="close" size={26} color={colors.primary.base} />
         </TouchableOpacity>
       </View>
 
@@ -156,7 +156,7 @@ export default function PaywallScreen() {
         <View style={styles.benefits}>
           {BENEFITS.map((benefit) => (
             <View key={benefit.text} style={styles.benefitRow}>
-              <Ionicons name={benefit.icon} size={18} color={colors.primary.burgundy} />
+              <Ionicons name={benefit.icon} size={18} color={colors.primary.base} />
               <Text style={styles.benefitText}>{benefit.text}</Text>
             </View>
           ))}
@@ -164,7 +164,7 @@ export default function PaywallScreen() {
 
         {loading ? (
           <View style={styles.loading}>
-            <ActivityIndicator color={colors.primary.burgundy} />
+            <ActivityIndicator color={colors.primary.base} />
             <Text style={styles.loadingText}>Loading plans…</Text>
           </View>
         ) : !purchasesAvailable || !packages?.length ? (
@@ -200,7 +200,7 @@ export default function PaywallScreen() {
                   <Ionicons
                     name={isSelected ? 'radio-button-on' : 'radio-button-off'}
                     size={22}
-                    color={isSelected ? colors.primary.burgundy : colors.neutral.stone}
+                    color={isSelected ? colors.primary.base : colors.neutral.border}
                   />
                 </TouchableOpacity>
               );
@@ -216,7 +216,7 @@ export default function PaywallScreen() {
           activeOpacity={0.9}
         >
           {busy ? (
-            <ActivityIndicator color={colors.neutral.cream} />
+            <ActivityIndicator color={colors.neutral.bg} />
           ) : (
             <Text style={styles.ctaText}>
               {isPro ? 'You already have Pro' : packageTrialLabel(selected) ? 'Start free trial' : 'Continue'}
@@ -252,7 +252,7 @@ export default function PaywallScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
   topBar: {
     paddingHorizontal: spacing.md,
     paddingBottom: spacing.xs,
@@ -265,42 +265,42 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 30,
     fontWeight: '600',
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 15,
     lineHeight: 22,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     textAlign: 'center',
     marginTop: spacing.sm,
   },
   benefits: { marginTop: spacing.lg, gap: spacing.sm },
   benefitRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  benefitText: { flex: 1, fontSize: 15, color: colors.neutral.charcoal },
+  benefitText: { flex: 1, fontSize: 15, color: colors.neutral.ink },
   loading: { alignItems: 'center', paddingVertical: spacing.xl, gap: spacing.sm },
-  loadingText: { fontSize: 14, color: colors.neutral.pewter },
+  loadingText: { fontSize: 14, color: colors.neutral.inkTertiary },
   unavailable: { paddingVertical: spacing.lg },
-  unavailableText: { fontSize: 14, color: colors.neutral.pewter, textAlign: 'center' },
+  unavailableText: { fontSize: 14, color: colors.neutral.inkTertiary, textAlign: 'center' },
   plans: { marginTop: spacing.lg, gap: spacing.sm },
   plan: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: 10,
     padding: spacing.md,
     minHeight: 44,
   },
-  planSelected: { borderColor: colors.primary.burgundy, borderWidth: 2 },
+  planSelected: { borderColor: colors.primary.base, borderWidth: 2 },
   planMain: { flex: 1 },
-  planPeriod: { fontFamily: SERIF, fontSize: 17, fontWeight: '600', color: colors.neutral.charcoal },
-  planPrice: { fontSize: 15, color: colors.neutral.charcoal, marginTop: 2 },
-  planTrial: { fontSize: 13, color: colors.primary.burgundy, marginTop: 2 },
+  planPeriod: { fontFamily: SERIF, fontSize: 17, fontWeight: '600', color: colors.neutral.ink },
+  planPrice: { fontSize: 15, color: colors.neutral.ink, marginTop: 2 },
+  planTrial: { fontSize: 13, color: colors.primary.base, marginTop: 2 },
   cta: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: 8,
     paddingVertical: spacing.md,
     alignItems: 'center',
@@ -309,11 +309,11 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   ctaDisabled: { opacity: 0.5 },
-  ctaText: { color: colors.neutral.cream, fontSize: 16, fontWeight: '600' },
+  ctaText: { color: colors.neutral.bg, fontSize: 16, fontWeight: '600' },
   legalese: {
     fontSize: 11,
     lineHeight: 16,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: spacing.md,
     textAlign: 'center',
   },
@@ -327,9 +327,9 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 13,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     textDecorationLine: 'underline',
     paddingVertical: spacing.xs,
   },
-  linkDivider: { fontSize: 13, color: colors.neutral.pewter },
+  linkDivider: { fontSize: 13, color: colors.neutral.inkTertiary },
 });

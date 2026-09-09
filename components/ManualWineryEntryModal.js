@@ -119,7 +119,7 @@ const ManualWineryEntryModal = ({
   };
 
   const getIconColor = () => {
-    return actionType === 'visit' ? colors.primary.burgundy : colors.status.wishlist;
+    return actionType === 'visit' ? colors.primary.base : colors.status.wishlist;
   };
 
   return (
@@ -147,7 +147,7 @@ const ManualWineryEntryModal = ({
               {/* Header */}
               <View style={styles.header}>
                 <View style={[styles.iconContainer, { backgroundColor: getIconColor() }]}>
-                  <Ionicons name={getIcon()} size={24} color={colors.neutral.cream} />
+                  <Ionicons name={getIcon()} size={24} color={colors.neutral.bg} />
                 </View>
                 <View style={styles.headerText}>
                   <Text style={styles.title}>{getTitle()}</Text>
@@ -168,12 +168,12 @@ const ManualWineryEntryModal = ({
                 <TextInput
                   style={styles.input}
                   placeholder="e.g., Château Margaux"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                   value={name}
                   onChangeText={setName}
                   autoFocus={true}
                   returnKeyType="done"
-                  selectionColor={colors.primary.burgundy}
+                  selectionColor={colors.primary.base}
                 />
               </View>
 
@@ -182,7 +182,7 @@ const ManualWineryEntryModal = ({
                 <View style={styles.locationRow}>
                   <View style={styles.locationInfo}>
                     <View style={styles.locationIconContainer}>
-                      <Ionicons name="location" size={18} color={colors.primary.burgundy} />
+                      <Ionicons name="location" size={18} color={colors.primary.base} />
                     </View>
                     <View style={styles.locationTextWrap}>
                       <Text style={styles.locationLabel}>Use current location</Text>
@@ -194,9 +194,9 @@ const ManualWineryEntryModal = ({
                   <Switch
                     value={useCurrentLocation}
                     onValueChange={setUseCurrentLocation}
-                    trackColor={{ false: colors.neutral.stone, true: colors.primary.rosé }}
-                    thumbColor={useCurrentLocation ? colors.primary.burgundy : colors.neutral.parchment}
-                    ios_backgroundColor={colors.neutral.stone}
+                    trackColor={{ false: colors.neutral.border, true: colors.primary.soft }}
+                    thumbColor={useCurrentLocation ? colors.primary.base : colors.neutral.surface}
+                    ios_backgroundColor={colors.neutral.border}
                   />
                 </View>
               </View>
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: borderRadius.xl,
     padding: spacing.lg,
     width: 340,
@@ -269,13 +269,13 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: 2,
   },
   subtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 
   // Divider
@@ -287,12 +287,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   dividerDiamond: {
     width: 6,
     height: 6,
-    backgroundColor: colors.gold.rich,
+    backgroundColor: colors.accent.base,
     transform: [{ rotate: '45deg' }],
     marginHorizontal: spacing.sm,
   },
@@ -303,26 +303,26 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginBottom: spacing.sm,
   },
   input: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     fontSize: typography.body.regular.fontSize,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
 
   // Location Section
   locationSection: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
@@ -345,21 +345,21 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   locationLabel: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '500',
   },
   locationSubtext: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
 

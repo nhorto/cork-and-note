@@ -155,7 +155,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
   if (loadingCellar) {
     return (
       <View style={[styles.card, styles.centeredCard]}>
-        <ActivityIndicator color={colors.gold.rich} />
+        <ActivityIndicator color={colors.accent.base} />
       </View>
     );
   }
@@ -165,7 +165,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
     return (
       <View style={styles.card}>
         <View style={styles.headerRow}>
-          <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
+          <Ionicons name="sparkles" size={18} color={colors.accent.base} />
           <Text style={styles.eyebrow}>TONIGHT&apos;S PICK</Text>
         </View>
         <Text style={styles.emptyTitle}>Let the sommelier pick from your cellar</Text>
@@ -197,7 +197,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
         accessibilityRole="button"
         accessibilityLabel={collapsed ? "Expand Tonight's Pick" : "Collapse Tonight's Pick"}
       >
-        <Ionicons name="sparkles" size={18} color={colors.gold.rich} />
+        <Ionicons name="sparkles" size={18} color={colors.accent.base} />
         <Text style={styles.eyebrow}>TONIGHT&apos;S PICK</Text>
         {collapsed ? (
           <Text style={styles.collapsedTeaser} numberOfLines={1}>
@@ -208,7 +208,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
         <Ionicons
           name={collapsed ? 'chevron-down' : 'chevron-up'}
           size={18}
-          color={colors.primary.burgundy}
+          color={colors.primary.base}
         />
       </TouchableOpacity>
 
@@ -225,7 +225,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
         activeOpacity={0.8}
         onPress={() => setShowPickers((s) => !s)}
       >
-        <Ionicons name="options-outline" size={16} color={colors.primary.burgundy} />
+        <Ionicons name="options-outline" size={16} color={colors.primary.base} />
         <View style={styles.tuneBtnTextWrap}>
           <Text style={styles.tuneBtnText}>
             {showPickers ? 'Hide options' : 'Tune your pick'}
@@ -237,7 +237,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
         <Ionicons
           name={showPickers ? 'chevron-up' : 'chevron-down'}
           size={16}
-          color={colors.primary.burgundy}
+          color={colors.primary.base}
         />
       </TouchableOpacity>
 
@@ -265,7 +265,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
           <TextInput
             style={styles.freeText}
             placeholder="Optional: e.g. something for grilled salmon"
-            placeholderTextColor={colors.neutral.silver}
+            placeholderTextColor={colors.neutral.placeholder}
             value={freeText}
             onChangeText={setFreeText}
             returnKeyType="done"
@@ -336,7 +336,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
                 <Ionicons
                   name="chevron-forward"
                   size={14}
-                  color={colors.primary.burgundy}
+                  color={colors.primary.base}
                 />
               </View>
             ) : null}
@@ -359,7 +359,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
                   <Ionicons
                     name="wine-outline"
                     size={16}
-                    color={colors.primary.burgundy}
+                    color={colors.primary.base}
                     style={styles.altIcon}
                   />
                   <View style={styles.altMeta}>
@@ -391,10 +391,10 @@ const SERIF = Platform.OS === 'ios' ? 'Georgia' : 'serif';
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     padding: spacing.md,
     ...shadows.soft,
   },
@@ -411,12 +411,12 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
   },
   flexSpacer: { flex: 1 },
   collapsedTeaser: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginLeft: spacing.sm,
     flexShrink: 1,
   },
@@ -426,9 +426,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
@@ -437,24 +437,24 @@ const styles = StyleSheet.create({
   tuneBtnTextWrap: { flex: 1 },
   tuneBtnText: {
     ...typography.body.regular,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
   tuneBtnHint: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
 
   title: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: spacing.sm,
   },
   subtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
   },
 
@@ -468,7 +468,7 @@ const styles = StyleSheet.create({
   },
   pickerLabel: {
     ...typography.body.caption,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   pillScroll: {
     gap: spacing.xs,
@@ -479,31 +479,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm + 2,
     borderRadius: borderRadius.round,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.cream,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.bg,
     marginRight: spacing.xs,
   },
   pillActive: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
+    borderColor: colors.primary.base,
   },
   pillText: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
   },
   pillTextActive: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
   freeText: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginTop: spacing.xs,
   },
 
@@ -520,34 +520,34 @@ const styles = StyleSheet.create({
   },
   resultDivider: {
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
     marginBottom: spacing.md,
   },
   aside: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     fontStyle: 'italic',
     marginBottom: spacing.sm,
     lineHeight: 19,
   },
   pickLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
   },
   pickName: {
     ...typography.heading.h2,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontFamily: SERIF,
     marginTop: 2,
   },
   pickProducer: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
   pickWhy: {
     ...typography.body.regular,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     marginTop: spacing.sm,
     lineHeight: 22,
   },
@@ -559,9 +559,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   flavorChip: {
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.round,
     paddingVertical: 3,
     paddingHorizontal: spacing.sm,
@@ -570,7 +570,7 @@ const styles = StyleSheet.create({
   },
   flavorChipText: {
     ...typography.body.small,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontSize: 12,
   },
 
@@ -582,7 +582,7 @@ const styles = StyleSheet.create({
   },
   viewBottleText: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
 
@@ -592,7 +592,7 @@ const styles = StyleSheet.create({
   },
   altHeader: {
     ...typography.body.caption,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: spacing.sm,
   },
   altRow: {
@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.linen,
+    borderTopColor: colors.neutral.divider,
   },
   altIcon: {
     marginTop: 2,
@@ -611,19 +611,19 @@ const styles = StyleSheet.create({
   },
   altName: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
   },
   altWhy: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
     lineHeight: 18,
   },
 
   disclaimer: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     marginTop: spacing.md,
     textAlign: 'center',
@@ -632,13 +632,13 @@ const styles = StyleSheet.create({
   // Empty state
   emptyTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: spacing.sm,
   },
   emptyBody: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: spacing.xs,
     lineHeight: 19,
   },

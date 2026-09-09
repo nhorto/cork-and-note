@@ -109,7 +109,7 @@ export default function BottlePairing({ bottle }) {
   return (
     <View style={styles.card}>
       <View style={styles.headerRow}>
-        <Ionicons name="restaurant" size={18} color={colors.gold.rich} />
+        <Ionicons name="restaurant" size={18} color={colors.accent.base} />
         <Text style={styles.eyebrow}>FOOD PAIRING</Text>
         <View style={styles.flexSpacer} />
         <TouchableOpacity
@@ -143,7 +143,7 @@ export default function BottlePairing({ bottle }) {
           <TextInput
             style={styles.freeText}
             placeholder="Optional: e.g. cooking for vegetarians"
-            placeholderTextColor={colors.neutral.silver}
+            placeholderTextColor={colors.neutral.placeholder}
             value={freeText}
             onChangeText={setFreeText}
             returnKeyType="done"
@@ -185,7 +185,7 @@ export default function BottlePairing({ bottle }) {
               <Ionicons
                 name={CATEGORY_ICON[p.category] || 'restaurant-outline'}
                 size={16}
-                color={colors.primary.burgundy}
+                color={colors.primary.base}
                 style={styles.pairIcon}
               />
               <View style={styles.pairMeta}>
@@ -208,10 +208,10 @@ const SERIF = Platform.OS === 'ios' ? 'Georgia' : 'serif';
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     padding: spacing.md,
     marginTop: spacing.lg,
   },
@@ -223,24 +223,24 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
   },
   flexSpacer: { flex: 1 },
   tuneLink: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
 
   title: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: spacing.sm,
   },
   subtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
   },
 
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   pickerRow: { gap: spacing.xs },
   pickerLabel: {
     ...typography.body.caption,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   pillScroll: {
     gap: spacing.xs,
@@ -263,31 +263,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm + 2,
     borderRadius: borderRadius.round,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.cream,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.bg,
     marginRight: spacing.xs,
   },
   pillActive: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
+    borderColor: colors.primary.base,
   },
   pillText: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
   },
   pillTextActive: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
   freeText: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginTop: spacing.xs,
   },
 
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   },
   retryLink: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
 
@@ -312,19 +312,19 @@ const styles = StyleSheet.create({
   result: { marginTop: spacing.md },
   resultDivider: {
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
     marginBottom: spacing.md,
   },
   aside: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     fontStyle: 'italic',
     marginBottom: spacing.sm,
     lineHeight: 19,
   },
   intro: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: spacing.sm,
     lineHeight: 22,
   },
@@ -335,25 +335,25 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.linen,
+    borderTopColor: colors.neutral.divider,
   },
   pairIcon: { marginTop: 2 },
   pairMeta: { flex: 1 },
   pairDish: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
   },
   pairWhy: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
     lineHeight: 18,
   },
 
   disclaimer: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     marginTop: spacing.md,
     textAlign: 'center',

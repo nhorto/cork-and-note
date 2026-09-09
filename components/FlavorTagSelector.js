@@ -138,14 +138,14 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
       {/* Search and Custom Tag Input */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={18} color={colors.primary.burgundy} style={styles.searchIcon} />
+          <Ionicons name="search" size={18} color={colors.primary.base} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search flavor notes..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor={colors.neutral.silver}
-            selectionColor={colors.primary.burgundy}
+            placeholderTextColor={colors.neutral.placeholder}
+            selectionColor={colors.primary.base}
           />
           {searchQuery !== '' && (
             <TouchableOpacity
@@ -154,7 +154,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
               accessibilityLabel="Clear"
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Ionicons name="close-circle" size={18} color={colors.primary.burgundy} />
+              <Ionicons name="close-circle" size={18} color={colors.primary.base} />
             </TouchableOpacity>
           )}
         </View>
@@ -166,8 +166,8 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             value={customTag}
             onChangeText={setCustomTag}
             onSubmitEditing={addCustomTag}
-            placeholderTextColor={colors.neutral.silver}
-            selectionColor={colors.primary.burgundy}
+            placeholderTextColor={colors.neutral.placeholder}
+            selectionColor={colors.primary.base}
           />
           <TouchableOpacity
             style={styles.addButton}
@@ -180,7 +180,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             <Ionicons
               name="add-circle"
               size={24}
-              color={customTag.trim() === '' ? colors.neutral.stone : colors.primary.burgundy}
+              color={customTag.trim() === '' ? colors.neutral.border : colors.primary.base}
             />
           </TouchableOpacity>
         </View>
@@ -231,7 +231,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
                 <Ionicons
                   name={expandedCategories[category] ? "chevron-up" : "chevron-down"}
                   size={18}
-                  color={colors.primary.burgundy}
+                  color={colors.primary.base}
                 />
               </TouchableOpacity>
             ) : (
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginBottom: spacing.sm,
   },
   selectedTagsScroll: {
@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   noTagsText: {
     ...typography.body.small,
     fontStyle: 'italic',
-    color: colors.neutral.silver,
+    color: colors.neutral.placeholder,
     paddingHorizontal: spacing.xs,
   },
   selectedChip: {
@@ -293,10 +293,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.sm,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
   },
   searchIcon: {
     marginRight: spacing.sm,
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing.sm,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   customTagContainer: {
     flexDirection: 'row',
@@ -315,13 +315,13 @@ const styles = StyleSheet.create({
   customTagInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   addButton: {
     marginLeft: spacing.sm,
@@ -336,21 +336,21 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
     marginRight: spacing.sm,
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   activeCategoryTab: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
+    borderColor: colors.primary.base,
   },
   categoryTabText: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     fontWeight: '500',
   },
   activeCategoryTabText: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
   tagsScrollView: {
     maxHeight: 200,
@@ -362,18 +362,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.sm,
     marginBottom: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   categoryTitle: {
     ...typography.body.regular,
     fontWeight: 'bold',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: spacing.sm,
   },
   tagsContainer: {
