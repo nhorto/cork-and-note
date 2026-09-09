@@ -2,9 +2,9 @@
 
 **Prepared:** 2026-09-03
 **Owner-only tasks:** see [`owner-checklist.md`](owner-checklist.md).
-**Status (2026-09-07):** Owner decisions taken 2026-09-03 on pricing ($9.99/mo · $59.99/yr, no lifetime), free meters (as proposed), and platform (iOS only). Navigation option (§3 Layer A vs B) still pending mockup review — it is now the main blocker on further UX work.
+**Status (2026-09-08):** Owner decisions taken 2026-09-03 on pricing ($9.99/mo · $59.99/yr, no lifetime), free meters (as proposed), and platform (iOS only). Navigation option (§3 Layer A vs B) still pending mockup review — it is now the main blocker on further UX work.
 
-Delivered since: every §2.1 must-fix that needed no owner decision (account deletion #161 — verified end-to-end in production, legal screens #162, Maps key #164, fail-closed limiter #165, dead links #166), the full §3.2 Layer A findability pass plus most of Layer C (#170), the §3.3 serif guard, and from §2.3 the `handle_new_user` migration and the first test suite. **Build 11 is on TestFlight** (§2.0 complete). The privacy-policy and support URLs Apple requires are live at <https://cork-and-note.vercel.app> without waiting on the domain. Still open: icons (#163, needs final artwork), the Journal tab (Layer B, needs the A/B decision), the Pro tier (§4.5, needs the RevenueCat and App Store Connect accounts), and the rest of §2.3.
+Delivered since: every §2.1 must-fix that needed no owner decision (account deletion #161 — verified end-to-end in production, legal screens #162, Maps key #164, fail-closed limiter #165, dead links #166), the full §3.2 Layer A findability pass plus most of Layer C (#170), the §3.3 serif guard, and from §2.3 the `handle_new_user` migration and the first test suite. **Build 11 is on TestFlight** (§2.0 complete). The privacy-policy and support URLs Apple requires are live at <https://cork-and-note.vercel.app> without waiting on the domain. **The Pro tier (§4.5) is built** (#192): App Store Connect products, RevenueCat, the paywall, Restore Purchases, the four free gates, and a server-side entitlement the AI calls actually trust. It needs a fresh EAS build to be testable — `react-native-purchases` is native code — and two browser steps from the owner (webhook secret, EAS key). Still open: icons (#163, needs final artwork), the Journal tab (Layer B, needs the A/B decision), and the rest of §2.3.
 **Builds on:** [`monetization-and-marketing-strategy.md`](monetization-and-marketing-strategy.md) (June 2026 research), the 2026-07-05 [code review](../audits/2026-07-05-code-review.md) and [design review](../audits/2026-07-05-design-review.md), issue #148, and three fresh audits of the current `main` (UX/findability, launch readiness, payments/pricing research).
 
 ---
@@ -172,9 +172,14 @@ Fixed costs: Apple $99/yr, Supabase Pro ~$25/mo, Anthropic $20–100/mo at launc
 ### 4.5 Implementation plan for Pro (about 4–5 days)
 1. **Products in App Store Connect:** `pro_monthly` ($9.99) and `pro_annual` ($59.99, 7-day intro trial) in one subscription group "Cork & Note Pro".
 2. **RevenueCat:** project, entitlement `pro`, offering `default`; paywall designed in the dashboard (Paywalls v2) so copy and price tests don't need a release.
-3. **Client:** `npx expo install react-native-purchases react-native-purchases-ui`; identify the user with the Supabase user id at login; `usePro()` hook exposing `isPro` + `presentPaywall()`; Restore Purchases in Account settings; Terms and Privacy links on the paywall.
-4. **Server truth:** RevenueCat webhook → a small edge function → `public.entitlements (user_id, is_pro, expires_at, source)`. The chat edge function reads it and enforces the monthly meter for free users using the existing `chat_usage` table (count rows per calendar month; separate `task` for scans vs chat). Never trust `isPro` from the client for the AI call.
-5. **Gates in the app:** scan buttons, sommelier send, cellar add past 25, export. Each shows a one-line "3 free scans left this month" before the wall, never a surprise.
+3. ~~**Client**~~ **✅ done.** `usePro()` exposes `isPro`, `remaining(task)`, `gate(task)` and `presentPaywall()`. The user is identified to RevenueCat by Supabase user id and logged out on sign-out, without which the next account on a device inherits the previous one's Pro.
+4. ~~**Server truth**~~ **✅ built; the chat half is deliberately not deployed yet.** `revenuecat-webhook` → `public.entitlements`, and the chat function decides Pro from that table and meters free users per calendar month on `chat_usage.task`. It refuses a spent meter with 402, which is what the app opens the paywall on. Deploying the metering before a build exists that can sell a subscription would wall testers with no way past, so it ships with that build.
+5. ~~**Gates in the app**~~ **✅ done.** Scans, sommelier send (both surfaces), cellar add past 25, and CSV export — which had to be built, since it did not exist.
+
+Two decisions taken while building that differ from the plan above:
+
+- **The paywall is a screen in the app, not a dashboard-designed Paywalls v2 template.** Guideline 3.1.2 requires specific text and two working legal links, and leaving those to remote configuration means a rejection is one dashboard edit away. `lib/purchases.js` still exposes `presentHostedPaywall()`, so moving to Paywalls v2 for copy and price tests is a small change when there is data worth testing.
+- **Tonight's Pick, bottle pairing and AI drink windows spend the sommelier meter** rather than being Pro-only or free. They are Claude calls on the same path, so anything else either hands free users an unmetered Sonnet budget or walls a feature the tier table never said was paid. Worth revisiting once §4.6 usage data exists.
 6. **Analytics:** RevenueCat charts cover revenue; add a lightweight event layer (PostHog free tier or Supabase table) for activation = first tasting logged, D1/D7/D30 return, paywall view → purchase.
 
 ---
