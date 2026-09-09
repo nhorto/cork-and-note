@@ -47,6 +47,28 @@ app were built independently in the same window). Burgundy + gold + cream + seri
 "wine" palette; a raised center action button is a stock mobile pattern; "what should I open
 tonight" is the obvious cellar killer feature. Nobody owns any of this.
 
+### Did anyone copy anyone? (Wayback Machine timeline, checked 2026-09-09)
+
+Because our repo is public, we checked whether Sommo's look could have been lifted from it — or
+vice versa. The archive answers it cleanly:
+
+| Date | Event |
+|---|---|
+| 2025-05-20 | Our repo created (burgundy theme not yet in it) |
+| **2026-01-14** | **Earliest Wayback capture of sommo.app: already burgundy `#722F37` theme-color, gold/cream, Playfair serif** |
+| **2026-02-20** | Our Château Label theme (`#722F37` burgundy) lands in the repo (`44ac014`) |
+| Apr–May 2026 | Sommo deepens its burgundy `#722F37` → `#4A0E1B` |
+| May–Jun 2026 | Sommo swaps Playfair → **Fraunces** as its serif |
+| 2026-06-08 | Our raised-center ＋ tab button lands (`8ada39a`) |
+
+**Sommo's burgundy/gold/cream/serif identity is in the archive five weeks before our theme
+existed in this repo**, so they could not have copied it from us — and we designed ours
+independently. The identical starting hex is less spooky than it looks: `#722F37` is the
+canonical "Wine" web color; both apps reached for the same off-the-shelf swatch. No archive
+exists before 2026-01-14 (they launched ~Dec 2025), so their launch-era look is unverifiable,
+but nothing that *is* verifiable supports copying in either direction. Verdict: **pure
+convergent evolution — and all the more reason to move, since neither of us owns the look.**
+
 **But it still matters.** In an App Store search results page, in screenshots, and in a reviewer's
 mind, the two apps currently read as the same product — and Sommo got to market first, has
 traction, and charges **half our yearly price** ($30/yr vs our $59.99/yr). We can't out-incumbent
@@ -99,10 +121,12 @@ look. Distinct, but coolest/least "wine" of the three.
 
 ### 5.2 Typography
 
-Swap the display serif from Georgia (visually adjacent to Sommo's Playfair-style serif) to
-**Fraunces** via `expo-google-fonts` — warmer, chunkier, instantly recognizable, and
-`theme.js` already routes every heading through the `typography.fonts.serif` token, so it's a
-one-token change plus font loading.
+Swap the display serif from Georgia (visually adjacent to Sommo's serif look). ~~Fraunces~~ —
+struck after the Wayback check: **Sommo itself switched to Fraunces in mid-2026**, so it's
+disqualified, as is Playfair (their old face). Recommend **Libre Caslon** (Text for running
+headings, Display for heroes) via `expo-google-fonts` — bookish, field-journal warmth that fits
+the "Note" identity and matches neither of their eras. `theme.js` already routes every heading
+through the `typography.fonts.serif` token, so it's a one-token change plus font loading.
 
 ### 5.3 Tab bar
 
