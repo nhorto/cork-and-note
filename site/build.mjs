@@ -413,7 +413,7 @@ const home = page({
           <th scope="col" class="plan pro">
             <span class="plan-name">Pro</span>
             <span class="plan-price">$9.99<small>/month</small></span>
-            <span class="plan-tag">or $59.99/year with a 7-day free trial</span>
+            <span class="plan-tag">or $59.99/year with a 3-day free trial</span>
           </th>
         </tr>
       </thead>

@@ -44,6 +44,10 @@ export const FAIR_USE_DAILY_CAPS = {
 } as const;
 export const FAIR_USE_MONTHLY_CHAT_CAP = 1_000;
 
+/** Burst cap, any task, any tier: nobody types 15 sommelier questions in 5 minutes. */
+export const BURST_WINDOW_MIN = 5;
+export const BURST_LIMIT = 15;
+
 export type MeteredTask = keyof typeof FREE_TIER_LIMITS;
 
 /** The RevenueCat entitlement identifier configured in the dashboard. */
@@ -158,6 +162,128 @@ export function limitReachedMessage(task: MeteredTask): string {
  */
 export const PHOTO_CHAT_PRO_MESSAGE =
   "Asking the sommelier about a photo is a Pro feature. Upgrade to Pro to send photos in chat.";
+
+// ── The whole request gate, as one pure function ───────────────────────────
+// Everything above are the parts; this is the decision the chat function acts
+// on. It exists so __tests__/ai-gates.test.js can walk realistic multi-day
+// sequences (a free user burning scans across months, a Pro user grinding
+// 50 chats a day) through the EXACT logic production runs — the edge function
+// only fetches the counts and returns what this says.
+
+/**
+ * Start of the counting window for `task` at `nowMs`; null means lifetime —
+ * count everything. This is the single place the meter windows become SQL:
+ * the edge function and the client provider both build their `created_at`
+ * filter from it, so neither can disagree with FREE_METER_WINDOWS.
+ */
+export function usageWindowStart(task: MeteredTask, nowMs: number): string | null {
+  return FREE_METER_WINDOWS[task] === "month" ? monthWindowStart(nowMs) : null;
+}
+
+export type GateCounts = {
+  /** Calls by this user, any task, in the last BURST_WINDOW_MIN minutes. */
+  burst: number;
+  /** Calls by this user, THIS task, in the last 24 hours. */
+  day: number;
+  /**
+   * Calls by this user, THIS task, since usageWindowStart(task) — i.e. this
+   * calendar month for chat, all time for scans. Only read when
+   * `needsWindowCount` says so; pass 0 otherwise.
+   */
+  window: number;
+};
+
+/** Whether the caller must fetch `counts.window`. Pro scans need no count at all. */
+export function needsWindowCount(isPro: boolean, task: MeteredTask): boolean {
+  return !isPro || task === "chat";
+}
+
+export type GateVerdict =
+  | { allowed: true; isPro: boolean; task: MeteredTask; meter: MeterDecision }
+  | {
+      allowed: false;
+      isPro: boolean;
+      task: MeteredTask;
+      /** 402 opens the paywall in the app; 429 is "slow down", never a sale. */
+      status: 402 | 429;
+      body: {
+        error: string;
+        code?: "free_limit_reached";
+        meter?: {
+          task: MeteredTask;
+          limit: number | null;
+          used: number;
+          remaining: number | null;
+          isPro: boolean;
+        };
+      };
+    };
+
+/**
+ * Decide one AI call. Checks run cheapest-lie-first: burst and daily fair-use
+ * caps apply to everyone before any question of payment; then free chat is
+ * refused photos (a label scan by the back door, on the dearer model); then the
+ * free meter or Pro's monthly chat ceiling settles it.
+ */
+export function gateAiRequest(input: {
+  nowMs: number;
+  task: unknown;
+  hasImages: boolean;
+  entitlement: EntitlementRow;
+  counts: GateCounts;
+}): GateVerdict {
+  const task = normalizeTask(input.task);
+  const isPro = isEntitlementActive(input.entitlement, input.nowMs);
+  const refuse = (
+    status: 402 | 429,
+    body: { error: string; code?: "free_limit_reached" }
+  ): GateVerdict => ({ allowed: false, isPro, task, status, body });
+
+  if (input.counts.burst >= BURST_LIMIT) {
+    return refuse(429, {
+      error: "Rate limit exceeded. Please wait a few minutes and try again.",
+    });
+  }
+  if (input.counts.day >= FAIR_USE_DAILY_CAPS[task]) {
+    return refuse(429, {
+      error: "Daily fair-use limit reached. Please try again tomorrow.",
+    });
+  }
+
+  if (!isPro && task === "chat" && input.hasImages) {
+    return refuse(402, { error: PHOTO_CHAT_PRO_MESSAGE, code: "free_limit_reached" });
+  }
+
+  if (isPro && task === "chat" && input.counts.window >= FAIR_USE_MONTHLY_CHAT_CAP) {
+    return refuse(429, {
+      error:
+        "You've reached this month's fair-use limit for the sommelier. It resets on the 1st.",
+    });
+  }
+
+  const meter = meterDecision({ isPro, task, used: input.counts.window });
+  if (!meter.allowed) {
+    return {
+      allowed: false,
+      isPro,
+      task,
+      status: 402,
+      body: {
+        error: limitReachedMessage(task),
+        code: "free_limit_reached",
+        meter: {
+          task: meter.task,
+          limit: meter.limit,
+          used: meter.used,
+          remaining: meter.remaining,
+          isPro: false,
+        },
+      },
+    };
+  }
+
+  return { allowed: true, isPro, task, meter };
+}
 
 // ── RevenueCat webhook → entitlement rows ──────────────────────────────────
 

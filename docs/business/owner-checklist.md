@@ -27,7 +27,8 @@ Everything here needs your identity, your accounts, or your money. Items are in 
 
 - [ ] **Bank account on the Paid Apps Agreement** — ⚠️ **the last Apple blocker.** App Store Connect → Business → Agreements. The agreement itself is signed and the **W-9 is done** (both ✅ 2026-09-08); only the banking details remain. **No subscription can be sold until this is green**, and Apple takes days to approve it.
 - [x] **App Store Small Business Program** — ✅ enrolled 2026-09-08. Commission is **15%**, so $9.99 nets **$8.49** and $59.99/yr nets **$50.99** (about $4.25/mo). Every net figure in the launch plan already assumes this rate.
-- [x] **Create the subscription products** — ✅ done 2026-09-08. Group *Cork & Note Pro*; `pro_monthly` $9.99/month with **no trial**; `pro_annual` $59.99/year with a **7-day free trial**; both priced and available in all **175 territories**.
+- [x] **Create the subscription products** — ✅ done 2026-09-08. Group *Cork & Note Pro*; `pro_monthly` $9.99/month with **no trial**; `pro_annual` $59.99/year with a free trial; both priced and available in all **175 territories**.
+- [ ] **Switch the annual trial from 7 days to 3 days** (decided 2026-09-09, ~2 minutes, console-only — the API key on this machine has no issuer ID recorded, so Claude can't do it). App Store Connect → My Apps → Cork & Note → Monetization → Subscriptions → *Cork & Note Pro* → `pro_annual` → **Introductory Offers** → delete the existing 7-day free trial → **+** → Free trial → duration **3 days** → all territories → no end date. The app and paywall need no change: they read the trial length from StoreKit at runtime.
 - [x] **Delete the two stray non-consumable IAPs** — ✅ done 2026-09-08. They were left over from an earlier experiment and would have shown up in the review submission as unfinished products.
 - [x] **Age rating questionnaire** — ✅ done 2026-09-08. Frequent/intense alcohol references → 18+.
 - [x] **App Privacy questionnaire** — ✅ done 2026-09-08, from the selections in [`app-store-listing.md`](app-store-listing.md) §7. Revisit it only if analytics (PostHog) are added, which would flip Usage Data to "collected".
@@ -107,7 +108,7 @@ Still undecided and parked: the **domain name** (see §C — it is a branding ch
 
 ---
 
-**Decided so far:** Pro at $9.99/mo and $59.99/yr with a 7-day trial on annual only, no lifetime unlock · Free tier: unlimited logging, 3 lifetime scans + 5 text-only sommelier messages a month, 25-bottle cellar cap · iOS only for v1 · **v1 ships with the paywall** · **launch region Virginia** · **Anthropic capped at $100/mo** · **no LLC, Maryland law**.
+**Decided so far:** Pro at $9.99/mo and $59.99/yr with a 3-day trial on annual only (shortened from 7, 2026-09-09 — ASC toggle pending above), no lifetime unlock · Free tier: unlimited logging, 3 lifetime scans + 5 text-only sommelier messages a month, 25-bottle cellar cap · iOS only for v1 · **v1 ships with the paywall** · **launch region Virginia** · **Anthropic capped at $100/mo** · **no LLC, Maryland law**.
 
 **Owner work completed 2026-09-08:** Anthropic cap set · App Privacy questionnaire · age ratings · W-9 · Small Business Program enrolment · Apple membership confirmed · two stray non-consumable IAPs deleted · Google Maps key rotated · support mailbox created · subscriptions created in App Store Connect · RevenueCat project, entitlement, products and offering wired · In-App Purchase key generated and verified · governing law and legal name answered · launch region and launch scope decided.
 
