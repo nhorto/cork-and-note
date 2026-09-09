@@ -25,6 +25,7 @@ import {
   MOODS,
   OCCASIONS,
 } from '../lib/cellarSommelier';
+import { usePro } from '../hooks/usePro';
 import theme from '../styles/theme';
 import Button from './Button';
 
@@ -64,6 +65,7 @@ function PickerRow({ label, options, value, onChange }) {
 }
 
 export default function TonightsPickCard({ onRequireCellar }) {
+  const { gate } = usePro();
   const router = useRouter();
 
   const [bottles, setBottles] = useState(null); // null = not loaded yet
@@ -121,6 +123,9 @@ export default function TonightsPickCard({ onRequireCellar }) {
 
   const askSommelier = useCallback(async () => {
     if (!hasCellar) return;
+    // These are sommelier calls too: they spend the same 5/month chat meter
+    // server-side, so they get the same gate rather than a confusing refusal.
+    if (!gate('chat')) return;
     setThinking(true);
     setError(null);
     try {
@@ -144,7 +149,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
     } finally {
       setThinking(false);
     }
-  }, [bottles, hasCellar, occasion, cuisine, mood, freeText]);
+  }, [bottles, hasCellar, occasion, cuisine, mood, freeText, gate]);
 
   // ── Loading the cellar ───────────────────────────────────
   if (loadingCellar) {
