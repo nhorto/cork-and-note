@@ -200,25 +200,49 @@ Two decisions taken while building that differ from the plan above:
 
 ---
 
-## 5. Getting users
+## 5. Getting users — Virginia
 
-The June strategy doc covers channels in depth; this is the concrete first-90-days version.
+The June strategy doc covers channels in depth; this is the concrete first-90-days version. **The launch region is Virginia** (decided 2026-09-08). The operational detail — AVA targeting, the winery shortlist, the card copy, the outreach email and the in-person script — is in **[`virginia-launch.md`](virginia-launch.md)**. This section is the strategy and the sequence.
 
 **Positioning in one line:** *The wine journal for people who visit wineries. Log the tasting room, remember every wine, and ask a sommelier who knows what you actually liked.* Do not fight Vivino on "scan a label to see a score."
 
-**Before submission (parallel with §2):**
-- Landing site at your domain (privacy, terms, support, waitlist email form, App Store badge). Repurpose the Vercel project; close #152 either way.
+### 5.1 Why Virginia is the right launch region
+
+- **You can drive to it, repeatedly.** Loudoun County is about **1h 20m from Baltimore** and 25 miles from DC. Placing cards is not a one-off delivery — it is a relationship that needs revisiting, restocking and filming, and the region you will actually go back to beats the region that looks best on paper.
+- **It is dense enough to cluster.** Roughly 300 wineries statewide, and **51 in Loudoun County alone**. Four to six tasting rooms in one day, on foot-level effort, with no overnight.
+- **Real, sourced tourist volume.** **2.64 million wine-related tourists and $246.7M of wine tourism revenue in 2019** (Virginia Wine Board economic impact study, published 2022). Average spend per wine trip **$717**; **61%+ of winery visitors are 25–54**, which is squarely the app's demographic.
+- **The wineries themselves say they have the problem you solve.** In the 2024 GO Virginia Region 9 survey of the Charlottesville/Piedmont counties, **75% named tasting-room visitor traffic as a concern** and **43% named marketing**, with **72% of all sales going through the tasting room**. That is the opening line of every outreach conversation, and it is theirs, not ours.
+- **Prestige exists here too.** The Monticello AVA was *Wine Enthusiast*'s **2023 Wine Region of the Year** — the only North American nominee. It is a two-hour drive and the best possible backdrop for founder content.
+
+**Sequence, not a blanket.** Loudoun first (day trip, densest), Monticello second (overnight, prestige), then the **Virginia Peninsula AVA** — which has only **six wineries in total**, so it can be covered completely in a day. "Cork & Note is in every winery in the Virginia Peninsula AVA" is a true sentence worth owning.
+
+### 5.2 Before submission (parallel with §2)
+
+- ~~Landing site at your domain~~ — **live** at <https://cork-and-note.vercel.app> (#177), with privacy, terms and support. The domain is branding, not a blocker.
 - Ask every current TestFlight tester to be ready to leave an App Store review on launch day. Ten reviews in week one matters more than any ad.
-- Pick **one wine region you can drive to** as the launch region.
+- ~~Pick one wine region you can drive to~~ — **Virginia.**
+- **Decide the card attribution scheme before printing anything.** See §5.3 — this is the one item with a hard deadline, because it cannot be added to a card already on a bar.
 
-**Launch month:**
-- **Tasting-room QR cards** at 5–10 wineries in that region: "Remember what you tasted today — Cork & Note." This is the channel no incumbent can copy and it reaches people at the exact moment of intent.
-- **Founder content:** short vertical videos of you logging at a tasting room, 2–3 per week, TikTok + Instagram Reels. Personality over polish.
+### 5.3 Launch month
+
+- **Tasting-room QR cards** — the channel no incumbent can copy, reaching people at the exact moment they have just tasted five wines and will not remember which was which. Copy, physical spec and the winery shortlist are in [`virginia-launch.md`](virginia-launch.md) §3–4. **Target for month one: five wineries with cards on the bar and a scan number you trust** — not forty placements you cannot measure.
+- **⚠️ There is no attribution today.** No install referrer, no campaign parameter, no per-winery code. If cards go out and installs rise, nothing in the product can say which winery did it. A **per-winery short link** on the card is the cheapest fix, needs no app change, and is the only option that cannot be retrofitted onto a printed card. **This wants deciding before the first print run** — engineering lane, tracked in [`virginia-launch.md`](virginia-launch.md) §5.
+- **Founder content:** short vertical videos of you logging at a tasting room, 2–3 per week, TikTok + Instagram Reels. Personality over polish. Every card trip is also a filming trip.
 - **ASO:** the name/subtitle/keywords in §2.2; iterate monthly.
-- **Local communities:** the region's wine Facebook groups, r/wine, local wine clubs. Value first, 90/10 rule.
+- **Local communities:** Virginia wine Facebook groups, r/wine, local clubs. Value first, 90/10 rule.
 - **Apple Search Ads:** $10–20/day on "wine journal", "wine tasting notes", "winery app" once the paywall is live and you can see cost per trial.
+- **October is Virginia Wine Month**, the state marketing office's flagship promotion. It is the obvious moment to launch into — but it is roughly three weeks from this decision, which is too tight for a print run plus winery sign-ups. **Pilot this October with hand-delivered cards; aim the real push at October 2027.**
 
-**What to measure weekly:** downloads, activation (logged a first tasting within 24h), D7 retention, paywall views, trial starts, paid conversions, Anthropic spend. If activation is under ~40%, the onboarding (Layer C) is the problem, not marketing.
+**⚠️ One competitive note before approaching the state marketing office.** The Virginia Wine Board's FY2024–25 annual report says VirginiaWine.org has added **"new features like tracking winery visits."** Not the same product, but close enough that the state office is a *partner or a competitor, not a neutral channel*. Decide which before pitching. The Virginia Wineries Association, which has a formal affiliate tier for non-winery businesses, is the cleaner front door.
+
+### 5.4 What Virginia exposes in the product
+
+Choosing Virginia does not create new engineering work, but it does put weight on two known gaps. Both are documented in [`region-model.md`](../research/region-model.md) §11 and **neither is a launch blocker**.
+
+- **The app has no winery data, in Virginia or anywhere.** Wineries are private per user with no shared directory and no place search, so a guest who scans a card in a tasting room types the winery's name in and drops a pin by hand. There is a historical irony worth knowing: a shared **~306-row Virginia winery catalog existed until 2026-06-19** and was deliberately deleted when the product went general-purpose. The import file is still in `data/`, imported by nothing, carrying no AVA data and one winery geocoded into Austria. Re-introducing a catalog means revisiting the per-user RLS model — a product decision, not a data import, and not one to take for launch.
+- **Region autocomplete has no reference data**, so the first bottle from any region has nothing to suggest. Virginia makes this slightly more visible than most regions would, because its labels print the state on blends and the AVA on estate wines from the same producer — so `Virginia` and `Monticello` end up as two unrelated entries for one place. The cheap fix, if it ever matters, is seeding the autocomplete with Virginia's AVA names only; that is region-model §11.3 option 1 and it needs no schema change.
+
+**What to measure weekly:** downloads, activation (logged a first tasting within 24h), D7 retention, paywall views, trial starts, paid conversions, Anthropic spend, and — once §5.3's attribution exists — scans per card per week. If activation is under ~40%, the onboarding (Layer C) is the problem, not marketing.
 
 ---
 
