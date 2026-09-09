@@ -30,6 +30,8 @@ import {
   View,
 } from 'react-native';
 import { scanTastingCard } from '../lib/cellarScan';
+import MeterHint from './MeterHint';
+import { usePro } from '../hooks/usePro';
 import { aiService } from '../lib/ai';
 import theme from '../styles/theme';
 
@@ -38,6 +40,10 @@ const { colors, typography, spacing, borderRadius } = theme;
 export default function TastingMenuScanner({ onScanned }) {
   // The picked card image uri (for the thumbnail), the in-flight reading state,
   // and a soft error. No image == the initial CTA state.
+  // Free scans are metered (3/month, §4.2). gate() opens the paywall instead
+  // of starting a scan the server would only refuse.
+  const { gate } = usePro();
+
   const [imageUri, setImageUri] = useState(null);
   const [reading, setReading] = useState(false);
   const [error, setError] = useState(null);
@@ -83,6 +89,9 @@ export default function TastingMenuScanner({ onScanned }) {
 
   // Camera — mirrors components/LabelScanner.js (permission → launch → asset uri).
   const scanWithCamera = useCallback(async () => {
+    // Checked before the picker, not after: making someone frame a card and
+    // only then telling them they are out of scans is the surprise §4.5 forbids.
+    if (!gate('label_scan')) return;
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
@@ -100,10 +109,13 @@ export default function TastingMenuScanner({ onScanned }) {
     } catch {
       Alert.alert('Camera unavailable', 'Could not open the camera. You can choose from your library or add wines manually.');
     }
-  }, [readCard]);
+  }, [readCard, gate]);
 
   // Library — mirrors components/LabelScanner.js.
   const scanFromLibrary = useCallback(async () => {
+    // Checked before the picker, not after: making someone frame a card and
+    // only then telling them they are out of scans is the surprise §4.5 forbids.
+    if (!gate('label_scan')) return;
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
@@ -121,7 +133,7 @@ export default function TastingMenuScanner({ onScanned }) {
     } catch {
       Alert.alert('Library unavailable', 'Could not open your photo library. You can use the camera or add wines manually.');
     }
-  }, [readCard]);
+  }, [readCard, gate]);
 
   return (
     <View style={styles.card}>
@@ -189,6 +201,8 @@ export default function TastingMenuScanner({ onScanned }) {
           </TouchableOpacity>
         </View>
       )}
+
+      <MeterHint task="label_scan" />
 
       <Text style={styles.disclaimer}>
         We&apos;ll add what we can read — you can edit or remove any wine before saving.

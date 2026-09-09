@@ -18,17 +18,22 @@ import {
 } from 'react-native';
 import CellarBottleForm from '../../components/CellarBottleForm';
 import LabelScanner from '../../components/LabelScanner';
+import MeterHint from '../../components/MeterHint';
 import ScreenHeader from '../../components/ScreenHeader';
+import { usePro } from '../../hooks/usePro';
 import { cellarService } from '../../lib/cellar';
 import { getEntrySuggestions } from '../../lib/cellarEntry';
 import { knownLocations } from '../../lib/cellarLocation';
+import { sumQuantity } from '../../lib/cellarBrowse';
 import { knownRegions } from '../../lib/cellarRegion';
 import { notifySuccess } from '../../lib/haptics';
+import { canAddBottle, cellarHint } from '../../lib/pro';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
 export default function AddBottleScreen() {
+  const { isPro, presentPaywall } = usePro();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
 
@@ -50,6 +55,8 @@ export default function AddBottleScreen() {
   const [purchaseToday, setPurchaseToday] = useState(true);
   // A short confirmation after the previous save, so a quick second add feels acknowledged.
   const [justAdded, setJustAdded] = useState(null);
+  // Bottles (not lots) already in the cellar, for the free 25-bottle cap (§4.2).
+  const [bottleCount, setBottleCount] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -67,6 +74,8 @@ export default function AddBottleScreen() {
         const bottles = res?.success ? res.bottles : [];
         setLocationOptions(knownLocations(bottles).map((name) => ({ name })));
         setRegionOptions(knownRegions(bottles));
+        // Same fetch, no extra round-trip: this list is the cellar.
+        setBottleCount(sumQuantity(bottles));
       });
     return () => {
       active = false;
@@ -120,6 +129,15 @@ export default function AddBottleScreen() {
   };
 
   const handleSubmit = async (payload) => {
+    // The free cellar holds 25 bottles. Checked here rather than on the way in,
+    // because "Add another like it" re-uses this form without ever leaving the
+    // screen — a route-level guard would let someone walk straight past the cap.
+    const adding = Number(payload?.quantity) || 1;
+    if (!canAddBottle({ isPro, bottleCount, adding })) {
+      presentPaywall('cellar');
+      return;
+    }
+
     setSaving(true);
     const res = await cellarService.addBottle(payload);
     setSaving(false);
@@ -130,6 +148,7 @@ export default function AddBottleScreen() {
     }
 
     notifySuccess();
+    setBottleCount((count) => count + adding);
 
     // If we auto-linked the new bottle to an existing tasting (#140), say so.
     const linkedNote = res.linkedWine ? ' Linked to a matching tasting in your journal.' : '';
@@ -167,6 +186,12 @@ export default function AddBottleScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <MeterHint
+            text={cellarHint({ isPro, bottleCount })}
+            source="cellar"
+            style={styles.cellarHint}
+          />
+
           {justAdded ? (
             <View style={styles.addedBanner}>
               <Ionicons name="checkmark-circle" size={18} color={colors.status.visited} />
@@ -200,6 +225,9 @@ export default function AddBottleScreen() {
 }
 
 const styles = StyleSheet.create({
+  cellarHint: {
+    marginBottom: spacing.sm,
+  },
   container: { flex: 1, backgroundColor: colors.neutral.cream },
   flex: { flex: 1 },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },

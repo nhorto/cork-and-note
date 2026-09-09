@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { canonicalizeRegion, normalizeRegion } from '../lib/cellarRegion';
+import { usePro } from '../hooks/usePro';
 import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
 import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal, varietalText } from '../lib/varietals';
 import theme from '../styles/theme';
@@ -121,6 +122,7 @@ export default function CellarBottleForm({
   // #53 smart default: prefill purchase date with today (add screen opts in).
   defaultPurchaseToday = false,
 }) {
+  const { gate } = usePro();
   const [form, setForm] = useState(() =>
     initialState(initialValues, { defaultPurchaseToday })
   );
@@ -142,6 +144,9 @@ export default function CellarBottleForm({
 
   // Ask the sommelier to propose a window from the current form fields.
   const suggestWindow = async () => {
+    // These are sommelier calls too: they spend the same 5/month chat meter
+    // server-side, so they get the same gate rather than a confusing refusal.
+    if (!gate('chat')) return;
     setWindowSuggesting(true);
     setWindowError(null);
     setWindowProposal(null);

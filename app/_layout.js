@@ -1,4 +1,5 @@
-// app/_layout.js — root layout: auth context, navigation guard, cellar reminders
+// app/_layout.js — root layout: auth context, Pro entitlements, navigation guard,
+// cellar reminders
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,6 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import OfflineBanner from '../components/OfflineBanner';
+import { ProProvider } from '../components/ProProvider';
 import { checkAndReschedule, setNotificationHandler } from '../lib/notifications';
 import { supabase } from '../lib/supabase';
 import { startUpdateWatcher } from '../lib/updates';
@@ -335,28 +337,34 @@ export default function RootLayout() {
 
   return (
     <AuthContext.Provider value={authContextValue}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          {/* Pinned above the navigator so it shows on every screen (§2.3). */}
-          <OfflineBanner />
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="login" />
-              <Stack.Screen name="register" />
-              <Stack.Screen name="forgot-password" />
-              <Stack.Screen name="reset-password" />
-              <Stack.Screen name="profile/account-settings" />
-              <Stack.Screen name="profile/notifications" />
-              <Stack.Screen name="profile/change-password" />
-              <Stack.Screen name="profile/help-support" />
-              <Stack.Screen name="profile/feedback" />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
-          </ThemeProvider>
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
+      {/* Inside the auth provider because it follows the signed-in user: it
+          identifies them to RevenueCat on sign-in and logs out on sign-out, so
+          one account's Pro cannot leak to the next person on this device. */}
+      <ProProvider userId={user?.id ?? null}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider>
+            {/* Pinned above the navigator so it shows on every screen (§2.3). */}
+            <OfflineBanner />
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="login" />
+                <Stack.Screen name="register" />
+                <Stack.Screen name="forgot-password" />
+                <Stack.Screen name="reset-password" />
+                <Stack.Screen name="profile/account-settings" />
+                <Stack.Screen name="profile/notifications" />
+                <Stack.Screen name="profile/change-password" />
+                <Stack.Screen name="profile/help-support" />
+                <Stack.Screen name="profile/feedback" />
+                <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              <StatusBar style="auto" />
+            </ThemeProvider>
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </ProProvider>
     </AuthContext.Provider>
   );
 }

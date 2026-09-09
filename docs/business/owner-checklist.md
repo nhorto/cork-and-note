@@ -1,6 +1,6 @@
 # Owner checklist — things only Nick can do
 
-**Updated:** 2026-09-07 · Companion to [`launch-plan-2026-09.md`](launch-plan-2026-09.md)
+**Updated:** 2026-09-08 · Companion to [`launch-plan-2026-09.md`](launch-plan-2026-09.md)
 
 Everything here needs your identity, your accounts, or your money. Items are in the order they unblock work. "Hand back" says what I need from you afterwards so engineering can continue.
 
@@ -18,13 +18,7 @@ Everything here needs your identity, your accounts, or your money. Items are in 
 
 - [ ] **Paid Apps Agreement + banking + tax**: App Store Connect → Business → Agreements. Accept the Paid Apps agreement, add a bank account, complete the W-9. **No subscription can be sold until this is green**, and Apple takes days to approve it, so start now.
 - [ ] **Enroll in the App Store Small Business Program** (developer.apple.com/app-store/small-business-program). 15% instead of 30%. Must be enrolled before the first paid transaction.
-- [ ] **Create the subscription products** in App Store Connect → your app → Subscriptions:
-  - Group: *Cork & Note Pro*
-  - `pro_monthly` — $9.99 / 1 month
-  - `pro_annual` — $59.99 / 1 year, with a 7-day free introductory offer
-  - Localized display names: "Pro Monthly", "Pro Annual". Review screenshot and description can be placeholders until the paywall exists.
-  - Generate an **In-App Purchase key** (Users and Access → Integrations → In-App Purchase) for RevenueCat.
-  *Hand back:* the two product IDs as created (in case you change them).
+- [x] **Create the subscription products** — ✅ done 2026-09-08. Group *Cork & Note Pro*; `pro_monthly` $9.99/month; `pro_annual` $59.99/year with a 7-day free trial; both priced and available in all 175 territories.
 - [ ] **Create a Sandbox tester** (Users and Access → Sandbox) so purchases can be tested on TestFlight builds.
 - [ ] **Age rating questionnaire**: answer "Frequent/Intense" for alcohol references → 18+. (I'll tell you the exact answers when we fill in the listing.)
 - [ ] **App Privacy questionnaire** in ASC: I'll give you the exact selections; only you can submit them.
@@ -36,8 +30,23 @@ Everything here needs your identity, your accounts, or your money. Items are in 
 
 ## C. Third-party accounts (this week)
 
-- [ ] **RevenueCat**: create an account and a project "Cork & Note", add the iOS app with bundle id `com.nicholashorton.corkandnote`, connect it with the In-App Purchase key from B, create entitlement `pro`, offering `default` with the two products.
-  *Hand back:* the **public** iOS SDK key (starts with `appl_`). It is safe in the app code. Never send me the secret API key.
+- [x] **RevenueCat** — ✅ done 2026-09-08. Project `proj3888109e`, App Store app `appa26facd9fb`, entitlement `pro`, offering `default` with `$rc_monthly` / `$rc_annual`. The public `appl_` SDK key is in `~/.secrets/ops.env`.
+- [ ] **Point RevenueCat at our webhook** (browser-only, ~3 minutes). Two halves, and the webhook rejects everything until both match:
+  1. In RevenueCat → *Projects → Cork & Note → Integrations → Webhooks*, add a webhook with
+     **URL:** `https://ixecayqpogkiawempzgc.supabase.co/functions/v1/revenuecat-webhook`
+     **Authorization header value:** a long random string you invent (a password manager's generator is ideal).
+  2. Give Supabase the same string, from a terminal in the repo:
+     ```
+     supabase secrets set REVENUECAT_WEBHOOK_SECRET='<the same string>' \
+       --project-ref ixecayqpogkiawempzgc
+     ```
+  Until this is done the endpoint answers `503 Not configured` to everyone, which is deliberate: an unauthenticated webhook could grant anyone Pro. Send RevenueCat's "Send test webhook" afterwards — it should answer `200 {"ok":true,"updated":0}` (a test event names no real user, so there is nothing to write).
+- [ ] **Add the RevenueCat key to EAS** so the app can talk to the store. From a terminal in the repo, for both environments:
+  ```
+  eas env:create --environment production --name REVENUECAT_IOS_API_KEY --value '<REVENUECAT_PUBLIC_KEY_CORKNOTE from ~/.secrets/ops.env>'
+  eas env:create --environment preview    --name REVENUECAT_IOS_API_KEY --value '<same value>'
+  ```
+  It is a publishable key — it is safe inside the app binary — but it lives in EAS rather than git so it can be rotated without a release, exactly like `GOOGLE_MAPS_API_KEY`. Without it the app runs as if the Pro tier did not exist.
 - [ ] **Anthropic console**: set a monthly spend limit and an email alert. Suggested $100 limit, alert at $50, unless you want a different number.
   *Hand back:* the number you set, so the free-tier meters match it.
 - [ ] **Google Cloud console**: restrict the Maps key currently committed in `app.json` (Android apps only, package `com.nicholashorton.corkandnote` + your release SHA-1), or delete it and create a new restricted one.
@@ -51,6 +60,10 @@ Everything here needs your identity, your accounts, or your money. Items are in 
 
 - [ ] **Privacy policy and terms**: both are **drafted, in the app, and publicly hosted** (<https://cork-and-note.vercel.app/privacy> and `/terms`). What's left is your read-through: confirm the governing-law state, your legal name or entity, and the support address once it exists. Worth a lawyer's glance. They already disclose that chat text and photos go to Anthropic.
 - [ ] **Business entity**: an LLC is not required to launch, but Apple pays whoever owns the developer account, and the tax and banking forms in B are easier to change now than after revenue starts. Your call; tell me either way so the legal pages match.
+- [ ] **Deploy the metering half of the chat function — but not before the paywall build is live.** The Pro tier's server-side meters (3 scans and 5 sommelier messages a month) are written and tested but deliberately NOT deployed: turning them on now would wall testers on build 11, which has no paywall to buy your way past. Ship it with the first build that has one:
+  ```
+  supabase functions deploy chat --project-ref ixecayqpogkiawempzgc
+  ```
 - [ ] **Confirm the app icon**: `assets/images/cork_and_note_logo.png` is the only real logo in the repo. If that is final, I'll generate the icon, adaptive icon and splash from it. If not, send the final artwork.
 
 ## E. Decisions still open
@@ -69,5 +82,7 @@ Everything here needs your identity, your accounts, or your money. Items are in 
 ---
 
 **Decided so far:** Pro at $9.99/mo and $59.99/yr with a 7-day trial, no lifetime unlock · Free tier: unlimited logging, 3 scans + 5 sommelier messages a month, 25-bottle cellar cap · iOS only for v1 · Apple agreement signed.
+
+**Shipped 2026-09-08:** the Pro tier — RevenueCat purchases, a guideline-3.1.2 paywall, Restore Purchases, and the four free-tier gates, with the entitlement decided server-side. **It needs a fresh EAS build to be testable at all** (`react-native-purchases` is native code, so no existing TestFlight build can run it).
 
 **Shipped 2026-09-07:** build 11 on TestFlight (signing repaired, valid to 2027) · account deletion live and verified against production · privacy/terms in-app and hosted · UX findability pass (Layers A + most of C) · landing site replacing the 2-month-broken Vercel build · Jest suite + CI · Supabase migration drift resolved and the auto-paused project brought back up.
