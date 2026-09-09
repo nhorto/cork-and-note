@@ -64,10 +64,43 @@ size-capped hero photo per page instead of a gallery → skip/gate `editorialSum
 
 ### Alternatives considered (briefly)
 
-OpenStreetMap/Foursquare have free winery pins but no trustworthy ratings/hours/photos; Yelp's
-display terms are restrictive. A later hybrid (cheap pins for discovery, Google details on tap)
-is the main cost dodge if volume ever makes it worth it. Start Google-only: one vendor, best
-winery coverage, and we already ship Google Maps.
+Foursquare's paid API is barely cheaper than Google for details ($15/1K vs $20/1K, and only 500
+free calls/mo from June 2026) with worse winery coverage; Yelp's display terms are restrictive;
+OSM has winery pins but no ratings/hours/photos. The genuinely free asset is **FSQ OS Places**
+(Foursquare's open dataset): names, categories, coordinates, websites for US wineries,
+self-hostable with no API cost or caching restriction.
+
+### 2.5 Cost-lean architecture (recommended — adopted after owner cost review 2026-09-09)
+
+The expensive SKU-by-SKU plan above is the ceiling, not the plan. Three substitutions cut the
+marginal cost ~80% without losing the feature:
+
+1. **No Google Nearby Search at all.** Discovery pins come from our own winery table (already
+   populated by users' logged visits) seeded once with US wineries from the free FSQ OS Places
+   dataset loaded into Supabase. Google Text Search **IDs-Only — free, unlimited** — matches
+   records to `google_place_id` lazily. Kills the $32/1K SKU entirely.
+2. **One Place Details Enterprise call per winery-page open** (rating, hours, website, phone),
+   in-memory memoized for the session. No `editorialSummary` at launch.
+3. **Our users' own visit photos as the winery hero** — more personal than a stock Google photo
+   anyway ("your photo from your visit"). One size-capped Google photo only when we have none.
+
+Revised numbers at ~8 winery-page opens per enriched user/month:
+
+| Enriched (Pro) MAU | Heavy Google-everything plan | Cost-lean plan |
+|---|---|---|
+| 100 | ~$34/mo | **~$0** (inside the 1K free detail calls) |
+| 500 | ~$278/mo | **~$65/mo** |
+| 2,000 | ~$1,673/mo | **~$310/mo (~$0.15/user vs ~$5–10 revenue)** |
+
+**Hard spend ceiling:** besides a $50 budget alert, set Google Cloud **per-API quota caps**
+(max requests/day) on Place Details and Photos. A quota cap is a hard stop, not a notification —
+if it's ever hit, the enriched rows simply hide for the rest of the day (the same graceful
+degradation the offline path uses), and the bill cannot exceed the cap × price by construction.
+
+**Supabase side:** edge-function invocations are $0 at any plausible scale — the free tier
+includes 500K invocations/mo, Pro ($25/mo, which the backend already needs regardless) includes
+2M, then $2 per additional million. Even 2,000 MAU × 100 calls/mo = 200K invocations ≈ 10% of
+the Pro allowance. The Google proxy adds no meaningful Supabase cost.
 
 ## 3. Build plan (proposed epic)
 
