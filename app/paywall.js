@@ -30,6 +30,9 @@ import {
   FREE_MONTHLY_LIMITS,
   PRIVACY_URL,
   TERMS_URL,
+  packagePeriod,
+  packagePriceLine,
+  packageTrialLabel,
 } from '../lib/pro';
 import { fetchOffering, purchasePackage } from '../lib/purchases';
 import { colors, spacing, typography } from '../styles/theme';
@@ -44,32 +47,6 @@ const BENEFITS = [
   { icon: 'wine', text: 'An unlimited cellar with drink windows and Tonight’s Pick' },
   { icon: 'download', text: 'Export your tastings to CSV' },
 ];
-
-/** "$59.99 / year", from the store's own localised strings. */
-function priceLine(pkg) {
-  const product = pkg?.product;
-  if (!product?.priceString) return null;
-  const period = periodLabel(pkg);
-  return period ? `${product.priceString} / ${period}` : product.priceString;
-}
-
-function periodLabel(pkg) {
-  const unit = pkg?.product?.subscriptionPeriod || pkg?.packageType;
-  if (!unit) return null;
-  if (/ANNUAL|Y1|YEAR/i.test(unit)) return 'year';
-  if (/MONTHLY|M1|MONTH/i.test(unit)) return 'month';
-  return null;
-}
-
-/** The intro offer, if the store says this product has one (the annual 7-day trial). */
-function trialLabel(pkg) {
-  const intro = pkg?.product?.introPrice;
-  if (!intro || intro.price > 0) return null;
-  const n = intro.periodNumberOfUnits;
-  const unit = (intro.periodUnit || '').toLowerCase();
-  if (!n || !unit) return 'Free trial';
-  return `${n}-${unit} free trial`;
-}
 
 export default function PaywallScreen() {
   const router = useRouter();
@@ -91,7 +68,7 @@ export default function PaywallScreen() {
       // 17.5% for monthly, §4.2) and it carries the trial.
       const available = (offering?.availablePackages ?? [])
         .slice()
-        .sort((a, b) => (periodLabel(a) === 'year' ? -1 : 0) - (periodLabel(b) === 'year' ? -1 : 0));
+        .sort((a, b) => (packagePeriod(a) === 'year' ? -1 : 0) - (packagePeriod(b) === 'year' ? -1 : 0));
       setPackages(available);
       setSelected(available[0] ?? null);
       setLoading(false);
@@ -112,7 +89,10 @@ export default function PaywallScreen() {
       return;
     }
     if (result.isPro) {
-      await onPurchased();
+      // Deliberately not awaited: onPurchased() spends up to ten seconds waiting
+      // for our webhook to land, and it already flips isPro synchronously. Making
+      // someone stare at the paywall they just paid on would be a terrible thanks.
+      onPurchased();
       router.back();
     }
   }, [selected, busy, onPurchased, router]);
@@ -199,7 +179,7 @@ export default function PaywallScreen() {
           <View style={styles.plans}>
             {packages.map((pkg) => {
               const isSelected = pkg.identifier === selected?.identifier;
-              const trial = trialLabel(pkg);
+              const trial = packageTrialLabel(pkg);
               return (
                 <TouchableOpacity
                   key={pkg.identifier}
@@ -212,9 +192,9 @@ export default function PaywallScreen() {
                   <View style={styles.planMain}>
                     {/* 3.1.2: length of subscription + price per period. */}
                     <Text style={styles.planPeriod}>
-                      {periodLabel(pkg) === 'year' ? 'Annual' : 'Monthly'}
+                      {packagePeriod(pkg) === 'year' ? 'Annual' : 'Monthly'}
                     </Text>
-                    <Text style={styles.planPrice}>{priceLine(pkg)}</Text>
+                    <Text style={styles.planPrice}>{packagePriceLine(pkg)}</Text>
                     {trial ? <Text style={styles.planTrial}>{trial}</Text> : null}
                   </View>
                   <Ionicons
@@ -239,7 +219,7 @@ export default function PaywallScreen() {
             <ActivityIndicator color={colors.neutral.cream} />
           ) : (
             <Text style={styles.ctaText}>
-              {isPro ? 'You already have Pro' : trialLabel(selected) ? 'Start free trial' : 'Continue'}
+              {isPro ? 'You already have Pro' : packageTrialLabel(selected) ? 'Start free trial' : 'Continue'}
             </Text>
           )}
         </TouchableOpacity>

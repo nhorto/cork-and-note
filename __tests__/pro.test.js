@@ -13,6 +13,9 @@ import {
   isPaywallError,
   meterHint,
   onMeterUpdate,
+  packagePeriod,
+  packagePriceLine,
+  packageTrialLabel,
   publishMeter,
   remainingFree,
 } from '../lib/pro';
@@ -166,5 +169,59 @@ describe('client mirror matches the server', () => {
         );
       }
     }
+  });
+});
+
+
+describe('store package helpers', () => {
+  // The paywall labels and sorts plans from these, and the SDK spells the period
+  // three different ways depending on where you read it. Getting this wrong once
+  // labelled every plan "Monthly" and put the annual plan second.
+  const annual = {
+    identifier: '$rc_annual',
+    packageType: 'ANNUAL',
+    product: { priceString: '$59.99', subscriptionPeriod: 'P1Y' },
+  };
+  const monthly = {
+    identifier: '$rc_monthly',
+    packageType: 'MONTHLY',
+    product: { priceString: '$9.99', subscriptionPeriod: 'P1M' },
+  };
+
+  it('reads the period from packageType, identifier or an ISO-8601 duration', () => {
+    expect(packagePeriod(annual)).toBe('year');
+    expect(packagePeriod(monthly)).toBe('month');
+    expect(packagePeriod({ product: { subscriptionPeriod: 'P1Y' } })).toBe('year');
+    expect(packagePeriod({ product: { subscriptionPeriod: 'P1M' } })).toBe('month');
+    expect(packagePeriod({ identifier: '$rc_annual' })).toBe('year');
+  });
+
+  it('has no opinion about a package it cannot read', () => {
+    expect(packagePeriod(null)).toBeNull();
+    expect(packagePeriod({})).toBeNull();
+    expect(packagePeriod({ packageType: 'LIFETIME' })).toBeNull();
+  });
+
+  it("shows the store's own localised price, never our own", () => {
+    expect(packagePriceLine(annual)).toBe('$59.99 / year');
+    expect(packagePriceLine(monthly)).toBe('$9.99 / month');
+    // A euro price with an unreadable period still shows the price.
+    expect(packagePriceLine({ product: { priceString: '59,99 €' } })).toBe('59,99 €');
+    // No price at all renders nothing rather than "undefined / year".
+    expect(packagePriceLine({ packageType: 'ANNUAL' })).toBeNull();
+  });
+
+  it('announces a free trial only when the store actually offers one', () => {
+    expect(
+      packageTrialLabel({
+        product: { introPrice: { price: 0, periodNumberOfUnits: 7, periodUnit: 'DAY' } },
+      })
+    ).toBe('7-day free trial');
+    // A paid intro offer is not a free trial and must not be sold as one.
+    expect(
+      packageTrialLabel({ product: { introPrice: { price: 4.99, periodNumberOfUnits: 1, periodUnit: 'MONTH' } } })
+    ).toBeNull();
+    expect(packageTrialLabel(monthly)).toBeNull();
+    expect(packageTrialLabel(null)).toBeNull();
   });
 });
