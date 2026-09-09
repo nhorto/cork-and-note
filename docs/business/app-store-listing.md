@@ -70,9 +70,9 @@ Cork & Note is for people of legal drinking age. Please drink responsibly.
 The first release of Cork & Note. Log the wines you taste, remember the places you tasted them, keep track of your cellar, and ask a sommelier that knows your palate.
 ```
 
-## 6. Age rating questionnaire
+## 6. Age rating questionnaire — ✅ submitted 2026-09-08
 
-Apple's 2026 tiers are 4+ / 9+ / 13+ / 16+ / 18+. Answer everything "None" **except**:
+Apple's 2026 tiers are 4+ / 9+ / 13+ / 16+ / 18+. Everything was answered "None" **except**, and this table is kept as the record of what was submitted:
 
 | Question | Answer |
 |---|---|
@@ -89,7 +89,9 @@ Apple's 2026 tiers are 4+ / 9+ / 13+ / 16+ / 18+. Answer everything "None" **exc
 
 Expected result: **18+**. This matches Delectable and Vivino.
 
-## 7. App Privacy questionnaire
+## 7. App Privacy questionnaire — ✅ submitted 2026-09-08
+
+Kept as the record of what was submitted. **Revisit it if analytics are ever added** — Usage Data was answered "not collected", and PostHog would change that.
 
 For each item: **Linked to the user: Yes**, **Used for tracking: No**, purpose **App Functionality** unless noted.
 
@@ -180,4 +182,10 @@ password never lands in git.
 
 ---
 
-**Still needed before submission:** the screenshot set, and the owner's read-through of the legal pages.
+**Still needed before submission (as of 2026-09-08):**
+
+- **The owner's read-through of the legal pages.** The governing law (Maryland) and legal name (Nicholas Horton, individual) were answered on 2026-09-08 and are in `lib/legalContent.js`; what is left is Nick reading the result.
+- **A real support email in the listing and in the legal pages.** The mailbox exists as of 2026-09-08 but its address has not reached the repo. Note that **§8 and §10 below name `review@corkandnote.com`, on a domain that is not owned yet** — the demo account works, but that address needs replacing before submission.
+- **Paywall screenshots for review.** v1 ships with the paywall (decided 2026-09-08), so App Review will look at the purchase screen. Needs the next EAS build to capture.
+
+The 6.9" screenshot set is captured and committed (§9). Age ratings and App Privacy are submitted (§6, §7).
