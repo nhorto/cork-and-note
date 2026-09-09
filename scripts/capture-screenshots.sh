@@ -55,7 +55,7 @@ xcrun simctl status_bar booted override \
 SHOTS=(
   "1-home:/(tabs)/home:14"
   "2-log-a-tasting:/log-session?mode=wine:14"
-  "3-winery-visits:WINERY:14"
+  "3-winery-visits:WINERY:18" # extra settle: the Pro Google card live-fetches after the page mounts
   "5-sommelier:/(tabs)/sommelier:14"
   "4-explore-map:/(tabs)/map:6"
 )
