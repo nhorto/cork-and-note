@@ -21,7 +21,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#6C2126"
+        "backgroundColor": "#6B2A3A"
       },
       "package": "com.nicholashorton.corkandnote",
       "edgeToEdgeEnabled": true,
@@ -48,7 +48,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 220,
           "resizeMode": "contain",
-          "backgroundColor": "#F9F4EE"
+          "backgroundColor": "#FFF8F0"
         }
       ],
       [

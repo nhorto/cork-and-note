@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(44, 44, 44, 0.4)',
+    backgroundColor: 'rgba(61, 43, 61, 0.4)', // colors.neutral.charcoal (plum ink) at 40%
   },
   modalContainer: {
     height: MODAL_HEIGHT,
