@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   // Full-bleed dimming scrim (also the tap-to-close target).
   scrim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.overlay.dark,
+    backgroundColor: colors.overlay.scrim,
   },
   // Centers the card and lifts it above the keyboard; box-none lets taps in the
   // empty area fall through to the scrim.

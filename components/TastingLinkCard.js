@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   linkBtnText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
 
   // Picker sheet
-  backdrop: { flex: 1, backgroundColor: colors.overlay.dark, justifyContent: 'flex-end' },
+  backdrop: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: colors.neutral.cream,
     borderTopLeftRadius: borderRadius.xl,

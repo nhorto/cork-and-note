@@ -46,6 +46,13 @@ export const colors = {
   // Overlay
   overlay: {
     light: 'rgba(250, 248, 245, 0.95)',
+    // Behind a sheet or dialog. A warm, light wash — it separates the sheet from
+    // the screen without turning the whole app grey, which is what the old 60%
+    // neutral scrim did. Raise the alpha if a sheet ever needs more separation.
+    scrim: 'rgba(61, 42, 38, 0.25)',
+    // ON TOP of a photo: the contrast plate behind white icons and counters
+    // (thumbnail badges, the "3 of 7" pill in the photo viewer). Stays heavy on
+    // purpose — this one is about legibility, not depth. Not a sheet backdrop.
     dark: 'rgba(44, 44, 44, 0.6)',
   },
 };

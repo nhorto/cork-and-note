@@ -144,7 +144,7 @@ const WineryNameModal = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: colors.overlay.dark,
+    backgroundColor: colors.overlay.scrim,
     justifyContent: 'center',
     alignItems: 'center',
   },

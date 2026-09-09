@@ -119,7 +119,7 @@ function Action({ icon, color, title, subtitle, onPress, last }) {
 const styles = StyleSheet.create({
   scrim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.overlay.dark,
+    backgroundColor: colors.overlay.scrim,
   },
   sheetWrap: {
     flex: 1,
