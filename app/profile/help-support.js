@@ -35,29 +35,29 @@ const HelpSupportModal = () => {
           value: [
             {
               name: 'Home',
-              description: "Your landing page — recent tastings, your cellar at a glance, Tonight's Pick, and where you've been"
+              description: "Your landing page — your journey so far, Tonight's Pick, and your cellar at a glance"
+            },
+            {
+              name: 'Journal',
+              description: 'Every wine you have tasted, with search, filters, and your notes'
+            },
+            {
+              name: 'Wineries',
+              description: "A map of the places you've visited and wishlisted, with search"
+            },
+            {
+              name: 'Somm',
+              description: 'Your AI sommelier, personalized to the wines you have rated'
             },
             {
               name: 'Cellar',
               description: 'The bottles you own, with drink-window tracking and gentle reminders'
-            },
-            {
-              name: '＋ (center)',
-              description: 'Log a wine you tasted — anywhere, with or without a place'
-            },
-            {
-              name: 'Explore',
-              description: "A map of the places you've visited and wishlisted, with search"
-            },
-            {
-              name: 'Profile',
-              description: 'Your journey stats, the sommelier, settings, and this help'
             }
           ]
         },
         {
           type: 'tip',
-          value: 'New here? Log a wine with the center ＋ button, or add a bottle to your Cellar to get started.'
+          value: 'New here? Tap the floating ＋ Log button to log a wine, or add a bottle to your Cellar to get started. Your profile and settings live behind your avatar on Home.'
         }
       ]
     },
@@ -73,7 +73,7 @@ const HelpSupportModal = () => {
         {
           type: 'steps',
           value: [
-            'Tap the center ＋ button in the bottom bar',
+            'Tap the floating ＋ Log button, then "Log a wine"',
             'Add each wine you tasted — name, type, vintage, and your ratings',
             'Optionally tag a place (a winery, a restaurant, or home) — or skip it',
             'Add flavor notes, written notes, and photos',
@@ -178,7 +178,7 @@ const HelpSupportModal = () => {
       content: [
         {
           type: 'text',
-          value: 'The Explore tab maps every place you have logged or saved.'
+          value: 'The Wineries tab maps every place you have logged or saved.'
         },
         {
           type: 'attributes',

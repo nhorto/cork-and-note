@@ -12,6 +12,7 @@ import {
   View
 } from 'react-native';
 import Chip from '../../components/Chip';
+import LogFab from '../../components/LogFab';
 import ScreenHeader from '../../components/ScreenHeader';
 import WinesFilterModal from '../../components/WinesFilterModal';
 import { cellarService } from '../../lib/cellar';
@@ -245,10 +246,11 @@ export default function Wines() {
 
   return (
     <View style={styles.container}>
-      {/* Hidden tab route — a real back chevron so you're not stranded (#170
-          item 4); "Your tastings" is the one vocabulary (item 8). */}
+      {/* Journal tab root (flat-five bar, #203) — no back chevron;
+          "Your tastings" is the one vocabulary (#170 item 8). */}
       <ScreenHeader
         title="Your tastings"
+        showBack={false}
         right={
           <TouchableOpacity
             style={[
@@ -366,6 +368,8 @@ export default function Wines() {
         }}
         onClose={() => setShowFilters(false)}
       />
+
+      <LogFab />
     </View>
   );
 }

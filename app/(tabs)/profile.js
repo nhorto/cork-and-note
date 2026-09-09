@@ -55,9 +55,18 @@ export default function ProfileScreen() {
       {/* Custom Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
-          <View style={styles.headerLeft}>
-            <Ionicons name="wine" size={20} color={colors.primary.burgundy} />
-          </View>
+          {/* Hidden tab route (flat-five bar, #203): Profile is reached from
+              the Home avatar, so a real back chevron replaces the old
+              decorative wine mark. */}
+          <TouchableOpacity
+            style={styles.headerLeft}
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
+          </TouchableOpacity>
           <Text style={styles.headerTitle}>Profile</Text>
           <TouchableOpacity
             style={styles.headerRight}
