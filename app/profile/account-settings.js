@@ -15,6 +15,7 @@ import {
 import ScreenHeader from '../../components/ScreenHeader';
 import { usePro } from '../../hooks/usePro';
 import { accountService } from '../../lib/account';
+import { shareTastingsCsv } from '../../lib/exportTastings';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
 
@@ -30,6 +31,7 @@ export default function AccountSettingsScreen() {
   const [locationPermissionStatus, setLocationPermissionStatus] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   // Required on the paywall AND in Settings by App Store guideline 3.1.2. It is
   // also the only way back for someone who reinstalled or changed device, so it
@@ -47,6 +49,23 @@ export default function AccountSettingsScreen() {
       'Nothing to restore',
       result.error || 'We could not find a previous purchase for this Apple Account.'
     );
+  };
+
+  // CSV export is the one Pro feature that is not about cost — it is about the
+  // journal being the user's. Free users see the row and the paywall rather than
+  // a hidden feature they never learn exists.
+  const handleExport = async () => {
+    if (exporting) return;
+    if (!isPro) {
+      presentPaywall('export');
+      return;
+    }
+    setExporting(true);
+    const result = await shareTastingsCsv();
+    setExporting(false);
+    if (!result.success) {
+      Alert.alert('Export failed', result.error);
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -194,6 +213,32 @@ export default function AccountSettingsScreen() {
           </Text>
         </View>
 
+        {/* Your Data Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Your data</Text>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.lastButton]}
+            disabled={exporting}
+            onPress={handleExport}
+            accessibilityRole="button"
+          >
+            <Ionicons name="download" size={20} color={colors.primary.burgundy} />
+            <Text style={styles.actionButtonText}>
+              {exporting ? 'Preparing export…' : 'Export tastings (CSV)'}
+            </Text>
+            {isPro ? (
+              <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+            ) : (
+              <Text style={styles.proBadge}>PRO</Text>
+            )}
+          </TouchableOpacity>
+
+          <Text style={styles.infoNote}>
+            A spreadsheet of every tasting you&apos;ve logged — one row per wine, yours to keep.
+          </Text>
+        </View>
+
         {/* Account Actions Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account actions</Text>
@@ -321,6 +366,18 @@ const styles = StyleSheet.create({
   // The last row in a section drops the divider hairline.
   lastButton: {
     borderBottomWidth: 0,
+  },
+  proBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: colors.primary.burgundy,
+    borderWidth: 1,
+    borderColor: colors.primary.burgundy,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    overflow: 'hidden',
   },
   dangerText: {
     color: colors.status.error,

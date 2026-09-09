@@ -79,6 +79,20 @@ describe('cellar cap', () => {
     expect(canAddBottle({ isPro: false, bottleCount: 40 })).toBe(false);
   });
 
+  it('counts the quantity being added, not just the lot', () => {
+    // Otherwise the cap reads "unlimited, if you type a big number in Quantity".
+    expect(canAddBottle({ isPro: false, bottleCount: 13, adding: 12 })).toBe(true);
+    expect(canAddBottle({ isPro: false, bottleCount: 14, adding: 12 })).toBe(false);
+    expect(canAddBottle({ isPro: false, bottleCount: 0, adding: 100 })).toBe(false);
+    expect(canAddBottle({ isPro: true, bottleCount: 0, adding: 100 })).toBe(true);
+  });
+
+  it('treats a missing or nonsense quantity as one bottle', () => {
+    expect(canAddBottle({ isPro: false, bottleCount: 24, adding: undefined })).toBe(true);
+    expect(canAddBottle({ isPro: false, bottleCount: 24, adding: 0 })).toBe(true);
+    expect(canAddBottle({ isPro: false, bottleCount: 25, adding: NaN })).toBe(false);
+  });
+
   it('never caps a Pro cellar', () => {
     expect(canAddBottle({ isPro: true, bottleCount: 5000 })).toBe(true);
     expect(cellarHint({ isPro: true, bottleCount: 5000 })).toBeNull();
