@@ -205,3 +205,53 @@ A + B close #88. C is an unrelated drive-by. D–F are recorded so the reasoning
 1. **Is the staged plan the right call** — ship autocomplete + normalisation now and revisit structure only if it still hurts? The alternative is committing to the curated list up front, which is more work and more maintenance but fixes the `Monticello` / `Virginia` case properly.
 2. **How much does the home-screen "N regions" stat matter to you?** If it's a number you actually look at, that argues for Stage 2 sooner, since it's the consumer most distorted by unnormalised values.
 3. **Bug 2** (`winery.region`) — delete the sentence, or is a winery-level region something you want (it would need a new column and a way to populate it)?
+
+---
+
+## 11. Virginia launch coverage check — 2026-09-08
+
+**Why this section exists.** Virginia was chosen as the launch region on 2026-09-08 (launch plan §5). The obvious question is whether region autocomplete "covers Virginia AVAs". It was checked against the code, not assumed. **No code was changed by this section** — it is a coverage report for a lane that is not this one.
+
+### 11.1 The answer: coverage is not thin, it is zero — by design
+
+There is **no reference region data anywhere in the repository.** `knownRegions()` (`lib/cellarRegion.js:29`) builds its suggestion list *entirely* from the distinct `region` values already on the signed-in user's own cellar bottles, and `canonicalizeRegion()` (`:50`) only ever adopts a spelling the same user has already typed. `app/cellar/add.js:76` and `app/cellar/[id].js:99` are the only callers, and both pass in that user's bottles.
+
+That is exactly what §5.1 specified, and it works. But it means the Virginia-specific behaviour is:
+
+| Situation | What the user sees |
+|---|---|
+| First Virginia bottle ever | **No suggestions.** Whatever they type is stored verbatim |
+| Second bottle, same spelling | Suggestion appears, casing is normalised |
+| "Monticello" then "Virginia" | Two regions, two filter chips, two groups — both correct, neither related |
+| "Monticello AVA" then "Monticello" | Two regions. Only *casing* collapses, not wording |
+
+So a Virginia collector reproduces §3.1's worst case almost exactly, and the launch region is one where it is unusually easy to hit: Virginia labels commonly print the state (`Virginia`) on a multi-AVA blend and the AVA (`Monticello`, `Shenandoah Valley`) on an estate wine from the *same producer*. The home screen's "N regions across your cellar" will read high for a cellar bought entirely within an hour's drive.
+
+**This is not a regression and it is not a launch blocker** (§3.2: the persona owns dozens of bottles, and the free-text search still finds everything). It is Stage 2 — §5.2's curated list — becoming slightly more attractive than it was in August, because the launch region has a two-level naming convention baked into its labels. It does not become *necessary*.
+
+### 11.2 The bigger gap is wineries, not regions
+
+Worth separating, because it sounds like the same problem and is not.
+
+The `wineries` table is **private per user** (`supabase/migrations/20260619020000_wineries_per_user_ownership.sql`) and `PlacePicker` searches only the wineries that user has already created (`components/PlacePicker.js:56`). There is **no shared winery directory and no POI/place search**. A new user in a Virginia tasting room types the winery's name and drops a pin by hand.
+
+That migration is also the direct precedent for the launch decision, and it is worth quoting because it went the other way:
+
+> *"App direction change: from a shared Virginia catalog to a general-purpose app where each user privately builds their own winery list… The legacy ~306 Virginia seed rows were a one-time import for the old Virginia-only product and have been removed."*
+
+The import file itself is still in the repo — `data/wineries_with_coordinates_and_id.json`, 306 rows — **and is imported by nothing.** It is the orphan of that June cleanup. Its contents, checked 2026-09-08:
+
+- 305 of 306 rows are Virginia addresses (217 written `, VA 2xxxx`, 88 written `, Virginia 2xxxx`, one `, VIRGINIA `), so any consumer would need to parse both spellings.
+- No `region`, `state` or `country` field — only `id`, `name`, `website`, `address`, `latitude`, `longitude`. So it carries **no AVA information** and could not seed region autocomplete even if something wanted it to.
+- `website` values are site-relative paths (`/wineries/12-ridges-vineyard`) from whatever site it was scraped from, not URLs.
+- **One bad geocode:** `Honah Lee Vineyard` (Gordonsville, VA) has `latitude: 47.607798, longitude: 14.300144` — a point in Austria. Every other row is inside Virginia's bounding box.
+
+**None of this is asking for a fix here.** It is recorded so that the first person who proposes "just seed the Virginia wineries for launch" knows three things up front: the seed rows were deliberately deleted three months ago, the surviving file has no AVA data and one wrong pin, and re-introducing a shared catalog means revisiting the per-user RLS model — which is a product decision, not a data import.
+
+### 11.3 If the launch does want Virginia coverage
+
+In rough order of cost, smallest first. All are out of scope for the docs lane; recorded so the options are not re-derived.
+
+1. **Seed the region autocomplete list only** — a static array of Virginia's AVAs plus `Virginia` itself, unioned into `knownRegions()` output. Pure client, no schema, no migration, and it does not touch wineries at all. This is §5.2's Stage 2 scoped down to one state, and it is the only option that is genuinely small.
+2. **Prefill the region from a visited winery** — already analysed and deferred in §6 ("prefill, never bind"), and it needs address parsing the app does not have.
+3. **Re-introduce a shared winery directory** — reverses the June decision, needs a new RLS model, and needs the data file cleaned first. Do not do this for launch.
