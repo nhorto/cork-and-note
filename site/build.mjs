@@ -86,7 +86,7 @@ ${main}
       <img class="mark" src="/assets/logo.jpg" alt="" width="44" height="44">
       <div>
         <p class="foot-word">Cork &amp; Note</p>
-        <p class="foot-tag">Your tasting-room memory.</p>
+        <p class="foot-tag">Remember what you tasted.</p>
       </div>
     </div>
     <p class="foot-links"><a href="/#features">Features</a><a href="/#pricing">Pricing</a><a href="/support">Support</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></p>
@@ -133,47 +133,12 @@ const phone = (src, alt, { eager = false } = {}) =>
     eager ? ' fetchpriority="high"' : ' loading="lazy"'
   }></div>`;
 
-const CHAPTERS = [
-  {
-    numeral: 'I',
-    shot: 'shot-2-log-a-tasting.png',
-    alt: 'Cork & Note screen for logging a wine, with a label-scan button and a rating form.',
-    eyebrow: 'The journal',
-    heading: 'Capture it while you’re still at the counter.',
-    body: 'Log each wine as you taste it — a rating, flavour notes, a photo, and how it made you feel. Tag the winery, the restaurant, or nowhere at all. A Tuesday-night bottle with no place attached still counts.',
-    points: [
-      'Scan the label or the tasting card and the producer, vintage and grapes fill themselves in.',
-      'Built for real tasting rooms: it tells you when you’re offline instead of pretending to save.',
-    ],
-  },
-  {
-    numeral: 'II',
-    shot: 'shot-3-winery-visits.png',
-    alt: 'A winery page in Cork & Note showing past visits and the wines tasted on each one.',
-    eyebrow: 'The places',
-    heading: 'Every winery keeps its own page.',
-    body: 'Each place you’ve logged remembers the visits you’ve made, the wines you poured on each one, and the notes you left behind. Walk back in two years later knowing exactly what you loved.',
-    points: [
-      'Your most-visited places and latest trips, right on Home.',
-      'Restaurants and tasting bars count too — anywhere you drink wine.',
-    ],
-  },
-  {
-    numeral: 'III',
-    shot: 'shot-4-explore-map.jpg',
-    alt: 'The Explore map in Cork & Note with pins on the wineries you have visited.',
-    eyebrow: 'The map',
-    heading: 'Your wine country, pinned.',
-    body: 'The map fills in as you taste: every winery you’ve visited, every region you’ve worked through, and your next stop while you’re out there.',
-    points: [
-      'A living record of your own travels, not a directory of everyone else’s.',
-      'Long-press to drop a pin on a place that isn’t listed yet.',
-    ],
-  },
-];
-
-const chapters = CHAPTERS.map(
-  (c, i) => `<div class="chapter${i % 2 ? ' flip' : ''}">
+// Chapter order tells the positioning story (marketing plan 2026-09-09):
+// memory first (broad, welcoming), the sommelier second (the help), the
+// places-passport third (the proof no other wine app keeps), cellar last.
+// The sommelier and places sections have their own richer layouts, so the
+// chapters render individually rather than from one loop.
+const chapterBlock = (c, flip = false) => `<div class="chapter${flip ? ' flip' : ''}">
   <div class="chapter-text">
     <p class="eyebrow"><span class="numeral">${c.numeral}</span>${esc(c.eyebrow)}</p>
     <h3>${esc(c.heading)}</h3>
@@ -181,13 +146,39 @@ const chapters = CHAPTERS.map(
     <ul class="points">${c.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
   </div>
   <div class="stage">${phone(c.shot, c.alt)}</div>
-</div>`
-).join('\n');
+</div>`;
+
+const JOURNAL_CHAPTER = {
+  numeral: 'I',
+  shot: 'shot-2-log-a-tasting.png',
+  alt: 'Cork & Note screen for logging a wine, with a label-scan button and a rating form.',
+  eyebrow: 'The journal',
+  heading: 'Capture it while the glass is still in your hand.',
+  body: 'A bottle at home, dinner out, or a flight at the tasting bar — log each wine as you taste it: a rating, flavour notes, a photo, and how it made you feel. Tag the place, or don’t. A Tuesday-night bottle with no location still counts.',
+  points: [
+    'Scan the label or the tasting card and the producer, vintage and grapes fill themselves in.',
+    'No wine vocabulary required — plain words like “honey, but dry?” are exactly the point.',
+  ],
+};
+
+const PLACES_CHAPTER = {
+  numeral: 'III',
+  shot: 'shot-3-winery-visits.png',
+  alt: 'A winery page in Cork & Note showing your past visits and notes alongside live Google rating, opening hours and website.',
+  eyebrow: 'The places · your passport',
+  heading: 'The wineries remember you back.',
+  body: 'You taste six wines in an afternoon, love the third one, and by summer’s end the trip has blurred. Not here. Every place you’ve been keeps its own page — your visits, the wines you poured on each one, your notes and photos — on a map that fills in as you travel. No other wine app keeps this.',
+  points: [
+    'Pro adds live winery intel from Google, right on the page: rating, opening hours, website and phone — plan the next visit from the record of the last one.',
+    'The map is yours on any plan: long-press to pin anywhere — restaurants and tasting bars count too.',
+  ],
+};
 
 const ASKS = [
+  'I like this wine — how would I describe it?',
+  'What does “dry” actually mean?',
   'What should I open with the lamb tonight?',
-  'I’m at the counter — the Grenache or the Syrah, given what I liked last spring?',
-  'What is Trousseau, actually?',
+  'What do the wines I’ve liked have in common?',
 ];
 
 const WINDOWS = [
@@ -200,15 +191,15 @@ const WINDOWS = [
 const WHY = [
   [
     'The bottle and the place',
-    'Rating apps know the wine but not the trip. Passport apps stamp the visit but forget the wine. Cork & Note keeps what you drank together with where you were.',
+    'Rating apps know the wine but not the trip. Passport apps stamp the visit but forget the wine. Cork & Note keeps what you drank together with where you were — and knows the winery, too.',
   ],
   [
     'A sommelier with your palate',
-    'Other apps recommend from crowd scores. Cork & Note’s sommelier reasons from your own ratings, visits and cellar — advice from a friend who was there with you.',
+    'Cork & Note’s sommelier reasons from your own ratings, visits and cellar. It has read your journal — because you wrote it — so its advice starts from what you actually liked.',
   ],
   [
     'A journal, not a feed',
-    'No followers, no public ratings, no performing. Your notes are private to you: a place to actually remember, and to learn what you like along the way.',
+    'No followers, no public ratings, no performing. Your notes are private to you — and they are never deleted, on any plan. A memory app that holds your memories hostage isn’t one.',
   ],
 ];
 
@@ -218,7 +209,10 @@ const NO = '<span class="no" role="img" aria-label="Not included">—</span>';
 const COMPARE = [
   ['Journal', [
     ['Tastings, ratings, flavour notes & photos', 'Unlimited', 'Unlimited'],
-    ['Winery visits, map & wishlist', 'Unlimited', 'Unlimited'],
+  ]],
+  ['Wineries', [
+    ['Your map, pins, visits & wishlist', 'Unlimited', 'Unlimited'],
+    ['Live rating, hours & website on winery pages', NO, YES],
   ]],
   ['Cellar', [
     ['Bottles tracked', 'Up to 25', 'Unlimited'],
@@ -248,12 +242,16 @@ const compareRows = COMPARE.map(
 
 const PRO_WINS = [
   [
-    'Scans that fill the form',
-    'Point at the bottle or the tasting card and the producer, vintage and grapes fill themselves in — as many times a day as the tasting room pours.',
-  ],
-  [
     'A sommelier on call',
     'Ask what to open, what to try next, or what that grape on the menu is. Every answer starts from your own ratings, not a crowd score.',
+  ],
+  [
+    'The winery, live',
+    'Every winery page adds its Google rating, opening hours, website and phone next to your own history there — the record of your last visit, and everything you need to plan the next one.',
+  ],
+  [
+    'Scans that fill the form',
+    'Point at the bottle or the tasting card and the producer, vintage and grapes fill themselves in — as many times a day as the tasting room pours.',
   ],
   [
     'A cellar that watches itself',
@@ -268,7 +266,7 @@ const FAQ = [
   ],
   [
     'Will my journal get locked behind Pro?',
-    'No. Everything you log — tastings, places, photos, notes, and up to 25 cellar bottles — is free for as long as you use the app. Pro only adds unlimited label scans and sommelier messages, the unlimited cellar with drink windows, and export.',
+    'No. Everything you log — tastings, places, photos, notes, your map, and up to 25 cellar bottles — is free for as long as you use the app, and we never delete your entries on any plan. Pro adds the unlimited sommelier and scans, live winery details, the unlimited cellar with drink windows and Tonight’s Pick, and export.',
   ],
   [
     'Is my journal public?',
@@ -280,7 +278,7 @@ const FAQ = [
   ],
   [
     'Does it work when the tasting room has no signal?',
-    'Wine country and cell coverage are old enemies. Cork & Note tells you when you’re offline instead of pretending to save, so you never lose a note you thought you took.',
+    'Wine country and cell coverage are old enemies. Cork & Note tells you when you’re offline instead of pretending to save, so you always know whether a note has landed.',
   ],
   [
     'What about Android?',
@@ -289,9 +287,9 @@ const FAQ = [
 ];
 
 const home = page({
-  title: 'Cork & Note — the wine journal for people who actually go to wineries',
+  title: 'Cork & Note — remember what you tasted, discover what you like',
   description:
-    'Your tasting-room memory. Log every wine, remember where you had it, and ask a sommelier who has actually read your notes. Coming soon to the App Store.',
+    'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere — no expertise needed. Coming soon to the App Store.',
   active: '/',
   dark: true,
   extraHead: `<script type="application/ld+json">${JSON.stringify({
@@ -301,7 +299,7 @@ const home = page({
     operatingSystem: 'iOS',
     applicationCategory: 'LifestyleApplication',
     description:
-      'Your tasting-room memory. Log every wine, remember where you had it, and ask a sommelier who has actually read your notes.',
+      'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere — no expertise needed.',
     offers: [
       { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD' },
       { '@type': 'Offer', name: 'Pro (monthly)', price: '9.99', priceCurrency: 'USD' },
@@ -312,9 +310,9 @@ const home = page({
   main: `<section class="hero">
   <div class="wide hero-grid">
     <div class="hero-text">
-      <p class="eyebrow">A wine journal for iPhone</p>
-      <h1>The wine journal for people who <em>actually</em> go to wineries.</h1>
-      <p class="lede"><strong>Your tasting-room memory.</strong> Log every wine while you’re still at the counter, keep every winery you’ve visited on a map, and ask a sommelier who has read your notes — not the internet’s.</p>
+      <p class="eyebrow">Your wine journal &amp; personal AI sommelier</p>
+      <h1>Remember what you tasted. Discover what you like.</h1>
+      <p class="lede">Log any wine in plain words, ask a sommelier who has read your notes, and watch a map of your wine life fill in — every winery remembered, visit by visit. For a bottle at home, dinner out, or a day in wine country. <strong>No wine expertise needed.</strong></p>
       <div class="hero-actions">
         <span class="badge">Coming soon to the App&nbsp;Store</span>
         <a class="textlink" href="#features">See how it works <span aria-hidden="true">↓</span></a>
@@ -328,7 +326,7 @@ const home = page({
 <section class="pain">
   <div class="wrap">
     <div class="double-rule" role="presentation"></div>
-    <p class="pain-line">You taste six wines in an afternoon, love the third one, and by the next weekend you can’t remember its name.</p>
+    <p class="pain-line">You remember <em>liking</em> it — the label, the porch, the second pour. A week later, the name is gone.</p>
     <p class="pain-fix">Cork &amp; Note fixes that.</p>
     <div class="double-rule" role="presentation"></div>
   </div>
@@ -338,23 +336,29 @@ const home = page({
   <div class="wide">
     <div class="section-head">
       <p class="eyebrow">What it does</p>
-      <h2>Log the wine. Keep the place. Ask the sommelier.</h2>
+      <h2>Log the wine. Ask the sommelier. Keep the places.</h2>
     </div>
-    ${chapters}
+    ${chapterBlock(JOURNAL_CHAPTER)}
   </div>
 </section>
 
 <section id="sommelier" class="somm">
   <div class="wide somm-grid">
     <div class="somm-text">
-      <p class="eyebrow"><span class="numeral">IV</span>The sommelier</p>
+      <p class="eyebrow"><span class="numeral">II</span>The sommelier</p>
       <h2>Ask a sommelier who has read your notes.</h2>
-      <p class="lede">An AI wine companion grounded in your own ratings, visits and cellar — not a crowd score. It knows what you actually liked, because it has read your journal.</p>
+      <p class="lede">An AI wine companion grounded in your own ratings, visits and cellar — not a crowd score. It knows what you actually liked, because it has read your journal. Beginner questions are its favourite kind.</p>
       <p class="asks-label">Things you can ask</p>
       <ul class="asks">${ASKS.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>
-      <p class="somm-note">Tonight’s Pick chooses from the bottles you own that are ready to drink. Five messages a month on Free, unlimited on Pro.</p>
+      <p class="somm-note">Five messages a month on Free, unlimited on Pro. Tonight’s Pick — the sommelier choosing from your own ready-to-drink bottles — is part of Pro.</p>
     </div>
-    <div class="somm-stage">${phone('shot-5-sommelier.png', 'The Cork & Note sommelier, asking what you should drink tonight from the bottles in your cellar.')}</div>
+    <div class="somm-stage">${phone('shot-5-sommelier.png', 'The Cork & Note sommelier answering a plain-words question about the wines you have rated.')}</div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="wide">
+    ${chapterBlock(PLACES_CHAPTER, true)}
   </div>
 </section>
 
@@ -389,8 +393,8 @@ const home = page({
   <div class="wide">
     <div class="section-head">
       <p class="eyebrow">Pricing at launch</p>
-      <h2>The journal is free. The sommelier is Pro.</h2>
-      <p class="section-lede">Logging is never gated: every tasting, place, photo and note is free for as long as you use the app. Pro pays for the two things that cost us real money and feel like magic — the label scanner and the sommelier — plus an unlimited cellar.</p>
+      <h2>Start with a free journal. Get more help with Pro.</h2>
+      <p class="section-lede">Logging is never gated: every tasting, place, photo and note is free for as long as you use the app — and never deleted. Pro adds the parts that help: an unlimited sommelier and scanner, live winery details, and the full cellar.</p>
     </div>
     <div class="compare-wrap">
     <table class="compare">

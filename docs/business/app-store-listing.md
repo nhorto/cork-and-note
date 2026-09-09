@@ -11,7 +11,7 @@ Everything App Store Connect asks for, written out so it can be pasted in. Chara
 | Field | Value | Limit |
 |---|---|---|
 | **Name** | `Cork & Note: Wine Journal` | 25/30 |
-| **Subtitle** | `Log tastings & winery visits` | 28/30 |
+| **Subtitle** | `Wine notes & an AI sommelier` | 28/30 |
 | **Primary category** | Food & Drink | |
 | **Secondary category** | Lifestyle | |
 | **Bundle ID** | `com.nicholashorton.corkandnote` | |
@@ -33,33 +33,33 @@ Do **not** repeat words already in the name or subtitle — Apple indexes those 
 Editable any time without a new build — use it for seasonal hooks.
 
 ```
-Your tasting-room memory. Log every wine, remember where you had it, and ask a sommelier who has actually read your notes.
+Remember what you tasted. Discover what you like. Log any wine in plain words, ask a sommelier who has read your notes, and keep every winery you visit.
 ```
 
 ## 4. Description
 
 ```
-Cork & Note is the wine journal for people who actually go to wineries.
+Remember what you tasted. Discover what you like.
 
-You taste six wines in an afternoon, love the third one, and by the next weekend you cannot remember its name. Cork & Note fixes that.
+You remember liking it — the label, the porch, the second pour. A week later the name is gone. Cork & Note fixes that.
 
-LOG THE TASTING ROOM
-Capture each wine as you taste it — ratings, flavour notes, a photo, and how it made you feel. Tag the winery, the restaurant, or nowhere at all. A wine logged without a location still counts.
+LOG ANY WINE, ANYWHERE
+A bottle at home, dinner out, or a flight at the tasting bar — capture each wine as you taste it: ratings, flavour notes, a photo, and how it made you feel. Tag the place, or don't. No wine vocabulary needed.
+
+ASK A SOMMELIER
+An AI wine companion grounded in your own ratings, not crowd scores. Ask what to open with dinner, how to describe a wine you like, or what the wines you've loved have in common. Beginner questions are its favourite kind.
+
+KEEP EVERY WINERY
+Each place you visit gets its own page — your visits, the wines you poured, your notes and photos — on a map that fills in as you travel. With Pro, winery pages add live ratings, opening hours and websites, so the record of your last visit helps you plan the next one.
 
 SCAN THE LABEL
 Point your camera at a bottle or a tasting-room card and let Cork & Note fill in the producer, the vintage and the grapes, so you can get back to drinking.
 
-REMEMBER WHERE YOU HAVE BEEN
-Every place you have logged, on a map and in a list, with the wines you tried at each one. See your most-visited winery and everywhere you have explored.
-
 KEEP A CELLAR
 Track the bottles you own with drink windows that tell you what is ready now, what needs holding, and what to open tonight before it slips past its peak.
 
-ASK A SOMMELIER
-An AI wine companion grounded in your own ratings. Ask what to open with dinner, what you might enjoy next, or let it pick tonight's bottle from your cellar. It knows what you actually liked, because it has read your notes.
-
-BUILT FOR REAL TASTING ROOMS
-Works when the signal does not. Cork & Note tells you when you are offline instead of pretending to save.
+YOURS, PRIVATELY, FOREVER
+No feed, no followers. Your notes are private and never deleted — on any plan. And it tells you when you are offline instead of pretending to save.
 
 Cork & Note is for people of legal drinking age. Please drink responsibly.
 ```
