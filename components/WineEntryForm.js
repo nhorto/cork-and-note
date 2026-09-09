@@ -747,12 +747,12 @@ export default function WineEntryForm({
         {/* Photo buttons */}
         <View style={styles.photoButtons}>
           <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
-            <Ionicons name="camera" size={20} color="#E7E3E2" />
+            <Ionicons name="camera" size={20} color={colors.neutral.cream} />
             <Text style={styles.photoButtonText}>Take photo</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-            <Ionicons name="images" size={20} color="#E7E3E2" />
+            <Ionicons name="images" size={20} color={colors.neutral.cream} />
             <Text style={styles.photoButtonText}>Choose photos</Text>
           </TouchableOpacity>
         </View>
@@ -835,7 +835,7 @@ export default function WineEntryForm({
                     {type}
                   </Text>
                   {wineType === type && (
-                    <Ionicons name="checkmark" size={20} color="#8C1C13" />
+                    <Ionicons name="checkmark" size={20} color={colors.primary.wine} />
                   )}
                 </TouchableOpacity>
               ))}

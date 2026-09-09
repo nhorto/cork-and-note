@@ -423,8 +423,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    // rosé (#D4A5A5) at 30% alpha — container opacity would fade the icon too.
-    backgroundColor: 'rgba(212, 165, 165, 0.3)',
+    // rosé (#F0A99A) at 30% alpha — container opacity would fade the icon too.
+    backgroundColor: 'rgba(240, 169, 154, 0.3)',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
