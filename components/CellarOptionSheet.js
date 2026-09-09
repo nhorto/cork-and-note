@@ -42,7 +42,7 @@ export default function CellarOptionSheet({ visible, title, options = [], select
 }
 
 const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: colors.overlay.dark, justifyContent: 'flex-end' },
+  overlay: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: colors.neutral.cream,
     borderTopLeftRadius: borderRadius.xl,

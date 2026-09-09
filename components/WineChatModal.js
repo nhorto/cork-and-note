@@ -16,7 +16,9 @@ import {
 } from 'react-native';
 import ChatBubble from './ChatBubble';
 import ChatInput from './ChatInput';
+import MeterHint from './MeterHint';
 import TypingDots from './TypingDots';
+import { usePro } from '../hooks/usePro';
 import { aiService } from '../lib/ai';
 import { chatService } from '../lib/chat';
 import theme from '../styles/theme';
@@ -26,6 +28,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.65;
 
 export default function WineChatModal({ visible, onClose, onUseSuggestions, onConversationStarted, onDismiss, existingConversationId, currentWineData }) {
+  const { gate } = usePro();
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [sending, setSending] = useState(false);
@@ -112,6 +115,10 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
 
   const handleSend = useCallback(async (text, photos = []) => {
     if (sendingRef.current) return;
+    // The second sommelier surface (#121). It spends the same 5/month chat meter
+    // as the Sommelier tab, so it needs the same gate — walling only one of them
+    // would just move the surprise.
+    if (!gate('chat')) return;
     sendingRef.current = true;
     setSending(true);
     try {
@@ -194,7 +201,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
       sendingRef.current = false;
       setSending(false);
     }
-  }, [conversation, messages, systemPrompt, onConversationStarted]);
+  }, [conversation, messages, systemPrompt, onConversationStarted, gate]);
 
   const handleUseSuggestions = useCallback((suggestions) => {
     if (onUseSuggestions) {
@@ -284,6 +291,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           )}
 
           {/* Input */}
+          <MeterHint task="chat" style={styles.meterHint} />
           <ChatInput onSend={handleSend} disabled={sending} />
         </KeyboardAvoidingView>
       </View>
@@ -292,6 +300,9 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
 }
 
 const styles = StyleSheet.create({
+  meterHint: {
+    paddingHorizontal: spacing.md,
+  },
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',

@@ -13,7 +13,9 @@ import {
   View
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
+import { usePro } from '../../hooks/usePro';
 import { accountService } from '../../lib/account';
+import { shareTastingsCsv } from '../../lib/exportTastings';
 import theme from '../../styles/theme';
 import { AuthContext } from '../_layout';
 
@@ -22,11 +24,49 @@ const SERIF = typography.fonts.serif;
 export default function AccountSettingsScreen() {
   const router = useRouter();
   const { user, signOut } = useContext(AuthContext);
+  const { isPro, purchasesAvailable, restore, presentPaywall } = usePro();
 
   // Local state for settings
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [locationPermissionStatus, setLocationPermissionStatus] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  // Required on the paywall AND in Settings by App Store guideline 3.1.2. It is
+  // also the only way back for someone who reinstalled or changed device, so it
+  // must be here even when we believe they are already Pro.
+  const handleRestore = async () => {
+    if (restoring) return;
+    setRestoring(true);
+    const result = await restore();
+    setRestoring(false);
+    if (result.isPro) {
+      Alert.alert('Welcome back', 'Your Cork & Note Pro subscription has been restored.');
+      return;
+    }
+    Alert.alert(
+      'Nothing to restore',
+      result.error || 'We could not find a previous purchase for this Apple Account.'
+    );
+  };
+
+  // CSV export is the one Pro feature that is not about cost — it is about the
+  // journal being the user's. Free users see the row and the paywall rather than
+  // a hidden feature they never learn exists.
+  const handleExport = async () => {
+    if (exporting) return;
+    if (!isPro) {
+      presentPaywall('export');
+      return;
+    }
+    setExporting(true);
+    const result = await shareTastingsCsv();
+    setExporting(false);
+    if (!result.success) {
+      Alert.alert('Export failed', result.error);
+    }
+  };
 
   const handleDeleteAccount = async () => {
     if (deleting) return;
@@ -132,6 +172,71 @@ export default function AccountSettingsScreen() {
               thumbColor={colors.neutral.cream}
             />
           </View>
+        </View>
+
+        {/* Subscription Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Subscription</Text>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Plan:</Text>
+            <Text style={styles.infoValue}>{isPro ? 'Cork & Note Pro' : 'Free'}</Text>
+          </View>
+
+          {!isPro && purchasesAvailable ? (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => presentPaywall('settings')}
+              accessibilityRole="button"
+            >
+              <Ionicons name="sparkles" size={20} color={colors.primary.burgundy} />
+              <Text style={styles.actionButtonText}>Upgrade to Pro</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+            </TouchableOpacity>
+          ) : null}
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.lastButton]}
+            disabled={restoring}
+            onPress={handleRestore}
+            accessibilityRole="button"
+          >
+            <Ionicons name="refresh" size={20} color={colors.primary.burgundy} />
+            <Text style={styles.actionButtonText}>
+              {restoring ? 'Restoring…' : 'Restore purchases'}
+            </Text>
+            <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+          </TouchableOpacity>
+
+          <Text style={styles.infoNote}>
+            Subscriptions are billed to your Apple Account and can be managed or cancelled there.
+          </Text>
+        </View>
+
+        {/* Your Data Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Your data</Text>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.lastButton]}
+            disabled={exporting}
+            onPress={handleExport}
+            accessibilityRole="button"
+          >
+            <Ionicons name="download" size={20} color={colors.primary.burgundy} />
+            <Text style={styles.actionButtonText}>
+              {exporting ? 'Preparing export…' : 'Export tastings (CSV)'}
+            </Text>
+            {isPro ? (
+              <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+            ) : (
+              <Text style={styles.proBadge}>PRO</Text>
+            )}
+          </TouchableOpacity>
+
+          <Text style={styles.infoNote}>
+            A spreadsheet of every tasting you&apos;ve logged — one row per wine, yours to keep.
+          </Text>
         </View>
 
         {/* Account Actions Section */}
@@ -257,6 +362,22 @@ const styles = StyleSheet.create({
   },
   dangerButton: {
     borderBottomWidth: 0,
+  },
+  // The last row in a section drops the divider hairline.
+  lastButton: {
+    borderBottomWidth: 0,
+  },
+  proBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: colors.primary.burgundy,
+    borderWidth: 1,
+    borderColor: colors.primary.burgundy,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    overflow: 'hidden',
   },
   dangerText: {
     color: colors.status.error,

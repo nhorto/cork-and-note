@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { usePro } from '../hooks/usePro';
 import { OCCASIONS, SEASONS, cellarPairing } from '../lib/cellarPairing';
 import theme from '../styles/theme';
 import Button from './Button';
@@ -67,6 +68,7 @@ function PickerRow({ label, options, value, onChange }) {
 }
 
 export default function BottlePairing({ bottle }) {
+  const { gate } = usePro();
   const [occasion, setOccasion] = useState(null);
   const [season, setSeason] = useState(null);
   const [freeText, setFreeText] = useState('');
@@ -79,6 +81,9 @@ export default function BottlePairing({ bottle }) {
 
   const askSommelier = useCallback(async () => {
     if (!bottle) return;
+    // These are sommelier calls too: they spend the same 5/month chat meter
+    // server-side, so they get the same gate rather than a confusing refusal.
+    if (!gate('chat')) return;
     setThinking(true);
     setError(null);
     try {
@@ -99,7 +104,7 @@ export default function BottlePairing({ bottle }) {
     } finally {
       setThinking(false);
     }
-  }, [bottle, occasion, season, freeText]);
+  }, [bottle, occasion, season, freeText, gate]);
 
   return (
     <View style={styles.card}>

@@ -1179,7 +1179,7 @@ const styles = StyleSheet.create({
   // Wine Type Modal
   modalOverlay: {
     flex: 1,
-    backgroundColor: colors.overlay.dark,
+    backgroundColor: colors.overlay.scrim,
     justifyContent: 'flex-end',
   },
   modalContent: {
