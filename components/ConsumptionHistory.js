@@ -63,7 +63,7 @@ export default function ConsumptionHistory({ consumptions }) {
           return (
             <View key={row.id || i} style={[styles.row, i < rows.length - 1 && styles.rowBorder]}>
               <View style={styles.iconWrap}>
-                <Ionicons name={meta.icon} size={18} color={colors.primary.burgundy} />
+                <Ionicons name={meta.icon} size={18} color={colors.primary.base} />
               </View>
               <View style={styles.rowBody}>
                 <View style={styles.rowTop}>
@@ -84,9 +84,9 @@ export default function ConsumptionHistory({ consumptions }) {
                     activeOpacity={0.7}
                     onPress={() => router.push(`/wine/${row.wine_id}`)}
                   >
-                    <Ionicons name="reader-outline" size={13} color={colors.gold.shimmer} />
+                    <Ionicons name="reader-outline" size={13} color={colors.accent.strong} />
                     <Text style={styles.tastingLinkText}>View tasting note</Text>
-                    <Ionicons name="chevron-forward" size={13} color={colors.gold.shimmer} />
+                    <Ionicons name="chevron-forward" size={13} color={colors.accent.strong} />
                   </TouchableOpacity>
                 ) : null}
               </View>
@@ -100,27 +100,27 @@ export default function ConsumptionHistory({ consumptions }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.md,
   },
-  heading: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.sm },
-  empty: { ...typography.body.small, color: colors.neutral.pewter, lineHeight: 19 },
+  heading: { ...typography.body.caption, color: colors.accent.ink, marginBottom: spacing.sm },
+  empty: { ...typography.body.small, color: colors.neutral.inkTertiary, lineHeight: 19 },
 
   row: { flexDirection: 'row', gap: spacing.sm, paddingVertical: spacing.sm },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.neutral.linen },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.neutral.divider },
   iconWrap: { width: 24, alignItems: 'center', paddingTop: 1 },
   rowBody: { flex: 1 },
 
   rowTop: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: spacing.xs },
-  reason: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  qty: { ...typography.body.small, color: colors.neutral.graphite },
-  date: { ...typography.body.small, color: colors.neutral.pewter, marginLeft: 'auto' },
+  reason: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  qty: { ...typography.body.small, color: colors.neutral.inkSecondary },
+  date: { ...typography.body.small, color: colors.neutral.inkTertiary, marginLeft: 'auto' },
 
-  note: { ...typography.body.small, color: colors.neutral.graphite, marginTop: 2, lineHeight: 19 },
+  note: { ...typography.body.small, color: colors.neutral.inkSecondary, marginTop: 2, lineHeight: 19 },
 
   tastingLink: {
     flexDirection: 'row',
@@ -129,5 +129,5 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: spacing.xs,
   },
-  tastingLinkText: { ...typography.body.small, color: colors.gold.text, fontWeight: '600' },
+  tastingLinkText: { ...typography.body.small, color: colors.accent.ink, fontWeight: '600' },
 });

@@ -188,7 +188,7 @@ export default function FeedbackScreen() {
             <Ionicons
               name={star <= rating ? 'star' : 'star-outline'}
               size={36}
-              color={star <= rating ? colors.gold.rich : colors.neutral.stone}
+              color={star <= rating ? colors.accent.base : colors.neutral.border}
             />
           </TouchableOpacity>
         ))}
@@ -212,13 +212,13 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('feedback')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="chatbubble" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
+                <Ionicons name="chatbubble" size={22} color={colors.primary.base} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Share feedback</Text>
               </View>
               <Ionicons
                 name={activeSection === 'feedback' ? 'chevron-up' : 'chevron-down'}
                 size={22}
-                color={colors.neutral.pewter}
+                color={colors.neutral.inkTertiary}
               />
             </TouchableOpacity>
             
@@ -311,13 +311,13 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('bug')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="bug" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
+                <Ionicons name="bug" size={22} color={colors.primary.base} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Report a bug</Text>
               </View>
               <Ionicons
                 name={activeSection === 'bug' ? 'chevron-up' : 'chevron-down'}
                 size={22}
-                color={colors.neutral.pewter}
+                color={colors.neutral.inkTertiary}
               />
             </TouchableOpacity>
             
@@ -332,7 +332,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={4}
                   textAlignVertical="top"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                 />
                 
                 <Text style={styles.label}>Steps to reproduce</Text>
@@ -344,7 +344,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={4}
                   textAlignVertical="top"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                 />
                 
                 <Text style={styles.label}>Device</Text>
@@ -353,7 +353,7 @@ export default function FeedbackScreen() {
                   value={bugDevice}
                   onChangeText={setBugDevice}
                   placeholder="What device are you using? (e.g., iPhone 13, Samsung Galaxy S21)"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                 />
                 
                 <Button
@@ -372,13 +372,13 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('contact')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="mail" size={22} color={colors.primary.burgundy} style={styles.sectionIcon} />
+                <Ionicons name="mail" size={22} color={colors.primary.base} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Contact support</Text>
               </View>
               <Ionicons
                 name={activeSection === 'contact' ? 'chevron-up' : 'chevron-down'}
                 size={22}
-                color={colors.neutral.pewter}
+                color={colors.neutral.inkTertiary}
               />
             </TouchableOpacity>
             
@@ -392,7 +392,7 @@ export default function FeedbackScreen() {
                   placeholder="Enter your email address"
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                 />
                 
                 <Text style={styles.label}>Subject</Text>
@@ -401,7 +401,7 @@ export default function FeedbackScreen() {
                   value={contactSubject}
                   onChangeText={setContactSubject}
                   placeholder="What is your message about?"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                 />
                 
                 <Text style={styles.label}>Message</Text>
@@ -413,7 +413,7 @@ export default function FeedbackScreen() {
                   multiline
                   numberOfLines={6}
                   textAlignVertical="top"
-                  placeholderTextColor={colors.neutral.silver}
+                  placeholderTextColor={colors.neutral.placeholder}
                 />
                 
                 <Button
@@ -439,7 +439,7 @@ export default function FeedbackScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   keyboardAvoid: {
     flex: 1,
@@ -453,12 +453,12 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   section: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: 8,
     marginBottom: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -476,28 +476,28 @@ const styles = StyleSheet.create({
   sectionTitleText: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   sectionContent: {
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.linen,
+    borderTopColor: colors.neutral.divider,
   },
   label: {
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 8,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: 8,
     padding: 12,
     fontSize: 15,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     marginBottom: 16,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   textArea: {
     minHeight: 120,
@@ -508,24 +508,24 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     overflow: 'hidden',
   },
   segmentButton: {
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   segmentButtonActive: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
   },
   segmentButtonText: {
     fontSize: 14,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   segmentButtonTextActive: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '500',
   },
   ratingContainer: {

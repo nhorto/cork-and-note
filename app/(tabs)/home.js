@@ -159,7 +159,7 @@ export default function HomeScreen() {
             activeOpacity={0.85}
             onPress={() => setReloadKey((k) => k + 1)}
           >
-            <Ionicons name="cloud-offline-outline" size={18} color={colors.primary.burgundy} />
+            <Ionicons name="cloud-offline-outline" size={18} color={colors.primary.base} />
             <Text style={styles.errorBannerText}>Couldn&apos;t load your data</Text>
             <Text style={styles.errorBannerAction}>Retry</Text>
           </TouchableOpacity>
@@ -204,7 +204,7 @@ export default function HomeScreen() {
           onPress={() => router.push('/(tabs)/cellar')}
         >
           <View style={styles.cellarIcon}>
-            <Ionicons name="file-tray-stacked-outline" size={22} color={colors.primary.burgundy} />
+            <Ionicons name="file-tray-stacked-outline" size={22} color={colors.primary.base} />
           </View>
           <View style={styles.cellarMeta}>
             <Text style={styles.cellarTitle}>
@@ -220,7 +220,7 @@ export default function HomeScreen() {
                 : 'Track the bottles you own'}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.primary.burgundy} />
+          <Ionicons name="chevron-forward" size={20} color={colors.primary.base} />
         </TouchableOpacity>
 
         {/* Collection at a glance — compact insights entry (R6 / #56). Shows 1–2
@@ -248,19 +248,19 @@ export default function HomeScreen() {
               onPress={() => router.push(`/wine/${w.id}`)}
             >
               <View style={styles.wineGlass}>
-                <Ionicons name="wine-outline" size={18} color={colors.primary.burgundy} />
+                <Ionicons name="wine-outline" size={18} color={colors.primary.base} />
               </View>
               <View style={styles.wineMeta}>
                 <Text style={styles.wineName}>{w.name}</Text>
                 <Text style={styles.wineDetail}>{w.detail}</Text>
               </View>
               {w.rating ? <Text style={styles.wineScore}>{w.rating}</Text> : null}
-              <Ionicons name="chevron-forward" size={18} color={colors.neutral.silver} />
+              <Ionicons name="chevron-forward" size={18} color={colors.neutral.placeholder} />
             </TouchableOpacity>
           ))
         ) : (
           <View style={styles.empty}>
-            <Ionicons name="wine-outline" size={26} color={colors.gold.shimmer} />
+            <Ionicons name="wine-outline" size={26} color={colors.accent.strong} />
             <Text style={styles.emptyText}>
               {loaded ? 'No wines logged yet' : 'Loading…'}
             </Text>
@@ -321,7 +321,7 @@ function JourneyCard({ stats, highlights, onOpenMap, onPressWines, onPressPlaces
         accessibilityRole="button"
         accessibilityLabel="Open your map"
       >
-        <Ionicons name="map-outline" size={16} color={colors.primary.burgundy} />
+        <Ionicons name="map-outline" size={16} color={colors.primary.base} />
         <Text style={styles.journeyMapLinkText}>Open your map ›</Text>
       </TouchableOpacity>
 
@@ -419,22 +419,22 @@ function InsightsEntryCard({ insights, onPress }) {
       </View>
       <TouchableOpacity style={styles.insights} activeOpacity={0.9} onPress={onPress}>
         <View style={styles.insightsIcon}>
-          <Ionicons name="analytics-outline" size={22} color={colors.gold.shimmer} />
+          <Ionicons name="analytics-outline" size={22} color={colors.accent.strong} />
         </View>
         <View style={styles.insightsMeta}>
           <Text style={styles.insightsTitle}>{highlight}</Text>
           <Text style={styles.insightsSub} numberOfLines={1}>{sub}</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+        <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
       </TouchableOpacity>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
 
-  header: { backgroundColor: colors.neutral.cream, paddingTop: 60 },
+  header: { backgroundColor: colors.neutral.bg, paddingTop: 60 },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -442,10 +442,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
   },
-  welcome: { ...typography.body.caption, color: colors.neutral.pewter },
+  welcome: { ...typography.body.caption, color: colors.neutral.inkTertiary },
   name: {
     ...typography.heading.h1,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: 2,
   },
@@ -453,20 +453,20 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
     fontFamily: SERIF,
     fontSize: 18,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
   },
   headerBorder: {
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
     marginHorizontal: spacing.lg,
   },
 
@@ -477,38 +477,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     marginTop: spacing.md,
   },
-  errorBannerText: { ...typography.body.small, color: colors.neutral.graphite, flex: 1 },
+  errorBannerText: { ...typography.body.small, color: colors.neutral.inkSecondary, flex: 1 },
   errorBannerAction: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
 
   // Your Journey — passport card
   journeyCard: {
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.lg,
   },
-  journeyLabel: { ...typography.body.caption, color: colors.gold.text },
+  journeyLabel: { ...typography.body.caption, color: colors.accent.ink },
   journeyTitle: {
     fontFamily: SERIF,
     fontSize: 22,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginTop: spacing.xs,
   },
-  journeySub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
+  journeySub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 2 },
   journeyMapLink: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -519,12 +519,12 @@ const styles = StyleSheet.create({
   },
   journeyMapLinkText: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
   journeyDivider: {
     height: 1,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
     marginTop: spacing.sm,
     marginBottom: spacing.sm,
   },
@@ -533,9 +533,9 @@ const styles = StyleSheet.create({
   journeyStatNum: {
     fontFamily: SERIF,
     fontSize: 20,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
   },
-  journeyStatLabel: { ...typography.body.caption, color: colors.neutral.pewter, marginTop: 2 },
+  journeyStatLabel: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginTop: 2 },
 
   // Tonight's pick hero
   tonightsPick: { marginTop: spacing.lg },
@@ -544,20 +544,20 @@ const styles = StyleSheet.create({
   rtdStrip: { flexDirection: 'row', gap: spacing.sm },
   rtdTile: {
     flex: 1,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.xs,
     alignItems: 'center',
   },
   rtdDot: { width: 8, height: 8, borderRadius: 4, marginBottom: spacing.xs },
-  rtdCount: { fontFamily: SERIF, fontSize: 22, color: colors.neutral.charcoal },
-  rtdCountMuted: { color: colors.neutral.silver },
+  rtdCount: { fontFamily: SERIF, fontSize: 22, color: colors.neutral.ink },
+  rtdCountMuted: { color: colors.neutral.placeholder },
   rtdLabel: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
     fontSize: 11,
     textAlign: 'center',
@@ -568,9 +568,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
   },
@@ -578,22 +578,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cellarMeta: { flex: 1 },
-  cellarTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  cellarSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
+  cellarTitle: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  cellarSub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
 
   // At-a-glance insights entry (R6 / #56)
   insights: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
   },
@@ -601,13 +601,13 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   insightsMeta: { flex: 1 },
-  insightsTitle: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  insightsSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
+  insightsTitle: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  insightsSub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
 
   // Section headers
   sectionHeader: {
@@ -617,17 +617,17 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
-  sectionLabel: { ...typography.body.caption, color: colors.gold.text },
-  sectionAction: { ...typography.body.small, color: colors.primary.burgundy },
+  sectionLabel: { ...typography.body.caption, color: colors.accent.ink },
+  sectionAction: { ...typography.body.small, color: colors.primary.base },
 
   // Wine card
   wineCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     marginBottom: spacing.sm,
@@ -636,30 +636,30 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
   wineMeta: { flex: 1 },
-  wineName: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  wineDetail: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
-  wineScore: { fontFamily: SERIF, fontSize: 16, color: colors.primary.burgundy },
+  wineName: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  wineDetail: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
+  wineScore: { fontFamily: SERIF, fontSize: 16, color: colors.primary.base },
 
   // Empty state
   empty: {
     alignItems: 'center',
     paddingVertical: spacing.xl,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderStyle: 'dashed',
   },
   emptyText: {
     ...typography.body.regular,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     fontFamily: SERIF,
     marginTop: spacing.sm,
   },
-  emptySub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
+  emptySub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 2 },
 });

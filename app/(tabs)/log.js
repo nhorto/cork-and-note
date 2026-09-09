@@ -25,7 +25,7 @@ export default function LogScreen() {
             accessibilityRole="button"
             accessibilityLabel="Close"
           >
-            <Ionicons name="close" size={22} color={colors.neutral.charcoal} />
+            <Ionicons name="close" size={22} color={colors.neutral.ink} />
           </TouchableOpacity>
         </View>
         <View style={styles.headerBorder} />
@@ -40,7 +40,7 @@ export default function LogScreen() {
           onPress={() => router.push('/log-session?mode=wine')}
         >
           <View style={styles.choiceIcon}>
-            <Ionicons name="wine" size={24} color={colors.primary.burgundy} />
+            <Ionicons name="wine" size={24} color={colors.primary.base} />
           </View>
           <View style={styles.choiceText}>
             <Text style={styles.choiceTitle}>Log a wine</Text>
@@ -48,7 +48,7 @@ export default function LogScreen() {
               Just the winemaker &amp; varietal — add a place if you like.
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+          <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -57,7 +57,7 @@ export default function LogScreen() {
           onPress={() => router.push('/log-session?mode=winery')}
         >
           <View style={styles.choiceIcon}>
-            <Ionicons name="location" size={24} color={colors.primary.burgundy} />
+            <Ionicons name="location" size={24} color={colors.primary.base} />
           </View>
           <View style={styles.choiceText}>
             <Text style={styles.choiceTitle}>Start a winery visit</Text>
@@ -65,7 +65,7 @@ export default function LogScreen() {
               Log several wines from one winery in a session.
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+          <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
         </TouchableOpacity>
       </View>
     </View>
@@ -73,8 +73,8 @@ export default function LogScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
-  header: { backgroundColor: colors.neutral.cream, paddingTop: 60 },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
+  header: { backgroundColor: colors.neutral.bg, paddingTop: 60 },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -92,19 +92,19 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
   headerBorder: {
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
     marginHorizontal: spacing.lg,
   },
 
   body: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
   prompt: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.lg,
   },
@@ -112,9 +112,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginBottom: spacing.md,
@@ -124,22 +124,22 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   choiceText: { flex: 1 },
   choiceTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
-  choiceSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 2 },
+  choiceSub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 2 },
   note: {
     ...typography.body.small,
-    color: colors.neutral.silver,
+    color: colors.neutral.placeholder,
     textAlign: 'center',
     marginTop: spacing.lg,
     fontStyle: 'italic',

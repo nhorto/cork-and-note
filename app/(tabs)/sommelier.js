@@ -67,7 +67,7 @@ function ConversationRow({ conversation, onPress, onDelete }) {
       activeOpacity={0.7}
     >
       <View style={styles.convIcon}>
-        <Ionicons name={contextIcon} size={20} color={colors.primary.burgundy} />
+        <Ionicons name={contextIcon} size={20} color={colors.primary.base} />
       </View>
       <View style={styles.convContent}>
         <Text style={styles.convTitle} numberOfLines={1}>
@@ -79,7 +79,7 @@ function ConversationRow({ conversation, onPress, onDelete }) {
           {formatRelativeDate(conversation.updated_at)}
         </Text>
       </View>
-      <Ionicons name="chevron-forward" size={16} color={colors.neutral.silver} />
+      <Ionicons name="chevron-forward" size={16} color={colors.neutral.placeholder} />
     </TouchableOpacity>
   );
 }
@@ -285,7 +285,7 @@ export default function SommelierScreen() {
 
         {loading ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color={colors.primary.burgundy} />
+            <ActivityIndicator size="large" color={colors.primary.base} />
           </View>
         ) : (
           // Single scroll surface: the cellar-grounded "Tonight's pick" hero on
@@ -302,7 +302,7 @@ export default function SommelierScreen() {
 
             {/* New conversation */}
             <TouchableOpacity style={styles.newChatButton} onPress={startNewChat}>
-              <Ionicons name="add-circle" size={20} color={colors.neutral.cream} />
+              <Ionicons name="add-circle" size={20} color={colors.neutral.bg} />
               <Text style={styles.newChatText}>New conversation</Text>
             </TouchableOpacity>
 
@@ -311,7 +311,7 @@ export default function SommelierScreen() {
                 <Ionicons
                   name="chatbubbles-outline"
                   size={40}
-                  color={colors.neutral.stone}
+                  color={colors.neutral.border}
                 />
                 <Text style={styles.listEmptyTitle}>No conversations yet</Text>
                 <Text style={styles.listEmptySubtitle}>
@@ -348,7 +348,7 @@ export default function SommelierScreen() {
           accessibilityRole="button"
           accessibilityLabel="Back"
         >
-          <Ionicons name="chevron-back" size={24} color={colors.primary.burgundy} />
+          <Ionicons name="chevron-back" size={24} color={colors.primary.base} />
         </TouchableOpacity>
         <View style={styles.chatHeaderContent}>
           <Text style={styles.chatHeaderTitle} numberOfLines={1}>
@@ -366,12 +366,12 @@ export default function SommelierScreen() {
         {/* Messages */}
         {loading ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color={colors.primary.burgundy} />
+            <ActivityIndicator size="large" color={colors.primary.base} />
           </View>
         ) : messages.length === 0 ? (
           <View style={styles.emptyChatState}>
             <View style={styles.sommelierIcon}>
-              <Ionicons name="wine" size={32} color={colors.primary.burgundy} />
+              <Ionicons name="wine" size={32} color={colors.primary.base} />
             </View>
             <Text style={styles.emptyChatTitle}>Bonjour!</Text>
             <Text style={styles.emptyChatSubtitle}>
@@ -413,11 +413,11 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   divider: {
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
 
   // List view (Tonight's pick + recent chats)
@@ -435,18 +435,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     paddingVertical: spacing.md,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     ...shadows.soft,
   },
   newChatText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
   recentLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
   },
@@ -456,18 +456,18 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     marginBottom: spacing.sm,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   convIcon: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -476,12 +476,12 @@ const styles = StyleSheet.create({
   convTitle: {
     ...typography.body.regular,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   convMeta: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
   },
   listEmptyState: {
@@ -491,13 +491,13 @@ const styles = StyleSheet.create({
   },
   listEmptyTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     marginTop: spacing.md,
   },
   listEmptySubtitle: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     marginTop: spacing.sm,
   },
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
   },
   chatHeaderTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
 
@@ -551,21 +551,21 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 2,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
   emptyChatTitle: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   emptyChatSubtitle: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     marginTop: spacing.sm,
     lineHeight: 22,
@@ -578,10 +578,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   typingBubble: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
     marginLeft: 36, // account for avatar space

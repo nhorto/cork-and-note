@@ -8,7 +8,7 @@ import { colors } from '../styles/theme';
 
 const REST = 0.4;
 
-export default function TypingDots({ color = colors.neutral.pewter, size = 6, style }) {
+export default function TypingDots({ color = colors.neutral.inkTertiary, size = 6, style }) {
   const values = useRef([
     new Animated.Value(REST),
     new Animated.Value(REST),

@@ -114,7 +114,7 @@ export default function NotificationsScreen() {
 
       {loading || !prefs ? (
         <View style={styles.loadingWrap}>
-          <ActivityIndicator color={colors.primary.burgundy} />
+          <ActivityIndicator color={colors.primary.base} />
         </View>
       ) : (
         <ScrollView
@@ -126,7 +126,7 @@ export default function NotificationsScreen() {
             <Ionicons
               name="notifications-outline"
               size={22}
-              color={colors.gold.rich}
+              color={colors.accent.base}
               style={{ marginBottom: spacing.sm }}
             />
             <Text style={styles.introText}>
@@ -162,8 +162,8 @@ export default function NotificationsScreen() {
                   value={!!prefs.enabled}
                   onValueChange={handleMasterToggle}
                   disabled={busy || unavailable}
-                  trackColor={{ false: colors.neutral.stone, true: colors.primary.burgundy }}
-                  thumbColor={colors.neutral.cream}
+                  trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
+                  thumbColor={colors.neutral.bg}
                 />
               </View>
             </View>
@@ -184,8 +184,8 @@ export default function NotificationsScreen() {
                   value={!!prefs.notifyPeakEntry}
                   onValueChange={(v) => updatePref({ notifyPeakEntry: v })}
                   disabled={!prefs.enabled || busy || unavailable}
-                  trackColor={{ false: colors.neutral.stone, true: colors.primary.burgundy }}
-                  thumbColor={colors.neutral.cream}
+                  trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
+                  thumbColor={colors.neutral.bg}
                 />
               </View>
               <View style={styles.row}>
@@ -199,8 +199,8 @@ export default function NotificationsScreen() {
                   value={!!prefs.notifyPastPeak}
                   onValueChange={(v) => updatePref({ notifyPastPeak: v })}
                   disabled={!prefs.enabled || busy || unavailable}
-                  trackColor={{ false: colors.neutral.stone, true: colors.primary.burgundy }}
-                  thumbColor={colors.neutral.cream}
+                  trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
+                  thumbColor={colors.neutral.bg}
                 />
               </View>
             </View>
@@ -241,7 +241,7 @@ export default function NotificationsScreen() {
                 disabled={busy || !prefs.enabled}
                 activeOpacity={0.7}
               >
-                <Ionicons name="paper-plane-outline" size={18} color={colors.primary.burgundy} />
+                <Ionicons name="paper-plane-outline" size={18} color={colors.primary.base} />
                 <Text style={styles.testButtonText}>Send a test reminder</Text>
               </TouchableOpacity>
             </View>
@@ -262,7 +262,7 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   loadingWrap: {
     flex: 1,
@@ -275,30 +275,30 @@ const styles = StyleSheet.create({
   },
 
   introCard: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     padding: spacing.lg,
     marginBottom: spacing.lg,
     ...shadows.soft,
   },
   introText: {
     ...typography.body.regular,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
   },
 
   noticeCard: {
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
   noticeText: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
   },
 
   section: {
@@ -306,20 +306,20 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginBottom: spacing.sm,
   },
   sectionHint: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: spacing.sm,
   },
 
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     overflow: 'hidden',
     ...shadows.soft,
   },
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   },
   rowBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   rowInfo: {
     flex: 1,
@@ -338,13 +338,13 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '500',
     marginBottom: 2,
   },
   rowDescription: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 
   chipRow: {
@@ -359,23 +359,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     padding: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
   },
   testButtonDisabled: {
     opacity: 0.5,
   },
   testButtonText: {
     ...typography.body.regular,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '500',
   },
 
   footnote: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     textAlign: 'center',
     marginTop: spacing.sm,

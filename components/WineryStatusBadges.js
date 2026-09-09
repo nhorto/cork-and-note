@@ -17,13 +17,13 @@ const WineryStatusBadges = ({ status, compact = false }) => {
       <View style={styles.compactContainer}>
         {visited && (
           <View style={[styles.badge, styles.visitedBadge]}>
-            <Ionicons name="checkmark-circle" size={14} color={colors.neutral.cream} />
+            <Ionicons name="checkmark-circle" size={14} color={colors.neutral.bg} />
           </View>
         )}
 
         {isWantToVisit && (
           <View style={[styles.badge, styles.wishlistBadge]}>
-            <Ionicons name="bookmark" size={14} color={colors.neutral.cream} />
+            <Ionicons name="bookmark" size={14} color={colors.neutral.bg} />
           </View>
         )}
       </View>
@@ -34,7 +34,7 @@ const WineryStatusBadges = ({ status, compact = false }) => {
     <View style={styles.container}>
       {visited && (
         <View style={[styles.statusBadge, styles.visitedBadge]}>
-          <Ionicons name="checkmark-circle" size={16} color={colors.neutral.cream} />
+          <Ionicons name="checkmark-circle" size={16} color={colors.neutral.bg} />
           <Text style={styles.badgeText}>
             {visitCount > 1 ? `Visited ${visitCount} times` : 'Visited'}
           </Text>
@@ -43,7 +43,7 @@ const WineryStatusBadges = ({ status, compact = false }) => {
 
       {isWantToVisit && (
         <View style={[styles.statusBadge, styles.wishlistBadge]}>
-          <Ionicons name="bookmark" size={16} color={colors.neutral.cream} />
+          <Ionicons name="bookmark" size={16} color={colors.neutral.bg} />
           <Text style={styles.badgeText}>Want to Visit</Text>
         </View>
       )}
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     ...typography.body.small,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '500',
   },
 });

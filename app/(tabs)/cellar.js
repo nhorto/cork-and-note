@@ -143,7 +143,7 @@ export default function CellarScreen() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.headerIcon}>
-            <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.burgundy} />
+            <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.base} />
           </View>
           <Text style={styles.headerTitle}>Cellar</Text>
           {/* Deliberately empty. Adding a bottle lives on the FAB below (and on
@@ -160,13 +160,13 @@ export default function CellarScreen() {
         <View style={styles.toolbar}>
           {/* Search */}
           <View style={styles.searchBox}>
-            <Ionicons name="search" size={16} color={colors.neutral.pewter} />
+            <Ionicons name="search" size={16} color={colors.neutral.inkTertiary} />
             <TextInput
               style={styles.searchInput}
               value={query}
               onChangeText={setQuery}
               placeholder="Search name, producer, region, vintage"
-              placeholderTextColor={colors.neutral.silver}
+              placeholderTextColor={colors.neutral.placeholder}
               autoCorrect={false}
               returnKeyType="search"
             />
@@ -177,7 +177,7 @@ export default function CellarScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Clear"
               >
-                <Ionicons name="close-circle" size={16} color={colors.neutral.silver} />
+                <Ionicons name="close-circle" size={16} color={colors.neutral.placeholder} />
               </TouchableOpacity>
             )}
           </View>
@@ -250,7 +250,7 @@ export default function CellarScreen() {
       {/* Body */}
       {!loaded ? (
         <View style={styles.center}>
-          <ActivityIndicator color={colors.primary.burgundy} />
+          <ActivityIndicator color={colors.primary.base} />
         </View>
       ) : bottles.length === 0 ? (
         loadError ? (
@@ -293,7 +293,7 @@ export default function CellarScreen() {
         accessibilityRole="button"
         accessibilityLabel="Add bottle"
       >
-        <Ionicons name="add" size={26} color={colors.neutral.cream} />
+        <Ionicons name="add" size={26} color={colors.neutral.bg} />
       </TouchableOpacity>
 
       {/* Sheets */}
@@ -370,7 +370,7 @@ function ControlButton({ icon, label, active, badge, onPress }) {
       <Ionicons
         name={icon}
         size={15}
-        color={active ? colors.primary.burgundy : colors.neutral.graphite}
+        color={active ? colors.primary.base : colors.neutral.inkSecondary}
       />
       <Text style={[styles.controlText, active && styles.controlTextActive]} numberOfLines={1}>
         {label}
@@ -399,7 +399,7 @@ function BottleCard({ bottle, onPress }) {
         {bottle.photo_url ? (
           <Image source={{ uri: bottle.photo_url }} style={styles.cardThumb} />
         ) : (
-          <Ionicons name="wine-outline" size={20} color={colors.primary.burgundy} />
+          <Ionicons name="wine-outline" size={20} color={colors.primary.base} />
         )}
         {bottle.quantity > 1 && (
           <View style={styles.qtyDot}>
@@ -428,7 +428,7 @@ function BottleCard({ bottle, onPress }) {
             <Text style={styles.badgeText}>{badge.label}</Text>
           </View>
         )}
-        <Ionicons name="chevron-forward" size={18} color={colors.neutral.silver} />
+        <Ionicons name="chevron-forward" size={18} color={colors.neutral.placeholder} />
       </View>
     </TouchableOpacity>
   );
@@ -478,7 +478,7 @@ function PreviewCard({ bottle }) {
   return (
     <View style={[styles.card, styles.previewCard]}>
       <View style={[styles.cardGlass, styles.previewGlass]}>
-        <Ionicons name="wine-outline" size={20} color={colors.gold.shimmer} />
+        <Ionicons name="wine-outline" size={20} color={colors.accent.strong} />
         {bottle.quantity > 1 && (
           <View style={[styles.qtyDot, styles.previewQtyDot]}>
             <Text style={styles.qtyDotText}>{bottle.quantity}</Text>
@@ -516,7 +516,7 @@ function EmptyCellar({ onAdd }) {
     >
       <View style={styles.onboardHero}>
         <View style={styles.iconRing}>
-          <Ionicons name="file-tray-stacked-outline" size={36} color={colors.gold.shimmer} />
+          <Ionicons name="file-tray-stacked-outline" size={36} color={colors.accent.strong} />
         </View>
         <Text style={styles.emptyTitle}>Start your cellar</Text>
         <Text style={styles.emptySub}>
@@ -541,7 +541,7 @@ function EmptyCellar({ onAdd }) {
         {VALUE_POINTS.map((point) => (
           <View key={point.text} style={styles.valueRow}>
             <View style={styles.valueIcon}>
-              <Ionicons name={point.icon} size={15} color={colors.primary.burgundy} />
+              <Ionicons name={point.icon} size={15} color={colors.primary.base} />
             </View>
             <Text style={styles.valueText}>{point.text}</Text>
           </View>
@@ -550,7 +550,7 @@ function EmptyCellar({ onAdd }) {
 
       {/* Exactly one primary action. */}
       <TouchableOpacity style={styles.onboardCta} onPress={onAdd} activeOpacity={0.9}>
-        <Ionicons name="add" size={18} color={colors.neutral.cream} />
+        <Ionicons name="add" size={18} color={colors.neutral.bg} />
         <Text style={styles.emptyCtaText}>Add your first bottle</Text>
       </TouchableOpacity>
 
@@ -562,7 +562,7 @@ function EmptyCellar({ onAdd }) {
         activeOpacity={0.7}
         hitSlop={8}
       >
-        <Ionicons name="camera-outline" size={15} color={colors.neutral.pewter} />
+        <Ionicons name="camera-outline" size={15} color={colors.neutral.inkTertiary} />
         <Text style={styles.onboardSecondaryText}>or scan a label to add faster</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -575,7 +575,7 @@ function LoadError({ onRetry }) {
   return (
     <View style={styles.body}>
       <View style={styles.iconRing}>
-        <Ionicons name="cloud-offline-outline" size={36} color={colors.gold.shimmer} />
+        <Ionicons name="cloud-offline-outline" size={36} color={colors.accent.strong} />
       </View>
       <Text style={styles.emptyTitle}>Couldn&apos;t load your cellar</Text>
       <Text style={styles.emptySub}>
@@ -583,7 +583,7 @@ function LoadError({ onRetry }) {
         and try again.
       </Text>
       <TouchableOpacity style={styles.emptyCta} onPress={onRetry} activeOpacity={0.9}>
-        <Ionicons name="refresh" size={18} color={colors.neutral.cream} />
+        <Ionicons name="refresh" size={18} color={colors.neutral.bg} />
         <Text style={styles.emptyCtaText}>Try again</Text>
       </TouchableOpacity>
     </View>
@@ -594,7 +594,7 @@ function NoResults({ onReset }) {
   return (
     <View style={styles.body}>
       <View style={styles.iconRing}>
-        <Ionicons name="search-outline" size={36} color={colors.gold.shimmer} />
+        <Ionicons name="search-outline" size={36} color={colors.accent.strong} />
       </View>
       <Text style={styles.emptyTitle}>No matches</Text>
       <Text style={styles.emptySub}>
@@ -602,7 +602,7 @@ function NoResults({ onReset }) {
         them to see everything again.
       </Text>
       <TouchableOpacity style={styles.emptyCta} onPress={onReset} activeOpacity={0.9}>
-        <Ionicons name="refresh" size={18} color={colors.neutral.cream} />
+        <Ionicons name="refresh" size={18} color={colors.neutral.bg} />
         <Text style={styles.emptyCtaText}>Clear search & filters</Text>
       </TouchableOpacity>
     </View>
@@ -610,10 +610,10 @@ function NoResults({ onReset }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-  header: { backgroundColor: colors.neutral.cream, paddingTop: 60 },
+  header: { backgroundColor: colors.neutral.bg, paddingTop: 60 },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -625,19 +625,19 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   headerIconSpacer: { width: 40, height: 40 },
   headerTitle: {
     ...typography.heading.h2,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
-  headerBorder: { height: 1, backgroundColor: colors.gold.muted, marginHorizontal: spacing.lg },
+  headerBorder: { height: 1, backgroundColor: colors.accent.border, marginHorizontal: spacing.lg },
 
   toolbar: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
 
@@ -645,9 +645,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -655,16 +655,16 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: typography.body.regular.fontSize,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     paddingVertical: 0,
   },
 
   segment: {
     flexDirection: 'row',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     padding: 3,
     marginTop: spacing.sm,
   },
@@ -674,9 +674,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs + 2,
     borderRadius: borderRadius.sm,
   },
-  segmentBtnActive: { backgroundColor: colors.primary.burgundy },
-  segmentText: { ...typography.body.small, color: colors.neutral.graphite },
-  segmentTextActive: { color: colors.neutral.cream, fontWeight: '600' },
+  segmentBtnActive: { backgroundColor: colors.primary.base },
+  segmentText: { ...typography.body.small, color: colors.neutral.inkSecondary },
+  segmentTextActive: { color: colors.neutral.bg, fontWeight: '600' },
 
   controlRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   control: {
@@ -689,22 +689,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.round,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.surface,
   },
-  controlActive: { borderColor: colors.primary.burgundy, backgroundColor: colors.gold.light },
-  controlText: { ...typography.body.small, color: colors.neutral.graphite, flexShrink: 1 },
-  controlTextActive: { color: colors.primary.burgundy, fontWeight: '600' },
+  controlActive: { borderColor: colors.primary.base, backgroundColor: colors.accent.surface },
+  controlText: { ...typography.body.small, color: colors.neutral.inkSecondary, flexShrink: 1 },
+  controlTextActive: { color: colors.primary.base, fontWeight: '600' },
   controlBadge: {
     minWidth: 16,
     height: 16,
     paddingHorizontal: 4,
     borderRadius: 8,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  controlBadgeText: { color: colors.neutral.cream, fontSize: 11, fontWeight: '700' },
+  controlBadgeText: { color: colors.neutral.bg, fontSize: 11, fontWeight: '700' },
 
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   clearChip: {
@@ -712,9 +712,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.round,
   },
-  clearChipText: { ...typography.body.small, color: colors.neutral.pewter, fontWeight: '600' },
+  clearChipText: { ...typography.body.small, color: colors.neutral.inkTertiary, fontWeight: '600' },
 
-  summary: { ...typography.body.small, color: colors.neutral.pewter, marginTop: spacing.sm },
+  summary: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: spacing.sm },
 
   listContent: { padding: spacing.lg, paddingBottom: 120 },
 
@@ -725,25 +725,25 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     marginTop: spacing.xs,
     borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
+    borderBottomColor: colors.accent.border,
     marginBottom: spacing.sm,
   },
   sectionTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     flexShrink: 1,
     marginRight: spacing.sm,
   },
-  sectionCount: { ...typography.body.small, color: colors.neutral.pewter },
+  sectionCount: { ...typography.body.small, color: colors.neutral.inkTertiary },
 
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     marginBottom: spacing.sm,
@@ -752,7 +752,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -769,18 +769,18 @@ const styles = StyleSheet.create({
     height: 18,
     paddingHorizontal: 4,
     borderRadius: 9,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qtyDotText: { color: colors.neutral.cream, fontSize: 11, fontWeight: '700' },
+  qtyDotText: { color: colors.neutral.bg, fontSize: 11, fontWeight: '700' },
   cardMeta: { flex: 1 },
-  cardName: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  cardProducer: { ...typography.body.small, color: colors.neutral.graphite, marginTop: 1 },
-  cardSub: { ...typography.body.small, color: colors.neutral.pewter, marginTop: 1 },
+  cardName: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  cardProducer: { ...typography.body.small, color: colors.neutral.inkSecondary, marginTop: 1 },
+  cardSub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
   cardRight: { alignItems: 'flex-end', gap: spacing.xs },
   badge: { paddingVertical: 2, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  badgeText: { ...typography.body.caption, color: colors.neutral.cream },
+  badgeText: { ...typography.body.caption, color: colors.neutral.bg },
 
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl },
   iconRing: {
@@ -788,22 +788,22 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: 48,
     borderWidth: 2,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
   },
   emptyTitle: {
     ...typography.heading.h1,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.sm,
     textAlign: 'center',
   },
   emptySub: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     lineHeight: 22,
   },
@@ -811,13 +811,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.sm,
     marginTop: spacing.xl,
   },
-  emptyCtaText: { ...typography.body.regular, color: colors.neutral.cream, fontWeight: '600' },
+  emptyCtaText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
 
   // --- Onboarding empty state ---
   onboardScroll: { flex: 1 },
@@ -829,13 +829,13 @@ const styles = StyleSheet.create({
   onboardHero: { alignItems: 'center', marginBottom: spacing.xl },
   // The preview strip's "Example cellar" caption with a gold rule beside it.
   previewHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.md },
-  previewLabel: { ...typography.body.caption, color: colors.neutral.pewter },
-  previewRule: { flex: 1, height: 1, backgroundColor: colors.gold.muted },
+  previewLabel: { ...typography.body.caption, color: colors.neutral.inkTertiary },
+  previewRule: { flex: 1, height: 1, backgroundColor: colors.accent.border },
   previewList: { opacity: 0.75 },
   // Muted twin of `card` — softer surface, no shadow, so it reads as a sample.
-  previewCard: { backgroundColor: colors.neutral.cream, borderColor: colors.neutral.linen },
-  previewGlass: { backgroundColor: colors.neutral.parchment },
-  previewQtyDot: { backgroundColor: colors.gold.shimmer },
+  previewCard: { backgroundColor: colors.neutral.bg, borderColor: colors.neutral.divider },
+  previewGlass: { backgroundColor: colors.neutral.surface },
+  previewQtyDot: { backgroundColor: colors.accent.strong },
   previewBadge: { opacity: 0.9 },
 
   // Value list — three tight, scannable benefit lines.
@@ -845,18 +845,18 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  valueText: { ...typography.body.regular, color: colors.neutral.graphite, flex: 1 },
+  valueText: { ...typography.body.regular, color: colors.neutral.inkSecondary, flex: 1 },
 
   onboardCta: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.sm,
@@ -872,7 +872,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     marginTop: spacing.xs,
   },
-  onboardSecondaryText: { ...typography.body.small, color: colors.neutral.pewter },
+  onboardSecondaryText: { ...typography.body.small, color: colors.neutral.inkTertiary },
 
   fab: {
     position: 'absolute',
@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadows.strong,

@@ -1,5 +1,5 @@
 // components/ChatBubble.js
-// Chat message bubble - burgundy for user, parchment for AI
+// Chat message bubble - primary.base for user, neutral.surface for AI
 // AI messages render markdown, user messages render plain text
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
@@ -15,26 +15,26 @@ const SERIF = typography.fonts.serif;
 const mdStyles = {
   body: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     lineHeight: 22,
   },
   strong: {
     fontWeight: '700',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   em: {
     fontStyle: 'italic',
   },
   heading1: {
     ...typography.heading.h2,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontFamily: SERIF,
     marginTop: spacing.sm,
     marginBottom: spacing.xs,
   },
   heading2: {
     ...typography.heading.h3,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontFamily: SERIF,
     marginTop: spacing.sm,
     marginBottom: spacing.xs,
@@ -42,7 +42,7 @@ const mdStyles = {
   heading3: {
     ...typography.body.large,
     fontWeight: '600',
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     marginTop: spacing.xs,
     marginBottom: spacing.xs,
   },
@@ -56,44 +56,44 @@ const mdStyles = {
     marginVertical: 2,
   },
   bullet_list_icon: {
-    color: colors.gold.text,
+    color: colors.accent.ink,
     fontSize: 14,
     lineHeight: 22,
     marginRight: spacing.xs,
   },
   ordered_list_icon: {
-    color: colors.gold.text,
+    color: colors.accent.ink,
     fontSize: 14,
     lineHeight: 22,
     marginRight: spacing.xs,
   },
   code_inline: {
-    backgroundColor: colors.neutral.linen,
-    color: colors.primary.merlot,
+    backgroundColor: colors.neutral.divider,
+    color: colors.primary.darkest,
     borderRadius: 4,
     paddingHorizontal: 4,
     fontSize: 13,
     fontFamily: 'Courier',
   },
   fence: {
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
     borderRadius: borderRadius.md,
     padding: spacing.sm,
     marginVertical: spacing.xs,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   blockquote: {
     borderLeftWidth: 3,
-    borderLeftColor: colors.gold.rich,
+    borderLeftColor: colors.accent.base,
     paddingLeft: spacing.md,
     marginVertical: spacing.xs,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: borderRadius.sm,
     padding: spacing.sm,
   },
   hr: {
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
     height: 1,
     marginVertical: spacing.sm,
   },
@@ -102,7 +102,7 @@ const mdStyles = {
     marginBottom: spacing.xs,
   },
   link: {
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     textDecorationLine: 'underline',
   },
 };
@@ -140,7 +140,7 @@ export default function ChatBubble({ message, onUseSuggestions }) {
       {/* AI avatar */}
       {!isUser && (
         <View style={styles.avatar}>
-          <Ionicons name="wine" size={16} color={colors.primary.burgundy} />
+          <Ionicons name="wine" size={16} color={colors.primary.base} />
         </View>
       )}
 
@@ -167,7 +167,7 @@ export default function ChatBubble({ message, onUseSuggestions }) {
             style={styles.suggestionsButton}
             onPress={() => onUseSuggestions(message.ai_suggestions)}
           >
-            <Ionicons name="sparkles" size={14} color={colors.gold.rich} />
+            <Ionicons name="sparkles" size={14} color={colors.accent.base} />
             <Text style={styles.suggestionsButtonText}>Use Suggestions</Text>
           </TouchableOpacity>
         )}
@@ -197,9 +197,9 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.xs,
@@ -212,13 +212,13 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
   userBubble: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderBottomRightRadius: borderRadius.sm,
   },
   aiBubble: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderBottomLeftRadius: borderRadius.sm,
   },
   text: {
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   userText: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
   imageRow: {
     flexDirection: 'row',
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   suggestionsButton: {
     flexDirection: 'row',
@@ -248,15 +248,15 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     alignSelf: 'flex-start',
   },
   suggestionsButtonText: {
     ...typography.body.small,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     fontWeight: '600',
   },
   timestamp: {
@@ -266,10 +266,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
   },
   userTimestamp: {
-    color: colors.primary.rosé,
+    color: colors.primary.soft,
     textAlign: 'right',
   },
   aiTimestamp: {
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 });

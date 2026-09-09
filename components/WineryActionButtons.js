@@ -124,7 +124,7 @@ const WineryActionButtons = ({
           <Ionicons
             name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}
             size={24}
-            color={status.isWantToVisit ? colors.neutral.cream : colors.primary.burgundy}
+            color={status.isWantToVisit ? colors.neutral.bg : colors.primary.base}
           />
         </TouchableOpacity>
       </View>
@@ -147,7 +147,7 @@ const WineryActionButtons = ({
         <Ionicons
           name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}
           size={isVeryNarrowScreen ? 20 : 24}
-          color={status.isWantToVisit ? colors.neutral.cream : colors.primary.burgundy}
+          color={status.isWantToVisit ? colors.neutral.bg : colors.primary.base}
         />
         <Text
           style={[
@@ -183,12 +183,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
     marginHorizontal: spacing.xs,
     maxWidth: 180,
     ...shadows.soft,
@@ -196,29 +196,29 @@ const styles = StyleSheet.create({
   compactButton: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.md,
     padding: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
     marginLeft: spacing.sm,
     width: 44,
     height: 44,
   },
   activeWishlistButton: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
+    borderColor: colors.primary.base,
   },
   actionButtonText: {
     marginLeft: spacing.sm,
     ...typography.body.regular,
     fontWeight: '500',
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     textAlign: 'center',
     flexShrink: 1,
   },
   activeButtonText: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
 });
 

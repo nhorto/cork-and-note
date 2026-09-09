@@ -25,7 +25,7 @@ export default function StarRating({
         key={i}
         name={name}
         size={size}
-        color={name === 'star-outline' ? colors.neutral.stone : colors.gold.rich}
+        color={name === 'star-outline' ? colors.neutral.border : colors.accent.base}
         style={styles.star}
       />
     );
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   star: { marginRight: 1 },
   value: {
     marginLeft: 6,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     fontWeight: '600',
   },
 });

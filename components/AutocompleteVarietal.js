@@ -98,8 +98,8 @@ const AutocompleteVarietal = ({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
-          placeholderTextColor={colors.neutral.silver}
-          selectionColor={colors.primary.burgundy}
+          placeholderTextColor={colors.neutral.placeholder}
+          selectionColor={colors.primary.base}
           autoCapitalize="words"
           autoCorrect={false}
         />
@@ -112,7 +112,7 @@ const AutocompleteVarietal = ({
             accessibilityLabel="Clear"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="close-circle" size={20} color={colors.neutral.silver} />
+            <Ionicons name="close-circle" size={20} color={colors.neutral.placeholder} />
           </TouchableOpacity>
         )}
       </View>
@@ -136,7 +136,7 @@ const AutocompleteVarietal = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.suggestionText}>{suggestion}</Text>
-                <Ionicons name="arrow-up-outline" size={16} color={colors.primary.burgundy} />
+                <Ionicons name="arrow-up-outline" size={16} color={colors.primary.base} />
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -160,19 +160,19 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingRight: 40,
     ...typography.body.regular,
-    backgroundColor: colors.neutral.parchment,
-    color: colors.neutral.charcoal,
+    backgroundColor: colors.neutral.surface,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
   inputFocused: {
-    borderColor: colors.primary.burgundy,
-    backgroundColor: colors.neutral.cream,
-    shadowColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
+    backgroundColor: colors.neutral.bg,
+    shadowColor: colors.primary.base,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -196,10 +196,10 @@ const styles = StyleSheet.create({
     top: '100%',
     left: 0,
     right: 0,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
     borderTopWidth: 0,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
     borderBottomLeftRadius: borderRadius.md,
     borderBottomRightRadius: borderRadius.md,
     ...shadows.medium,
@@ -216,14 +216,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   lastSuggestionItem: {
     borderBottomWidth: 0,
   },
   suggestionText: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     flex: 1,
   },
 });

@@ -40,11 +40,11 @@ const TAB_BAR_ROW_HEIGHT = 60;
 // Tab bar styling with Château Label aesthetic
 const tabBarStyles = {
   tabBarStyle: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopWidth: 1,
-    borderTopColor: colors.gold.muted,
+    borderTopColor: colors.accent.border,
     paddingTop: 8,
-    shadowColor: colors.neutral.charcoal,
+    shadowColor: colors.neutral.ink,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -63,25 +63,25 @@ const tabBarStyles = {
 // Header styling with Château Label aesthetic
 const headerStyles = {
   headerStyle: {
-    backgroundColor: colors.neutral.cream,
-    shadowColor: colors.neutral.charcoal,
+    backgroundColor: colors.neutral.bg,
+    shadowColor: colors.neutral.ink,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 4,
     borderBottomWidth: 1,
-    borderBottomColor: colors.gold.muted,
+    borderBottomColor: colors.accent.border,
   },
   headerTitleStyle: {
     fontSize: moderateScale(18),
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
-  headerTintColor: colors.primary.burgundy,
+  headerTintColor: colors.primary.base,
 };
 
-// The active tab already reads as active from the burgundy tint on its icon and
+// The active tab already reads as active from the primary.base tint on its icon and
 // label, so there is no separate indicator dot — a second marker under one of
 // five tabs just looked like a smudge.
 const TabIcon = ({ name, color, size }) => (
@@ -111,8 +111,8 @@ export default function Layout() {
         ...tabBarStyles,
         tabBarStyle,
         ...headerStyles,
-        tabBarActiveTintColor: colors.primary.burgundy,
-        tabBarInactiveTintColor: colors.neutral.pewter,
+        tabBarActiveTintColor: colors.primary.base,
+        tabBarInactiveTintColor: colors.neutral.inkTertiary,
         tabBarAllowFontScaling: false,
       }}
     >

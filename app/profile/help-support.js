@@ -390,7 +390,7 @@ const HelpSupportModal = () => {
       case 'tip':
         return (
           <View style={styles.tipContainer}>
-            <Ionicons name="bulb" size={24} color={colors.gold.shimmer} style={styles.tipIcon} />
+            <Ionicons name="bulb" size={24} color={colors.accent.strong} style={styles.tipIcon} />
             <Text style={styles.tipText}>{item.value}</Text>
           </View>
         );
@@ -424,13 +424,13 @@ const HelpSupportModal = () => {
                 onPress={() => setActiveGuide(guide.id)}
               >
                 <View style={styles.guideIcon}>
-                  <Ionicons name={guide.icon} size={24} color={colors.primary.burgundy} />
+                  <Ionicons name={guide.icon} size={24} color={colors.primary.base} />
                 </View>
                 <View style={styles.guideInfo}>
                   <Text style={styles.guideTitle}>{guide.title}</Text>
                   <Text style={styles.guideSubtitle}>Learn more</Text>
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+                <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
               </TouchableOpacity>
             ))}
 
@@ -451,7 +451,7 @@ const HelpSupportModal = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   content: {
     flex: 1,
@@ -463,17 +463,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: 8,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   guideIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -484,12 +484,12 @@ const styles = StyleSheet.create({
   guideTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: 4,
   },
   guideSubtitle: {
     fontSize: 14,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   guideContent: {
     padding: 16,
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   contentText: {
     fontSize: 16,
     lineHeight: 24,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: 12,
   },
   stepsList: {
@@ -514,14 +514,14 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
     marginTop: 2,
   },
   stepNumberText: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: 'bold',
     fontSize: 14,
   },
@@ -529,7 +529,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   bulletList: {
     marginVertical: 12,
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
   },
   bulletPoint: {
     fontSize: 18,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     marginRight: 10,
     marginTop: -2,
   },
@@ -548,15 +548,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     lineHeight: 22,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   attributesList: {
     marginVertical: 12,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: 8,
     padding: 12,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   attributeItem: {
     marginBottom: 12,
@@ -564,22 +564,22 @@ const styles = StyleSheet.create({
   attributeName: {
     fontSize: 15,
     fontWeight: '600',
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     marginBottom: 4,
   },
   attributeDescription: {
     fontSize: 14,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     lineHeight: 20,
   },
   tipContainer: {
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderRadius: 8,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'flex-start',
     borderLeftWidth: 3,
-    borderLeftColor: colors.gold.shimmer,
+    borderLeftColor: colors.accent.strong,
   },
   tipIcon: {
     marginRight: 12,
@@ -589,7 +589,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontStyle: 'italic',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     lineHeight: 22,
   },
   versionInfo: {
@@ -598,12 +598,12 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 14,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: 4,
   },
   copyrightText: {
     fontSize: 12,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 });
 

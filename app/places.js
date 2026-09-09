@@ -59,13 +59,13 @@ export default function PlacesScreen() {
       <ScreenHeader title="Your places" />
 
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={18} color={colors.neutral.pewter} />
+        <Ionicons name="search" size={18} color={colors.neutral.inkTertiary} />
         <TextInput
           style={styles.searchInput}
           value={search}
           onChangeText={setSearch}
           placeholder="Search your places"
-          placeholderTextColor={colors.neutral.silver}
+          placeholderTextColor={colors.neutral.placeholder}
           autoCorrect={false}
           returnKeyType="search"
         />
@@ -76,7 +76,7 @@ export default function PlacesScreen() {
             accessibilityLabel="Clear search"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="close-circle" size={18} color={colors.neutral.silver} />
+            <Ionicons name="close-circle" size={18} color={colors.neutral.placeholder} />
           </TouchableOpacity>
         )}
       </View>
@@ -92,7 +92,7 @@ export default function PlacesScreen() {
             onPress={() => router.push(`/winery/${item.id}`)}
           >
             <View style={styles.rowIcon}>
-              <Ionicons name="location" size={20} color={colors.primary.burgundy} />
+              <Ionicons name="location" size={20} color={colors.primary.base} />
             </View>
             <View style={styles.rowText}>
               <Text style={styles.rowTitle} numberOfLines={1}>
@@ -103,13 +103,13 @@ export default function PlacesScreen() {
                 {formatVisitDate(item.lastVisit)}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.gold.shimmer} />
+            <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
           </TouchableOpacity>
         )}
         ListEmptyComponent={
           loading ? null : (
             <View style={styles.empty}>
-              <Ionicons name="map-outline" size={40} color={colors.neutral.silver} />
+              <Ionicons name="map-outline" size={40} color={colors.neutral.placeholder} />
               <Text style={styles.emptyTitle}>
                 {query ? 'No places match your search' : 'No places yet'}
               </Text>
@@ -137,7 +137,7 @@ export default function PlacesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -147,16 +147,16 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     marginBottom: spacing.sm,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
   },
   searchInput: {
     flex: 1,
     paddingVertical: spacing.sm + 2,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   listContent: {
     padding: spacing.lg,
@@ -167,9 +167,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     padding: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     marginBottom: spacing.sm,
   },
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -185,11 +185,11 @@ const styles = StyleSheet.create({
   rowTitle: {
     ...typography.body.regular,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   rowSub: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
   },
   empty: {
@@ -199,25 +199,25 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginTop: spacing.md,
   },
   emptyText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     marginTop: spacing.sm,
   },
   emptyButton: {
     marginTop: spacing.lg,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.lg,
   },
   emptyButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
 });

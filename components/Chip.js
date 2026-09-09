@@ -1,9 +1,9 @@
 // components/Chip.js
 // Canonical pill chip for flavor tags and similar selectable/removable tokens.
-// One recipe replaces the three drifted colorways (rosé/burgundy,
-// burgundy/cream, gold.light/gold):
-//   unselected — parchment fill, stone border, charcoal label
-//   selected   — burgundy fill, cream label
+// One recipe replaces the three drifted colorways (primary.soft/primary.base,
+// primary.base/neutral.bg, accent.surface/accent):
+//   unselected — neutral.surface fill, neutral.border border, neutral.ink label
+//   selected   — primary.base fill, neutral.bg label
 // Pass onPress to make it selectable; pass onRemove to show a trailing ×.
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -34,7 +34,7 @@ export default function Chip({
           <Ionicons
             name="close"
             size={14}
-            color={selected ? colors.neutral.cream : colors.neutral.pewter}
+            color={selected ? colors.neutral.bg : colors.neutral.inkTertiary}
           />
         </TouchableOpacity>
       ) : null}
@@ -77,20 +77,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   chipUnselected: {
-    backgroundColor: colors.neutral.parchment,
-    borderColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.surface,
+    borderColor: colors.neutral.border,
   },
   chipSelected: {
-    backgroundColor: colors.primary.burgundy,
-    borderColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
+    borderColor: colors.primary.base,
   },
   label: {
     fontSize: 13,
     fontWeight: '500',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   labelSelected: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
   removeBtn: {
     marginLeft: spacing.xs,

@@ -19,12 +19,12 @@ const { colors, typography, spacing, borderRadius } = theme;
 // without shouting. Burgundy leads (the most-common bucket), then warm golds and
 // muted neutrals — calm, not a rainbow.
 const BAR_COLORS = [
-  colors.primary.burgundy,
-  colors.gold.rich,
-  colors.primary.wine,
-  colors.gold.shimmer,
+  colors.primary.base,
+  colors.accent.base,
+  colors.primary.deep,
+  colors.accent.strong,
   colors.status.wishlist,
-  colors.neutral.silver,
+  colors.neutral.placeholder,
 ];
 
 // Round a 0–100 pct for display without ever showing a misleading "0%" for a
@@ -129,18 +129,18 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
     gap: spacing.sm,
   },
-  rowLabel: { ...typography.body.regular, color: colors.neutral.charcoal, flex: 1 },
-  rowCount: { ...typography.body.small, color: colors.neutral.pewter },
+  rowLabel: { ...typography.body.regular, color: colors.neutral.ink, flex: 1 },
+  rowCount: { ...typography.body.small, color: colors.neutral.inkTertiary },
   track: {
     height: 8,
     borderRadius: borderRadius.round,
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
     overflow: 'hidden',
   },
   fill: { height: 8, borderRadius: borderRadius.round },
   moreLine: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     marginTop: spacing.xs,
   },
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   trendCol: { flex: 1, alignItems: 'center', height: '100%' },
   trendCount: {
     ...typography.body.small,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     fontWeight: '600',
     marginBottom: spacing.xs,
     minHeight: 16,
@@ -171,16 +171,16 @@ const styles = StyleSheet.create({
     minHeight: 4,
     borderTopLeftRadius: borderRadius.sm,
     borderTopRightRadius: borderRadius.sm,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
   },
   trendBarEmpty: {
     height: 3,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
     borderRadius: borderRadius.round,
   },
   trendLabel: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontSize: 11,
     marginTop: spacing.xs,
   },
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
   // Shared empty line
   emptyLine: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
   },
 });

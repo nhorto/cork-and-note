@@ -158,7 +158,7 @@ export default function WineDetail() {
     if (!wine.photos || wine.photos.length === 0) {
       return (
         <View style={styles.noPhotosContainer}>
-          <Ionicons name="camera-outline" size={40} color={colors.gold.shimmer} />
+          <Ionicons name="camera-outline" size={40} color={colors.accent.strong} />
           <Text style={styles.noPhotosText}>No photos yet</Text>
         </View>
       );
@@ -178,7 +178,7 @@ export default function WineDetail() {
             >
               <Image source={{ uri: photo }} style={styles.photoThumbnail} />
               <View style={styles.photoOverlay}>
-                <Ionicons name="expand-outline" size={18} color={colors.neutral.cream} />
+                <Ionicons name="expand-outline" size={18} color={colors.neutral.bg} />
               </View>
             </TouchableOpacity>
           ))}
@@ -190,7 +190,7 @@ export default function WineDetail() {
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.primary.burgundy} />
+        <ActivityIndicator size="large" color={colors.primary.base} />
         <Text style={styles.loadingText}>Loading wine details…</Text>
       </SafeAreaView>
     );
@@ -227,7 +227,7 @@ export default function WineDetail() {
             accessibilityRole="button"
             accessibilityLabel="Edit log"
           >
-            <Ionicons name="create-outline" size={22} color={colors.primary.burgundy} />
+            <Ionicons name="create-outline" size={22} color={colors.primary.base} />
           </TouchableOpacity>
         }
       />
@@ -246,7 +246,7 @@ export default function WineDetail() {
         </View>
         {originLabel ? (
           <View style={styles.wineryRow}>
-            <Ionicons name="business-outline" size={15} color={colors.primary.burgundy} />
+            <Ionicons name="business-outline" size={15} color={colors.primary.base} />
             <Text style={styles.wineryText}>{originLabel}</Text>
           </View>
         ) : null}
@@ -274,7 +274,7 @@ export default function WineDetail() {
             accessibilityLabel="View this wine in your cellar"
           >
             <View style={styles.cellarIcon}>
-              <Ionicons name="file-tray-stacked" size={20} color={colors.neutral.cream} />
+              <Ionicons name="file-tray-stacked" size={20} color={colors.neutral.bg} />
             </View>
             <View style={styles.cellarText}>
               <Text style={styles.cellarTitle}>
@@ -286,7 +286,7 @@ export default function WineDetail() {
                   : `A different vintage${cellarMatch.differentVintage ? ` (${cellarMatch.differentVintage})` : ''} · tap to view`}
               </Text>
             </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.gold.rich} />
+            <Ionicons name="chevron-forward" size={18} color={colors.accent.base} />
           </TouchableOpacity>
         ) : null}
 
@@ -339,7 +339,7 @@ export default function WineDetail() {
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionLabel}>VISIT INFORMATION</Text>
           <TouchableOpacity style={styles.editLogLink} onPress={handleEditLog} accessibilityLabel="Edit log">
-            <Ionicons name="create-outline" size={16} color={colors.primary.burgundy} />
+            <Ionicons name="create-outline" size={16} color={colors.primary.base} />
             <Text style={styles.editLogLinkText}>Edit log</Text>
           </TouchableOpacity>
         </View>
@@ -361,7 +361,7 @@ export default function WineDetail() {
                 <Text style={styles.visitNotes} numberOfLines={2}>{visit.notes}</Text>
               ) : null}
             </View>
-            <Ionicons name="chevron-forward" size={20} color={colors.neutral.silver} />
+            <Ionicons name="chevron-forward" size={20} color={colors.neutral.placeholder} />
           </TouchableOpacity>
         ) : (
           <View style={styles.visitInfo}>
@@ -394,7 +394,7 @@ export default function WineDetail() {
             accessibilityLabel="Close"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="close" size={32} color={colors.neutral.cream} />
+            <Ionicons name="close" size={32} color={colors.neutral.bg} />
           </TouchableOpacity>
 
           {wine.photos && wine.photos.length > 0 && (
@@ -427,7 +427,7 @@ export default function WineDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.neutral.cream },
+  container: { flex: 1, backgroundColor: colors.neutral.bg },
   center: { alignItems: 'center', justifyContent: 'center' },
   scrollView: { flex: 1 },
   scrollContent: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
@@ -436,24 +436,24 @@ const styles = StyleSheet.create({
 
   wineName: {
     ...typography.heading.h1,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: spacing.lg,
   },
   wineTypeContainer: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: spacing.xs },
-  wineType: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
-  wineMeta: { ...typography.body.regular, color: colors.neutral.pewter, marginLeft: spacing.xs },
+  wineType: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
+  wineMeta: { ...typography.body.regular, color: colors.neutral.inkTertiary, marginLeft: spacing.xs },
   wineryRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
-  wineryText: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600' },
+  wineryText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
 
   // "In your cellar" link card (#117)
   cellarCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.lg,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
@@ -463,46 +463,46 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.gold.rich,
+    backgroundColor: colors.accent.base,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cellarText: { flex: 1 },
   cellarTitle: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '700',
   },
   cellarSub: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
 
   // Overall rating
   ratingCard: {
     alignItems: 'center',
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.lg,
     paddingVertical: spacing.lg,
     marginTop: spacing.lg,
   },
-  ratingValue: { fontFamily: SERIF, fontSize: 40, color: colors.primary.burgundy, marginBottom: spacing.xs },
+  ratingValue: { fontFamily: SERIF, fontSize: 40, color: colors.primary.base, marginBottom: spacing.xs },
   starsContainer: { flexDirection: 'row', gap: spacing.xs },
 
   // Cards
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.md,
     ...shadows.soft,
   },
-  sectionLabel: { ...typography.body.caption, color: colors.gold.text, marginBottom: spacing.md },
+  sectionLabel: { ...typography.body.caption, color: colors.accent.ink, marginBottom: spacing.md },
 
   // Photos
   photoScroll: { marginHorizontal: -spacing.xs },
@@ -520,33 +520,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: spacing.xl,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderStyle: 'dashed',
     marginTop: spacing.md,
   },
-  noPhotosText: { marginTop: spacing.sm, color: colors.neutral.pewter, ...typography.body.regular },
+  noPhotosText: { marginTop: spacing.sm, color: colors.neutral.inkTertiary, ...typography.body.regular },
 
   // Detailed ratings
   ratingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.md },
-  ratingLabel: { width: 80, ...typography.body.small, color: colors.neutral.graphite },
+  ratingLabel: { width: 80, ...typography.body.small, color: colors.neutral.inkSecondary },
   ratingBar: {
     flex: 1,
     height: 8,
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
     borderRadius: borderRadius.sm,
     marginHorizontal: spacing.md,
     overflow: 'hidden',
   },
-  ratingFill: { height: '100%', borderRadius: borderRadius.sm, backgroundColor: colors.primary.burgundy },
-  ratingNumber: { width: 32, ...typography.body.small, color: colors.neutral.charcoal, textAlign: 'right' },
+  ratingFill: { height: '100%', borderRadius: borderRadius.sm, backgroundColor: colors.primary.base },
+  ratingNumber: { width: 32, ...typography.body.small, color: colors.neutral.ink, textAlign: 'right' },
 
   // Flavor notes
   flavorTags: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 
-  notesText: { ...typography.body.regular, color: colors.neutral.charcoal, lineHeight: 22 },
+  notesText: { ...typography.body.regular, color: colors.neutral.ink, lineHeight: 22 },
 
   // Visit information
   sectionHeaderRow: {
@@ -557,34 +557,34 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   editLogLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  editLogLinkText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
+  editLogLinkText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
   visitInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
   },
   visitDetails: { flex: 1 },
-  wineryName: { ...typography.body.regular, color: colors.primary.burgundy, fontWeight: '600', marginBottom: 2 },
-  visitDate: { ...typography.body.small, color: colors.neutral.pewter },
-  visitNotes: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic', marginTop: 2 },
+  wineryName: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600', marginBottom: 2 },
+  visitDate: { ...typography.body.small, color: colors.neutral.inkTertiary },
+  visitNotes: { ...typography.body.small, color: colors.neutral.inkTertiary, fontStyle: 'italic', marginTop: 2 },
 
   // Sommelier CTA
   sommelierButton: { marginTop: spacing.xl },
 
   // Loading / error
-  loadingText: { marginTop: spacing.md, ...typography.body.regular, color: colors.neutral.pewter },
-  errorText: { ...typography.heading.h3, color: colors.neutral.graphite, marginBottom: spacing.lg, fontFamily: SERIF },
+  loadingText: { marginTop: spacing.md, ...typography.body.regular, color: colors.neutral.inkTertiary },
+  errorText: { ...typography.heading.h3, color: colors.neutral.inkSecondary, marginBottom: spacing.lg, fontFamily: SERIF },
   backButton: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: borderRadius.sm,
   },
-  backButtonText: { ...typography.body.regular, color: colors.neutral.cream, fontWeight: '600' },
+  backButtonText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
 
   // Photo modal (dark overlay intentional)
   photoModalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)', justifyContent: 'center', alignItems: 'center' },
@@ -600,5 +600,5 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.round,
   },
-  photoModalText: { color: colors.neutral.cream, ...typography.body.small },
+  photoModalText: { color: colors.neutral.bg, ...typography.body.small },
 });

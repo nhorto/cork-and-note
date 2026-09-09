@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1000,
-    backgroundColor: colors.neutral.charcoal,
+    backgroundColor: colors.neutral.ink,
     paddingBottom: spacing.xs,
     paddingHorizontal: spacing.md,
   },
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   text: {
     ...typography.body.small,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
 });

@@ -94,7 +94,7 @@ export default function AutocompleteInput({
           </Text>
           {linked ? (
             <View style={styles.linkedPill}>
-              <Ionicons name="link" size={11} color={colors.primary.burgundy} />
+              <Ionicons name="link" size={11} color={colors.primary.base} />
               <Text style={styles.linkedText}>Linked</Text>
             </View>
           ) : null}
@@ -114,8 +114,8 @@ export default function AutocompleteInput({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
-          placeholderTextColor={colors.neutral.silver}
-          selectionColor={colors.primary.burgundy}
+          placeholderTextColor={colors.neutral.placeholder}
+          selectionColor={colors.primary.base}
           autoCapitalize={autoCapitalize}
           autoCorrect={false}
         />
@@ -127,7 +127,7 @@ export default function AutocompleteInput({
             accessibilityLabel="Clear"
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="close-circle" size={20} color={colors.neutral.silver} />
+            <Ionicons name="close-circle" size={20} color={colors.neutral.placeholder} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -162,7 +162,7 @@ export default function AutocompleteInput({
                       </Text>
                     ) : null}
                   </View>
-                  <Ionicons name="return-down-back" size={16} color={colors.primary.burgundy} />
+                  <Ionicons name="return-down-back" size={16} color={colors.primary.base} />
                 </TouchableOpacity>
               );
             })}
@@ -181,8 +181,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.xs,
   },
-  label: { ...typography.body.caption, color: colors.neutral.pewter },
-  req: { color: colors.primary.wine },
+  label: { ...typography.body.caption, color: colors.neutral.inkTertiary },
+  req: { color: colors.primary.deep },
   linkedPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -190,11 +190,11 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.round,
-    backgroundColor: colors.gold.light,
+    backgroundColor: colors.accent.surface,
   },
   linkedText: {
     ...typography.body.caption,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     textTransform: 'none',
     letterSpacing: 0.3,
   },
@@ -202,19 +202,19 @@ const styles = StyleSheet.create({
   inputContainer: { position: 'relative', flexDirection: 'row', alignItems: 'center' },
   input: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     paddingRight: 40,
     fontSize: typography.body.regular.fontSize,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   inputFocused: {
-    borderColor: colors.primary.burgundy,
-    backgroundColor: colors.neutral.cream,
+    borderColor: colors.primary.base,
+    backgroundColor: colors.neutral.bg,
   },
   inputWithSuggestions: {
     borderBottomLeftRadius: 0,
@@ -232,10 +232,10 @@ const styles = StyleSheet.create({
     top: '100%',
     left: 0,
     right: 0,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
     borderTopWidth: 0,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
     borderBottomLeftRadius: borderRadius.md,
     borderBottomRightRadius: borderRadius.md,
     ...shadows.medium,
@@ -250,14 +250,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   lastSuggestionItem: { borderBottomWidth: 0 },
   suggestionTextWrap: { flex: 1, marginRight: spacing.sm },
-  suggestionText: { ...typography.body.regular, color: colors.neutral.charcoal },
+  suggestionText: { ...typography.body.regular, color: colors.neutral.ink },
   suggestionSubtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
 });

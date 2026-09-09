@@ -105,16 +105,16 @@ const VisitStatsCard = () => {
   // Get wine color based on type
   const getWineColor = (wineType) => {
     const type = wineType?.toLowerCase();
-    if (type === 'red') return colors.primary.burgundy;
-    if (type === 'white') return colors.gold.light;
-    if (type === 'rosé' || type === 'rose') return colors.primary.rosé;
-    return colors.gold.shimmer; // Default for sparkling, etc.
+    if (type === 'red') return colors.primary.base;
+    if (type === 'white') return colors.accent.surface;
+    if (type === 'rosé' || type === 'rose') return colors.primary.soft;
+    return colors.accent.strong; // Default for sparkling, etc.
   };
 
   const getWineIconColor = (wineType) => {
     const type = wineType?.toLowerCase();
-    if (type === 'white') return colors.neutral.charcoal;
-    return colors.neutral.cream;
+    if (type === 'white') return colors.neutral.ink;
+    return colors.neutral.bg;
   };
 
   if (loading) {
@@ -141,7 +141,7 @@ const VisitStatsCard = () => {
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
           <View style={styles.statIconContainer}>
-            <Ionicons name="business-outline" size={20} color={colors.primary.burgundy} />
+            <Ionicons name="business-outline" size={20} color={colors.primary.base} />
           </View>
           <Text style={styles.statValue}>{stats.totalWineries}</Text>
           <Text style={styles.statLabel}>Places</Text>
@@ -151,7 +151,7 @@ const VisitStatsCard = () => {
 
         <View style={styles.statItem}>
           <View style={styles.statIconContainer}>
-            <Ionicons name="calendar-outline" size={20} color={colors.primary.burgundy} />
+            <Ionicons name="calendar-outline" size={20} color={colors.primary.base} />
           </View>
           <Text style={styles.statValue}>{stats.totalVisits}</Text>
           <Text style={styles.statLabel}>Visits</Text>
@@ -161,7 +161,7 @@ const VisitStatsCard = () => {
 
         <View style={styles.statItem}>
           <View style={styles.statIconContainer}>
-            <Ionicons name="wine-outline" size={20} color={colors.primary.burgundy} />
+            <Ionicons name="wine-outline" size={20} color={colors.primary.base} />
           </View>
           <Text style={styles.statValue}>{stats.totalWines}</Text>
           <Text style={styles.statLabel}>Wines</Text>
@@ -178,7 +178,7 @@ const VisitStatsCard = () => {
               style={styles.seeAllButton}
             >
               <Text style={styles.seeAllText}>View all</Text>
-              <Ionicons name="arrow-forward" size={14} color={colors.primary.burgundy} />
+              <Ionicons name="arrow-forward" size={14} color={colors.primary.base} />
             </TouchableOpacity>
           </View>
 
@@ -194,7 +194,7 @@ const VisitStatsCard = () => {
                 activeOpacity={0.7}
               >
                 <View style={styles.listItemIcon}>
-                  <Ionicons name="location" size={18} color={colors.primary.burgundy} />
+                  <Ionicons name="location" size={18} color={colors.primary.base} />
                 </View>
                 <View style={styles.listItemContent}>
                   <Text style={styles.listItemTitle} numberOfLines={1}>
@@ -205,7 +205,7 @@ const VisitStatsCard = () => {
                   </Text>
                 </View>
                 <View style={styles.listItemArrow}>
-                  <Ionicons name="chevron-forward" size={16} color={colors.gold.shimmer} />
+                  <Ionicons name="chevron-forward" size={16} color={colors.accent.strong} />
                 </View>
               </TouchableOpacity>
             ))}
@@ -223,7 +223,7 @@ const VisitStatsCard = () => {
               style={styles.seeAllButton}
             >
               <Text style={styles.seeAllText}>View all</Text>
-              <Ionicons name="arrow-forward" size={14} color={colors.primary.burgundy} />
+              <Ionicons name="arrow-forward" size={14} color={colors.primary.base} />
             </TouchableOpacity>
           </View>
 
@@ -257,7 +257,7 @@ const VisitStatsCard = () => {
                   </Text>
                 </View>
                 <View style={styles.listItemArrow}>
-                  <Ionicons name="chevron-forward" size={16} color={colors.gold.shimmer} />
+                  <Ionicons name="chevron-forward" size={16} color={colors.accent.strong} />
                 </View>
               </TouchableOpacity>
             ))}
@@ -269,7 +269,7 @@ const VisitStatsCard = () => {
       {stats.recentVisits.length === 0 && stats.recentWines.length === 0 && (
         <View style={styles.emptyState}>
           <View style={styles.emptyIconContainer}>
-            <Ionicons name="wine-outline" size={32} color={colors.gold.muted} />
+            <Ionicons name="wine-outline" size={32} color={colors.accent.border} />
           </View>
           <Text style={styles.emptyTitle}>Begin your journey</Text>
           <Text style={styles.emptySubtitle}>
@@ -283,12 +283,12 @@ const VisitStatsCard = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     padding: spacing.lg,
     marginBottom: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     ...shadows.soft,
   },
 
@@ -302,13 +302,13 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     marginBottom: spacing.sm,
     opacity: 0.6,
   },
   loadingText: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
   },
 
@@ -322,11 +322,11 @@ const styles = StyleSheet.create({
   decorativeLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   headerLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginHorizontal: spacing.md,
   },
 
@@ -346,29 +346,29 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xs,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   statValue: {
     fontSize: 28,
     fontWeight: '300',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     letterSpacing: -0.5,
   },
   statLabel: {
     ...typography.body.caption,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginTop: 2,
   },
   statDivider: {
     width: 1,
     height: 48,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
     opacity: 0.5,
   },
 
@@ -383,11 +383,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     paddingBottom: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   sectionTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
   },
   seeAllButton: {
@@ -397,16 +397,16 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '500',
   },
 
   // List Styles
   listContainer: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.neutral.linen,
+    borderColor: colors.neutral.divider,
     overflow: 'hidden',
   },
   listItem: {
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   listItemLast: {
     borderBottomWidth: 0,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: spacing.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   listItemContent: {
     flex: 1,
@@ -445,13 +445,13 @@ const styles = StyleSheet.create({
   },
   listItemTitle: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '500',
     marginBottom: 2,
   },
   listItemSubtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   listItemArrow: {
     width: 24,
@@ -469,22 +469,22 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   emptyTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.xs,
   },
   emptySubtitle: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     maxWidth: 240,
   },

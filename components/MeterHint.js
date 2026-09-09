@@ -26,7 +26,7 @@ export default function MeterHint({ task, text, source, style }) {
       activeOpacity={0.7}
       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
     >
-      <Ionicons name="information-circle-outline" size={14} color={colors.neutral.pewter} />
+      <Ionicons name="information-circle-outline" size={14} color={colors.neutral.inkTertiary} />
       <Text style={styles.text}>{label}</Text>
     </TouchableOpacity>
   );
@@ -42,6 +42,6 @@ const styles = StyleSheet.create({
   text: {
     flex: 1,
     fontSize: 12,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
 });

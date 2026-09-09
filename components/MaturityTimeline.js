@@ -50,7 +50,7 @@ export default function MaturityTimeline({ drinkFrom, drinkBy, onAddWindow }) {
       <View style={styles.card}>
         <Text style={styles.title}>MATURITY</Text>
         <View style={styles.emptyRow}>
-          <Ionicons name="hourglass-outline" size={18} color={colors.neutral.pewter} />
+          <Ionicons name="hourglass-outline" size={18} color={colors.neutral.inkTertiary} />
           <Text style={styles.emptyText}>
             No drink window set yet.
             {onAddWindow ? ' Add one — or let the sommelier suggest it.' : ''}
@@ -126,9 +126,9 @@ export default function MaturityTimeline({ drinkFrom, drinkBy, onAddWindow }) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.lg,
@@ -139,20 +139,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },
-  title: { ...typography.body.caption, color: colors.gold.text },
+  title: { ...typography.body.caption, color: colors.accent.ink },
 
   statusBadge: {
     paddingVertical: 2,
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.sm,
   },
-  statusBadgeText: { ...typography.body.caption, color: colors.neutral.cream },
+  statusBadgeText: { ...typography.body.caption, color: colors.neutral.bg },
 
   // Track
   track: {
     height: 10,
     borderRadius: borderRadius.round,
-    backgroundColor: colors.neutral.linen,
+    backgroundColor: colors.neutral.divider,
     overflow: 'visible',
     justifyContent: 'center',
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: borderRadius.round,
   },
   fillFall: {
-    backgroundColor: colors.gold.shimmer,
+    backgroundColor: colors.accent.strong,
     borderTopRightRadius: borderRadius.round,
     borderBottomRightRadius: borderRadius.round,
   },
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     width: 2,
     height: 16,
     marginLeft: -1,
-    backgroundColor: colors.neutral.charcoal,
+    backgroundColor: colors.neutral.ink,
   },
   nowMark: {
     position: 'absolute',
@@ -188,9 +188,9 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 2,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
   },
 
   scaleRow: {
@@ -207,22 +207,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing.sm,
   },
-  scaleText: { ...typography.body.small, color: colors.neutral.pewter },
-  scaleTextPeak: { ...typography.body.small, color: colors.neutral.graphite, fontWeight: '600' },
+  scaleText: { ...typography.body.small, color: colors.neutral.inkTertiary },
+  scaleTextPeak: { ...typography.body.small, color: colors.neutral.inkSecondary, fontWeight: '600' },
 
   caption: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginTop: spacing.sm,
     fontWeight: '500',
   },
 
   // Empty state
   emptyRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  emptyText: { ...typography.body.small, color: colors.neutral.pewter, flex: 1, lineHeight: 18 },
+  emptyText: { ...typography.body.small, color: colors.neutral.inkTertiary, flex: 1, lineHeight: 18 },
   addLink: {
     ...typography.body.small,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
     marginTop: spacing.sm,
   },

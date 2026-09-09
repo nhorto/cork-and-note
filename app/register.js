@@ -158,7 +158,7 @@ export default function RegisterScreen() {
           accessibilityLabel="Go back"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="arrow-back" size={24} color={colors.neutral.charcoal} />
+          <Ionicons name="arrow-back" size={24} color={colors.neutral.ink} />
         </TouchableOpacity>
 
         <Text style={styles.title}>Create account</Text>
@@ -166,18 +166,18 @@ export default function RegisterScreen() {
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <Ionicons name="person" size={20} color={colors.primary.burgundy} style={styles.inputIcon} />
+            <Ionicons name="person" size={20} color={colors.primary.base} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Full name"
               value={name}
               onChangeText={setName}
-              placeholderTextColor={colors.neutral.silver}
+              placeholderTextColor={colors.neutral.placeholder}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color={colors.primary.burgundy} style={styles.inputIcon} />
+            <Ionicons name="mail" size={20} color={colors.primary.base} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email address"
@@ -185,19 +185,19 @@ export default function RegisterScreen() {
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
-              placeholderTextColor={colors.neutral.silver}
+              placeholderTextColor={colors.neutral.placeholder}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color={colors.primary.burgundy} style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color={colors.primary.base} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
-              placeholderTextColor={colors.neutral.silver}
+              placeholderTextColor={colors.neutral.placeholder}
             />
             <TouchableOpacity
               style={styles.visibilityIcon}
@@ -209,7 +209,7 @@ export default function RegisterScreen() {
               <Ionicons
                 name={showPassword ? 'eye-off' : 'eye'}
                 size={20}
-                color={colors.primary.burgundy}
+                color={colors.primary.base}
               />
             </TouchableOpacity>
           </View>
@@ -223,7 +223,7 @@ export default function RegisterScreen() {
                   <Ionicons
                     name={req.met ? 'checkmark-circle' : 'ellipse-outline'}
                     size={16}
-                    color={req.met ? colors.status.success : colors.neutral.silver}
+                    color={req.met ? colors.status.success : colors.neutral.placeholder}
                   />
                   <Text style={[
                     styles.requirementText,
@@ -237,14 +237,14 @@ export default function RegisterScreen() {
           )}
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color={colors.primary.burgundy} style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color={colors.primary.base} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Confirm password"
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPassword}
-              placeholderTextColor={colors.neutral.silver}
+              placeholderTextColor={colors.neutral.placeholder}
             />
           </View>
 
@@ -254,7 +254,7 @@ export default function RegisterScreen() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color={colors.neutral.cream} />
+              <ActivityIndicator color={colors.neutral.bg} />
             ) : (
               <Text style={styles.registerButtonText}>Sign up</Text>
             )}
@@ -277,7 +277,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   scrollContent: {
     flexGrow: 1,
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 26,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: spacing.sm,
     marginTop: spacing.xl,
     textAlign: 'center',
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 15,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -316,11 +316,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: 12,
     marginBottom: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     height: 52,
   },
   inputIcon: {
@@ -329,23 +329,23 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   visibilityIcon: {
     padding: 8,
   },
   passwordRequirements: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     padding: spacing.md,
     borderRadius: borderRadius.md,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   requirementsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: spacing.sm,
   },
   requirementRow: {
@@ -361,10 +361,10 @@ const styles = StyleSheet.create({
     color: colors.status.success,
   },
   requirementNotMet: {
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
   },
   registerButton: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     height: 52,
     justifyContent: 'center',
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   registerButtonText: {
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,
@@ -384,11 +384,11 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 14,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
   },
   loginLink: {
     fontSize: 14,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '700',
   },
 });

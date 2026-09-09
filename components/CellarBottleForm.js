@@ -307,7 +307,7 @@ export default function CellarBottleForm({
               accessibilityRole="button"
               accessibilityLabel="Decrease"
             >
-              <Ionicons name="remove" size={20} color={colors.primary.burgundy} />
+              <Ionicons name="remove" size={20} color={colors.primary.base} />
             </TouchableOpacity>
             <TextInput
               style={styles.stepValue}
@@ -322,7 +322,7 @@ export default function CellarBottleForm({
               accessibilityRole="button"
               accessibilityLabel="Increase"
             >
-              <Ionicons name="add" size={20} color={colors.primary.burgundy} />
+              <Ionicons name="add" size={20} color={colors.primary.base} />
             </TouchableOpacity>
           </View>
         </View>
@@ -348,7 +348,7 @@ export default function CellarBottleForm({
         <Ionicons
           name={showMore ? 'chevron-up' : 'chevron-down'}
           size={18}
-          color={colors.primary.burgundy}
+          color={colors.primary.base}
         />
       </TouchableOpacity>
 
@@ -427,9 +427,9 @@ export default function CellarBottleForm({
             activeOpacity={0.85}
           >
             {windowSuggesting ? (
-              <ActivityIndicator size="small" color={colors.primary.burgundy} />
+              <ActivityIndicator size="small" color={colors.primary.base} />
             ) : (
-              <Ionicons name="sparkles" size={16} color={colors.primary.burgundy} />
+              <Ionicons name="sparkles" size={16} color={colors.primary.base} />
             )}
             <Text style={styles.suggestBtnText}>
               {windowSuggesting ? 'Asking the sommelier…' : 'Suggest a window'}
@@ -453,7 +453,7 @@ export default function CellarBottleForm({
               ) : null}
               <View style={styles.proposalActions}>
                 <TouchableOpacity style={styles.proposalAccept} onPress={acceptWindow} activeOpacity={0.85}>
-                  <Ionicons name="checkmark" size={16} color={colors.neutral.cream} />
+                  <Ionicons name="checkmark" size={16} color={colors.neutral.bg} />
                   <Text style={styles.proposalAcceptText}>Use it</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.proposalDismiss} onPress={() => setWindowProposal(null)} activeOpacity={0.85}>
@@ -500,7 +500,7 @@ function Field({ label, required, flex, multiline, style, ...props }) {
       </Text>
       <TextInput
         style={[styles.input, multiline && styles.inputMultiline]}
-        placeholderTextColor={colors.neutral.silver}
+        placeholderTextColor={colors.neutral.placeholder}
         multiline={multiline}
         {...props}
       />
@@ -512,17 +512,17 @@ const styles = StyleSheet.create({
   field: { marginBottom: spacing.md },
   flex: { flex: 1 },
   row: { flexDirection: 'row', gap: spacing.md },
-  label: { ...typography.body.caption, color: colors.neutral.pewter, marginBottom: spacing.xs },
-  req: { color: colors.primary.wine },
+  label: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginBottom: spacing.xs },
+  req: { color: colors.primary.deep },
   input: {
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     fontSize: typography.body.regular.fontSize,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
   inputMultiline: { minHeight: 88, textAlignVertical: 'top' },
 
@@ -535,12 +535,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.neutral.parchment,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.neutral.surface,
   },
   moreToggleText: {
     ...typography.body.regular,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     fontWeight: '600',
   },
   moreSection: { marginBottom: spacing.sm },
@@ -551,28 +551,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
-    backgroundColor: colors.neutral.cream,
+    borderColor: colors.neutral.border,
+    backgroundColor: colors.neutral.bg,
   },
-  sizeChipActive: { backgroundColor: colors.primary.burgundy, borderColor: colors.primary.burgundy },
-  sizeChipText: { ...typography.body.small, color: colors.neutral.graphite },
-  sizeChipTextActive: { color: colors.neutral.cream },
+  sizeChipActive: { backgroundColor: colors.primary.base, borderColor: colors.primary.base },
+  sizeChipText: { ...typography.body.small, color: colors.neutral.inkSecondary },
+  sizeChipTextActive: { color: colors.neutral.bg },
 
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   stepBtn: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   stepValue: {
     width: 64,
     fontSize: 18,
     fontFamily: SERIF,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
   },
 
   error: { ...typography.body.small, color: colors.status.error, marginBottom: spacing.md },
@@ -586,38 +586,38 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     borderRadius: borderRadius.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
-    backgroundColor: colors.gold.light,
+    borderColor: colors.accent.border,
+    backgroundColor: colors.accent.surface,
     marginBottom: spacing.sm,
   },
-  suggestBtnText: { ...typography.body.small, color: colors.primary.burgundy, fontWeight: '600' },
-  suggestHint: { ...typography.body.small, color: colors.neutral.pewter, marginBottom: spacing.md, marginTop: -spacing.xs },
+  suggestBtnText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  suggestHint: { ...typography.body.small, color: colors.neutral.inkTertiary, marginBottom: spacing.md, marginTop: -spacing.xs },
   suggestError: { ...typography.body.small, color: colors.status.error, marginBottom: spacing.md },
 
   proposalCard: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
     borderRadius: borderRadius.md,
     padding: spacing.md,
     marginBottom: spacing.md,
   },
-  proposalRange: { ...typography.body.regular, color: colors.neutral.charcoal, fontWeight: '600' },
-  proposalWhy: { ...typography.body.small, color: colors.neutral.graphite, marginTop: spacing.xs, lineHeight: 18 },
+  proposalRange: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
+  proposalWhy: { ...typography.body.small, color: colors.neutral.inkSecondary, marginTop: spacing.xs, lineHeight: 18 },
   proposalActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.md },
   proposalAccept: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.sm,
   },
-  proposalAcceptText: { ...typography.body.small, color: colors.neutral.cream, fontWeight: '600' },
+  proposalAcceptText: { ...typography.body.small, color: colors.neutral.bg, fontWeight: '600' },
   proposalDismiss: { paddingVertical: spacing.sm, paddingHorizontal: spacing.sm },
-  proposalDismissText: { ...typography.body.small, color: colors.primary.burgundy },
-  proposalNote: { ...typography.body.small, color: colors.neutral.pewter, fontStyle: 'italic', marginTop: spacing.sm },
+  proposalDismissText: { ...typography.body.small, color: colors.primary.base },
+  proposalNote: { ...typography.body.small, color: colors.neutral.inkTertiary, fontStyle: 'italic', marginTop: spacing.sm },
 
   // Still used by the AI "Suggest a window" button (suggestBtn), which is not a
   // primary/secondary CTA and is intentionally left as a hand-rolled touchable.

@@ -103,7 +103,7 @@ export default function WishlistScreen() {
       activeOpacity={0.7}
     >
       <View style={styles.wineryIcon}>
-        <Ionicons name="wine" size={20} color={colors.primary.burgundy} />
+        <Ionicons name="wine" size={20} color={colors.primary.base} />
       </View>
 
       <View style={styles.wineryInfo}>
@@ -140,7 +140,7 @@ export default function WishlistScreen() {
     return (
       <View style={styles.centerContainer}>
         <View style={styles.emptyIcon}>
-          <Ionicons name="bookmark-outline" size={40} color={colors.gold.muted} />
+          <Ionicons name="bookmark-outline" size={40} color={colors.accent.border} />
         </View>
         <Text style={styles.messageTitle}>Sign in required</Text>
         <Text style={styles.messageText}>
@@ -155,7 +155,7 @@ export default function WishlistScreen() {
     return (
       <View style={styles.centerContainer}>
         <View style={styles.loadingIcon}>
-          <Ionicons name="wine-outline" size={32} color={colors.gold.muted} />
+          <Ionicons name="wine-outline" size={32} color={colors.accent.border} />
         </View>
         <Text style={styles.loadingText}>Loading your wishlist...</Text>
       </View>
@@ -202,7 +202,7 @@ export default function WishlistScreen() {
         ListEmptyComponent={
           <View style={styles.emptyInner}>
             <View style={styles.emptyIcon}>
-              <Ionicons name="bookmark-outline" size={40} color={colors.gold.muted} />
+              <Ionicons name="bookmark-outline" size={40} color={colors.accent.border} />
             </View>
             <Text style={styles.emptyTitle}>Your wishlist is empty</Text>
             <Text style={styles.emptyText}>
@@ -214,7 +214,7 @@ export default function WishlistScreen() {
               onPress={() => router.push('/(tabs)/map')}
               activeOpacity={0.7}
             >
-              <Ionicons name="map-outline" size={18} color={colors.neutral.cream} />
+              <Ionicons name="map-outline" size={18} color={colors.neutral.bg} />
               <Text style={styles.exploreButtonText}>Explore map</Text>
             </TouchableOpacity>
           </View>
@@ -227,21 +227,21 @@ export default function WishlistScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
 
   countBadge: {
     minWidth: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.sm,
   },
   countBadgeText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
   // Section Header
@@ -258,16 +258,16 @@ const styles = StyleSheet.create({
   decorativeLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   headerLabel: {
     ...typography.body.caption,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     marginHorizontal: spacing.md,
   },
   headerCount: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
   },
 
@@ -277,22 +277,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.xl,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   loadingIcon: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   loadingText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
   },
 
@@ -304,11 +304,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: spacing.md,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     ...shadows.soft,
   },
   wineryItemLast: {
@@ -318,12 +318,12 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   wineryInfo: {
     flex: 1,
@@ -331,14 +331,14 @@ const styles = StyleSheet.create({
   },
   wineryName: {
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontWeight: '600',
     fontFamily: SERIF,
     marginBottom: 2,
   },
   wineryAddress: {
     ...typography.body.small,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: spacing.xs,
   },
   removeButton: {
@@ -348,7 +348,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -369,22 +369,22 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   emptyTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
   emptyText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     maxWidth: 280,
     marginBottom: spacing.lg,
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
   exploreButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.md,
@@ -400,20 +400,20 @@ const styles = StyleSheet.create({
   },
   exploreButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
     fontWeight: '600',
   },
 
   // Message State
   messageTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: spacing.sm,
   },
   messageText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     maxWidth: 280,
   },

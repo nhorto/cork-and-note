@@ -129,7 +129,7 @@ export default function ResetPasswordScreen() {
   if (status === 'checking') {
     return (
       <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.primary.burgundy} />
+        <ActivityIndicator size="large" color={colors.primary.base} />
         <Text style={styles.checkingText}>Opening your reset link…</Text>
       </View>
     );
@@ -138,7 +138,7 @@ export default function ResetPasswordScreen() {
   if (status === 'invalid') {
     return (
       <View style={[styles.container, styles.center]}>
-        <Ionicons name="time-outline" size={48} color={colors.primary.burgundy} />
+        <Ionicons name="time-outline" size={48} color={colors.primary.base} />
         <Text style={styles.title}>Link expired</Text>
         <Text style={styles.subtitle}>
           This reset link is invalid or has expired. Request a new one and try again.
@@ -165,11 +165,11 @@ export default function ResetPasswordScreen() {
         </Text>
 
         <View style={styles.inputRow}>
-          <Ionicons name="lock-closed-outline" size={20} color={colors.primary.burgundy} />
+          <Ionicons name="lock-closed-outline" size={20} color={colors.primary.base} />
           <TextInput
             style={styles.input}
             placeholder="New password"
-            placeholderTextColor={colors.neutral.silver}
+            placeholderTextColor={colors.neutral.placeholder}
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             value={password}
@@ -184,17 +184,17 @@ export default function ResetPasswordScreen() {
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
-              color={colors.primary.burgundy}
+              color={colors.primary.base}
             />
           </TouchableOpacity>
         </View>
 
         <View style={styles.inputRow}>
-          <Ionicons name="lock-closed-outline" size={20} color={colors.primary.burgundy} />
+          <Ionicons name="lock-closed-outline" size={20} color={colors.primary.base} />
           <TextInput
             style={styles.input}
             placeholder="Confirm new password"
-            placeholderTextColor={colors.neutral.silver}
+            placeholderTextColor={colors.neutral.placeholder}
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             value={confirm}
@@ -210,7 +210,7 @@ export default function ResetPasswordScreen() {
           disabled={saving || status === 'done'}
         >
           {saving ? (
-            <ActivityIndicator color={colors.neutral.cream} />
+            <ActivityIndicator color={colors.neutral.bg} />
           ) : (
             <Text style={styles.buttonText}>Update password</Text>
           )}
@@ -223,7 +223,7 @@ export default function ResetPasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   center: {
     alignItems: 'center',
@@ -237,20 +237,20 @@ const styles = StyleSheet.create({
   },
   checkingText: {
     ...typography.body.regular,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     marginTop: spacing.md,
   },
   title: {
     ...typography.heading.h1,
     fontFamily: SERIF,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     textAlign: 'center',
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
   subtitle: {
     ...typography.body.regular,
-    color: colors.neutral.graphite,
+    color: colors.neutral.inkSecondary,
     textAlign: 'center',
     marginBottom: spacing.lg,
   },
@@ -258,9 +258,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     ...typography.body.regular,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     padding: 0,
   },
   errorText: {
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    backgroundColor: colors.primary.burgundy,
+    backgroundColor: colors.primary.base,
     borderRadius: borderRadius.md,
     paddingVertical: spacing.md,
     alignItems: 'center',
@@ -292,6 +292,6 @@ const styles = StyleSheet.create({
   buttonText: {
     ...typography.body.regular,
     fontWeight: '600',
-    color: colors.neutral.cream,
+    color: colors.neutral.bg,
   },
 });

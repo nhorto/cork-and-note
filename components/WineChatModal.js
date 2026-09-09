@@ -239,7 +239,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <Ionicons name="wine" size={18} color={colors.primary.burgundy} />
+              <Ionicons name="wine" size={18} color={colors.primary.base} />
               <Text style={styles.headerTitle}>Ask the sommelier</Text>
             </View>
             <TouchableOpacity
@@ -248,7 +248,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
               accessibilityRole="button"
               accessibilityLabel="Close"
             >
-              <Ionicons name="close" size={22} color={colors.neutral.graphite} />
+              <Ionicons name="close" size={22} color={colors.neutral.inkSecondary} />
             </TouchableOpacity>
           </View>
           <View style={styles.divider} />
@@ -256,7 +256,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           {/* Messages */}
           {loading ? (
             <View style={styles.centered}>
-              <ActivityIndicator size="large" color={colors.primary.burgundy} />
+              <ActivityIndicator size="large" color={colors.primary.base} />
             </View>
           ) : messages.length === 0 ? (
             <View style={styles.emptyState}>
@@ -309,11 +309,11 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(61, 43, 61, 0.4)', // colors.neutral.charcoal (plum ink) at 40%
+    backgroundColor: 'rgba(61, 43, 61, 0.4)', // colors.neutral.ink (plum ink) at 40%
   },
   modalContainer: {
     height: MODAL_HEIGHT,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     ...shadows.strong,
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors.neutral.stone,
+    backgroundColor: colors.neutral.border,
   },
   header: {
     flexDirection: 'row',
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     ...typography.heading.h3,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
   closeButton: {
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: colors.gold.muted,
+    backgroundColor: colors.accent.border,
   },
   centered: {
     flex: 1,
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...typography.body.regular,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     textAlign: 'center',
     lineHeight: 22,
     fontStyle: 'italic',
@@ -382,10 +382,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   typingBubble: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     borderRadius: borderRadius.lg,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     alignSelf: 'flex-start',

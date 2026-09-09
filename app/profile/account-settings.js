@@ -168,8 +168,8 @@ export default function AccountSettingsScreen() {
             <Switch
               value={locationEnabled}
               onValueChange={handleLocationToggle}
-              trackColor={{ false: colors.neutral.stone, true: colors.primary.burgundy }}
-              thumbColor={colors.neutral.cream}
+              trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
+              thumbColor={colors.neutral.bg}
             />
           </View>
         </View>
@@ -189,9 +189,9 @@ export default function AccountSettingsScreen() {
               onPress={() => presentPaywall('settings')}
               accessibilityRole="button"
             >
-              <Ionicons name="sparkles" size={20} color={colors.primary.burgundy} />
+              <Ionicons name="sparkles" size={20} color={colors.primary.base} />
               <Text style={styles.actionButtonText}>Upgrade to Pro</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
             </TouchableOpacity>
           ) : null}
 
@@ -201,11 +201,11 @@ export default function AccountSettingsScreen() {
             onPress={handleRestore}
             accessibilityRole="button"
           >
-            <Ionicons name="refresh" size={20} color={colors.primary.burgundy} />
+            <Ionicons name="refresh" size={20} color={colors.primary.base} />
             <Text style={styles.actionButtonText}>
               {restoring ? 'Restoring…' : 'Restore purchases'}
             </Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+            <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
           </TouchableOpacity>
 
           <Text style={styles.infoNote}>
@@ -223,12 +223,12 @@ export default function AccountSettingsScreen() {
             onPress={handleExport}
             accessibilityRole="button"
           >
-            <Ionicons name="download" size={20} color={colors.primary.burgundy} />
+            <Ionicons name="download" size={20} color={colors.primary.base} />
             <Text style={styles.actionButtonText}>
               {exporting ? 'Preparing export…' : 'Export tastings (CSV)'}
             </Text>
             {isPro ? (
-              <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+              <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
             ) : (
               <Text style={styles.proBadge}>PRO</Text>
             )}
@@ -247,9 +247,9 @@ export default function AccountSettingsScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/profile/change-password')}
           >
-            <Ionicons name="key" size={20} color={colors.primary.burgundy} />
+            <Ionicons name="key" size={20} color={colors.primary.base} />
             <Text style={styles.actionButtonText}>Change password</Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+            <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -274,7 +274,7 @@ export default function AccountSettingsScreen() {
             <Text style={[styles.actionButtonText, styles.dangerText]}>
               {deleting ? 'Deleting account…' : 'Delete account'}
             </Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.gold.shimmer} />
+            <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
           </TouchableOpacity>
         </View>
 
@@ -301,24 +301,24 @@ export default function AccountSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.neutral.bg,
   },
   content: {
     flex: 1,
   },
   section: {
-    backgroundColor: colors.neutral.parchment,
+    backgroundColor: colors.neutral.surface,
     marginHorizontal: 20,
     marginVertical: 10,
     borderRadius: 10,
     padding: 20,
     borderWidth: 1,
-    borderColor: colors.neutral.stone,
+    borderColor: colors.neutral.border,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     fontFamily: SERIF,
     marginBottom: 15,
   },
@@ -334,12 +334,12 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginBottom: 5,
   },
   settingDescription: {
     fontSize: 14,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     lineHeight: 20,
   },
   permissionStatus: {
@@ -352,12 +352,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: colors.neutral.linen,
+    borderBottomColor: colors.neutral.divider,
   },
   actionButtonText: {
     flex: 1,
     fontSize: 16,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     marginLeft: 15,
   },
   dangerButton: {
@@ -371,9 +371,9 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.5,
-    color: colors.primary.burgundy,
+    color: colors.primary.base,
     borderWidth: 1,
-    borderColor: colors.primary.burgundy,
+    borderColor: colors.primary.base,
     borderRadius: 4,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -389,18 +389,18 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 14,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     width: 60,
     fontWeight: '500',
   },
   infoValue: {
     fontSize: 14,
-    color: colors.neutral.charcoal,
+    color: colors.neutral.ink,
     flex: 1,
   },
   infoNote: {
     fontSize: 12,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     fontStyle: 'italic',
     marginTop: 10,
     lineHeight: 16,
