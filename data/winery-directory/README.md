@@ -1,189 +1,269 @@
-# US winery directory seed — status: BLOCKED, no CSV shipped in this PR
+# US winery directory seed
 
-**tl;dr:** this branch ships the `winery_directory` table (migration) and the
-loader script, but **not** `us-wineries.csv.gz`. FSQ OS Places' two
-documented free/anonymous distribution channels have both been shut off
-since `docs/research/winery-enrichment-google-places.md` was written, and no
-credentials for the remaining (gated) channel were available in this
-sandboxed session. See "The blocker" below, then "What we need from Nick" for
-the unblock options.
+**Status: DATA LOADED (2026-09-09).** `us-wineries.csv.gz` in this directory
+contains 14,482 US wineries extracted from **Overture Maps' `places` theme**
+(Option B from the original blocker — see "History: the FSQ OS Places
+blocker" below). This is a source swap from the original plan (Foursquare's
+FSQ OS Places, Apache-2.0), which is documented in that section for context.
+The **license for this data is CDLA-Permissive-2.0**, not Apache-2.0 — see
+"License / attribution" below before distributing or modifying it further.
 
-## What was supposed to happen
+## 2026-09-09: extracted from Overture Maps
 
-Per `docs/research/winery-enrichment-google-places.md` §2.5, discovery pins
-for the Wineries tab come from our own `winery_directory` table, seeded once
-from Foursquare's free, open **FSQ OS Places** dataset — not from Google
-Nearby Search. The intended extraction: DuckDB querying the dataset's
-parquet remotely (no full download), filtered to US wineries, written out as
-a CSV for a one-time server-side load into Supabase.
+### Release used
 
-## The blocker
+`2026-08-19.0` — the latest release in `s3://overturemaps-us-west-2/release/`
+as of 2026-09-09 (the other available release at extraction time was the
+prior `2026-07-22.0`). Source theme/type: `theme=places/type=place`, 16
+zstd-compressed parquet part files, anonymous S3 access, region `us-west-2`,
+no credentials required.
 
-Both documented free access paths for FSQ OS Places are no longer usable
-without an approved account:
+### Exact query
 
-1. **Anonymous S3 mirror** (`s3://fsq-os-places-us-east-1/release/...`,
-   `us-east-1`, no credentials). As of 2026-09-09 this bucket contains only
-   `LICENSE.txt` and `NOTICE.txt` at its root — the `release/` prefix that
-   used to hold the parquet data no longer exists:
-
-   ```
-   $ curl -s "https://fsq-os-places-us-east-1.s3.amazonaws.com/?list-type=2&prefix=release/&max-keys=50"
-   <ListBucketResult ...><Prefix>release/</Prefix><KeyCount>0</KeyCount>...</ListBucketResult>
-
-   $ curl -s "https://fsq-os-places-us-east-1.s3.amazonaws.com/?list-type=2&max-keys=50"
-   <ListBucketResult ...><KeyCount>2</KeyCount>...
-     <Contents><Key>LICENSE.txt</Key>...</Contents>
-     <Contents><Key>NOTICE.txt</Key>...</Contents>
-   </ListBucketResult>
-   ```
-
-2. **Hugging Face mirror** (`foursquare/fsq-os-places`). The dataset card
-   itself now says: *"Foursquare OS Places is now a gated dataset on
-   Hugging Face"* — it requires a Hugging Face account, filling out an
-   access-request form (organization, title, country, intended use), and
-   Foursquare's approval before any file can be downloaded, even though the
-   dataset is still nominally Apache-2.0-licensed. Resolving any parquet
-   file anonymously 401s:
-
-   ```
-   $ curl -sI "https://huggingface.co/datasets/foursquare/fsq-os-places/resolve/main/release/dt=2026-08-11/places/parquet/places_000000.parquet"
-   HTTP/2 401
-   x-error-code: GatedRepo
-   x-error-message: Access to dataset foursquare/fsq-os-places is restricted.
-     You must have access to it and be authenticated to access it. Please log in.
-   ```
-
-   The dataset card does confirm the **latest release as of this check is
-   `dt=2026-08-11`** (3 parquet shards for the `places` config, per the
-   repo's file tree — sizes ~118–125 MB each, well beyond what's worth
-   downloading in full even if access were granted; the DuckDB query below
-   is written to filter remotely, same as originally planned).
-
-No AWS credentials and no Hugging Face token were present in this
-environment, and HF's gated-dataset approval is an interactive step (login +
-form + wait for/auto-approval) that can't be completed non-interactively.
-Rather than fabricate winery rows to fill `us-wineries.csv.gz`, this PR ships
-the schema and tooling only. **Do not treat the absence of a CSV here as "0
-wineries" — it means extraction hasn't run yet.**
-
-## What we need from Nick (pick one)
-
-**Option A — get FSQ OS Places access (matches the original plan exactly):**
-1. Create a free Hugging Face account (or use an existing one) and open
-   https://huggingface.co/datasets/foursquare/fsq-os-places
-2. Accept the gating terms / submit the access request form. (Foursquare's
-   form has historically auto-approved; may take a few minutes.)
-3. Generate a Hugging Face **User Access Token** (read scope) from
-   https://huggingface.co/settings/tokens
-4. Hand the token to whoever runs the extraction (env var `HF_TOKEN`, or
-   `huggingface-cli login`), and re-run the query in "Exact query" below —
-   swap the `read_parquet(...)` source for either:
-   - `hf://datasets/foursquare/fsq-os-places/release/dt=<latest>/places/parquet/*.parquet`
-     via DuckDB's `httpfs` (DuckDB reads the token from `HF_TOKEN` or
-     `~/.cache/huggingface/token`; may need `duckdb -c "INSTALL httpfs; SET
-     hf_token='<token>';"`, syntax varies by DuckDB version — check
-     `duckdb --version` docs at run time), or
-   - `huggingface-cli download foursquare/fsq-os-places --include
-     "release/dt=<latest>/places/parquet/*.parquet" --local-dir ./fsq-places`
-     followed by `read_parquet('./fsq-places/**/*.parquet')`.
-5. Once the CSV is produced, gzip it into this directory as
-   `us-wineries.csv.gz`, fill in the sanity-check numbers below, and run the
-   loader (see "Apply steps").
-
-**Option B — swap the data source.** Overture Maps' `places` theme is still
-openly, anonymously accessible on S3 as of this check
-(`s3://overturemaps-us-west-2/release/2026-08-19.0/theme=places/...`, no
-gating) and its "places" theme is itself partly built from Foursquare's open
-places contribution plus other providers. Trade-offs: different license
-(**CDLA-Permissive-2.0**, not Apache-2.0 — the attribution note below would
-need to change), different schema (categories, confidence scores), and it's
-a superset that needs its own winery-category filter. This is a bigger scope
-change than a source swap and should be a explicit decision, not something
-done silently in a "seed" PR.
-
-**Option C — defer.** Ship this PR's schema/loader now (harmless, empty
-table), revisit the data load once Option A or B is resolved.
-
-## Exact query (to run once access is available)
+Run with DuckDB (`httpfs` + `spatial` extensions). This queries the parquet
+files remotely — DuckDB's column pruning means only the columns selected
+below (plus the `categories`/`confidence`/`operating_status` filter columns)
+are actually fetched, not the full ~10 GB dataset:
 
 ```sql
-INSTALL httpfs;
-LOAD httpfs;
-SET s3_region = 'us-east-1';
+INSTALL httpfs; LOAD httpfs; INSTALL spatial; LOAD spatial;
+SET s3_region = 'us-west-2';
+PRAGMA threads = 8;
 
 CREATE OR REPLACE TABLE us_wineries AS
 WITH places AS (
   SELECT
-    fsq_place_id,
-    name,
-    latitude,
-    longitude,
-    address,
-    locality AS city,
-    region   AS state,
-    postcode,
-    website,
-    country,
-    date_closed,
-    fsq_category_ids,
-    fsq_category_labels
+    id AS gers_id,
+    names.primary AS name,
+    ST_Y(geometry) AS latitude,
+    ST_X(geometry) AS longitude,
+    addresses[1].freeform AS address,
+    addresses[1].locality AS city,
+    addresses[1].region AS state,
+    addresses[1].postcode AS postcode,
+    addresses[1].country AS country,
+    (CASE WHEN len(websites) > 0 THEN websites[1] ELSE NULL END) AS website,
+    confidence,
+    operating_status,
+    categories.primary AS category
   FROM read_parquet(
-    's3://fsq-os-places-us-east-1/release/dt=2026-08-11/places/parquet/*.parquet'
-    -- once HF access is granted, swap for:
-    -- 'hf://datasets/foursquare/fsq-os-places/release/dt=2026-08-11/places/parquet/*.parquet'
+    's3://overturemaps-us-west-2/release/2026-08-19.0/theme=places/type=place/*.parquet'
   )
+  WHERE categories.primary = 'winery'
 ),
 wineries AS (
   SELECT *
   FROM places
   WHERE country = 'US'
-    AND date_closed IS NULL
-    AND (
-      list_contains(fsq_category_ids, '50327c8591d4c4b30a586d5d')
-      OR list_any_value(fsq_category_labels, l -> l LIKE '%> Winery')
-    )
+    AND confidence >= 0.5
+    AND (operating_status IS NULL OR operating_status != 'permanently_closed')
 ),
 deduped AS (
   -- Same name + ~same coordinates (3 decimal places, ~110m) counts as a
-  -- duplicate; keep the lowest fsq_place_id deterministically.
+  -- duplicate; keep the lowest gers_id deterministically. Overture still
+  -- has near-duplicate entries under slightly different names/coordinates
+  -- for the same physical winery (e.g. multiple "Robert Mondavi Winery"
+  -- rows in different Napa-area towns) that this pass does not catch —
+  -- that's a data-quality property of the source, not a bug in this query.
   SELECT *,
     row_number() OVER (
       PARTITION BY lower(name), round(latitude, 3), round(longitude, 3)
-      ORDER BY fsq_place_id
+      ORDER BY gers_id
     ) AS rn
   FROM wineries
 )
-SELECT fsq_place_id, name, latitude, longitude, address, city, state, postcode, website
+SELECT gers_id, name, latitude, longitude, address, city, state, postcode, website
 FROM deduped
 WHERE rn = 1;
 
--- Sanity checks (expect roughly 5,000-20,000 total; <1,000 or >100,000 means
--- the category filter is wrong):
-SELECT count(*) FROM us_wineries;
-SELECT state, count(*) FROM us_wineries
-  WHERE state IN ('VA','CA','NY','OR','WA') GROUP BY state ORDER BY state;
-SELECT * FROM us_wineries WHERE state = 'VA' LIMIT 5;
+SELECT count(*) AS total FROM us_wineries;
 
-COPY us_wineries TO 'data/winery-directory/us-wineries.csv' (HEADER, DELIMITER ',');
+COPY us_wineries TO 'us-wineries.csv' (HEADER, DELIMITER ',');
 ```
 
-Then: `gzip -9 data/winery-directory/us-wineries.csv`.
+Then: `gzip -9 us-wineries.csv` and the `gers_id` CSV header was renamed to
+`fsq_place_id` (see "Column naming mismatch" below) before committing.
 
-## Sanity-check numbers
+### Category taxonomy value
 
-**Not filled in — extraction has not run.** Once it has, populate:
+Verified directly against the data (not just docs): `categories.primary`
+values under the wine umbrella in this release are `winery`,
+`beer_wine_and_spirits`, `wine_bar`, `wine_wholesaler`,
+`wine_tasting_room`, `wine_tours`, and `wine_tasting_classes`. Only
+`winery` was selected — `wine_bar` and the other adjacent categories are
+explicitly excluded per the task brief (they are not wineries).
 
-- Dataset release used: `dt=2026-08-11` (or whatever is latest at run time)
-- Total US winery rows: TBD (expect ~5,000–20,000)
-- Per-state counts — VA: TBD, CA: TBD, NY: TBD, OR: TBD, WA: TBD
-- 5 sample Virginia rows (table): TBD
+### Confidence threshold
 
-## License / attribution (verified, does not require data access)
+**`confidence >= 0.5`.** Checked the distribution of `confidence` for
+`categories.primary = 'winery' AND addresses[1].country = 'US'` on a sample
+partition before deciding: values ranged ~0.05–1.0 with a mean of ~0.82, and
+only a small minority (~4% in the sample) fell below 0.5. 0.5 drops the
+low-confidence tail without cutting meaningfully into the real winery count.
 
-FSQ OS Places is Apache License 2.0. Foursquare's `NOTICE.txt`
-(`s3://fsq-os-places-us-east-1/NOTICE.txt`), reproduced verbatim per its own
-"preserve the full content of this NOTICE.txt file" requirement:
+### Closed-place filter
+
+Rows with `operating_status = 'permanently_closed'` were excluded. Rows with
+`operating_status IS NULL` (the overwhelming majority — Overture doesn't
+populate this field for most places) were kept, since NULL means "unknown,"
+not "closed."
+
+### Total row count
+
+**14,482** US wineries after the country/category/confidence/closed filters
+and exact-duplicate collapse. This is within the task's expected range
+(4,000–25,000); no filter-correctness investigation was needed.
+
+### Per-state counts (VA / CA / NY / OR / WA)
+
+| State | Count |
+|-------|------:|
+| CA    | 5,374 |
+| NY    |   657 |
+| OR    |   956 |
+| VA    |   484 |
+| WA    | 1,106 |
+
+### 5 sample Virginia rows
+
+| name | city | postcode | website |
+|------|------|----------|---------|
+| 12 Ridges Vineyard | Vesuvius | 24483-2116 | http://www.12ridges.com/ |
+| 2 Witches Winery & Brewing Company | Danville | 24541-3545 | http://www.2witcheswinebrew.com |
+| 50 West Vineyards | Middleburg | 20117-2918 | http://50westvineyards.com/ |
+| 8 Chains North Winery | Waterford | 20197 | https://8chainsnorth.com/ |
+| 868 Estate Vineyards | Purcellville | 20132 | https://868estatevineyards.com/ |
+
+(Full rows, including lat/lon and street address, are in the CSV.)
+
+### Spot-checks
+
+All 3 requested famous wineries are present (plus corporate/related-entity
+duplicates Overture carries separately, e.g. multiple Ste Michelle Wine
+Estates and Robert Mondavi rows across nearby cities):
+
+- **Robert Mondavi** — `Robert Mondavi Winery` (Napa, Oakville-area/Napa,
+  Lodi), `Robert Mondavi Wineries,Napa Valley` (St Helena), etc.
+- **Chateau Ste Michelle** — `Chateau Ste Michelle Canoe Ridge Estate
+  winery` and `Chateau Ste Michelle River Ridge Estate Winery` (both
+  Paterson, WA), `Ste Michelle Wine Estates` (Grandview / Paterson, WA).
+- **Barboursville Vineyards** — `Barboursville Vineyards` (Barboursville
+  and Charlottesville, VA), `Barboursville Winery` (Barboursville, VA;
+  older/alternate naming for the same operation).
+
+### Column naming mismatch (read before running the loader)
+
+`scripts/load-winery-directory.mjs` and
+`supabase/migrations/20260910000000_winery_directory.sql` both use the
+column name `fsq_place_id`, inherited from the original FSQ OS Places plan.
+Since this data comes from Overture instead, the "id" is actually an
+**Overture GERS id** (a UUID, e.g.
+`7a825350-02f5-4e17-aac6-ed0c0fd408ca`), not a Foursquare place id. Rather
+than change the table/loader schema in this data-only PR, the CSV's id
+column is still **named `fsq_place_id`** (the DuckDB query above produces
+it as `gers_id` and the header is renamed before commit) so the existing
+loader works unmodified. A follow-up PR should rename the column (in the
+migration, the loader, and this CSV) to something source-neutral like
+`external_place_id`, plus record which source produced each row if we ever
+blend sources.
+
+## License / attribution
+
+This data is licensed under **CDLA-Permissive-2.0** (Community Data License
+Agreement – Permissive – Version 2.0), Overture Maps Foundation's license
+for the `places` theme — **not** Apache-2.0, which was the license that
+would have applied under the original FSQ OS Places plan. Per
+https://docs.overturemaps.org/attribution/:
+
+- **General citation** (recommended for any publication/use of Overture
+  data): *"Overture Maps Foundation, overturemaps.org"*
+- **Places theme sources**, each themselves under CDLA-Permissive-2.0: Meta,
+  Microsoft, PinMeTo, Krick, RenderSEO, DAC, BrightQuery.
+- **Foursquare-sourced places within the Places theme** are a special case:
+  Apache-2.0, copyright "2024 Foursquare Labs, Inc. All rights reserved,"
+  with attribution requirements per Foursquare's own NOTICE.txt
+  (https://opensource.foursquare.com/places-notice-txt/). Since this
+  extract does not carry a per-row `sources` column through to the CSV, we
+  cannot cheaply identify which individual winery rows originated from
+  Foursquare vs. another provider — treat the whole extract as subject to
+  **both** CDLA-Permissive-2.0 (the theme's overall license) **and** the
+  Foursquare NOTICE.txt attribution requirement, to be safe.
+- **AllThePlaces-sourced places**: CC0 1.0 (public domain) — no obligation,
+  mentioned for completeness.
+- If any underlying contribution includes OpenStreetMap data (some Places
+  theme sources do), also include: *"© OpenStreetMap contributors, Overture
+  Maps Foundation."*
+
+Practical implication once this data is loaded: our developer docs (or this
+README, since we're distributing derived flat-file data) must carry the
+"Overture Maps Foundation, overturemaps.org" citation, the CDLA-Permissive-2.0
+license reference (https://cdla.dev/permissive-2-0/), and the OSM +
+Foursquare attribution lines above, alongside the dataset.
+
+## Apply steps
+
+```bash
+# 1. Apply the schema (already on main; skip if already applied)
+supabase db push   # or: apply supabase/migrations/20260910000000_winery_directory.sql
+                     # against the target project
+
+# 2. Load the data (service role key required; never ship this key in the app)
+npm install @supabase/supabase-js   # if not already a project dependency
+SUPABASE_URL=https://<project-ref>.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
+node scripts/load-winery-directory.mjs data/winery-directory/us-wineries.csv.gz
+```
+
+## Files in this PR
+
+- `data/winery-directory/README.md` — this file.
+- `data/winery-directory/us-wineries.csv.gz` — 14,482 US wineries, columns
+  `fsq_place_id` (actually an Overture GERS id — see "Column naming
+  mismatch" above), `name`, `latitude`, `longitude`, `address`, `city`,
+  `state`, `postcode`, `website`. Gzipped, ~1.0 MB.
+- `supabase/migrations/20260910000000_winery_directory.sql` — unchanged
+  from main; creates `public.winery_directory` (empty until loaded), RLS:
+  `select` for `authenticated` only, no client-writable policies. Indexes
+  on `state` and `(latitude, longitude)`.
+- `scripts/load-winery-directory.mjs` — unchanged from main; batched (500
+  rows) upsert on `fsq_place_id` into `winery_directory`, via
+  `@supabase/supabase-js`.
+
+This PR does **not** run the loader or touch any live Supabase project —
+only files are added. Applying the migration/load is a separate,
+owner-run step (see "Apply steps").
+
+## History: the FSQ OS Places blocker (2026-09-09, resolved via source swap)
+
+The original plan (per
+`docs/research/winery-enrichment-google-places.md` §2.5) was to seed this
+table from Foursquare's free, open **FSQ OS Places** dataset. Both of that
+dataset's documented free/anonymous access paths were found to be shut off:
+
+1. **Anonymous S3 mirror** (`s3://fsq-os-places-us-east-1/release/...`,
+   `us-east-1`, no credentials). As of 2026-09-09 this bucket contains only
+   `LICENSE.txt` and `NOTICE.txt` at its root — the `release/` prefix that
+   used to hold the parquet data no longer exists.
+2. **Hugging Face mirror** (`foursquare/fsq-os-places`). Now a gated
+   dataset requiring an account, an access-request form, and Foursquare's
+   approval — resolving any parquet file anonymously returns HTTP 401
+   (`x-error-code: GatedRepo`).
+
+No AWS credentials or Hugging Face token were available in that session, and
+HF's gated-dataset approval is an interactive step that couldn't be
+completed non-interactively. That PR (#212) shipped the schema and loader
+only, with three documented options for unblocking: (A) get FSQ OS Places
+HF access, (B) swap to Overture Maps' openly-accessible `places` theme, or
+(C) defer. **This extraction executes Option B.** Overture's `places` theme
+is itself partly built from Foursquare's own open places contribution plus
+other providers (see "License / attribution" above), so this is a related
+but distinct dataset — different license (CDLA-Permissive-2.0, not
+Apache-2.0), different schema (Overture's `categories`/`confidence`
+instead of FSQ's category id list), and a different id space (Overture GERS
+ids instead of FSQ place ids — see "Column naming mismatch" above).
+
+FSQ OS Places' own license/attribution text (Apache-2.0), preserved here in
+case a future PR blends in FSQ data directly:
 
 ```
 © 2025 Foursquare Labs, Inc. All rights reserved.
@@ -204,35 +284,4 @@ You may obtain a copy of the License at: http://www.apache.org/licenses/LICENSE-
 See the License for the specific language governing permissions and limitations under the License.
 
 We also encourage you to join our Placemaker community (https://opensource.foursquare.com/placemaker/)—where you can contribute and provide suggestions to improve the accuracy of the Data for future releases for yourself and others.
-```
-
-Practical implication once data is loaded: our developer docs (or this
-README, since we're distributing derived flat-file data) must keep this
-NOTICE.txt text, and a copy of the Apache 2.0 license text/link, alongside
-the dataset.
-
-## Files in this PR
-
-- `data/winery-directory/README.md` — this file.
-- `data/winery-directory/us-wineries.csv.gz` — **not present**; see blocker
-  above.
-- `supabase/migrations/20260910000000_winery_directory.sql` — creates
-  `public.winery_directory` (empty until loaded), RLS: `select` for
-  `authenticated` only, no client-writable policies. Indexes on `state` and
-  `(latitude, longitude)`.
-- `scripts/load-winery-directory.mjs` — batched (500 rows) upsert on
-  `fsq_place_id` into `winery_directory`, via `@supabase/supabase-js`.
-
-## Apply steps (once a real CSV exists)
-
-```bash
-# 1. Apply the schema
-supabase db push   # or: apply supabase/migrations/20260910000000_winery_directory.sql
-                     # against the target project
-
-# 2. Load the data (service role key required; never ship this key in the app)
-npm install @supabase/supabase-js   # if not already a project dependency
-SUPABASE_URL=https://<project-ref>.supabase.co \
-SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
-node scripts/load-winery-directory.mjs data/winery-directory/us-wineries.csv.gz
 ```
