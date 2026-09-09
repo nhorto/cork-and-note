@@ -78,6 +78,7 @@
     "preset": "jest-expo",
     "testPathIgnorePatterns": [
       "/node_modules/",
+      "/.claude/",
       "/.expo/",
       "/site/"
     ],
