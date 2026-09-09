@@ -651,11 +651,14 @@ export default function WineEntryForm({
               disabled={!varietalInput.trim()}
               activeOpacity={0.85}
               accessibilityRole="button"
-              accessibilityLabel="Add"
+              accessibilityLabel="Add grape"
             >
               <Ionicons name="add" size={22} color={colors.neutral.bg} />
             </TouchableOpacity>
           </View>
+          <Text style={styles.varietalHint}>
+            Not listed? Type the grape and tap +. Add each grape for a blend.
+          </Text>
         </View>
 
         <View style={styles.inputGroup}>
@@ -1047,6 +1050,11 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  varietalHint: {
+    ...typography.body.small,
+    color: colors.neutral.inkTertiary,
+    marginTop: spacing.xs,
   },
   varietalChip: {
     flexDirection: 'row',

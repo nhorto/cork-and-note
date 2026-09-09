@@ -12,7 +12,7 @@ import {
 import theme from '../styles/theme';
 // Single source of truth for the varietal list (shared with the cellar form) —
 // see lib/varietals.js (#134).
-import { WINE_VARIETALS } from '../lib/varietals';
+import { searchVarietals } from '../lib/varietals';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 
@@ -33,9 +33,7 @@ const AutocompleteVarietal = ({
 
   useEffect(() => {
     if (value && value.length > 0 && isFocused) {
-      const filtered = WINE_VARIETALS.filter(varietal =>
-        varietal.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5);
+      const filtered = searchVarietals(value);
       setSuggestions(filtered);
       setShowSuggestions(filtered.length > 0);
     } else {
@@ -46,13 +44,6 @@ const AutocompleteVarietal = ({
 
   const handleFocus = () => {
     setIsFocused(true);
-    if (value && value.length > 0) {
-      const filtered = WINE_VARIETALS.filter(varietal =>
-        varietal.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5);
-      setSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
-    }
   };
 
   const handleBlur = () => {
@@ -123,7 +114,7 @@ const AutocompleteVarietal = ({
             style={styles.suggestionsList}
             keyboardShouldPersistTaps="handled"
             nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
+            showsVerticalScrollIndicator
           >
             {suggestions.map((suggestion, index) => (
               <TouchableOpacity
@@ -133,6 +124,8 @@ const AutocompleteVarietal = ({
                   index === suggestions.length - 1 && styles.lastSuggestionItem
                 ]}
                 onPress={() => handleSuggestionPress(suggestion)}
+                accessibilityRole="button"
+                accessibilityLabel={`Select ${suggestion}`}
                 activeOpacity={0.7}
               >
                 <Text style={styles.suggestionText}>{suggestion}</Text>
