@@ -22,6 +22,7 @@ import {
 import CellarFilterModal from '../../components/CellarFilterModal';
 import Chip from '../../components/Chip';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
+import TonightsPickCard from '../../components/TonightsPickCard';
 import { cellarService, drinkWindowMeta } from '../../lib/cellar';
 import {
   EMPTY_FILTERS,
@@ -267,6 +268,14 @@ export default function CellarScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           stickySectionHeadersEnabled={false}
+          // Tonight's Pick lives with the bottles it chooses from (owner
+          // feedback 2026-09-09 — it left Home for the Somm tab + here).
+          // Collapsible, so it stays out of the way of the list itself.
+          ListHeaderComponent={
+            <View style={styles.tonightsPickWrap}>
+              <TonightsPickCard onRequireCellar={() => router.push('/cellar/add')} />
+            </View>
+          }
           renderSectionHeader={({ section }) =>
             section.title ? (
               <View style={styles.sectionHeader}>
@@ -717,6 +726,7 @@ const styles = StyleSheet.create({
   summary: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: spacing.sm },
 
   listContent: { padding: spacing.lg, paddingBottom: 120 },
+  tonightsPickWrap: { marginBottom: spacing.md },
 
   sectionHeader: {
     flexDirection: 'row',

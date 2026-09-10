@@ -9,7 +9,10 @@ import MapView, { Marker } from 'react-native-maps';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import PinActionModal from '../../components/PinActionModal';
 import WineryNameModal from '../../components/WineryNameModal';
+import { usePro } from '../../hooks/usePro';
+import { haversineKm } from '../../lib/geo';
 import { wineriesService } from '../../lib/wineries';
+import { wineryDirectoryService } from '../../lib/wineryDirectory';
 import { wishlistService } from '../../lib/wishlist';
 import theme from '../../styles/theme';
 
@@ -44,6 +47,15 @@ export default function MapScreen() {
   const [showFabMenu, setShowFabMenu] = useState(false);
   const [showManualModal, setShowManualModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+
+  // Winery discovery (Pro, #203 P2 + owner feedback 2026-09-09): nearby
+  // wineries from OUR directory table shown by default, in their own color,
+  // with filter chips to narrow the map. Zero Google cost — the directory is
+  // our own table (Overture seed).
+  const { isPro, presentPaywall } = usePro();
+  const [discoverPins, setDiscoverPins] = useState([]);
+  const [pinFilter, setPinFilter] = useState('all'); // 'all' | 'visited' | 'wishlist' | 'nearby'
+  const [openingDiscoverId, setOpeningDiscoverId] = useState(null);
 
   // Searchable list of places you've visited (#101).
   const [showPlacesList, setShowPlacesList] = useState(false);
@@ -132,6 +144,60 @@ export default function MapScreen() {
       }
     })();
   }, []);
+
+  // Load nearby directory wineries once location + Pro are known. Pins that
+  // sit on top of a place the user already has (same-ish spot) are dropped so
+  // a visited winery never shows twice in two colors.
+  useEffect(() => {
+    if (!isPro || !userLocation) return;
+    let active = true;
+    (async () => {
+      const res = await wineryDirectoryService.getNearby({
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude,
+        limitCount: 30,
+      });
+      if (!active || !res.success) return;
+      const fresh = res.wineries.filter(
+        (w) =>
+          !userPins.some(
+            (p) =>
+              p.latitude != null &&
+              haversineKm(p.latitude, p.longitude, w.latitude, w.longitude) < 0.15
+          )
+      );
+      setDiscoverPins(fresh);
+    })();
+    return () => {
+      active = false;
+    };
+    // userPins in deps so a newly-saved winery immediately swallows its
+    // duplicate discovery pin.
+  }, [isPro, userLocation, userPins]);
+
+  // Tapping a discovery pin promotes it to a real winery record and opens its
+  // page (same flow as Home's Near You row) — where the Google card enriches it.
+  const handleDiscoverPinPress = async (w) => {
+    if (openingDiscoverId) return;
+    setOpeningDiscoverId(w.id);
+    try {
+      const res = await wineriesService.findOrCreateWinery({
+        name: w.name,
+        latitude: w.latitude,
+        longitude: w.longitude,
+        address: [w.city, w.state].filter(Boolean).join(', ') || null,
+      });
+      const id = res?.winery?.id;
+      if (id != null) {
+        setUserPins((prev) =>
+          prev.some((p) => p.id === id) ? prev : [...prev, res.winery]
+        );
+        router.push(`/winery/${id}`);
+      }
+    } finally {
+      setOpeningDiscoverId(null);
+    }
+  };
 
   const zoomToUserLocation = async () => {
     if (!userLocation) {
@@ -373,7 +439,51 @@ export default function MapScreen() {
       >
         {userPins
           .filter(pin => pin.latitude != null && pin.longitude != null)
+          .filter(pin =>
+            pinFilter === 'all'
+              ? true
+              : pinFilter === 'visited'
+                ? pin.hasVisit
+                : pinFilter === 'wishlist'
+                  ? pin.inWishlist
+                  : false
+          )
           .map(pin => renderPinMarker(pin))}
+
+        {/* Discovery pins (Pro): nearby directory wineries in the accent
+            color, visually apart from visited (sage) and wishlist (slate). */}
+        {isPro &&
+          (pinFilter === 'all' || pinFilter === 'nearby') &&
+          discoverPins.map((w) =>
+            Platform.OS === 'android' ? (
+              <Marker
+                key={`dir-${w.id}`}
+                coordinate={{ latitude: w.latitude, longitude: w.longitude }}
+                pinColor={colors.accent.base}
+                title={w.name}
+                description="Nearby winery — tap to view"
+                onPress={() => handleDiscoverPinPress(w)}
+              />
+            ) : (
+              <Marker
+                key={`dir-${w.id}`}
+                coordinate={{ latitude: w.latitude, longitude: w.longitude }}
+                tracksViewChanges={false}
+                onPress={() => handleDiscoverPinPress(w)}
+              >
+                <View style={styles.markerContainer}>
+                  <View style={styles.markerLabelContainer}>
+                    <Text style={styles.markerLabel} numberOfLines={1}>
+                      {w.name}
+                    </Text>
+                  </View>
+                  <View style={[styles.wineryMarker, styles.discoverMarker]}>
+                    <Ionicons name="wine-outline" size={16} color={colors.neutral.ink} />
+                  </View>
+                </View>
+              </Marker>
+            )
+          )}
 
         {tempPin && (
           <Marker
@@ -402,6 +512,56 @@ export default function MapScreen() {
           <Ionicons name="list" size={18} color={colors.primary.base} />
         </TouchableOpacity>
       )}
+
+      {/* Pin filter chips: All · Visited · Wishlist · Nearby (owner feedback
+          2026-09-09). "Nearby" is the Pro discovery layer; free users get the
+          paywall from its chip rather than a silent no-op. */}
+      <View
+        style={[
+          styles.filterChips,
+          { top: visitedPlaces.length > 0 || wishlistPlaces.length > 0 ? 112 : 60 },
+        ]}
+      >
+        {[
+          ['all', 'All'],
+          ['visited', 'Visited'],
+          ['wishlist', 'Wishlist'],
+          ['nearby', 'Nearby'],
+        ].map(([key, label]) => {
+          const active = pinFilter === key;
+          const dotColor =
+            key === 'visited'
+              ? colors.status.visited
+              : key === 'wishlist'
+                ? colors.status.wishlist
+                : key === 'nearby'
+                  ? colors.accent.base
+                  : null;
+          return (
+            <TouchableOpacity
+              key={key}
+              style={[styles.filterChip, active && styles.filterChipActive]}
+              activeOpacity={0.85}
+              onPress={() => {
+                if (key === 'nearby' && !isPro) {
+                  presentPaywall('places');
+                  return;
+                }
+                setPinFilter(key);
+              }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={`Show ${label.toLowerCase()} pins`}
+            >
+              {dotColor && <View style={[styles.filterDot, { backgroundColor: dotColor }]} />}
+              <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
+                {label}
+              </Text>
+              {key === 'nearby' && !isPro && <Text style={styles.filterChipPro}>PRO</Text>}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       {/* FAB Button */}
       <TouchableOpacity
@@ -894,6 +1054,43 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.accent.border,
     ...shadows.medium,
+  },
+  // Pin filter chips (under the search pill)
+  filterChips: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  filterChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: colors.neutral.bg,
+    borderWidth: 1,
+    borderColor: colors.neutral.border,
+    borderRadius: borderRadius.round,
+    paddingHorizontal: spacing.sm + 2,
+    minHeight: 32,
+    ...shadows.soft,
+  },
+  filterChipActive: {
+    backgroundColor: colors.primary.base,
+    borderColor: colors.primary.base,
+  },
+  filterChipText: { ...typography.body.small, color: colors.neutral.ink, fontWeight: '600' },
+  filterChipTextActive: { color: colors.neutral.bg },
+  filterDot: { width: 8, height: 8, borderRadius: 4 },
+  filterChipPro: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    color: colors.accent.ink,
+  },
+  discoverMarker: {
+    backgroundColor: colors.accent.base,
+    borderColor: colors.neutral.bg,
   },
   searchPillText: {
     flex: 1,
