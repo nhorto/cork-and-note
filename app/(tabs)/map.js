@@ -3,7 +3,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
@@ -14,6 +14,7 @@ import { haversineKm } from '../../lib/geo';
 import { wineriesService } from '../../lib/wineries';
 import { wineryDirectoryService } from '../../lib/wineryDirectory';
 import { wishlistService } from '../../lib/wishlist';
+import { buildClusterIndex, regionToBoundingBox, regionToZoom } from '../../utils/MapUtils';
 import theme from '../../styles/theme';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
@@ -148,18 +149,19 @@ export default function MapScreen() {
     })();
   }, []);
 
-  // Load nearby directory wineries once location + Pro are known. Pins that
+  // Load directory wineries for whatever the map is LOOKING AT (#224), not
+  // the phone's physical location — panning to Napa from Virginia shows Napa.
+  // Debounced so settling after a fling fires one query, and the box is
+  // padded so pins just past the screen edge already exist mid-pan. Pins that
   // sit on top of a place the user already has (same-ish spot) are dropped so
   // a visited winery never shows twice in two colors.
   useEffect(() => {
-    if (!isPro || !userLocation) return;
+    if (!isPro) return;
     let active = true;
-    (async () => {
-      const res = await wineryDirectoryService.getNearby({
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude,
-        limitCount: 30,
-      });
+    const t = setTimeout(async () => {
+      const res = await wineryDirectoryService.getInBounds(
+        regionToBoundingBox(region, 0.3)
+      );
       if (!active || !res.success) return;
       const fresh = res.wineries.filter(
         (w) =>
@@ -170,13 +172,79 @@ export default function MapScreen() {
           )
       );
       setDiscoverPins(fresh);
-    })();
+    }, 350);
     return () => {
       active = false;
+      clearTimeout(t);
     };
     // userPins in deps so a newly-saved winery immediately swallows its
     // duplicate discovery pin.
-  }, [isPro, userLocation, userPins]);
+  }, [isPro, region, userPins]);
+
+  // Clustering (#224): all visible pins go through one supercluster index so
+  // a zoomed-out region shows count bubbles instead of a wall of overlapping
+  // markers. Name labels only render when the map is close enough for them to
+  // be readable; the threshold matches the initial centered-on-you view
+  // (longitudeDelta 0.1 ≈ zoom 11.8).
+  const zoom = regionToZoom(region);
+  const showLabels = zoom >= 11.5;
+
+  const visibleUserPins = useMemo(
+    () =>
+      userPins
+        .filter((pin) => pin.latitude != null && pin.longitude != null)
+        .filter((pin) =>
+          pinFilter === 'all'
+            ? true
+            : pinFilter === 'visited'
+              ? pin.hasVisit
+              : pinFilter === 'wishlist'
+                ? pin.inWishlist
+                : false
+        ),
+    [userPins, pinFilter]
+  );
+
+  const visibleDiscoverPins = useMemo(
+    () => (isPro && (pinFilter === 'all' || pinFilter === 'nearby') ? discoverPins : []),
+    [isPro, pinFilter, discoverPins]
+  );
+
+  const clusterIndex = useMemo(
+    () =>
+      buildClusterIndex([
+        ...visibleUserPins.map((pin) => ({ kind: 'user', pin })),
+        ...visibleDiscoverPins.map((pin) => ({ kind: 'discover', pin })),
+      ]),
+    [visibleUserPins, visibleDiscoverPins]
+  );
+
+  const mapFeatures = useMemo(() => {
+    const { west, south, east, north } = regionToBoundingBox(region, 0.2);
+    return clusterIndex.getClusters([west, south, east, north], Math.round(zoom));
+  }, [clusterIndex, region, zoom]);
+
+  // Tapping a bubble zooms to just past the level where it breaks apart.
+  const handleClusterPress = (cluster) => {
+    let expansionZoom;
+    try {
+      expansionZoom = clusterIndex.getClusterExpansionZoom(cluster.properties.cluster_id);
+    } catch {
+      expansionZoom = zoom + 2;
+    }
+    const [longitude, latitude] = cluster.geometry.coordinates;
+    const longitudeDelta = 360 / Math.pow(2, Math.min(expansionZoom + 0.5, 17));
+    mapRef.current?.animateToRegion(
+      {
+        latitude,
+        longitude,
+        latitudeDelta:
+          longitudeDelta * (region.latitudeDelta / Math.max(region.longitudeDelta, 0.00001)),
+        longitudeDelta,
+      },
+      400
+    );
+  };
 
   // Debounced directory search for the Find tab.
   useEffect(() => {
@@ -420,9 +488,12 @@ export default function MapScreen() {
       );
     }
 
+    // showLabels in the key: with tracksViewChanges off the marker is a
+    // one-time snapshot, so crossing the label zoom threshold has to remount
+    // the marker for the label to actually appear/disappear.
     return (
       <Marker
-        key={pin.id}
+        key={`${pin.id}-${showLabels ? 'lbl' : 'dot'}`}
         coordinate={{
           latitude: pin.latitude,
           longitude: pin.longitude
@@ -431,11 +502,13 @@ export default function MapScreen() {
         onPress={() => handlePinPress(pin)}
       >
         <View style={styles.markerContainer}>
-          <View style={styles.markerLabelContainer}>
-            <Text style={styles.markerLabel} numberOfLines={1}>
-              {pin.name}
-            </Text>
-          </View>
+          {showLabels && (
+            <View style={styles.markerLabelContainer}>
+              <Text style={styles.markerLabel} numberOfLines={1}>
+                {pin.name}
+              </Text>
+            </View>
+          )}
           <View style={[
             styles.wineryMarker,
             pin.hasVisit && styles.visitedMarker,
@@ -443,6 +516,73 @@ export default function MapScreen() {
           ]}>
             <Ionicons name="wine" size={16} color={colors.neutral.bg} />
           </View>
+        </View>
+      </Marker>
+    );
+  };
+
+  // Discovery pins (Pro): nearby directory wineries in the accent color,
+  // visually apart from visited (sage) and wishlist (slate).
+  const renderDiscoverMarker = (w) =>
+    Platform.OS === 'android' ? (
+      <Marker
+        key={`dir-${w.id}`}
+        coordinate={{ latitude: w.latitude, longitude: w.longitude }}
+        pinColor={colors.accent.base}
+        title={w.name}
+        description="Nearby winery — tap to view"
+        onPress={() => handleDiscoverPinPress(w)}
+      />
+    ) : (
+      <Marker
+        key={`dir-${w.id}-${showLabels ? 'lbl' : 'dot'}`}
+        coordinate={{ latitude: w.latitude, longitude: w.longitude }}
+        tracksViewChanges={false}
+        onPress={() => handleDiscoverPinPress(w)}
+      >
+        <View style={styles.markerContainer}>
+          {showLabels && (
+            <View style={styles.markerLabelContainer}>
+              <Text style={styles.markerLabel} numberOfLines={1}>
+                {w.name}
+              </Text>
+            </View>
+          )}
+          <View style={[styles.wineryMarker, styles.discoverMarker]}>
+            <Ionicons name="wine-outline" size={16} color={colors.neutral.ink} />
+          </View>
+        </View>
+      </Marker>
+    );
+
+  const renderClusterMarker = (cluster) => {
+    const [longitude, latitude] = cluster.geometry.coordinates;
+    const count = cluster.properties.point_count;
+    // A bubble of nothing-but-discovery pins keeps the discovery accent so
+    // the two layers stay tellable-apart even when collapsed.
+    const allDiscover = cluster.properties.discoverCount === count;
+    const size = count >= 100 ? 52 : count >= 25 ? 44 : 36;
+    return (
+      <Marker
+        key={`cluster-${cluster.properties.cluster_id}`}
+        coordinate={{ latitude, longitude }}
+        anchor={{ x: 0.5, y: 0.5 }}
+        // Android only renders custom marker views reliably while
+        // tracksViewChanges stays on (the Feb 2026 marker bug); clusters are
+        // few enough on screen that the extra redraws don't matter.
+        tracksViewChanges={Platform.OS === 'android'}
+        onPress={() => handleClusterPress(cluster)}
+      >
+        <View
+          style={[
+            styles.clusterMarker,
+            allDiscover && styles.clusterMarkerDiscover,
+            { width: size, height: size, borderRadius: size / 2 },
+          ]}
+        >
+          <Text style={[styles.clusterCount, allDiscover && styles.clusterCountDiscover]}>
+            {cluster.properties.point_count_abbreviated}
+          </Text>
         </View>
       </Marker>
     );
@@ -459,53 +599,15 @@ export default function MapScreen() {
         showsUserLocation={true}
         showsMyLocationButton={false}
       >
-        {userPins
-          .filter(pin => pin.latitude != null && pin.longitude != null)
-          .filter(pin =>
-            pinFilter === 'all'
-              ? true
-              : pinFilter === 'visited'
-                ? pin.hasVisit
-                : pinFilter === 'wishlist'
-                  ? pin.inWishlist
-                  : false
-          )
-          .map(pin => renderPinMarker(pin))}
-
-        {/* Discovery pins (Pro): nearby directory wineries in the accent
-            color, visually apart from visited (sage) and wishlist (slate). */}
-        {isPro &&
-          (pinFilter === 'all' || pinFilter === 'nearby') &&
-          discoverPins.map((w) =>
-            Platform.OS === 'android' ? (
-              <Marker
-                key={`dir-${w.id}`}
-                coordinate={{ latitude: w.latitude, longitude: w.longitude }}
-                pinColor={colors.accent.base}
-                title={w.name}
-                description="Nearby winery — tap to view"
-                onPress={() => handleDiscoverPinPress(w)}
-              />
-            ) : (
-              <Marker
-                key={`dir-${w.id}`}
-                coordinate={{ latitude: w.latitude, longitude: w.longitude }}
-                tracksViewChanges={false}
-                onPress={() => handleDiscoverPinPress(w)}
-              >
-                <View style={styles.markerContainer}>
-                  <View style={styles.markerLabelContainer}>
-                    <Text style={styles.markerLabel} numberOfLines={1}>
-                      {w.name}
-                    </Text>
-                  </View>
-                  <View style={[styles.wineryMarker, styles.discoverMarker]}>
-                    <Ionicons name="wine-outline" size={16} color={colors.neutral.ink} />
-                  </View>
-                </View>
-              </Marker>
-            )
-          )}
+        {/* User + discovery pins, clustered (#224): overlapping pins collapse
+            into count bubbles until you zoom in; tap a bubble to expand. */}
+        {mapFeatures.map((f) =>
+          f.properties.cluster
+            ? renderClusterMarker(f)
+            : f.properties.kind === 'discover'
+              ? renderDiscoverMarker(f.properties.pin)
+              : renderPinMarker(f.properties.pin)
+        )}
 
         {tempPin && (
           <Marker
@@ -1167,6 +1269,27 @@ const styles = StyleSheet.create({
   discoverMarker: {
     backgroundColor: colors.accent.base,
     borderColor: colors.neutral.bg,
+  },
+  // Cluster count bubbles (#224); width/height/radius are set inline since
+  // they scale with the count.
+  clusterMarker: {
+    backgroundColor: colors.primary.base,
+    borderWidth: 2,
+    borderColor: colors.neutral.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.medium,
+  },
+  clusterMarkerDiscover: {
+    backgroundColor: colors.accent.base,
+  },
+  clusterCount: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.neutral.bg,
+  },
+  clusterCountDiscover: {
+    color: colors.neutral.ink,
   },
   searchPillText: {
     flex: 1,
