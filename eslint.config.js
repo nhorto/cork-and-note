@@ -8,10 +8,18 @@ module.exports = defineConfig([
     ignores: ['dist/*', 'site/dist/*'],
   },
   {
-    // Unit tests run under Jest in Node, not in the app runtime.
+    // Unit tests run under Jest in Node, not in the app runtime — so they get
+    // both the Jest globals and CommonJS/Node ones (a test that walks the repo
+    // to lint theme tokens legitimately needs `require` and `__dirname`).
     files: ['__tests__/**/*.js'],
     languageOptions: {
       globals: {
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        require: 'readonly',
+        module: 'writable',
+        process: 'readonly',
+        console: 'readonly',
         jest: 'readonly',
         describe: 'readonly',
         it: 'readonly',
