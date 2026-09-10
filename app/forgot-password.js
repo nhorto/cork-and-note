@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createThemedStyles } from '../styles/ThemeProvider';
 import { AuthContext } from './_layout';
 
@@ -22,6 +23,7 @@ export default function ForgotPasswordScreen() {
   const { colors, styles } = useScreenTheme();
 
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { resetPassword } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +39,9 @@ export default function ForgotPasswordScreen() {
     setIsLoading(true);
 
     try {
-      const { error } = await resetPassword(email);
+      // Same normalisation as sign-up / login: the address has to match the one
+      // stored on the account or the reset email goes nowhere.
+      const { error } = await resetPassword(email.trim().toLowerCase());
 
       if (error) {
         Alert.alert('Error', error.message);
@@ -57,7 +61,7 @@ export default function ForgotPasswordScreen() {
       style={styles.container}
     >
       <TouchableOpacity
-        style={styles.backButton}
+        style={[styles.backButton, { top: insets.top + 4 }]}
         onPress={() => router.back()}
         accessibilityRole="button"
         accessibilityLabel="Go back"
@@ -104,6 +108,9 @@ export default function ForgotPasswordScreen() {
                 value={email}
                 onChangeText={setEmail}
                 autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="email"
+                textContentType="emailAddress"
                 keyboardType="email-address"
                 placeholderTextColor={colors.neutral.placeholder}
               />
@@ -147,11 +154,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.bg,
   },
   backButton: {
+    // `top` comes from the safe-area inset inline — a hardcoded value lands
+    // under the notch on some devices and stops receiving taps entirely.
     position: 'absolute',
-    top: 50,
-    left: 20,
+    left: spacing.md,
     zIndex: 10,
-    padding: 8,
+    // 44pt minimum touch target (launch plan §3.3)
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   contentContainer: {
     flex: 1,
