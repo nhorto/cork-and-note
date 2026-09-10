@@ -19,6 +19,7 @@ import {
 import AskSommelierBox from '../../components/AskSommelierBox';
 import LogFab from '../../components/LogFab';
 import NearYouRow from '../../components/NearYouRow';
+import UpgradePill from '../../components/UpgradePill';
 import { drinkWindowMeta, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
 import { varietalText } from '../../lib/varietals';
@@ -51,10 +52,21 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
+
+      // The tab navigator can focus Home while RootLayout is still restoring
+      // the persisted Supabase session. Starting user-scoped reads in that
+      // window produces a misleading "User not authenticated" development
+      // error even though AuthContext becomes authenticated moments later.
+      // user.id is a dependency, so restoration immediately starts the load.
+      if (!user?.id) {
+        return () => {
+          active = false;
+        };
+      }
+
       (async () => {
         try {
-          const [statsRes, visitsRes, wishRes, cellarRes, insightsRes] = await Promise.all([
-            visitsService.getVisitStats().catch(() => ({ success: false })),
+          const [visitsRes, wishRes, cellarRes, insightsRes] = await Promise.all([
             visitsService.getUserVisits().catch(() => ({ success: false })),
             wishlistService.getUserWishlist().catch(() => ({ success: false })),
             cellarService.getCellarStats().catch(() => ({ success: false })),
@@ -65,12 +77,14 @@ export default function HomeScreen() {
           // If every critical load failed, surface the error banner instead of
           // pretending the account is empty.
           setLoadFailed(
-            [statsRes, visitsRes, wishRes, cellarRes].every((r) => !r?.success)
+            [visitsRes, wishRes, cellarRes].every((r) => !r?.success)
           );
 
+          const visits = visitsRes?.visits ?? [];
+          const visitStats = visitsService.summarizeVisitStats(visits);
           setStats({
-            wines: statsRes?.stats?.totalWines ?? 0,
-            places: statsRes?.stats?.totalWineries ?? 0,
+            wines: visitStats.totalWines,
+            places: visitStats.totalWineries,
             wishlist: wishRes?.wishlist?.length ?? wishRes?.items?.length ?? 0,
           });
 
@@ -85,7 +99,6 @@ export default function HomeScreen() {
           setInsights(insightsRes?.success ? insightsRes.insights : null);
 
           // Flatten the most recent wines across recent visits.
-          const visits = visitsRes?.visits ?? [];
           const items = [];
           for (const visit of visits) {
             for (const wine of visit.wines ?? []) {
@@ -115,7 +128,7 @@ export default function HomeScreen() {
       return () => {
         active = false;
       };
-    }, [reloadKey])
+    }, [reloadKey, user?.id])
   );
 
   const firstName =
@@ -137,14 +150,19 @@ export default function HomeScreen() {
             <Text style={styles.welcome}>WELCOME BACK</Text>
             <Text style={styles.name}>{firstName}</Text>
           </View>
-          <TouchableOpacity
-            style={styles.avatar}
-            onPress={() => router.push('/(tabs)/profile')}
-            accessibilityRole="button"
-            accessibilityLabel="Profile & settings"
-          >
-            <Text style={styles.avatarText}>{initials}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            {/* Standing paywall route for free users (owner ask 2026-09-10);
+                renders nothing for Pro. */}
+            <UpgradePill />
+            <TouchableOpacity
+              style={styles.avatar}
+              onPress={() => router.push('/(tabs)/profile')}
+              accessibilityRole="button"
+              accessibilityLabel="Profile & settings"
+            >
+              <Text style={styles.avatarText}>{initials}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.headerBorder} />
       </View>
@@ -476,6 +494,11 @@ const styles = StyleSheet.create({
     color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: 2,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   avatar: {
     width: 42,

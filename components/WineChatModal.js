@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: colors.overlay.scrim, // colors.neutral.ink (plum ink) at 40%
+    backgroundColor: colors.overlay.scrim,
   },
   modalContainer: {
     height: MODAL_HEIGHT,

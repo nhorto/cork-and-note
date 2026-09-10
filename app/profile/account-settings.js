@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
   Alert,
+  AppState,
   Linking,
   ScrollView,
   StyleSheet,
@@ -93,6 +94,12 @@ export default function AccountSettingsScreen() {
   // Check current location permission status on component mount
   useEffect(() => {
     checkLocationPermission();
+    // Permission can only be revoked in the OS settings. Refresh the switch
+    // when the user comes back so it always reflects the real system state.
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') checkLocationPermission();
+    });
+    return () => subscription.remove();
   }, []);
 
   const checkLocationPermission = async () => {
@@ -120,26 +127,29 @@ export default function AccountSettingsScreen() {
         } else {
           setLocationEnabled(false);
           setLocationPermissionStatus(status);
-            Alert.alert(
-              'Disable Location Services',
-              'To completely disable location access, please go to your device Settings > Privacy & Security > Location Services and turn off location access for this app.',
-              [
-                { text: 'OK', style: 'default' }
-              ]
-            );
+          Alert.alert(
+            'Location access is off',
+            'Cork & Note cannot change this permission from inside the app. Open device settings and allow location access to use your position on the map.',
+            [
+              { text: 'Not now', style: 'cancel' },
+              { text: 'Open Settings', onPress: () => Linking.openSettings() },
+            ]
+          );
         }
       } catch (error) {
         console.error('Error requesting location permission:', error);
         Alert.alert('Error', 'Unable to request location permission.');
       }
     } else {
-      // User wants to disable location - show info about how to disable in settings
-      setLocationEnabled(false);
+      // iOS and Android only let the user revoke an existing grant in device
+      // settings. Keep the switch in sync with the actual permission until the
+      // user changes it there.
       Alert.alert(
-        'Disable Location Services',
-        'To completely disable location access, please go to your device Settings > Privacy & Security > Location Services and turn off location access for this app.',
+        'Change location access',
+        'Open device settings to turn off location access for Cork & Note.',
         [
-          { text: 'OK', style: 'default' }
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
         ]
       );
     }

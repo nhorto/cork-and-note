@@ -77,3 +77,42 @@ describe('summarizeVisits', () => {
     expect(result.topWinery.name).toBe('Hark');
   });
 });
+
+describe('summarizeVisitStats', () => {
+  it('returns zero counters for empty or invalid input', () => {
+    const empty = { totalVisits: 0, totalWineries: 0, totalWines: 0 };
+
+    expect(visitsService.summarizeVisitStats([])).toEqual(empty);
+    expect(visitsService.summarizeVisitStats(null)).toEqual(empty);
+  });
+
+  it('matches the visit stats semantics without another authenticated request', () => {
+    const visits = [
+      { ...visit(1, 'Barrel Oak', '2026-01-01'), wines: [{ id: 'w1' }, { id: 'w2' }] },
+      { ...visit(1, 'Barrel Oak', '2026-02-01'), wines: [{ id: 'w3' }] },
+      { ...visit(2, 'Hark', '2026-03-01'), wines: [] },
+    ];
+
+    expect(visitsService.summarizeVisitStats(visits)).toEqual({
+      totalVisits: 3,
+      totalWineries: 2,
+      totalWines: 3,
+    });
+  });
+
+  it('counts location-less tasting wines without inventing a place', () => {
+    expect(visitsService.summarizeVisitStats([
+      { ...visit(null, null, '2026-04-01'), wines: [{ id: 'w1' }] },
+    ])).toEqual({
+      totalVisits: 1,
+      totalWineries: 0,
+      totalWines: 1,
+    });
+  });
+
+  it('treats a missing wines relation as an empty list', () => {
+    expect(visitsService.summarizeVisitStats([
+      visit(1, 'Barrel Oak', '2026-01-01'),
+    ]).totalWines).toBe(0);
+  });
+});

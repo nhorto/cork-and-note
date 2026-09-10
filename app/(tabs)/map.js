@@ -4,12 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, AppState, FlatList, Linking, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import PinActionModal from '../../components/PinActionModal';
 import WineryNameModal from '../../components/WineryNameModal';
 import { usePro } from '../../hooks/usePro';
+import { getMapLocation } from '../../lib/mapLocation';
 import { haversineKm } from '../../lib/geo';
 import { wineriesService } from '../../lib/wineries';
 import { wineryDirectoryService } from '../../lib/wineryDirectory';
@@ -44,12 +45,17 @@ export default function MapScreen() {
   });
 
   const [userLocation, setUserLocation] = useState(null);
+  // null | 'permission' | 'services' | 'unavailable'. Location is optional,
+  // so a failed GPS lookup should become recoverable UI, never a raw native
+  // error or a blocker for manually dropping a pin.
+  const [locationIssue, setLocationIssue] = useState(null);
+  const [locating, setLocating] = useState(false);
   const [userPins, setUserPins] = useState([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
   const [pinsError, setPinsError] = useState(false);
-  // The welcome hint self-destructs after the first pin; the "?" button
-  // re-shows it on demand (#170 Layer C).
+  // Welcome can be dismissed even before saving a place; help reopens it.
   const [showHelpHint, setShowHelpHint] = useState(false);
+  const [welcomeDismissed, setWelcomeDismissed] = useState(false);
   const [tempPin, setTempPin] = useState(null);
   const [showNameModal, setShowNameModal] = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
@@ -64,6 +70,8 @@ export default function MapScreen() {
   // our own table (Overture seed).
   const { isPro, presentPaywall } = usePro();
   const [discoverPins, setDiscoverPins] = useState([]);
+  const [discoveryStatus, setDiscoveryStatus] = useState('loading');
+  const [discoveryRetry, setDiscoveryRetry] = useState(0);
   const [pinFilter, setPinFilter] = useState('all'); // 'all' | 'visited' | 'wishlist' | 'nearby'
   const [openingDiscoverId, setOpeningDiscoverId] = useState(null);
 
@@ -73,6 +81,7 @@ export default function MapScreen() {
   // "Find" tab (Pro, owner feedback 2026-09-09): search the whole winery
   // directory by name, nearest first. Debounced; our own table, zero API cost.
   const [directoryResults, setDirectoryResults] = useState([]);
+  const [searchStatus, setSearchStatus] = useState('idle');
   const [listTab, setListTab] = useState('visited'); // 'visited' | 'wishlist' (#97)
 
   // Places you've actually been (visited) and wineries you've saved (wishlist).
@@ -129,34 +138,98 @@ export default function MapScreen() {
     }
   };
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') return;
-
-        const loc = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced
-        });
-        const coords = {
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude
-        };
-        setUserLocation(coords);
-
-        // Center the map on the user's location once we have it.
-        const userRegion = {
-          ...coords,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        };
-        setRegion(userRegion);
-        mapRef.current?.animateToRegion(userRegion, 1000);
-      } catch (error) {
-        console.error('Error getting location:', error);
+  const getCurrentLocation = useCallback(async () => {
+    setLocating(true);
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync();
+      if (permission.status !== 'granted') {
+        setLocationIssue('permission');
+        return null;
       }
-    })();
+
+      const servicesEnabled = await Location.hasServicesEnabledAsync();
+      if (!servicesEnabled) {
+        setLocationIssue('services');
+        return null;
+      }
+
+      // Bound the native lookup so simulators and indoor devices without a
+      // GPS fix stay usable instead of leaving the UI spinning indefinitely.
+      const loc = await getMapLocation();
+      const coordinate = {
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      };
+      setUserLocation(coordinate);
+      setLocationIssue(null);
+      return coordinate;
+    } catch {
+      // A granted permission does not guarantee a fix (notably when a
+      // simulator has no location selected). Keep the map usable and explain
+      // what the user can do next instead of surfacing the native exception.
+      setLocationIssue('unavailable');
+      return null;
+    } finally {
+      setLocating(false);
+    }
   }, []);
+
+  const centerMapOn = useCallback((coordinate, delta = 0.05) => {
+    const nextRegion = {
+      ...coordinate,
+      latitudeDelta: delta,
+      longitudeDelta: delta,
+    };
+    setRegion(nextRegion);
+    mapRef.current?.animateToRegion(nextRegion, 1000);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const coordinate = await getCurrentLocation();
+      if (active && coordinate) centerMapOn(coordinate, 0.1);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [centerMapOn, getCurrentLocation]);
+
+  // If the permission CTA took the user to Account settings, resolve the
+  // stale banner automatically when they come back to the map.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      if (locationIssue !== 'permission') return () => { active = false; };
+
+      (async () => {
+        try {
+          const { status } = await Location.getForegroundPermissionsAsync();
+          if (active && status === 'granted') {
+            const coordinate = await getCurrentLocation();
+            if (active && coordinate) centerMapOn(coordinate, 0.1);
+          }
+        } catch {
+          // Keep the existing permission guidance visible.
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, [centerMapOn, getCurrentLocation, locationIssue])
+  );
+
+  // Opening device settings backgrounds the app without changing navigation
+  // focus. Retry when it becomes active so the banner recovers by itself.
+  useEffect(() => {
+    if (locationIssue !== 'services') return undefined;
+    const subscription = AppState.addEventListener('change', async (state) => {
+      if (state !== 'active') return;
+      const coordinate = await getCurrentLocation();
+      if (coordinate) centerMapOn(coordinate, 0.1);
+    });
+    return () => subscription.remove();
+  }, [centerMapOn, getCurrentLocation, locationIssue]);
 
   // Load directory wineries for whatever the map is LOOKING AT (#224), not
   // the phone's physical location — panning to Napa from Virginia shows Napa.
@@ -167,11 +240,18 @@ export default function MapScreen() {
   useEffect(() => {
     if (!isPro) return;
     let active = true;
+    setDiscoveryStatus('loading');
     const t = setTimeout(async () => {
       const res = await wineryDirectoryService.getInBounds(
         regionToBoundingBox(region, 0.3)
       );
-      if (!active || !res.success) return;
+      if (!active) return;
+      if (!res.success) {
+        setDiscoverPins([]);
+        setDiscoveryStatus('error');
+        return;
+      }
+      setDiscoveryStatus(res.wineries.length ? 'ready' : 'empty');
       const fresh = res.wineries.filter(
         (w) =>
           !userPins.some(
@@ -188,7 +268,7 @@ export default function MapScreen() {
     };
     // userPins in deps so a newly-saved winery immediately swallows its
     // duplicate discovery pin.
-  }, [isPro, region, userPins]);
+  }, [isPro, region, userPins, discoveryRetry]);
 
   // Clustering (#224): all visible pins go through one supercluster index so
   // a zoomed-out region shows count bubbles instead of a wall of overlapping
@@ -301,17 +381,23 @@ export default function MapScreen() {
     const q = placeSearch.trim();
     if (q.length < 2) {
       setDirectoryResults([]);
+      setSearchStatus('idle');
       return;
     }
+    let active = true;
+    setDirectoryResults([]);
+    setSearchStatus('loading');
     const t = setTimeout(async () => {
       const res = await wineryDirectoryService.searchByName({
         query: q,
         latitude: userLocation?.latitude ?? null,
         longitude: userLocation?.longitude ?? null,
       });
+      if (!active) return;
+      setSearchStatus(res.success ? 'ready' : 'error');
       if (res.success) setDirectoryResults(res.wineries);
     }, 300);
-    return () => clearTimeout(t);
+    return () => { active = false; clearTimeout(t); };
   }, [listTab, placeSearch, isPro, userLocation]);
 
   // Tapping a discovery pin promotes it to a real winery record and opens its
@@ -342,36 +428,8 @@ export default function MapScreen() {
   };
 
   const zoomToUserLocation = async () => {
-    if (!userLocation) {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Location permission is required.');
-          return;
-        }
-
-        const loc = await Location.getCurrentPositionAsync({});
-        const userLoc = {
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude
-        };
-        setUserLocation(userLoc);
-
-        mapRef.current?.animateToRegion({
-          ...userLoc,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }, 1000);
-      } catch (error) {
-        Alert.alert('Location Error', 'Unable to get your current location.');
-      }
-    } else {
-      mapRef.current?.animateToRegion({
-        ...userLocation,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      }, 1000);
-    }
+    const coordinate = userLocation ?? await getCurrentLocation();
+    if (coordinate) centerMapOn(coordinate);
   };
 
   const handleMapLongPress = useCallback((event) => {
@@ -382,31 +440,49 @@ export default function MapScreen() {
 
   const dropPinAtMyLocation = async () => {
     setShowFabMenu(false);
-
-    if (userLocation) {
-      setTempPin(userLocation);
-      setShowNameModal(true);
-    } else {
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Location permission is required to drop a pin.');
-          return;
-        }
-
-        const loc = await Location.getCurrentPositionAsync({});
-        const coordinate = {
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude
-        };
-        setUserLocation(coordinate);
-        setTempPin(coordinate);
-        setShowNameModal(true);
-      } catch (error) {
-        Alert.alert('Location Error', 'Unable to get your current location.');
-      }
-    }
+    const coordinate = userLocation ?? await getCurrentLocation();
+    if (!coordinate) return;
+    setTempPin(coordinate);
+    setShowNameModal(true);
   };
+
+  const openLocationHelp = async () => {
+    if (locationIssue === 'permission') {
+      router.push('/profile/account-settings');
+      return;
+    }
+    if (locationIssue === 'services') {
+      try {
+        await Linking.openSettings();
+      } catch {
+        Alert.alert(
+          'Open device settings',
+          'Turn on Location Services in your device settings, then return to Cork & Note.'
+        );
+      }
+      return;
+    }
+    const coordinate = await getCurrentLocation();
+    if (coordinate) centerMapOn(coordinate, 0.1);
+  };
+
+  const locationIssueContent = locationIssue === 'permission'
+    ? {
+        title: 'Location access is off',
+        message: 'Enable it in Account settings, or long-press the map to place a pin manually.',
+        action: 'Account settings',
+      }
+    : locationIssue === 'services'
+      ? {
+          title: 'Location Services are off',
+          message: 'Turn them on in device settings, or long-press the map to place a pin manually.',
+          action: 'Open settings',
+        }
+      : {
+          title: 'Couldn\'t find your location',
+          message: 'Check your signal and try again, or long-press the map to place a pin manually.',
+          action: locating ? 'Finding location…' : 'Try again',
+        };
 
   const handleSavePin = async (name, coordinate) => {
     const { success, winery, error } = await wineriesService.createWinery({
@@ -647,7 +723,7 @@ export default function MapScreen() {
         region={region}
         onRegionChangeComplete={onRegionChangeComplete}
         onLongPress={handleMapLongPress}
-        showsUserLocation={true}
+        showsUserLocation={Boolean(userLocation)}
         showsMyLocationButton={false}
       >
         {/* User + discovery pins, clustered (#224): overlapping pins collapse
@@ -668,21 +744,22 @@ export default function MapScreen() {
         )}
       </MapView>
 
-      {/* Search your visited places (#101). Shown once there's at least one
-          place to search; sits where the welcome hint would otherwise be. */}
-      {(visitedPlaces.length > 0 || wishlistPlaces.length > 0) && (
+      {/* Search stays available before the first saved or visited winery. */}
+      {(
         <TouchableOpacity
           style={styles.searchPill}
           activeOpacity={0.85}
           onPress={() => {
             // Open to whichever list has something to show.
-            setListTab(visitedPlaces.length === 0 && wishlistPlaces.length > 0 ? 'wishlist' : 'visited');
+            setListTab(isPro ? 'find' : wishlistPlaces.length > 0 && visitedPlaces.length === 0 ? 'wishlist' : 'visited');
+            setWelcomeDismissed(true);
+            setShowHelpHint(false);
             setShowPlacesList(true);
           }}
         >
           <Ionicons name="search" size={18} color={colors.neutral.inkTertiary} />
           <Text style={styles.searchPillText} numberOfLines={1}>
-            Your places &amp; wishlist
+            Search wineries &amp; your places
           </Text>
           <Ionicons name="list" size={18} color={colors.primary.ink} />
         </TouchableOpacity>
@@ -694,7 +771,7 @@ export default function MapScreen() {
       <View
         style={[
           styles.filterChips,
-          { top: visitedPlaces.length > 0 || wishlistPlaces.length > 0 ? 112 : 60 },
+          { top: 112 },
         ]}
       >
         {[
@@ -816,11 +893,13 @@ export default function MapScreen() {
 
       {/* Location Button */}
       <TouchableOpacity
-        style={styles.locationButton}
+        style={[styles.locationButton, locating && styles.controlButtonDisabled]}
         onPress={zoomToUserLocation}
+        disabled={locating}
         activeOpacity={0.7}
         accessibilityRole="button"
         accessibilityLabel="Center on my location"
+        accessibilityState={{ disabled: locating, busy: locating }}
       >
         <Ionicons name="locate" size={22} color={colors.primary.ink} />
       </TouchableOpacity>
@@ -835,56 +914,83 @@ export default function MapScreen() {
         <Ionicons name="help" size={20} color={colors.primary.ink} />
       </TouchableOpacity>
 
-      {/* Re-shown hint via the "?" button — dismissable by tapping it. */}
-      {showHelpHint && !(pinsLoaded && userPins.length === 0 && !pinsError) && (
-        <TouchableOpacity
-          style={styles.hintContainer}
-          activeOpacity={0.85}
-          onPress={() => setShowHelpHint(false)}
-        >
-          <View style={styles.hintIcon}>
-            <Ionicons name="wine-outline" size={20} color={colors.onPrimary} />
+      <View style={styles.mapNotices} pointerEvents="box-none">
+        {/* GPS is optional. Preserve the detailed recovery path from #238
+            while keeping #239's stacked map-status layout. */}
+        {locationIssue && (
+          <View style={styles.hintContainer} accessibilityRole="alert">
+            <View style={styles.hintIcon}>
+              <Ionicons name="location-outline" size={20} color={colors.onPrimary} />
+            </View>
+            <View style={styles.hintContent}>
+              <Text style={styles.hintTitle}>{locationIssueContent.title}</Text>
+              <Text style={styles.hintText}>{locationIssueContent.message}</Text>
+              <TouchableOpacity
+                onPress={openLocationHelp}
+                disabled={locating}
+                style={styles.hintAction}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: locating, busy: locating }}
+              >
+                <Text style={styles.hintActionText}>{locationIssueContent.action}</Text>
+                {!locating && (
+                  <Ionicons name="arrow-forward" size={14} color={colors.accent.base} />
+                )}
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              onPress={() => setLocationIssue(null)}
+              style={styles.hintDismiss}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss location message"
+            >
+              <Ionicons name="close" size={18} color={colors.onPrimary} />
+            </TouchableOpacity>
           </View>
-          <View style={styles.hintContent}>
-            <Text style={styles.hintTitle}>Getting around</Text>
-            <Text style={styles.hintText}>
-              Long-press on the map to drop a pin, or tap + to get started
-            </Text>
-          </View>
-        </TouchableOpacity>
-      )}
+        )}
 
-      {/* Hint text for first-time users — or an error banner when the pins
-          failed to load, so we don't show onboarding over a wrongly-empty map. */}
-      {pinsLoaded && userPins.length === 0 && (
-        pinsError ? (
-          <TouchableOpacity
-            style={styles.hintContainer}
-            activeOpacity={0.85}
-            onPress={loadUserPins}
-          >
-            <View style={styles.hintIcon}>
-              <Ionicons name="cloud-offline-outline" size={20} color={colors.onPrimary} />
-            </View>
-            <View style={styles.hintContent}>
-              <Text style={styles.hintTitle}>Couldn&apos;t load your places</Text>
-              <Text style={styles.hintText}>Tap to try again</Text>
-            </View>
-          </TouchableOpacity>
-        ) : (
+        {(showHelpHint || (pinsLoaded && !pinsError && userPins.length === 0 && !welcomeDismissed)) && (
           <View style={styles.hintContainer}>
-            <View style={styles.hintIcon}>
-              <Ionicons name="wine-outline" size={20} color={colors.onPrimary} />
-            </View>
             <View style={styles.hintContent}>
-              <Text style={styles.hintTitle}>Welcome</Text>
+              <Text style={styles.hintTitle}>{showHelpHint ? 'Getting around' : 'Welcome'}</Text>
               <Text style={styles.hintText}>
-                Long-press on the map to drop a pin, or tap + to get started
+                Search above, long-press the map to drop a pin, or tap + to log a visit.
               </Text>
             </View>
+            <TouchableOpacity
+              onPress={() => { setWelcomeDismissed(true); setShowHelpHint(false); }}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss map help"
+              style={styles.dismissHint}
+            >
+              <Ionicons name="close" size={22} color={colors.onPrimary} />
+            </TouchableOpacity>
           </View>
-        )
-      )}
+        )}
+        {pinsError && (
+          <TouchableOpacity onPress={loadUserPins} accessibilityRole="button">
+            <Text style={styles.mapStatus}>Couldn’t load your places. Tap to retry.</Text>
+          </TouchableOpacity>
+        )}
+        {!isPro && (pinFilter === 'all' || pinFilter === 'nearby') && (
+          <TouchableOpacity onPress={() => presentPaywall('places')} accessibilityRole="button">
+            <Text style={styles.mapStatus}>Winery discovery is included with Pro. Tap to explore Pro. Your saved places appear here for free.</Text>
+          </TouchableOpacity>
+        )}
+        {isPro && (pinFilter === 'all' || pinFilter === 'nearby') && discoveryStatus !== 'ready' && (
+          <TouchableOpacity
+            disabled={discoveryStatus !== 'error'}
+            onPress={() => setDiscoveryRetry((value) => value + 1)}
+            accessibilityRole={discoveryStatus === 'error' ? 'button' : 'text'}
+          >
+            <Text style={styles.mapStatus}>
+              {discoveryStatus === 'error' ? 'Couldn’t load wineries. Tap to retry.'
+                : discoveryStatus === 'loading' ? 'Loading wineries…'
+                  : 'No directory wineries in this area. Move the map or search by name.'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {/* Modals */}
       <WineryNameModal
@@ -1076,7 +1182,11 @@ export default function MapScreen() {
                   <Ionicons name="wine-outline" size={28} color={colors.accent.border} />
                   <Text style={styles.listEmptyText}>
                     {listTab === 'find'
-                      ? placeSearch.trim().length >= 2
+                      ? searchStatus === 'loading'
+                        ? 'Searching wineries…'
+                        : searchStatus === 'error'
+                        ? 'Couldn’t search wineries. Edit your search to try again.'
+                        : placeSearch.trim().length >= 2
                         ? 'No wineries match that name'
                         : 'Type a winery name — or browse the apricot pins on the map'
                       : placeSearch.trim()
@@ -1259,6 +1369,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.accent.border,
     ...shadows.soft,
+  },
+  controlButtonDisabled: {
+    opacity: 0.55,
   },
   helpButton: {
     position: 'absolute',
@@ -1481,11 +1594,22 @@ const styles = StyleSheet.create({
   },
 
   // Hint Container
-  hintContainer: {
+  mapNotices: {
     position: 'absolute',
-    top: 60,
+    top: 152,
     left: 16,
     right: 16,
+    gap: 8,
+  },
+  mapStatus: {
+    ...typography.body.small,
+    color: colors.neutral.ink,
+    backgroundColor: colors.neutral.bg,
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
+  },
+  dismissHint: { padding: 10 },
+  hintContainer: {
     backgroundColor: colors.primary.base,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
@@ -1517,6 +1641,26 @@ const styles = StyleSheet.create({
   hintText: {
     ...typography.body.small,
     color: colors.journey.secondary,
+  },
+  hintAction: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    minHeight: 24,
+  },
+  hintActionText: {
+    ...typography.body.small,
+    color: colors.accent.base,
+    fontWeight: '700',
+  },
+  hintDismiss: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: spacing.sm,
+    width: 32,
+    height: 32,
   },
 });
 return { colors, styles };

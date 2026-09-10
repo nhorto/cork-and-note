@@ -35,10 +35,16 @@ export default function LoginScreen() {
       return;
     }
 
+    // Trailing spaces and capitals arrive routinely from keyboards, autofill and
+    // password managers, and Supabase treats " Nick@Example.com " as a different
+    // (non-existent) account — which reads to the user as "my correct password
+    // was rejected". Normalise before we ask.
+    const cleanEmail = email.trim().toLowerCase();
+
     setIsLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(cleanEmail, password);
       if (error) {
         Alert.alert('Error', error.message);
       }
@@ -78,6 +84,9 @@ export default function LoginScreen() {
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              textContentType="username"
               keyboardType="email-address"
               placeholderTextColor={colors.neutral.placeholder}
             />
@@ -91,6 +100,9 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoComplete="password"
+              textContentType="password"
               placeholderTextColor={colors.neutral.placeholder}
             />
             <TouchableOpacity

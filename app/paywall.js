@@ -180,7 +180,9 @@ export default function PaywallScreen() {
                     ? 'Live winery ratings, hours and websites are part of Pro.'
                     : source === 'tonights_pick'
                       ? "Tonight's Pick — a bottle from your own cellar, chosen by your sommelier — is part of Pro."
-                      : 'Your journal stays free, forever. Pro unlocks the parts that think.'}
+                      : source === 'onboarding'
+                        ? 'Start with the sommelier on call. Your journal itself stays free, forever.'
+                        : 'Your journal stays free, forever. Pro unlocks the parts that think.'}
         </Text>
 
         <View style={styles.benefits}>
