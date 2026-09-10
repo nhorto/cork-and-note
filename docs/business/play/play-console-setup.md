@@ -179,3 +179,8 @@ Personal developer accounts created after 13 Nov 2023 **must run a closed test b
 1. Confirm `cork_and_note@yahoo.com` is live and monitored (it's on the deletion page, the listing contact, and the account-deletion flow).
 2. An Android `.aab` build (parallel branch owns `eas.json` / billing).
 3. 12+ tester Gmail addresses for the closed test.
+
+## 8. Android build requirements (added with the API-36 branch)
+
+- **Maps API key + Play App Signing:** Google Play re-signs the app with its own key. The Android Maps API key restriction must include the **Play App Signing certificate SHA-1 fingerprint** (Play Console → Test and release → App integrity → App signing key certificate, visible after the first upload) in addition to the upload-key fingerprint — otherwise store-installed builds show a **blank map** while local/EAS-internal installs work fine.
+- **versionCode:** auto-increments via EAS (`autoIncrement: true` in the `production` profile with `appVersionSource: "remote"`) — do not hand-manage it.
