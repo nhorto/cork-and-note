@@ -34,9 +34,15 @@ fi
 
 mkdir -p "$OUT"
 
-KEYS=$(curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-  "https://api.supabase.com/v1/projects/$REF/api-keys?reveal=true")
-ANON=$(echo "$KEYS" | python3 -c "import json,sys;print([k['api_key'] for k in json.load(sys.stdin) if k['name']=='anon'][0])")
+# The anon key: from the environment (e.g. EXPO_PUBLIC_SUPABASE_ANON_KEY in
+# .env) when available, otherwise via the Management API — which needs a token
+# whose account can reveal keys.
+ANON="${SUPABASE_ANON_KEY:-}"
+if [ -z "$ANON" ]; then
+  KEYS=$(curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+    "https://api.supabase.com/v1/projects/$REF/api-keys?reveal=true")
+  ANON=$(echo "$KEYS" | python3 -c "import json,sys;print([k['api_key'] for k in json.load(sys.stdin) if k['name']=='anon'][0])")
+fi
 SESSION=$(curl -s -X POST "https://$REF.supabase.co/auth/v1/token?grant_type=password" \
   -H "apikey: $ANON" -H "Content-Type: application/json" \
   -d "{\"email\":\"$DEMO_EMAIL\",\"password\":\"$DEMO_PASS\"}")
