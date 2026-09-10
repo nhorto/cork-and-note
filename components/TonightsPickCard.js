@@ -26,16 +26,17 @@ import {
   OCCASIONS,
 } from '../lib/cellarSommelier';
 import { usePro } from '../hooks/usePro';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
 
-const { colors, typography, spacing, borderRadius, shadows } = theme;
 
 // Persist the user's collapse choice so the card stays how they left it.
 const COLLAPSE_KEY = 'tonightsPick.collapsed';
 
 // A horizontal row of single-select pill choices.
 function PickerRow({ label, options, value, onChange }) {
+  const { styles } = useScreenTheme();
+
   return (
     <View style={styles.pickerRow}>
       <Text style={styles.pickerLabel}>{label}</Text>
@@ -65,6 +66,8 @@ function PickerRow({ label, options, value, onChange }) {
 }
 
 export default function TonightsPickCard({ onRequireCellar }) {
+  const { colors, spacing, styles } = useScreenTheme();
+
   const { isPro, presentPaywall } = usePro();
   const router = useRouter();
 
@@ -220,7 +223,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
         <Ionicons
           name={collapsed ? 'chevron-down' : 'chevron-up'}
           size={18}
-          color={colors.primary.base}
+          color={colors.primary.ink}
         />
       </TouchableOpacity>
 
@@ -237,7 +240,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
         activeOpacity={0.8}
         onPress={() => setShowPickers((s) => !s)}
       >
-        <Ionicons name="options-outline" size={16} color={colors.primary.base} />
+        <Ionicons name="options-outline" size={16} color={colors.primary.ink} />
         <View style={styles.tuneBtnTextWrap}>
           <Text style={styles.tuneBtnText}>
             {showPickers ? 'Hide options' : 'Tune your pick'}
@@ -249,7 +252,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
         <Ionicons
           name={showPickers ? 'chevron-up' : 'chevron-down'}
           size={16}
-          color={colors.primary.base}
+          color={colors.primary.ink}
         />
       </TouchableOpacity>
 
@@ -348,7 +351,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
                 <Ionicons
                   name="chevron-forward"
                   size={14}
-                  color={colors.primary.base}
+                  color={colors.primary.ink}
                 />
               </View>
             ) : null}
@@ -371,7 +374,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
                   <Ionicons
                     name="wine-outline"
                     size={16}
-                    color={colors.primary.base}
+                    color={colors.primary.ink}
                     style={styles.altIcon}
                   />
                   <View style={styles.altMeta}>
@@ -400,6 +403,12 @@ export default function TonightsPickCard({ onRequireCellar }) {
 }
 
 const SERIF = Platform.OS === 'ios' ? 'Georgia' : 'serif';
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius, shadows } = theme;
 
 const styles = StyleSheet.create({
   card: {
@@ -435,7 +444,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.6,
-    color: colors.neutral.ink,
+    color: colors.onAccent,
   },
   flexSpacer: { flex: 1 },
   collapsedTeaser: {
@@ -461,7 +470,7 @@ const styles = StyleSheet.create({
   tuneBtnTextWrap: { flex: 1 },
   tuneBtnText: {
     ...typography.body.regular,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
   tuneBtnHint: {
@@ -516,7 +525,7 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkSecondary,
   },
   pillTextActive: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
   freeText: {
@@ -560,7 +569,7 @@ const styles = StyleSheet.create({
   },
   pickName: {
     ...typography.heading.h2,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontFamily: SERIF,
     marginTop: 2,
   },
@@ -606,7 +615,7 @@ const styles = StyleSheet.create({
   },
   viewBottleText: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
 
@@ -666,4 +675,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     lineHeight: 19,
   },
+});
+return { colors, spacing, styles };
 });

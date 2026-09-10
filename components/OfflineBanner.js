@@ -11,11 +11,12 @@ import NetInfo from '@react-native-community/netinfo';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing } = theme;
 
 export default function OfflineBanner() {
+  const { spacing, styles } = useScreenTheme();
+
   const [offline, setOffline] = useState(false);
   const insets = useSafeAreaInsets();
   const slide = useRef(new Animated.Value(0)).current;
@@ -64,6 +65,12 @@ export default function OfflineBanner() {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing } = theme;
+
 const styles = StyleSheet.create({
   bar: {
     position: 'absolute',
@@ -83,4 +90,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.bg,
     fontWeight: '600',
   },
+});
+return { spacing, styles };
 });

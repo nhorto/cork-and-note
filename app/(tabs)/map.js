@@ -14,12 +14,14 @@ import { haversineKm } from '../../lib/geo';
 import { wineriesService } from '../../lib/wineries';
 import { wineryDirectoryService } from '../../lib/wineryDirectory';
 import { wishlistService } from '../../lib/wishlist';
-import theme from '../../styles/theme';
+import { createThemedStyles, useTheme } from '../../styles/ThemeProvider';
+import { darkMapStyle } from '../../styles/mapTheme';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
-const SERIF = typography.fonts.serif;
 
 export default function MapScreen() {
+  const { mode } = useTheme();
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const params = useLocalSearchParams();
   const mapRef = useRef(null);
@@ -407,7 +409,7 @@ export default function MapScreen() {
     if (Platform.OS === 'android') {
       return (
         <Marker
-          key={pin.id}
+          key={`${pin.id}-${mode}`}
           coordinate={{
             latitude: pin.latitude,
             longitude: pin.longitude
@@ -422,7 +424,7 @@ export default function MapScreen() {
 
     return (
       <Marker
-        key={pin.id}
+        key={`${pin.id}-${mode}`}
         coordinate={{
           latitude: pin.latitude,
           longitude: pin.longitude
@@ -441,7 +443,7 @@ export default function MapScreen() {
             pin.hasVisit && styles.visitedMarker,
             pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
           ]}>
-            <Ionicons name="wine" size={16} color={colors.neutral.bg} />
+            <Ionicons name="wine" size={16} color={pin.hasVisit || pin.inWishlist ? colors.onStatus : colors.onPrimary} />
           </View>
         </View>
       </Marker>
@@ -451,6 +453,8 @@ export default function MapScreen() {
   return (
     <View style={styles.container}>
       <MapView
+        userInterfaceStyle={mode}
+        customMapStyle={mode === 'dark' ? darkMapStyle(colors) : []}
         ref={mapRef}
         style={{ flex: 1 }}
         region={region}
@@ -479,7 +483,7 @@ export default function MapScreen() {
           discoverPins.map((w) =>
             Platform.OS === 'android' ? (
               <Marker
-                key={`dir-${w.id}`}
+                key={`dir-${w.id}-${mode}`}
                 coordinate={{ latitude: w.latitude, longitude: w.longitude }}
                 pinColor={colors.accent.base}
                 title={w.name}
@@ -488,7 +492,7 @@ export default function MapScreen() {
               />
             ) : (
               <Marker
-                key={`dir-${w.id}`}
+                key={`dir-${w.id}-${mode}`}
                 coordinate={{ latitude: w.latitude, longitude: w.longitude }}
                 tracksViewChanges={false}
                 onPress={() => handleDiscoverPinPress(w)}
@@ -500,7 +504,7 @@ export default function MapScreen() {
                     </Text>
                   </View>
                   <View style={[styles.wineryMarker, styles.discoverMarker]}>
-                    <Ionicons name="wine-outline" size={16} color={colors.neutral.ink} />
+                    <Ionicons name="wine-outline" size={16} color={colors.onAccent} />
                   </View>
                 </View>
               </Marker>
@@ -531,7 +535,7 @@ export default function MapScreen() {
           <Text style={styles.searchPillText} numberOfLines={1}>
             Your places &amp; wishlist
           </Text>
-          <Ionicons name="list" size={18} color={colors.primary.base} />
+          <Ionicons name="list" size={18} color={colors.primary.ink} />
         </TouchableOpacity>
       )}
 
@@ -596,7 +600,7 @@ export default function MapScreen() {
         <Ionicons
           name={showFabMenu ? "close" : "add"}
           size={28}
-          color={colors.neutral.bg}
+          color={colors.onPrimary}
         />
       </TouchableOpacity>
 
@@ -617,7 +621,7 @@ export default function MapScreen() {
             activeOpacity={0.7}
           >
             <View style={[styles.fabMenuIcon, { backgroundColor: colors.primary.base }]}>
-              <Ionicons name="wine" size={18} color={colors.neutral.bg} />
+              <Ionicons name="wine" size={18} color={colors.onPrimary} />
             </View>
             <View style={styles.fabMenuContent}>
               <Text style={styles.fabMenuText}>Log visit</Text>
@@ -635,7 +639,7 @@ export default function MapScreen() {
             activeOpacity={0.7}
           >
             <View style={[styles.fabMenuIcon, { backgroundColor: colors.status.wishlist }]}>
-              <Ionicons name="bookmark" size={18} color={colors.neutral.bg} />
+              <Ionicons name="bookmark" size={18} color={colors.onStatus} />
             </View>
             <View style={styles.fabMenuContent}>
               <Text style={styles.fabMenuText}>Add to wishlist</Text>
@@ -651,7 +655,7 @@ export default function MapScreen() {
             activeOpacity={0.7}
           >
             <View style={[styles.fabMenuIcon, { backgroundColor: colors.status.visited }]}>
-              <Ionicons name="location" size={18} color={colors.neutral.bg} />
+              <Ionicons name="location" size={18} color={colors.onStatus} />
             </View>
             <View style={styles.fabMenuContent}>
               <Text style={styles.fabMenuText}>Drop pin here</Text>
@@ -669,7 +673,7 @@ export default function MapScreen() {
         accessibilityRole="button"
         accessibilityLabel="Center on my location"
       >
-        <Ionicons name="locate" size={22} color={colors.primary.base} />
+        <Ionicons name="locate" size={22} color={colors.primary.ink} />
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -679,7 +683,7 @@ export default function MapScreen() {
         accessibilityRole="button"
         accessibilityLabel="How to use the map"
       >
-        <Ionicons name="help" size={20} color={colors.primary.base} />
+        <Ionicons name="help" size={20} color={colors.primary.ink} />
       </TouchableOpacity>
 
       {/* Re-shown hint via the "?" button — dismissable by tapping it. */}
@@ -690,7 +694,7 @@ export default function MapScreen() {
           onPress={() => setShowHelpHint(false)}
         >
           <View style={styles.hintIcon}>
-            <Ionicons name="wine-outline" size={20} color={colors.neutral.bg} />
+            <Ionicons name="wine-outline" size={20} color={colors.onPrimary} />
           </View>
           <View style={styles.hintContent}>
             <Text style={styles.hintTitle}>Getting around</Text>
@@ -711,7 +715,7 @@ export default function MapScreen() {
             onPress={loadUserPins}
           >
             <View style={styles.hintIcon}>
-              <Ionicons name="cloud-offline-outline" size={20} color={colors.neutral.bg} />
+              <Ionicons name="cloud-offline-outline" size={20} color={colors.onPrimary} />
             </View>
             <View style={styles.hintContent}>
               <Text style={styles.hintTitle}>Couldn&apos;t load your places</Text>
@@ -721,7 +725,7 @@ export default function MapScreen() {
         ) : (
           <View style={styles.hintContainer}>
             <View style={styles.hintIcon}>
-              <Ionicons name="wine-outline" size={20} color={colors.neutral.bg} />
+              <Ionicons name="wine-outline" size={20} color={colors.onPrimary} />
             </View>
             <View style={styles.hintContent}>
               <Text style={styles.hintTitle}>Welcome</Text>
@@ -847,7 +851,7 @@ export default function MapScreen() {
                 onChangeText={setPlaceSearch}
                 autoCorrect={false}
                 returnKeyType="search"
-                selectionColor={colors.primary.base}
+                selectionColor={colors.primary.ink}
               />
               {placeSearch.length > 0 && (
                 <TouchableOpacity
@@ -905,7 +909,7 @@ export default function MapScreen() {
                       <Ionicons
                         name={listTab === 'wishlist' ? 'bookmark' : 'location'}
                         size={18}
-                        color={listTab === 'wishlist' ? colors.status.wishlist : colors.primary.base}
+                        color={listTab === 'wishlist' ? colors.status.wishlist : colors.primary.ink}
                       />
                     </View>
                     <View style={styles.placeMeta}>
@@ -947,6 +951,14 @@ export default function MapScreen() {
 // (~16pt tall, bottom-left); the previous 64 left a band of dead map between the
 // controls and the tab bar and pushed them out of comfortable thumb reach.
 const MAP_CONTROL_BOTTOM = 32;
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -1156,7 +1168,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary.base,
   },
   filterChipText: { ...typography.body.small, color: colors.neutral.ink, fontWeight: '600' },
-  filterChipTextActive: { color: colors.neutral.bg },
+  filterChipTextActive: { color: colors.onPrimary },
   filterDot: { width: 8, height: 8, borderRadius: 4 },
   filterChipPro: {
     fontSize: 9,
@@ -1236,7 +1248,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   segmentTextActive: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
   },
   searchBox: {
     flexDirection: 'row',
@@ -1317,7 +1329,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: colors.overlay.onImage,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -1327,13 +1339,15 @@ const styles = StyleSheet.create({
   },
   hintTitle: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
     fontFamily: SERIF,
     marginBottom: 2,
   },
   hintText: {
     ...typography.body.small,
-    color: colors.primary.soft,
+    color: colors.journey.secondary,
   },
+});
+return { colors, styles };
 });

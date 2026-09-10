@@ -14,9 +14,8 @@ import {
 } from 'react-native';
 import ScreenHeader from '../components/ScreenHeader';
 import { wineriesService } from '../lib/wineries';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 function formatVisitDate(dateString) {
   if (!dateString) return '';
@@ -28,6 +27,8 @@ function formatVisitDate(dateString) {
 }
 
 export default function PlacesScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,7 +93,7 @@ export default function PlacesScreen() {
             onPress={() => router.push(`/winery/${item.id}`)}
           >
             <View style={styles.rowIcon}>
-              <Ionicons name="location" size={20} color={colors.primary.base} />
+              <Ionicons name="location" size={20} color={colors.primary.ink} />
             </View>
             <View style={styles.rowText}>
               <Text style={styles.rowTitle} numberOfLines={1}>
@@ -133,6 +134,12 @@ export default function PlacesScreen() {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -217,7 +224,9 @@ const styles = StyleSheet.create({
   },
   emptyButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
+});
+return { colors, styles };
 });

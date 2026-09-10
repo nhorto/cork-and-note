@@ -33,11 +33,12 @@ import { scanWineLabel } from '../lib/cellarScan';
 import MeterHint from './MeterHint';
 import { usePro } from '../hooks/usePro';
 import { aiService } from '../lib/ai';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 export default function LabelScanner({ onScanned }) {
+  const { colors, styles } = useScreenTheme();
+
   // The picked label image uri (for the thumbnail preview), the in-flight
   // reading state, and a soft error. No image == the initial CTA state.
   // Free scans are metered (3/month, §4.2). gate() opens the paywall instead
@@ -152,7 +153,7 @@ export default function LabelScanner({ onScanned }) {
         <View style={styles.reading}>
           {imageUri ? <Image source={{ uri: imageUri }} style={styles.thumb} /> : null}
           <View style={styles.readingMeta}>
-            <ActivityIndicator color={colors.primary.base} size="small" />
+            <ActivityIndicator color={colors.primary.ink} size="small" />
             <Text style={styles.readingText}>Reading the label…</Text>
           </View>
         </View>
@@ -168,7 +169,7 @@ export default function LabelScanner({ onScanned }) {
               onPress={scanWithCamera}
               activeOpacity={0.85}
             >
-              <Ionicons name="camera-outline" size={16} color={colors.primary.base} />
+              <Ionicons name="camera-outline" size={16} color={colors.primary.ink} />
               <Text style={styles.secondaryBtnText}>Retry scan</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -188,7 +189,7 @@ export default function LabelScanner({ onScanned }) {
             onPress={scanWithCamera}
             activeOpacity={0.9}
           >
-            <Ionicons name="camera" size={16} color={colors.neutral.bg} />
+            <Ionicons name="camera" size={16} color={colors.onPrimary} />
             <Text style={styles.primaryBtnText}>Scan a label</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -196,7 +197,7 @@ export default function LabelScanner({ onScanned }) {
             onPress={scanFromLibrary}
             activeOpacity={0.85}
           >
-            <Ionicons name="image-outline" size={16} color={colors.primary.base} />
+            <Ionicons name="image-outline" size={16} color={colors.primary.ink} />
             <Text style={styles.secondaryBtnText}>Choose from library</Text>
           </TouchableOpacity>
         </View>
@@ -212,6 +213,12 @@ export default function LabelScanner({ onScanned }) {
 }
 
 const SERIF = Platform.OS === 'ios' ? 'Georgia' : 'serif';
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   card: {
@@ -265,7 +272,7 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '700',
   },
   secondaryBtn: {
@@ -283,7 +290,7 @@ const styles = StyleSheet.create({
   secondaryBtnFlex: { flex: 1 },
   secondaryBtnText: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
 
@@ -333,4 +340,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     textAlign: 'center',
   },
+});
+return { colors, styles };
 });

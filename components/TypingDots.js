@@ -4,11 +4,14 @@
 // calm static row). Opacity-only, so it runs on the native driver.
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, StyleSheet, View } from 'react-native';
-import { colors } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
 const REST = 0.4;
 
-export default function TypingDots({ color = colors.neutral.inkTertiary, size = 6, style }) {
+export default function TypingDots({ color, size = 6, style }) {
+  const { colors } = useScreenTheme();
+  if (color === undefined) color = colors.neutral.inkTertiary;
+
   const values = useRef([
     new Animated.Value(REST),
     new Animated.Value(REST),
@@ -68,4 +71,11 @@ export default function TypingDots({ color = colors.neutral.inkTertiary, size = 
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
+});
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors } = theme;
+
+return { colors };
 });

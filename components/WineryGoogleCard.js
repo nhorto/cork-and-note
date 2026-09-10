@@ -20,11 +20,12 @@ import { useEffect, useState } from 'react';
 import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { usePro } from '../hooks/usePro';
 import { placesService } from '../lib/places';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 export default function WineryGoogleCard({ winery, onPlaceIdSaved }) {
+  const { colors, styles } = useScreenTheme();
+
   const { isPro, presentPaywall } = usePro();
   const [details, setDetails] = useState(null);
   const [hoursOpen, setHoursOpen] = useState(false);
@@ -157,6 +158,8 @@ export default function WineryGoogleCard({ winery, onPlaceIdSaved }) {
 }
 
 function LinkRow({ icon, label, onPress }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <TouchableOpacity
       style={styles.row}
@@ -173,6 +176,12 @@ function LinkRow({ icon, label, onPress }) {
     </TouchableOpacity>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   // Free-tier teaser
@@ -204,7 +213,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.6,
-    color: colors.neutral.ink,
+    color: colors.onAccent,
   },
 
   // Pro card
@@ -241,7 +250,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
   },
-  openPillText: { ...typography.body.small, color: colors.neutral.bg, fontWeight: '600' },
+  openPillText: { ...typography.body.small, color: colors.onStatus, fontWeight: '600' },
   closedPill: { backgroundColor: colors.neutral.divider },
   closedPillText: { color: colors.neutral.inkSecondary },
   row: {
@@ -259,4 +268,6 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.lg + spacing.xs,
     paddingBottom: spacing.xs,
   },
+});
+return { colors, styles };
 });

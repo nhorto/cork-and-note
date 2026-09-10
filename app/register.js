@@ -14,12 +14,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { borderRadius, colors, spacing, typography } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import { AuthContext } from './_layout';
 
-const SERIF = typography.fonts.serif;
 
 export default function RegisterScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const { signUp } = useContext(AuthContext);
   const [name, setName] = useState('');
@@ -166,7 +167,7 @@ export default function RegisterScreen() {
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <Ionicons name="person" size={20} color={colors.primary.base} style={styles.inputIcon} />
+            <Ionicons name="person" size={20} color={colors.primary.ink} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Full name"
@@ -177,7 +178,7 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color={colors.primary.base} style={styles.inputIcon} />
+            <Ionicons name="mail" size={20} color={colors.primary.ink} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email address"
@@ -190,7 +191,7 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color={colors.primary.base} style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color={colors.primary.ink} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -209,7 +210,7 @@ export default function RegisterScreen() {
               <Ionicons
                 name={showPassword ? 'eye-off' : 'eye'}
                 size={20}
-                color={colors.primary.base}
+                color={colors.primary.ink}
               />
             </TouchableOpacity>
           </View>
@@ -237,7 +238,7 @@ export default function RegisterScreen() {
           )}
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color={colors.primary.base} style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color={colors.primary.ink} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Confirm password"
@@ -254,7 +255,7 @@ export default function RegisterScreen() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color={colors.neutral.bg} />
+              <ActivityIndicator color={colors.onPrimary} />
             ) : (
               <Text style={styles.registerButtonText}>Sign up</Text>
             )}
@@ -273,6 +274,13 @@ export default function RegisterScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { borderRadius, colors, spacing, typography } = theme;
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -372,7 +380,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   registerButtonText: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,
@@ -388,7 +396,9 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     fontSize: 14,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '700',
   },
+});
+return { colors, styles };
 });

@@ -1,9 +1,11 @@
 import { Link, Stack } from 'expo-router';
 import { StyleSheet, Text, TextStyle, View } from 'react-native';
 
-import { colors, spacing, typography } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
 export default function NotFoundScreen() {
+  const { styles } = useScreenTheme();
+
   return (
     <>
       <Stack.Screen options={{ title: 'Not Found' }} />
@@ -20,6 +22,11 @@ export default function NotFoundScreen() {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, spacing, typography } = theme;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -45,6 +52,8 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     paddingVertical: spacing.md,
     fontWeight: '600',
-    color: colors.primary.base,
+    color: colors.primary.ink,
   },
+});
+return { styles };
 });

@@ -6,106 +6,11 @@ import { useEffect, useState } from 'react';
 import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { chatService } from '../lib/chat';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius, shadows } = theme;
 
-const SERIF = typography.fonts.serif;
 // Markdown styles for AI messages (Château Label theme)
-const mdStyles = {
-  body: {
-    ...typography.body.regular,
-    color: colors.neutral.ink,
-    lineHeight: 22,
-  },
-  strong: {
-    fontWeight: '700',
-    color: colors.neutral.ink,
-  },
-  em: {
-    fontStyle: 'italic',
-  },
-  heading1: {
-    ...typography.heading.h2,
-    color: colors.primary.base,
-    fontFamily: SERIF,
-    marginTop: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  heading2: {
-    ...typography.heading.h3,
-    color: colors.primary.base,
-    fontFamily: SERIF,
-    marginTop: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  heading3: {
-    ...typography.body.large,
-    fontWeight: '600',
-    color: colors.primary.base,
-    marginTop: spacing.xs,
-    marginBottom: spacing.xs,
-  },
-  bullet_list: {
-    marginVertical: spacing.xs,
-  },
-  ordered_list: {
-    marginVertical: spacing.xs,
-  },
-  list_item: {
-    marginVertical: 2,
-  },
-  bullet_list_icon: {
-    color: colors.accent.ink,
-    fontSize: 14,
-    lineHeight: 22,
-    marginRight: spacing.xs,
-  },
-  ordered_list_icon: {
-    color: colors.accent.ink,
-    fontSize: 14,
-    lineHeight: 22,
-    marginRight: spacing.xs,
-  },
-  code_inline: {
-    backgroundColor: colors.neutral.divider,
-    color: colors.primary.darkest,
-    borderRadius: 4,
-    paddingHorizontal: 4,
-    fontSize: 13,
-    fontFamily: 'Courier',
-  },
-  fence: {
-    backgroundColor: colors.neutral.divider,
-    borderRadius: borderRadius.md,
-    padding: spacing.sm,
-    marginVertical: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.neutral.border,
-  },
-  blockquote: {
-    borderLeftWidth: 3,
-    borderLeftColor: colors.accent.base,
-    paddingLeft: spacing.md,
-    marginVertical: spacing.xs,
-    backgroundColor: colors.neutral.bg,
-    borderRadius: borderRadius.sm,
-    padding: spacing.sm,
-  },
-  hr: {
-    backgroundColor: colors.accent.border,
-    height: 1,
-    marginVertical: spacing.sm,
-  },
-  paragraph: {
-    marginTop: 0,
-    marginBottom: spacing.xs,
-  },
-  link: {
-    color: colors.primary.base,
-    textDecorationLine: 'underline',
-  },
-};
+
 
 // The chip label for a source. The hostname, not the page title: "vawine.org"
 // tells you at a glance whether the sommelier read the winery's own site or a
@@ -117,6 +22,8 @@ function sourceLabel(url) {
 }
 
 export default function ChatBubble({ message, onUseSuggestions }) {
+  const { colors, mdStyles, styles } = useScreenTheme();
+
   const isUser = message.role === 'user';
   const hasSuggestions = message.ai_suggestions && Object.keys(message.ai_suggestions).length > 0;
   const displayContent = message.displayText || message.content;
@@ -152,7 +59,7 @@ export default function ChatBubble({ message, onUseSuggestions }) {
       {/* AI avatar */}
       {!isUser && (
         <View style={styles.avatar}>
-          <Ionicons name="wine" size={16} color={colors.primary.base} />
+          <Ionicons name="wine" size={16} color={colors.primary.ink} />
         </View>
       )}
 
@@ -217,6 +124,109 @@ export default function ChatBubble({ message, onUseSuggestions }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius, shadows } = theme;
+
+const SERIF = typography.fonts.serif;
+
+const mdStyles = {
+  body: {
+    ...typography.body.regular,
+    color: colors.neutral.ink,
+    lineHeight: 22,
+  },
+  strong: {
+    fontWeight: '700',
+    color: colors.neutral.ink,
+  },
+  em: {
+    fontStyle: 'italic',
+  },
+  heading1: {
+    ...typography.heading.h2,
+    color: colors.primary.ink,
+    fontFamily: SERIF,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  heading2: {
+    ...typography.heading.h3,
+    color: colors.primary.ink,
+    fontFamily: SERIF,
+    marginTop: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  heading3: {
+    ...typography.body.large,
+    fontWeight: '600',
+    color: colors.primary.ink,
+    marginTop: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  bullet_list: {
+    marginVertical: spacing.xs,
+  },
+  ordered_list: {
+    marginVertical: spacing.xs,
+  },
+  list_item: {
+    marginVertical: 2,
+  },
+  bullet_list_icon: {
+    color: colors.accent.ink,
+    fontSize: 14,
+    lineHeight: 22,
+    marginRight: spacing.xs,
+  },
+  ordered_list_icon: {
+    color: colors.accent.ink,
+    fontSize: 14,
+    lineHeight: 22,
+    marginRight: spacing.xs,
+  },
+  code_inline: {
+    backgroundColor: colors.neutral.divider,
+    color: colors.primary.ink,
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    fontSize: 13,
+    fontFamily: 'Courier',
+  },
+  fence: {
+    backgroundColor: colors.neutral.divider,
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
+    marginVertical: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.neutral.border,
+  },
+  blockquote: {
+    borderLeftWidth: 3,
+    borderLeftColor: colors.accent.base,
+    paddingLeft: spacing.md,
+    marginVertical: spacing.xs,
+    backgroundColor: colors.neutral.bg,
+    borderRadius: borderRadius.sm,
+    padding: spacing.sm,
+  },
+  hr: {
+    backgroundColor: colors.accent.border,
+    height: 1,
+    marginVertical: spacing.sm,
+  },
+  paragraph: {
+    marginTop: 0,
+    marginBottom: spacing.xs,
+  },
+  link: {
+    color: colors.primary.ink,
+    textDecorationLine: 'underline',
+  },
+};
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
@@ -262,7 +272,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   userText: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
   },
   imageRow: {
     flexDirection: 'row',
@@ -335,10 +345,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
   },
   userTimestamp: {
-    color: colors.primary.soft,
+    color: colors.journey.secondary,
     textAlign: 'right',
   },
   aiTimestamp: {
     color: colors.neutral.inkTertiary,
   },
+});
+return { colors, mdStyles, styles };
 });

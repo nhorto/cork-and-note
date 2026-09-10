@@ -17,12 +17,9 @@ import {
   View,
 } from 'react-native';
 import { EMPTY_FILTERS, applyFilters, hasActiveFilters } from '../lib/winesBrowse';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
 
-const { colors, typography, spacing, borderRadius } = theme;
-
-const SERIF = typography.fonts.serif;
 
 export default function WinesFilterModal({
   visible,
@@ -32,6 +29,8 @@ export default function WinesFilterModal({
   onApply,
   onClose,
 }) {
+  const { spacing, styles } = useScreenTheme();
+
   // Draft state — edits don't take effect until Apply.
   const [draft, setDraft] = useState(filters || EMPTY_FILTERS);
 
@@ -143,6 +142,8 @@ export default function WinesFilterModal({
 }
 
 function FacetSection({ title, options, selected = [], onToggle, searchable = false }) {
+  const { colors, styles } = useScreenTheme();
+
   const [query, setQuery] = useState('');
   // Only bother with a search box once the list is long enough to scroll past.
   const showSearch = searchable && options.length > 6;
@@ -187,6 +188,8 @@ function FacetSection({ title, options, selected = [], onToggle, searchable = fa
 }
 
 function Chip({ label, active, onPress }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <TouchableOpacity
       style={[styles.chip, active && styles.chipActive]}
@@ -197,7 +200,7 @@ function Chip({ label, active, onPress }) {
         <Ionicons
           name="checkmark"
           size={13}
-          color={colors.neutral.bg}
+          color={colors.onPrimary}
           style={styles.chipCheck}
         />
       )}
@@ -207,6 +210,14 @@ function Chip({ label, active, onPress }) {
     </TouchableOpacity>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
@@ -235,7 +246,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   title: { ...typography.heading.h2, color: colors.neutral.ink, fontFamily: SERIF },
-  clearAll: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  clearAll: { ...typography.body.small, color: colors.primary.ink, fontWeight: '600' },
   clearAllDisabled: { color: colors.neutral.placeholder },
 
   scroll: { flexGrow: 0 },
@@ -280,5 +291,7 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: colors.primary.base, borderColor: colors.primary.base },
   chipCheck: { marginRight: 4 },
   chipText: { ...typography.body.small, color: colors.neutral.inkSecondary, flexShrink: 1 },
-  chipTextActive: { color: colors.neutral.bg },
+  chipTextActive: { color: colors.onPrimary },
+});
+return { colors, styles, spacing };
 });

@@ -15,12 +15,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { borderRadius, colors, spacing, typography } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import { AuthContext } from './_layout';
 
-const SERIF = typography.fonts.serif;
 
 export default function LoginScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const { signIn } = useContext(AuthContext);
   const [email, setEmail] = useState('');
@@ -70,7 +71,7 @@ export default function LoginScreen() {
 
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <Ionicons name="mail" size={20} color={colors.primary.base} style={styles.inputIcon} />
+            <Ionicons name="mail" size={20} color={colors.primary.ink} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Email address"
@@ -83,7 +84,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed" size={20} color={colors.primary.base} style={styles.inputIcon} />
+            <Ionicons name="lock-closed" size={20} color={colors.primary.ink} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -102,7 +103,7 @@ export default function LoginScreen() {
               <Ionicons
                 name={showPassword ? 'eye-off' : 'eye'}
                 size={20}
-                color={colors.primary.base}
+                color={colors.primary.ink}
               />
             </TouchableOpacity>
           </View>
@@ -119,7 +120,7 @@ export default function LoginScreen() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color={colors.neutral.bg} />
+              <ActivityIndicator color={colors.onPrimary} />
             ) : (
               <Text style={styles.loginButtonText}>Log in</Text>
             )}
@@ -138,6 +139,13 @@ export default function LoginScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { borderRadius, colors, spacing, typography } = theme;
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -168,7 +176,7 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 26,
     fontWeight: '600',
-    color: colors.primary.base,
+    color: colors.primary.ink,
     marginBottom: spacing.sm,
     textAlign: 'center',
     letterSpacing: 0.3,
@@ -209,7 +217,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   forgotPasswordText: {
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontSize: 14,
     fontWeight: '500',
   },
@@ -222,7 +230,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   loginButtonText: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,
@@ -238,7 +246,9 @@ const styles = StyleSheet.create({
   },
   registerLink: {
     fontSize: 14,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '700',
   },
+});
+return { colors, styles };
 });

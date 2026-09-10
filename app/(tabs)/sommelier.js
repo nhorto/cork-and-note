@@ -25,9 +25,8 @@ import TypingDots from '../../components/TypingDots';
 import { usePro } from '../../hooks/usePro';
 import { aiService } from '../../lib/ai';
 import { chatService } from '../../lib/chat';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius, shadows } = theme;
 
 // Compact relative date for the recent-chats list.
 function formatRelativeDate(dateString) {
@@ -47,6 +46,8 @@ function formatRelativeDate(dateString) {
 // inside the same ScrollView as the "Tonight's pick" hero without nesting a
 // FlatList in a ScrollView.
 function ConversationRow({ conversation, onPress, onDelete }) {
+  const { colors, styles } = useScreenTheme();
+
   const contextIcon =
     conversation.context_type === 'wine_entry' ? 'wine' : 'chatbubbles';
   const handleLongPress = () => {
@@ -67,7 +68,7 @@ function ConversationRow({ conversation, onPress, onDelete }) {
       activeOpacity={0.7}
     >
       <View style={styles.convIcon}>
-        <Ionicons name={contextIcon} size={20} color={colors.primary.base} />
+        <Ionicons name={contextIcon} size={20} color={colors.primary.ink} />
       </View>
       <View style={styles.convContent}>
         <Text style={styles.convTitle} numberOfLines={1}>
@@ -85,6 +86,8 @@ function ConversationRow({ conversation, onPress, onDelete }) {
 }
 
 export default function SommelierScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const { gate, isPro, presentPaywall } = usePro();
   const router = useRouter();
   // State
@@ -310,7 +313,7 @@ export default function SommelierScreen() {
 
         {loading ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color={colors.primary.base} />
+            <ActivityIndicator size="large" color={colors.primary.ink} />
           </View>
         ) : (
           // Single scroll surface: the cellar-grounded "Tonight's pick" hero on
@@ -327,7 +330,7 @@ export default function SommelierScreen() {
 
             {/* New conversation */}
             <TouchableOpacity style={styles.newChatButton} onPress={startNewChat}>
-              <Ionicons name="add-circle" size={20} color={colors.neutral.bg} />
+              <Ionicons name="add-circle" size={20} color={colors.onPrimary} />
               <Text style={styles.newChatText}>New conversation</Text>
             </TouchableOpacity>
 
@@ -373,7 +376,7 @@ export default function SommelierScreen() {
           accessibilityRole="button"
           accessibilityLabel="Back"
         >
-          <Ionicons name="chevron-back" size={24} color={colors.primary.base} />
+          <Ionicons name="chevron-back" size={24} color={colors.primary.ink} />
         </TouchableOpacity>
         <View style={styles.chatHeaderContent}>
           <Text style={styles.chatHeaderTitle} numberOfLines={1}>
@@ -391,12 +394,12 @@ export default function SommelierScreen() {
         {/* Messages */}
         {loading ? (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color={colors.primary.base} />
+            <ActivityIndicator size="large" color={colors.primary.ink} />
           </View>
         ) : messages.length === 0 ? (
           <View style={styles.emptyChatState}>
             <View style={styles.sommelierIcon}>
-              <Ionicons name="wine" size={32} color={colors.primary.base} />
+              <Ionicons name="wine" size={32} color={colors.primary.ink} />
             </View>
             <Text style={styles.emptyChatTitle}>Bonjour!</Text>
             <Text style={styles.emptyChatSubtitle}>
@@ -437,6 +440,12 @@ export default function SommelierScreen() {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius, shadows } = theme;
+
 const styles = StyleSheet.create({
   meterHint: {
     paddingHorizontal: spacing.md,
@@ -471,7 +480,7 @@ const styles = StyleSheet.create({
   },
   newChatText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
   recentLabel: {
@@ -616,4 +625,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm + 2,
     marginLeft: 36, // account for avatar space
   },
+});
+return { colors, styles };
 });

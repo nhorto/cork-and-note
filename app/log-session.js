@@ -17,9 +17,8 @@ import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import LogSessionForm from '../components/LogSessionForm';
 import { notifySuccess } from '../lib/haptics';
 import { visitsService } from '../lib/visits';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors } = theme;
 
 // Build a trailing sentence when some photos couldn't be uploaded, so a dropped
 // photo surfaces to the user instead of vanishing silently (#128). Empty string
@@ -39,6 +38,8 @@ const noteFailureNote = (failed) => {
 };
 
 export default function LogSessionScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const { mode, wineryId, wineryName, lat, lng, editVisitId } = useLocalSearchParams();
   const [submitting, setSubmitting] = useState(false);
@@ -157,7 +158,7 @@ export default function LogSessionScreen() {
   if (isEditing && loadingSession) {
     return (
       <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.primary.base} />
+        <ActivityIndicator size="large" color={colors.primary.ink} />
       </View>
     );
   }
@@ -173,6 +174,12 @@ export default function LogSessionScreen() {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors } = theme;
+
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
@@ -180,4 +187,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.neutral.bg,
   },
+});
+return { colors, styles };
 });

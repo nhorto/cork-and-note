@@ -16,14 +16,15 @@ import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { visitsService } from '../lib/visits';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 const BUCKET = 'wine-photos';
 const PREFIX = 'cellar/';
 
 export default function BottlePhotoPicker({ value, onChange, disabled }) {
+  const { colors, styles } = useScreenTheme();
+
   const [uploading, setUploading] = useState(false);
 
   // Upload one local URI and hand the public URL back to the form. The replaced
@@ -107,7 +108,7 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
             <Image source={{ uri: value }} style={styles.thumb} />
             {uploading && (
               <View style={styles.thumbOverlay}>
-                <ActivityIndicator size="small" color={colors.neutral.bg} />
+                <ActivityIndicator size="small" color={colors.onPrimary} />
               </View>
             )}
           </View>
@@ -118,7 +119,7 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
               disabled={disabled || uploading}
               activeOpacity={0.85}
             >
-              <Ionicons name="camera-outline" size={16} color={colors.primary.base} />
+              <Ionicons name="camera-outline" size={16} color={colors.primary.ink} />
               <Text style={styles.actionText}>Replace</Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -141,9 +142,9 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
           activeOpacity={0.85}
         >
           {uploading ? (
-            <ActivityIndicator size="small" color={colors.primary.base} />
+            <ActivityIndicator size="small" color={colors.primary.ink} />
           ) : (
-            <Ionicons name="camera-outline" size={22} color={colors.primary.base} />
+            <Ionicons name="camera-outline" size={22} color={colors.primary.ink} />
           )}
           <Text style={styles.addText}>{uploading ? 'Uploading…' : 'Add a photo'}</Text>
         </TouchableOpacity>
@@ -151,6 +152,12 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   container: { marginBottom: spacing.md },
@@ -169,7 +176,7 @@ const styles = StyleSheet.create({
     borderColor: colors.accent.border,
     backgroundColor: colors.neutral.surface,
   },
-  addText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
+  addText: { ...typography.body.regular, color: colors.primary.ink, fontWeight: '600' },
 
   // Filled-state thumbnail + actions.
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
@@ -201,6 +208,8 @@ const styles = StyleSheet.create({
     borderColor: colors.accent.border,
     backgroundColor: colors.neutral.surface,
   },
-  actionText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  actionText: { ...typography.body.small, color: colors.primary.ink, fontWeight: '600' },
   removeText: { color: colors.status.error },
+});
+return { colors, styles };
 });

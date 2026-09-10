@@ -24,16 +24,16 @@ import { matchWineToCellar } from '../../lib/cellarMatch';
 import { varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
 import { wineDisplayName } from '../../lib/wineDisplay';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius, shadows } = theme;
 
-const SERIF = typography.fonts.serif;
 // pagingEnabled snaps to the screen width, so the photo-viewer pages must
 // match it exactly for the offset math and "n of N" indicator to line up.
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function WineDetail() {
+  const { colors, styles } = useScreenTheme();
+
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const router = useRouter();
@@ -178,7 +178,7 @@ export default function WineDetail() {
             >
               <Image source={{ uri: photo }} style={styles.photoThumbnail} />
               <View style={styles.photoOverlay}>
-                <Ionicons name="expand-outline" size={18} color={colors.neutral.bg} />
+                <Ionicons name="expand-outline" size={18} color={colors.onPrimary} />
               </View>
             </TouchableOpacity>
           ))}
@@ -190,7 +190,7 @@ export default function WineDetail() {
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.primary.base} />
+        <ActivityIndicator size="large" color={colors.primary.ink} />
         <Text style={styles.loadingText}>Loading wine details…</Text>
       </SafeAreaView>
     );
@@ -227,7 +227,7 @@ export default function WineDetail() {
             accessibilityRole="button"
             accessibilityLabel="Edit log"
           >
-            <Ionicons name="create-outline" size={22} color={colors.primary.base} />
+            <Ionicons name="create-outline" size={22} color={colors.primary.ink} />
           </TouchableOpacity>
         }
       />
@@ -246,7 +246,7 @@ export default function WineDetail() {
         </View>
         {originLabel ? (
           <View style={styles.wineryRow}>
-            <Ionicons name="business-outline" size={15} color={colors.primary.base} />
+            <Ionicons name="business-outline" size={15} color={colors.primary.ink} />
             <Text style={styles.wineryText}>{originLabel}</Text>
           </View>
         ) : null}
@@ -274,7 +274,7 @@ export default function WineDetail() {
             accessibilityLabel="View this wine in your cellar"
           >
             <View style={styles.cellarIcon}>
-              <Ionicons name="file-tray-stacked" size={20} color={colors.neutral.bg} />
+              <Ionicons name="file-tray-stacked" size={20} color={colors.onAccent} />
             </View>
             <View style={styles.cellarText}>
               <Text style={styles.cellarTitle}>
@@ -339,7 +339,7 @@ export default function WineDetail() {
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionLabel}>VISIT INFORMATION</Text>
           <TouchableOpacity style={styles.editLogLink} onPress={handleEditLog} accessibilityLabel="Edit log">
-            <Ionicons name="create-outline" size={16} color={colors.primary.base} />
+            <Ionicons name="create-outline" size={16} color={colors.primary.ink} />
             <Text style={styles.editLogLinkText}>Edit log</Text>
           </TouchableOpacity>
         </View>
@@ -394,7 +394,7 @@ export default function WineDetail() {
             accessibilityLabel="Close"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="close" size={32} color={colors.neutral.bg} />
+            <Ionicons name="close" size={32} color={colors.onPrimary} />
           </TouchableOpacity>
 
           {wine.photos && wine.photos.length > 0 && (
@@ -426,6 +426,14 @@ export default function WineDetail() {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius, shadows } = theme;
+
+const SERIF = typography.fonts.serif;
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
   center: { alignItems: 'center', justifyContent: 'center' },
@@ -441,10 +449,10 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   wineTypeContainer: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', marginTop: spacing.xs },
-  wineType: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
+  wineType: { ...typography.body.regular, color: colors.primary.ink, fontWeight: '600' },
   wineMeta: { ...typography.body.regular, color: colors.neutral.inkTertiary, marginLeft: spacing.xs },
   wineryRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
-  wineryText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
+  wineryText: { ...typography.body.regular, color: colors.primary.ink, fontWeight: '600' },
 
   // "In your cellar" link card (#117)
   cellarCard: {
@@ -489,7 +497,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     marginTop: spacing.lg,
   },
-  ratingValue: { fontFamily: SERIF, fontSize: 40, color: colors.primary.base, marginBottom: spacing.xs },
+  ratingValue: { fontFamily: SERIF, fontSize: 40, color: colors.primary.ink, marginBottom: spacing.xs },
   starsContainer: { flexDirection: 'row', gap: spacing.xs },
 
   // Cards
@@ -557,7 +565,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   editLogLink: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  editLogLinkText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  editLogLinkText: { ...typography.body.small, color: colors.primary.ink, fontWeight: '600' },
   visitInfo: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -568,7 +576,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
   },
   visitDetails: { flex: 1 },
-  wineryName: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600', marginBottom: 2 },
+  wineryName: { ...typography.body.regular, color: colors.primary.ink, fontWeight: '600', marginBottom: 2 },
   visitDate: { ...typography.body.small, color: colors.neutral.inkTertiary },
   visitNotes: { ...typography.body.small, color: colors.neutral.inkTertiary, fontStyle: 'italic', marginTop: 2 },
 
@@ -584,10 +592,10 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderRadius: borderRadius.sm,
   },
-  backButtonText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
+  backButtonText: { ...typography.body.regular, color: colors.onPrimary, fontWeight: '600' },
 
   // Photo modal (dark overlay intentional)
-  photoModalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.9)', justifyContent: 'center', alignItems: 'center' },
+  photoModalOverlay: { flex: 1, backgroundColor: colors.overlay.photo, justifyContent: 'center', alignItems: 'center' },
   photoModalClose: { position: 'absolute', top: 50, right: 20, zIndex: 1, padding: spacing.sm },
   photoModalContainer: { width: SCREEN_WIDTH, height: 400, justifyContent: 'center', alignItems: 'center' },
   photoModalImage: { width: '90%', height: '90%', resizeMode: 'contain' },
@@ -600,5 +608,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.round,
   },
-  photoModalText: { color: colors.neutral.bg, ...typography.body.small },
+  photoModalText: { color: colors.onPrimary, ...typography.body.small },
+});
+return { colors, styles };
 });

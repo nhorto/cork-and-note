@@ -22,15 +22,13 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TIER, findPriorTastings, flattenTastedWines } from '../lib/cellarMatch';
 import { parseVarietals, varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
 import PlacePicker from './PlacePicker';
 import TastingMenuScanner from './TastingMenuScanner';
 import WineEntryForm from './WineEntryForm';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const PLACE_META = {
   winery: { icon: 'wine', label: 'Winery' },
   restaurant: { icon: 'restaurant', label: 'Restaurant' },
@@ -109,6 +107,8 @@ export default function LogSessionForm({
   onSave,
   onCancel,
 }) {
+  const { colors, spacing, styles } = useScreenTheme();
+
   const insets = useSafeAreaInsets();
 
   const isEditing = !!initialSession;
@@ -408,7 +408,7 @@ export default function LogSessionForm({
             </Text>
             {priorFlags[index] ? (
               <View style={styles.priorTag}>
-                <Ionicons name="time-outline" size={10} color={colors.primary.base} />
+                <Ionicons name="time-outline" size={10} color={colors.primary.ink} />
                 <Text style={styles.priorTagText}>
                   {priorFlags[index].tier === TIER.RELATED && priorFlags[index].otherVintage
                     ? `You've tasted the ${priorFlags[index].otherVintage}`
@@ -426,7 +426,7 @@ export default function LogSessionForm({
         </View>
         <View style={styles.wineActions}>
           <TouchableOpacity style={styles.actionLink} onPress={() => handleEditWine(index)}>
-            <Ionicons name="pencil-outline" size={15} color={colors.primary.base} />
+            <Ionicons name="pencil-outline" size={15} color={colors.primary.ink} />
             <Text style={styles.actionLinkText}>Edit</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionLink} onPress={() => handleDeleteWine(index)}>
@@ -446,7 +446,7 @@ export default function LogSessionForm({
           onPress={() => setShowPlacePicker(true)}
           activeOpacity={0.85}
         >
-          <Ionicons name="location-outline" size={20} color={colors.primary.base} />
+          <Ionicons name="location-outline" size={20} color={colors.primary.ink} />
           <View style={styles.addPlaceText}>
             <Text style={styles.addPlaceTitle}>
               Add a place <Text style={styles.optTag}>· optional</Text>
@@ -462,7 +462,7 @@ export default function LogSessionForm({
     return (
       <View style={styles.placeCard}>
         <View style={styles.placeIcon}>
-          <Ionicons name={meta.icon} size={20} color={colors.primary.base} />
+          <Ionicons name={meta.icon} size={20} color={colors.primary.ink} />
         </View>
         <View style={styles.placeBody}>
           <Text style={styles.placeName} numberOfLines={1}>
@@ -486,7 +486,7 @@ export default function LogSessionForm({
             accessibilityLabel="Edit"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="pencil-outline" size={16} color={colors.primary.base} />
+            <Ionicons name="pencil-outline" size={16} color={colors.primary.ink} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setPlace(null)}
@@ -543,7 +543,7 @@ export default function LogSessionForm({
         )}
 
         <TouchableOpacity style={styles.addWineBtn} onPress={handleAddWine} activeOpacity={0.85}>
-          <Ionicons name="add" size={20} color={colors.neutral.bg} />
+          <Ionicons name="add" size={20} color={colors.onPrimary} />
           <Text style={styles.addWineBtnText}>
             {wines.length === 0 ? 'Add wine' : 'Add another wine'}
           </Text>
@@ -561,7 +561,7 @@ export default function LogSessionForm({
           onChangeText={setVisitDate}
           placeholder="YYYY-MM-DD"
           placeholderTextColor={colors.neutral.placeholder}
-          selectionColor={colors.primary.base}
+          selectionColor={colors.primary.ink}
         />
         <Text
           style={[
@@ -583,7 +583,7 @@ export default function LogSessionForm({
           placeholderTextColor={colors.neutral.placeholder}
           multiline
           textAlignVertical="top"
-          selectionColor={colors.primary.base}
+          selectionColor={colors.primary.ink}
         />
 
         {/* Visit photos (#137) — a shot of the tasting card or the visit itself. */}
@@ -616,7 +616,7 @@ export default function LogSessionForm({
             onPress={addVisitPhotoFromCamera}
             activeOpacity={0.85}
           >
-            <Ionicons name="camera-outline" size={18} color={colors.primary.base} />
+            <Ionicons name="camera-outline" size={18} color={colors.primary.ink} />
             <Text style={styles.visitPhotoBtnText}>Take photo</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -624,7 +624,7 @@ export default function LogSessionForm({
             onPress={addVisitPhotosFromLibrary}
             activeOpacity={0.85}
           >
-            <Ionicons name="images-outline" size={18} color={colors.primary.base} />
+            <Ionicons name="images-outline" size={18} color={colors.primary.ink} />
             <Text style={styles.visitPhotoBtnText}>Choose photos</Text>
           </TouchableOpacity>
         </View>
@@ -682,6 +682,14 @@ export default function LogSessionForm({
     </SafeAreaView>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
@@ -751,7 +759,7 @@ const styles = StyleSheet.create({
   },
   // body.small, not body.caption — caption uppercases (it's the label style), so
   // a vintage-aware badge would read "YOU'VE TASTED THE 2019".
-  priorTagText: { ...typography.body.small, fontSize: 11, color: colors.primary.base },
+  priorTagText: { ...typography.body.small, fontSize: 11, color: colors.primary.ink },
   wineTypeBar: { width: 4, height: 40, borderRadius: 2, marginRight: spacing.md },
   wineInfo: { flex: 1 },
   wineName: {
@@ -780,7 +788,7 @@ const styles = StyleSheet.create({
     marginLeft: spacing.lg,
   },
   actionLink: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  actionLinkText: { ...typography.body.small, color: colors.primary.base, fontWeight: '500' },
+  actionLinkText: { ...typography.body.small, color: colors.primary.ink, fontWeight: '500' },
 
   addWineBtn: {
     flexDirection: 'row',
@@ -792,7 +800,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginTop: spacing.xs,
   },
-  addWineBtnText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
+  addWineBtnText: { ...typography.body.regular, color: colors.onPrimary, fontWeight: '600' },
 
   sectionLabel: {
     ...typography.body.caption,
@@ -916,7 +924,7 @@ const styles = StyleSheet.create({
   },
   visitPhotoBtnText: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
 
@@ -953,4 +961,6 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     textAlign: 'center',
   },
+});
+return { colors, spacing, styles };
 });

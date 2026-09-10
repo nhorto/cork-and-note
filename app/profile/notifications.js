@@ -28,9 +28,8 @@ import {
 } from '../../lib/notifications';
 import Chip from '../../components/Chip';
 import ScreenHeader from '../../components/ScreenHeader';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 // Early-evening delivery hour options (local time). Restrained to the window
 // when a wine lover is actually deciding what to open.
@@ -42,6 +41,8 @@ const HOUR_OPTIONS = [
 ];
 
 export default function NotificationsScreen() {
+  const { colors, spacing, styles } = useScreenTheme();
+
   const [loading, setLoading] = useState(true);
   const [prefs, setLocalPrefs] = useState(null);
   const [permission, setPermission] = useState('undetermined');
@@ -114,7 +115,7 @@ export default function NotificationsScreen() {
 
       {loading || !prefs ? (
         <View style={styles.loadingWrap}>
-          <ActivityIndicator color={colors.primary.base} />
+          <ActivityIndicator color={colors.primary.ink} />
         </View>
       ) : (
         <ScrollView
@@ -163,7 +164,7 @@ export default function NotificationsScreen() {
                   onValueChange={handleMasterToggle}
                   disabled={busy || unavailable}
                   trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
-                  thumbColor={colors.neutral.bg}
+                  thumbColor={colors.onPrimary}
                 />
               </View>
             </View>
@@ -185,7 +186,7 @@ export default function NotificationsScreen() {
                   onValueChange={(v) => updatePref({ notifyPeakEntry: v })}
                   disabled={!prefs.enabled || busy || unavailable}
                   trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
-                  thumbColor={colors.neutral.bg}
+                  thumbColor={colors.onPrimary}
                 />
               </View>
               <View style={styles.row}>
@@ -200,7 +201,7 @@ export default function NotificationsScreen() {
                   onValueChange={(v) => updatePref({ notifyPastPeak: v })}
                   disabled={!prefs.enabled || busy || unavailable}
                   trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
-                  thumbColor={colors.neutral.bg}
+                  thumbColor={colors.onPrimary}
                 />
               </View>
             </View>
@@ -241,7 +242,7 @@ export default function NotificationsScreen() {
                 disabled={busy || !prefs.enabled}
                 activeOpacity={0.7}
               >
-                <Ionicons name="paper-plane-outline" size={18} color={colors.primary.base} />
+                <Ionicons name="paper-plane-outline" size={18} color={colors.primary.ink} />
                 <Text style={styles.testButtonText}>Send a test reminder</Text>
               </TouchableOpacity>
             </View>
@@ -258,6 +259,12 @@ export default function NotificationsScreen() {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -369,7 +376,7 @@ const styles = StyleSheet.create({
   },
   testButtonText: {
     ...typography.body.regular,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '500',
   },
 
@@ -381,4 +388,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     paddingHorizontal: spacing.sm,
   },
+});
+return { colors, spacing, styles };
 });

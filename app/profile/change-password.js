@@ -16,12 +16,13 @@ import {
 import Button from '../../components/Button';
 import ScreenHeader from '../../components/ScreenHeader';
 import { supabase } from '../../lib/supabase';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors } = theme;
 
 export default function ChangePasswordScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const { user } = useContext(AuthContext);
   
@@ -184,7 +185,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showCurrentPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color={colors.primary.base}
+                  color={colors.primary.ink}
                 />
               </TouchableOpacity>
             </View>
@@ -213,7 +214,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showNewPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color={colors.primary.base}
+                  color={colors.primary.ink}
                 />
               </TouchableOpacity>
             </View>
@@ -264,7 +265,7 @@ export default function ChangePasswordScreen() {
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color={colors.primary.base}
+                  color={colors.primary.ink}
                 />
               </TouchableOpacity>
             </View>
@@ -294,6 +295,11 @@ export default function ChangePasswordScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -378,4 +384,6 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 18,
   },
+});
+return { colors, styles };
 });

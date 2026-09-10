@@ -32,11 +32,9 @@ import {
   browseCellar,
   hasActiveFilters,
 } from '../../lib/cellarBrowse';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const SORT_LABEL = Object.fromEntries(SORTS.map((s) => [s.key, s.label]));
 const GROUP_LABEL = Object.fromEntries(GROUPS.map((g) => [g.key, g.label]));
 
@@ -44,6 +42,8 @@ const GROUP_LABEL = Object.fromEntries(GROUPS.map((g) => [g.key, g.label]));
 const DEEP_LINK_STATUSES = ['too_young', 'ready', 'drink_up', 'past_peak'];
 
 export default function CellarScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const params = useLocalSearchParams();
   const [bottles, setBottles] = useState([]);
@@ -144,7 +144,7 @@ export default function CellarScreen() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.headerIcon}>
-            <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.base} />
+            <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.ink} />
           </View>
           <Text style={styles.headerTitle}>Cellar</Text>
           {/* Deliberately empty. Adding a bottle lives on the FAB below (and on
@@ -251,7 +251,7 @@ export default function CellarScreen() {
       {/* Body */}
       {!loaded ? (
         <View style={styles.center}>
-          <ActivityIndicator color={colors.primary.base} />
+          <ActivityIndicator color={colors.primary.ink} />
         </View>
       ) : bottles.length === 0 ? (
         loadError ? (
@@ -302,7 +302,7 @@ export default function CellarScreen() {
         accessibilityRole="button"
         accessibilityLabel="Add bottle"
       >
-        <Ionicons name="add" size={26} color={colors.neutral.bg} />
+        <Ionicons name="add" size={26} color={colors.onPrimary} />
       </TouchableOpacity>
 
       {/* Sheets */}
@@ -370,6 +370,8 @@ function buildActiveChips(filters) {
 }
 
 function ControlButton({ icon, label, active, badge, onPress }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <TouchableOpacity
       style={[styles.control, active && styles.controlActive]}
@@ -379,7 +381,7 @@ function ControlButton({ icon, label, active, badge, onPress }) {
       <Ionicons
         name={icon}
         size={15}
-        color={active ? colors.primary.base : colors.neutral.inkSecondary}
+        color={active ? colors.primary.ink : colors.neutral.inkSecondary}
       />
       <Text style={[styles.controlText, active && styles.controlTextActive]} numberOfLines={1}>
         {label}
@@ -394,11 +396,13 @@ function ControlButton({ icon, label, active, badge, onPress }) {
 }
 
 function BottleCard({ bottle, onPress }) {
+  const { colors, styles } = useScreenTheme();
+
   const producer = bottle.producer || bottle.wineries?.name;
   const subtitle = [bottle.vintage, bottle.varietal || bottle.wine_type, bottle.region]
     .filter(Boolean)
     .join(' · ');
-  const badge = bottle.drinkStatus ? drinkWindowMeta(bottle.drinkStatus) : null;
+  const badge = bottle.drinkStatus ? drinkWindowMeta(bottle.drinkStatus, colors) : null;
 
   return (
     <TouchableOpacity style={styles.card} activeOpacity={0.85} onPress={onPress}>
@@ -408,7 +412,7 @@ function BottleCard({ bottle, onPress }) {
         {bottle.photo_url ? (
           <Image source={{ uri: bottle.photo_url }} style={styles.cardThumb} />
         ) : (
-          <Ionicons name="wine-outline" size={20} color={colors.primary.base} />
+          <Ionicons name="wine-outline" size={20} color={colors.primary.ink} />
         )}
         {bottle.quantity > 1 && (
           <View style={styles.qtyDot}>
@@ -483,7 +487,9 @@ const VALUE_POINTS = [
 
 // A muted, non-interactive twin of BottleCard for the preview strip.
 function PreviewCard({ bottle }) {
-  const badge = drinkWindowMeta(bottle.status);
+  const { colors, styles } = useScreenTheme();
+
+  const badge = drinkWindowMeta(bottle.status, colors);
   return (
     <View style={[styles.card, styles.previewCard]}>
       <View style={[styles.cardGlass, styles.previewGlass]}>
@@ -517,6 +523,8 @@ function PreviewCard({ bottle }) {
 // Onboarding empty state: shows what a populated cellar looks like, a tight value
 // line, and drives ONE primary action ("Add your first bottle").
 function EmptyCellar({ onAdd }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <ScrollView
       style={styles.onboardScroll}
@@ -550,7 +558,7 @@ function EmptyCellar({ onAdd }) {
         {VALUE_POINTS.map((point) => (
           <View key={point.text} style={styles.valueRow}>
             <View style={styles.valueIcon}>
-              <Ionicons name={point.icon} size={15} color={colors.primary.base} />
+              <Ionicons name={point.icon} size={15} color={colors.primary.ink} />
             </View>
             <Text style={styles.valueText}>{point.text}</Text>
           </View>
@@ -559,7 +567,7 @@ function EmptyCellar({ onAdd }) {
 
       {/* Exactly one primary action. */}
       <TouchableOpacity style={styles.onboardCta} onPress={onAdd} activeOpacity={0.9}>
-        <Ionicons name="add" size={18} color={colors.neutral.bg} />
+        <Ionicons name="add" size={18} color={colors.onPrimary} />
         <Text style={styles.emptyCtaText}>Add your first bottle</Text>
       </TouchableOpacity>
 
@@ -581,6 +589,8 @@ function EmptyCellar({ onAdd }) {
 // Load-failure state: shown instead of the onboarding when the cellar fetch
 // fails, so owners of bottles aren't told to "start" their cellar.
 function LoadError({ onRetry }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <View style={styles.body}>
       <View style={styles.iconRing}>
@@ -592,7 +602,7 @@ function LoadError({ onRetry }) {
         and try again.
       </Text>
       <TouchableOpacity style={styles.emptyCta} onPress={onRetry} activeOpacity={0.9}>
-        <Ionicons name="refresh" size={18} color={colors.neutral.bg} />
+        <Ionicons name="refresh" size={18} color={colors.onPrimary} />
         <Text style={styles.emptyCtaText}>Try again</Text>
       </TouchableOpacity>
     </View>
@@ -600,6 +610,8 @@ function LoadError({ onRetry }) {
 }
 
 function NoResults({ onReset }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <View style={styles.body}>
       <View style={styles.iconRing}>
@@ -611,12 +623,20 @@ function NoResults({ onReset }) {
         them to see everything again.
       </Text>
       <TouchableOpacity style={styles.emptyCta} onPress={onReset} activeOpacity={0.9}>
-        <Ionicons name="refresh" size={18} color={colors.neutral.bg} />
+        <Ionicons name="refresh" size={18} color={colors.onPrimary} />
         <Text style={styles.emptyCtaText}>Clear search & filters</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
@@ -685,7 +705,7 @@ const styles = StyleSheet.create({
   },
   segmentBtnActive: { backgroundColor: colors.primary.base },
   segmentText: { ...typography.body.small, color: colors.neutral.inkSecondary },
-  segmentTextActive: { color: colors.neutral.bg, fontWeight: '600' },
+  segmentTextActive: { color: colors.onPrimary, fontWeight: '600' },
 
   controlRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   control: {
@@ -703,7 +723,7 @@ const styles = StyleSheet.create({
   },
   controlActive: { borderColor: colors.primary.base, backgroundColor: colors.accent.surface },
   controlText: { ...typography.body.small, color: colors.neutral.inkSecondary, flexShrink: 1 },
-  controlTextActive: { color: colors.primary.base, fontWeight: '600' },
+  controlTextActive: { color: colors.primary.ink, fontWeight: '600' },
   controlBadge: {
     minWidth: 16,
     height: 16,
@@ -713,7 +733,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  controlBadgeText: { color: colors.neutral.bg, fontSize: 11, fontWeight: '700' },
+  controlBadgeText: { color: colors.onPrimary, fontSize: 11, fontWeight: '700' },
 
   chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
   clearChip: {
@@ -783,14 +803,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qtyDotText: { color: colors.neutral.bg, fontSize: 11, fontWeight: '700' },
+  qtyDotText: { color: colors.onPrimary, fontSize: 11, fontWeight: '700' },
   cardMeta: { flex: 1 },
   cardName: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
   cardProducer: { ...typography.body.small, color: colors.neutral.inkSecondary, marginTop: 1 },
   cardSub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
   cardRight: { alignItems: 'flex-end', gap: spacing.xs },
   badge: { paddingVertical: 2, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  badgeText: { ...typography.body.caption, color: colors.neutral.bg },
+  badgeText: { ...typography.body.caption, color: colors.onStatus },
 
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl },
   iconRing: {
@@ -827,7 +847,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     marginTop: spacing.xl,
   },
-  emptyCtaText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
+  emptyCtaText: { ...typography.body.regular, color: colors.onPrimary, fontWeight: '600' },
 
   // --- Onboarding empty state ---
   onboardScroll: { flex: 1 },
@@ -896,4 +916,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     ...shadows.strong,
   },
+});
+return { colors, styles };
 });

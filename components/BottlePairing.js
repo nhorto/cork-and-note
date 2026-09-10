@@ -22,10 +22,9 @@ import {
 } from 'react-native';
 import { usePro } from '../hooks/usePro';
 import { OCCASIONS, SEASONS, cellarPairing } from '../lib/cellarPairing';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 // Map a pairing category onto an icon so the list scans quickly.
 const CATEGORY_ICON = {
@@ -39,6 +38,8 @@ const CATEGORY_ICON = {
 
 // A horizontal row of single-select pill choices (tap again to clear).
 function PickerRow({ label, options, value, onChange }) {
+  const { styles } = useScreenTheme();
+
   return (
     <View style={styles.pickerRow}>
       <Text style={styles.pickerLabel}>{label}</Text>
@@ -68,6 +69,8 @@ function PickerRow({ label, options, value, onChange }) {
 }
 
 export default function BottlePairing({ bottle }) {
+  const { colors, spacing, styles } = useScreenTheme();
+
   const { gate } = usePro();
   const [occasion, setOccasion] = useState(null);
   const [season, setSeason] = useState(null);
@@ -185,7 +188,7 @@ export default function BottlePairing({ bottle }) {
               <Ionicons
                 name={CATEGORY_ICON[p.category] || 'restaurant-outline'}
                 size={16}
-                color={colors.primary.base}
+                color={colors.primary.ink}
                 style={styles.pairIcon}
               />
               <View style={styles.pairMeta}>
@@ -205,6 +208,12 @@ export default function BottlePairing({ bottle }) {
 }
 
 const SERIF = Platform.OS === 'ios' ? 'Georgia' : 'serif';
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   card: {
@@ -228,7 +237,7 @@ const styles = StyleSheet.create({
   flexSpacer: { flex: 1 },
   tuneLink: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
 
@@ -276,7 +285,7 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkSecondary,
   },
   pillTextActive: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
   freeText: {
@@ -304,7 +313,7 @@ const styles = StyleSheet.create({
   },
   retryLink: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
 
@@ -358,4 +367,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     textAlign: 'center',
   },
+});
+return { colors, spacing, styles };
 });

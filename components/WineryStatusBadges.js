@@ -2,11 +2,12 @@
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 const WineryStatusBadges = ({ status, compact = false }) => {
+  const { colors, styles } = useScreenTheme();
+
   if (!status) return null;
 
   const { visited, visitCount, isWantToVisit } = status;
@@ -17,13 +18,13 @@ const WineryStatusBadges = ({ status, compact = false }) => {
       <View style={styles.compactContainer}>
         {visited && (
           <View style={[styles.badge, styles.visitedBadge]}>
-            <Ionicons name="checkmark-circle" size={14} color={colors.neutral.bg} />
+            <Ionicons name="checkmark-circle" size={14} color={colors.onStatus} />
           </View>
         )}
 
         {isWantToVisit && (
           <View style={[styles.badge, styles.wishlistBadge]}>
-            <Ionicons name="bookmark" size={14} color={colors.neutral.bg} />
+            <Ionicons name="bookmark" size={14} color={colors.onStatus} />
           </View>
         )}
       </View>
@@ -34,7 +35,7 @@ const WineryStatusBadges = ({ status, compact = false }) => {
     <View style={styles.container}>
       {visited && (
         <View style={[styles.statusBadge, styles.visitedBadge]}>
-          <Ionicons name="checkmark-circle" size={16} color={colors.neutral.bg} />
+          <Ionicons name="checkmark-circle" size={16} color={colors.onStatus} />
           <Text style={styles.badgeText}>
             {visitCount > 1 ? `Visited ${visitCount} times` : 'Visited'}
           </Text>
@@ -43,13 +44,20 @@ const WineryStatusBadges = ({ status, compact = false }) => {
 
       {isWantToVisit && (
         <View style={[styles.statusBadge, styles.wishlistBadge]}>
-          <Ionicons name="bookmark" size={16} color={colors.neutral.bg} />
+          <Ionicons name="bookmark" size={16} color={colors.onStatus} />
           <Text style={styles.badgeText}>Want to Visit</Text>
         </View>
       )}
     </View>
   );
 };
+
+
+export default WineryStatusBadges;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -86,9 +94,9 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     ...typography.body.small,
-    color: colors.neutral.bg,
+    color: colors.onStatus,
     fontWeight: '500',
   },
 });
-
-export default WineryStatusBadges;
+return { colors, styles };
+});
