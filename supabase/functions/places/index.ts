@@ -25,17 +25,22 @@ import { isEntitlementActive } from "../_shared/entitlements.ts";
 // ── Limits ──────────────────────────────────────────────────────────────
 const MAX_BODY_BYTES = 10_000;
 
+const MODES = ["details", "match", "photo"] as const;
+type Mode = (typeof MODES)[number];
+
 // Rate limits (per authenticated user)
 const SHORT_WINDOW_MIN = 5;
 const MAX_REQUESTS_SHORT = 20; // ≤20 places calls / 5 min (any mode)
-const MAX_PER_DAY: Record<string, number> = {
+// Record<Mode, …>, not Record<string, …>: a `string` key type accepts a missing
+// mode and hands back `undefined`, and `count >= undefined` is false — so the
+// cap would silently never fire. That is exactly how Tonight's Pick shipped
+// uncapped (see _shared/entitlements.ts). All three modes are covered today;
+// this makes it impossible for a fourth to arrive without one.
+const MAX_PER_DAY: Record<Mode, number> = {
   details: 40, // ~8 winery-page opens/user/mo in the model; 40/day is generous
   match: 40, // one-time per winery record, then stored
   photo: 60,
 };
-
-const MODES = ["details", "match", "photo"] as const;
-type Mode = (typeof MODES)[number];
 
 // Field masks pinned per mode (SKU control — see header comment).
 const DETAILS_FIELD_MASK = [

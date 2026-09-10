@@ -26,3 +26,21 @@ jobs:
 
       - name: Test
         run: npx jest --ci
+
+  # The edge functions are TypeScript that Jest never imports and eslint only
+  # parses — nothing was typechecking them. That gap let a metered task ship
+  # with no fair-use cap: `deno check` had been reporting it as an error the
+  # whole time, on a machine nobody was looking at.
+  deno:
+    name: Typecheck edge functions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type check
+        working-directory: supabase/functions
+        run: deno check chat/index.ts delete-account/index.ts revenuecat-webhook/index.ts places/index.ts _shared/*.ts

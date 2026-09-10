@@ -17,17 +17,32 @@ export const FREE_TIER_LIMITS = {
   tonights_pick: 0,
 } as const;
 
+/** Every AI call is metered as exactly one of these. */
+export type MeteredTask = keyof typeof FREE_TIER_LIMITS;
+
+/** How a free meter counts: since the beginning, or since the 1st of the month. */
+export type MeterWindow = "lifetime" | "month";
+
 /**
  * The window each free meter counts over. Scans are LIFETIME — three to feel
  * the magic, then the wall, like Sommo's five — because a Haiku scan costs a
  * third of a cent and the reason to gate it is conversion, not cost. Chat
  * resets each calendar month because five-ever would starve the habit loop
  * that makes the sommelier worth paying for.
+ *
+ * Typed `Record<MeteredTask, …>` rather than inferred, so adding a task to
+ * FREE_TIER_LIMITS FAILS TO COMPILE until this table covers it. That is not
+ * decoration: `tonights_pick` was added as a task on 2026-09-09 and silently
+ * missed both this table and FAIR_USE_DAILY_CAPS, which left Tonight's Pick
+ * with no daily cap in production for a day (see that constant).
  */
-export const FREE_METER_WINDOWS = {
+export const FREE_METER_WINDOWS: Record<MeteredTask, MeterWindow> = {
   label_scan: "lifetime",
   chat: "month",
-} as const;
+  // Free users get zero Tonight's Picks, so the window never decides anything —
+  // "lifetime" is the honest description of an allowance of 0 forever.
+  tonights_pick: "lifetime",
+};
 
 /** Free-tier cellar size. Enforced client-side; bottles cost us nothing to store. */
 export const FREE_CELLAR_BOTTLE_LIMIT = 25;
@@ -37,18 +52,29 @@ export const FREE_CELLAR_BOTTLE_LIMIT = 25;
  * is a marketing word for "more than a human wine journaler can use", not an
  * invitation to script us: 50 Sonnet chats/day is ~$18/month at absolute worst
  * against $8.49 net, and the monthly ceiling stops a bot that grinds every day.
+ *
+ * EVERY metered task must appear here. A missing entry does not fail loudly —
+ * `counts.day >= undefined` is `false`, so the cap silently never fires. That is
+ * exactly what happened to `tonights_pick` between 2026-09-09 and 2026-09-10:
+ * the task was added to FREE_TIER_LIMITS by one branch while another was
+ * rewriting this table, and the only thing still bounding it was the 15-per-5-
+ * minute burst cap — about 4,300 calls a day. Hence the Record type: the
+ * compiler now refuses a task that is not capped.
  */
-export const FAIR_USE_DAILY_CAPS = {
+export const FAIR_USE_DAILY_CAPS: Record<MeteredTask, number> = {
   chat: 50,
   label_scan: 30,
-} as const;
+  // Tonight's Pick is one "what should I open?" an evening, and each call ships
+  // the whole cellar to Sonnet (~1-2c). Twenty is far past any human evening
+  // and still bounds a scripted grind at a few dollars a month.
+  tonights_pick: 20,
+};
 export const FAIR_USE_MONTHLY_CHAT_CAP = 1_000;
 
 /** Burst cap, any task, any tier: nobody types 15 sommelier questions in 5 minutes. */
 export const BURST_WINDOW_MIN = 5;
 export const BURST_LIMIT = 15;
 
-export type MeteredTask = keyof typeof FREE_TIER_LIMITS;
 
 /** The RevenueCat entitlement identifier configured in the dashboard. */
 export const PRO_ENTITLEMENT_ID = "pro";
