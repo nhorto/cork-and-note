@@ -329,7 +329,10 @@ export default function MapScreen() {
         setUserPins((prev) =>
           prev.some((p) => p.id === id) ? prev : [...prev, res.winery]
         );
-        router.push(`/winery/${id}`);
+        // directoryId: promotion doesn't persist the directory link on the
+        // wineries row, so hand it to the page — the Google card uses it to
+        // write businessStatus back to the exact directory row (#225).
+        router.push({ pathname: `/winery/${id}`, params: { directoryId: String(w.id) } });
       }
     } finally {
       setOpeningDiscoverId(null);
