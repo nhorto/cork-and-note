@@ -7,6 +7,7 @@ import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-
 import Markdown from 'react-native-markdown-display';
 import { chatService } from '../lib/chat';
 import { createThemedStyles } from '../styles/ThemeProvider';
+import ReportAiResponseModal from './ReportAiResponseModal';
 
 
 // Markdown styles for AI messages (Château Label theme)
@@ -21,12 +22,20 @@ function sourceLabel(url) {
   return match ? match[1] : url;
 }
 
-export default function ChatBubble({ message, onUseSuggestions }) {
+// `reportContext` is the user prompt that preceded this reply, when the
+// parent list had it handy — it rides along on the report so the owner can
+// judge the reply against the question it answered.
+export default function ChatBubble({ message, onUseSuggestions, reportContext = null }) {
   const { colors, mdStyles, styles } = useScreenTheme();
 
   const isUser = message.role === 'user';
   const hasSuggestions = message.ai_suggestions && Object.keys(message.ai_suggestions).length > 0;
   const displayContent = message.displayText || message.content;
+  // Report flag: real assistant replies only. Local error bubbles (synthetic,
+  // client-made) aren't AI content — nothing there for anyone to review.
+  const reportable =
+    !isUser && !message.isLocalError && !String(message.id ?? '').startsWith('error-');
+  const [reportOpen, setReportOpen] = useState(false);
   // Pages the Pro web search leaned on. Present only on a live reply — they are
   // not persisted with the message, so reopening an old chat shows none.
   const sources = Array.isArray(message.sources) ? message.sources : [];
@@ -115,11 +124,40 @@ export default function ChatBubble({ message, onUseSuggestions }) {
           </TouchableOpacity>
         )}
 
-        {/* Timestamp */}
-        <Text style={[styles.timestamp, isUser ? styles.userTimestamp : styles.aiTimestamp]}>
-          {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </Text>
+        {/* Timestamp — with a discreet report flag on AI replies (Google Play
+            AI-content policy: flagging must be possible in-app, per response). */}
+        {isUser ? (
+          <Text style={[styles.timestamp, styles.userTimestamp]}>
+            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </Text>
+        ) : (
+          <View style={styles.footerRow}>
+            <Text style={[styles.timestamp, styles.aiTimestamp, styles.footerTimestamp]}>
+              {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </Text>
+            {reportable && (
+              <TouchableOpacity
+                style={styles.reportButton}
+                onPress={() => setReportOpen(true)}
+                accessibilityRole="button"
+                accessibilityLabel="Report this response"
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons name="flag-outline" size={13} color={colors.neutral.inkTertiary} />
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
       </View>
+
+      {reportable && (
+        <ReportAiResponseModal
+          visible={reportOpen}
+          messageContent={message.content}
+          context={reportContext}
+          onClose={() => setReportOpen(false)}
+        />
+      )}
     </View>
   );
 }
@@ -343,6 +381,19 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     textTransform: 'none',
     letterSpacing: 0,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.xs,
+    gap: spacing.sm,
+  },
+  footerTimestamp: {
+    marginTop: 0,
+  },
+  reportButton: {
+    padding: 2,
   },
   userTimestamp: {
     color: colors.journey.secondary,

@@ -433,7 +433,18 @@ export default function SommelierScreen() {
             ref={flatListRef}
             data={messages}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <ChatBubble message={item} />}
+            renderItem={({ item, index }) => (
+              <ChatBubble
+                message={item}
+                // The preceding user prompt rides along on an AI-response
+                // report so the owner can judge the reply in context.
+                reportContext={
+                  index > 0 && messages[index - 1].role === 'user'
+                    ? messages[index - 1].content
+                    : null
+                }
+              />
+            )}
             contentContainerStyle={styles.messageList}
             showsVerticalScrollIndicator={false}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
