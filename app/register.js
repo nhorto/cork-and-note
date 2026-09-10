@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -15,6 +16,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { PRIVACY_URL, TERMS_URL } from '../lib/pro';
 import { createThemedStyles } from '../styles/ThemeProvider';
 import { AuthContext } from './_layout';
 
@@ -269,6 +271,30 @@ export default function RegisterScreen() {
               <Text style={styles.registerButtonText}>Sign up</Text>
             )}
           </TouchableOpacity>
+
+          {/* Clickwrap: the Terms say acceptance happens at account creation
+              (lib/legalContent.js "Agreement"), so the terms must actually be
+              presented here. Hosted copies, because the in-app legal screens
+              sit behind the auth guard. */}
+          <Text style={styles.consentText}>
+            By creating an account you agree to the{' '}
+            <Text
+              style={styles.consentLink}
+              accessibilityRole="link"
+              onPress={() => Linking.openURL(TERMS_URL).catch(() => {})}
+            >
+              Terms of Use
+            </Text>
+            {' '}and{' '}
+            <Text
+              style={styles.consentLink}
+              accessibilityRole="link"
+              onPress={() => Linking.openURL(PRIVACY_URL).catch(() => {})}
+            >
+              Privacy Policy
+            </Text>
+            .
+          </Text>
         </View>
 
         <View style={styles.loginContainer}>
@@ -398,6 +424,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,
+  },
+  consentText: {
+    fontSize: 13,
+    color: colors.neutral.inkSecondary,
+    textAlign: 'center',
+    lineHeight: 19,
+    paddingHorizontal: spacing.md,
+  },
+  consentLink: {
+    color: colors.primary.ink,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   loginContainer: {
     flexDirection: 'row',

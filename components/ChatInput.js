@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
   View,
@@ -167,6 +168,13 @@ export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhot
           />
         </TouchableOpacity>
       </View>
+
+      {/* Always visible at the point of use, not just in the Terms: sommelier
+          answers are AI-generated and can be wrong. Lives here so every chat
+          surface (Sommelier tab + wine-entry modal) carries it. */}
+      <Text style={styles.aiDisclaimer}>
+        The sommelier is AI and can be wrong — trust your own taste.
+      </Text>
     </View>
   );
 }
@@ -243,6 +251,13 @@ const styles = StyleSheet.create({
   },
   sendButtonActive: {
     backgroundColor: colors.primary.base,
+  },
+  aiDisclaimer: {
+    ...typography.body.caption,
+    color: colors.neutral.inkTertiary,
+    textAlign: 'center',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.xs,
   },
 });
 return { colors, styles };

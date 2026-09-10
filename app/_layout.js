@@ -11,6 +11,7 @@ import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import AgeGate from '../components/AgeGate';
 import OfflineBanner from '../components/OfflineBanner';
 import { ProProvider } from '../components/ProProvider';
 import { checkAndReschedule, setNotificationHandler } from '../lib/notifications';
@@ -67,6 +68,32 @@ function AppRoot() {
   const [session, setSession] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
+
+  // AGE GATE — one-time legal-drinking-age attestation per install, required
+  // by the Terms ("You must be of legal drinking age…") for an alcohol app.
+  // Covers signed-in AND signed-out users, which is why it lives here and not
+  // on the register screen. 'loading' → keep the splash up, 'needed' → render
+  // the gate over everything, 'ok' → attested (or unreadable storage next
+  // launch will simply ask again — re-asking is the safe failure).
+  const [ageStatus, setAgeStatus] = useState('loading');
+  useEffect(() => {
+    // Screenshot automation can't tap the gate (see the automation note
+    // below); that build profile never ships, so skipping it is safe.
+    if (process.env.EXPO_PUBLIC_SCREENSHOT_MODE === '1') {
+      setAgeStatus('ok');
+      return;
+    }
+    let mounted = true;
+    AsyncStorage.getItem('cn_age_attested')
+      .then((v) => { if (mounted) setAgeStatus(v === 'yes' ? 'ok' : 'needed'); })
+      .catch(() => { if (mounted) setAgeStatus('needed'); });
+    return () => { mounted = false; };
+  }, []);
+  const confirmAge = () => {
+    setAgeStatus('ok');
+    // Best-effort persist: a write failure just re-asks on the next launch.
+    AsyncStorage.setItem('cn_age_attested', 'yes').catch(() => {});
+  };
 
   const router = useRouter();
   const segments = useSegments();
@@ -342,14 +369,15 @@ function AppRoot() {
     isInitialized,
   };
 
-  // Show splash screen until everything is loaded
+  // Show splash screen until everything is loaded — including the age-gate
+  // check, so the gate never flashes in after the app is already visible.
   useEffect(() => {
-    if (loaded && themeReady && !isLoading) {
+    if (loaded && themeReady && !isLoading && ageStatus !== 'loading') {
       SplashScreen.hideAsync();
     }
-  }, [loaded, themeReady, isLoading]);
+  }, [loaded, themeReady, isLoading, ageStatus]);
 
-  if (!loaded || !themeReady) {
+  if (!loaded || !themeReady || ageStatus === 'loading') {
     return null;
   }
 
@@ -380,6 +408,9 @@ function AppRoot() {
               </Stack>
               <StatusBar style={isDark ? 'light' : 'dark'} />
             </ThemeProvider>
+            {/* Last child so its opaque absolute fill covers every screen
+                (and the offline banner) until the user attests. */}
+            {ageStatus === 'needed' && <AgeGate onConfirm={confirmAge} />}
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </ProProvider>
