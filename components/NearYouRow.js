@@ -96,7 +96,11 @@ export default function NearYouRow() {
         address: [w.city, w.state].filter(Boolean).join(', ') || null,
       });
       const id = res?.winery?.id;
-      if (id != null) router.push(`/winery/${id}`);
+      // directoryId: the page's Google card uses it to write businessStatus
+      // back to the exact winery_directory row (#225).
+      if (id != null) {
+        router.push({ pathname: `/winery/${id}`, params: { directoryId: String(w.id) } });
+      }
     } finally {
       setOpening(null);
     }

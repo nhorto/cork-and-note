@@ -17,7 +17,10 @@
 //      photo   → Place Photos (one size-capped URI lookup)
 //    No editorialSummary (that's Enterprise+Atmosphere, +$5/1K) at launch.
 //  - Nothing from Google is stored except place IDs (policy: IDs are storable
-//    indefinitely; ratings/hours/photos are live-fetch only).
+//    indefinitely; ratings/hours/photos are live-fetch only). Deliberate
+//    exception (#225): businessStatus is folded into our own directory's
+//    operating_status flag — a store of the *fact* that a winery closed, kept
+//    to our Overture-seeded rows, not a cache of Google content for display.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
 import { isEntitlementActive } from "../_shared/entitlements.ts";
@@ -25,22 +28,28 @@ import { isEntitlementActive } from "../_shared/entitlements.ts";
 // ── Limits ──────────────────────────────────────────────────────────────
 const MAX_BODY_BYTES = 10_000;
 
+const MODES = ["details", "match", "photo"] as const;
+type Mode = (typeof MODES)[number];
+
 // Rate limits (per authenticated user)
 const SHORT_WINDOW_MIN = 5;
 const MAX_REQUESTS_SHORT = 20; // ≤20 places calls / 5 min (any mode)
-const MAX_PER_DAY: Record<string, number> = {
+// Record<Mode, …>, not Record<string, …>: a `string` key type accepts a missing
+// mode and hands back `undefined`, and `count >= undefined` is false — so the
+// cap would silently never fire. That is exactly how Tonight's Pick shipped
+// uncapped (see _shared/entitlements.ts). All three modes are covered today;
+// this makes it impossible for a fourth to arrive without one.
+const MAX_PER_DAY: Record<Mode, number> = {
   details: 40, // ~8 winery-page opens/user/mo in the model; 40/day is generous
   match: 40, // one-time per winery record, then stored
   photo: 60,
 };
 
-const MODES = ["details", "match", "photo"] as const;
-type Mode = (typeof MODES)[number];
-
 // Field masks pinned per mode (SKU control — see header comment).
 const DETAILS_FIELD_MASK = [
   "id",
   "displayName",
+  "businessStatus",
   "rating",
   "userRatingCount",
   "regularOpeningHours.weekdayDescriptions",
@@ -50,6 +59,16 @@ const DETAILS_FIELD_MASK = [
   "googleMapsUri",
   "photos.name",
 ].join(",");
+
+// Google businessStatus → winery_directory.operating_status (#225). A details
+// call is the one moment we learn a directory winery's real-world status for
+// free (the field rides along on the SKU we already pay for), so we write it
+// back — future users' discovery pins reflect it without their own Pro call.
+const BUSINESS_STATUS_TO_OPERATING: Record<string, string> = {
+  OPERATIONAL: "open", // also clears a stale 'possibly_closed' re-ingest flag
+  CLOSED_TEMPORARILY: "temporarily_closed",
+  CLOSED_PERMANENTLY: "permanently_closed",
+};
 
 const MATCH_FIELD_MASK = "places.id,places.displayName,places.formattedAddress";
 
@@ -176,9 +195,54 @@ Deno.serve(async (req: Request) => {
         return json({ error: "Winery details are unavailable right now." }, 502);
       }
       const place = await res.json();
+
+      // Freshness write-back (#225): stamp the matching winery_directory row.
+      // The table has no client-write policies, so this uses the service role.
+      // Best-effort — a write failure must never break the details response.
+      const operatingStatus = BUSINESS_STATUS_TO_OPERATING[place.businessStatus as string];
+      if (operatingStatus) {
+        try {
+          const admin = createClient(
+            Deno.env.get("SUPABASE_URL") ?? "",
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+          );
+          const stamp = {
+            operating_status: operatingStatus,
+            updated_at: new Date().toISOString(),
+          };
+          // The client sends directory_id when the winery page came from a
+          // directory pin (promotion doesn't persist the link on wineries, so
+          // it only survives that first navigation). With it we can also
+          // attach google_place_id to the directory row, which makes every
+          // later place-id-only match below actually hit.
+          const directoryId = parsed.directory_id;
+          if (typeof directoryId === "number" && Number.isInteger(directoryId) && directoryId > 0) {
+            // Guard: only stamp when the row has no place id yet or the same
+            // one — a hostile client must not re-point an attached row at a
+            // different Google place. (placeId is regex-validated above, so
+            // interpolating it into the filter is safe.)
+            const { error } = await admin
+              .from("winery_directory")
+              .update({ ...stamp, google_place_id: placeId })
+              .eq("id", directoryId)
+              .or(`google_place_id.is.null,google_place_id.eq.${placeId}`);
+            if (error) console.error("Directory status write-back error:", error);
+          } else {
+            const { error } = await admin
+              .from("winery_directory")
+              .update(stamp)
+              .eq("google_place_id", placeId);
+            if (error) console.error("Directory status write-back error:", error);
+          }
+        } catch (writeBackError) {
+          console.error("Directory status write-back failed:", writeBackError);
+        }
+      }
+
       result = {
         place_id: place.id,
         name: place.displayName?.text ?? null,
+        business_status: place.businessStatus ?? null,
         rating: place.rating ?? null,
         rating_count: place.userRatingCount ?? null,
         open_now: place.currentOpeningHours?.openNow ?? null,
