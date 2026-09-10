@@ -47,7 +47,7 @@ export default function AppearanceSettings() {
 const useScreenTheme = createThemedStyles(({ colors, typography }) => ({
   colors,
   styles: StyleSheet.create({
-    section: { marginBottom: 32 },
+    section: { paddingHorizontal: 20, paddingTop: 20, marginBottom: 22 },
     title: { fontFamily: typography.fonts.serif, fontSize: 22, color: colors.neutral.ink, marginBottom: 8 },
     description: { color: colors.neutral.inkSecondary, fontSize: 14, lineHeight: 21, marginBottom: 14 },
     option: { flexDirection: 'row', alignItems: 'center', padding: 16, marginBottom: 9, gap: 13, borderWidth: 1, borderColor: colors.neutral.border, borderRadius: 12, backgroundColor: colors.neutral.surface },
