@@ -19,6 +19,7 @@ import {
 import AskSommelierBox from '../../components/AskSommelierBox';
 import LogFab from '../../components/LogFab';
 import NearYouRow from '../../components/NearYouRow';
+import UpgradePill from '../../components/UpgradePill';
 import { drinkWindowMeta, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
 import { varietalText } from '../../lib/varietals';
@@ -137,14 +138,19 @@ export default function HomeScreen() {
             <Text style={styles.welcome}>WELCOME BACK</Text>
             <Text style={styles.name}>{firstName}</Text>
           </View>
-          <TouchableOpacity
-            style={styles.avatar}
-            onPress={() => router.push('/(tabs)/profile')}
-            accessibilityRole="button"
-            accessibilityLabel="Profile & settings"
-          >
-            <Text style={styles.avatarText}>{initials}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            {/* Standing paywall route for free users (owner ask 2026-09-10);
+                renders nothing for Pro. */}
+            <UpgradePill />
+            <TouchableOpacity
+              style={styles.avatar}
+              onPress={() => router.push('/(tabs)/profile')}
+              accessibilityRole="button"
+              accessibilityLabel="Profile & settings"
+            >
+              <Text style={styles.avatarText}>{initials}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.headerBorder} />
       </View>
@@ -476,6 +482,11 @@ const styles = StyleSheet.create({
     color: colors.neutral.ink,
     fontFamily: SERIF,
     marginTop: 2,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   avatar: {
     width: 42,

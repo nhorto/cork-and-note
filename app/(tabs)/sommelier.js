@@ -19,11 +19,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
 import MeterHint from '../../components/MeterHint';
+import ProUpsellCard from '../../components/ProUpsellCard';
 import ScreenHeader from '../../components/ScreenHeader';
 import TonightsPickCard from '../../components/TonightsPickCard';
 import TypingDots from '../../components/TypingDots';
+import UpgradePill from '../../components/UpgradePill';
 import { usePro } from '../../hooks/usePro';
 import { aiService } from '../../lib/ai';
+import { meterHint } from '../../lib/pro';
 import { chatService } from '../../lib/chat';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 
@@ -88,7 +91,7 @@ function ConversationRow({ conversation, onPress, onDelete }) {
 export default function SommelierScreen() {
   const { colors, styles } = useScreenTheme();
 
-  const { gate, isPro, presentPaywall } = usePro();
+  const { gate, isPro, remaining, presentPaywall } = usePro();
   const router = useRouter();
   // State
   const [view, setView] = useState('list'); // 'list' or 'chat'
@@ -308,8 +311,14 @@ export default function SommelierScreen() {
     return (
       <View style={styles.safeArea}>
         {/* Somm tab root (flat-five bar, #203) — no back chevron.
-            ScreenHeader handles the top inset itself. */}
-        <ScreenHeader title="Sommelier" subtitle="Your wine companion" showBack={false} />
+            ScreenHeader handles the top inset itself. The PRO pill is the
+            standing paywall route for free users (owner ask 2026-09-10). */}
+        <ScreenHeader
+          title="Sommelier"
+          subtitle="Your wine companion"
+          showBack={false}
+          right={<UpgradePill source="chat" />}
+        />
 
         {loading ? (
           <View style={styles.centered}>
@@ -327,6 +336,19 @@ export default function SommelierScreen() {
                 onRequireCellar={() => router.push('/cellar/add')}
               />
             </View>
+
+            {/* Standing Pro entry (owner ask 2026-09-10): the paywall used to
+                be reachable from this tab only by exhausting the chat meter.
+                Renders nothing for Pro. */}
+            <ProUpsellCard
+              title="Unlimited sommelier with Pro"
+              subtitle={
+                meterHint({ isPro, task: 'chat', remaining: remaining('chat') }) ??
+                'Ask anything, any time — photos included'
+              }
+              source="chat"
+              style={styles.upsell}
+            />
 
             {/* New conversation */}
             <TouchableOpacity style={styles.newChatButton} onPress={startNewChat}>
@@ -466,6 +488,9 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   pickWrap: {
+    marginBottom: spacing.md,
+  },
+  upsell: {
     marginBottom: spacing.md,
   },
   newChatButton: {

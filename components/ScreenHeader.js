@@ -77,7 +77,9 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.accent.border,
   },
   side: {
-    width: HIT,
+    // minWidth, not width: the right slot can hold something a little wider
+    // than the back chevron (the PRO pill) without clipping it.
+    minWidth: HIT,
     minHeight: HIT,
     justifyContent: 'center',
   },

@@ -23,6 +23,7 @@ import CellarFilterModal from '../../components/CellarFilterModal';
 import Chip from '../../components/Chip';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
 import TonightsPickCard from '../../components/TonightsPickCard';
+import UpgradePill from '../../components/UpgradePill';
 import { cellarService, drinkWindowMeta } from '../../lib/cellar';
 import {
   EMPTY_FILTERS,
@@ -147,11 +148,13 @@ export default function CellarScreen() {
             <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.ink} />
           </View>
           <Text style={styles.headerTitle}>Cellar</Text>
-          {/* Deliberately empty. Adding a bottle lives on the FAB below (and on
-              the tab bar's "+") — this screen used to offer all three, which was
-              two too many for one action (#155). The spacer keeps the title
-              optically centred now that the button is gone. */}
-          <View style={styles.headerIconSpacer} />
+          {/* No add button here: adding a bottle lives on the FAB below (and
+              on the tab bar's "+") (#155). The slot now carries the standing
+              PRO pill for free users (owner ask 2026-09-10); for Pro it is
+              empty and keeps the title optically centred. */}
+          <View style={styles.headerIconSpacer}>
+            <UpgradePill source="cellar" />
+          </View>
         </View>
         <View style={styles.headerBorder} />
       </View>
@@ -660,7 +663,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.accent.border,
   },
-  headerIconSpacer: { width: 40, height: 40 },
+  headerIconSpacer: { minWidth: 40, height: 40, alignItems: 'flex-end', justifyContent: 'center' },
   headerTitle: {
     ...typography.heading.h2,
     color: colors.neutral.ink,
