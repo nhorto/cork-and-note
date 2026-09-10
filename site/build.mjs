@@ -148,13 +148,16 @@ const chapterBlock = (c, flip = false) => `<div class="chapter${flip ? ' flip' :
   <div class="stage">${phone(c.shot, c.alt)}</div>
 </div>`;
 
+// Chapter headings are the questions a wine drinker actually asks (carried
+// over from the 2026-09-08 question-led draft, owner-preferred): each chapter
+// answers one of them.
 const JOURNAL_CHAPTER = {
   numeral: 'I',
   shot: 'shot-2-log-a-tasting.png',
   alt: 'Cork & Note screen for logging a wine, with a label-scan button and a rating form.',
   eyebrow: 'The journal',
-  heading: 'Capture it while the glass is still in your hand.',
-  body: 'A bottle at home, dinner out, or a flight at the tasting bar — log each wine as you taste it: a rating, flavour notes, a photo, and how it made you feel. Tag the place, or don’t. A Tuesday-night bottle with no location still counts.',
+  heading: 'Would you have it again?',
+  body: 'A bottle at home, dinner out, or a flight at the tasting bar — capture each wine while the glass is still in your hand: a rating, flavour notes, a photo, and how it made you feel. Tag the place, or don’t. A Tuesday-night bottle with no location still counts.',
   points: [
     'Scan the label or the tasting card and the producer, vintage and grapes fill themselves in.',
     'No wine vocabulary required — plain words like “honey, but dry?” are exactly the point.',
@@ -166,11 +169,24 @@ const PLACES_CHAPTER = {
   shot: 'shot-3-winery-visits.png',
   alt: 'A winery page in Cork & Note showing your past visits and notes alongside live Google rating, opening hours and website.',
   eyebrow: 'The places · your passport',
-  heading: 'The wineries remember you back.',
-  body: 'You taste six wines in an afternoon, love the third one, and by summer’s end the trip has blurred. Not here. Every place you’ve been keeps its own page — your visits, the wines you poured on each one, your notes and photos — on a map that fills in as you travel. No other wine app keeps this.',
+  heading: 'What did we try last time?',
+  body: 'The wineries remember you back. Every place you’ve been keeps its own page — your visits, the wines you poured on each one, your notes and photos — so you walk back in knowing exactly what you loved. No other wine app keeps this.',
   points: [
-    'Pro adds live winery intel from Google, right on the page: rating, opening hours, website and phone — plan the next visit from the record of the last one.',
-    'The map is yours on any plan: long-press to pin anywhere — restaurants and tasting bars count too.',
+    'Pro adds live winery intel from Google, right on the page: rating, opening hours, website and phone.',
+    'Restaurants and tasting bars keep pages too — anywhere you drink wine counts.',
+  ],
+};
+
+const MAP_CHAPTER = {
+  numeral: 'IV',
+  shot: 'shot-4-explore-map.png',
+  alt: 'The Cork & Note map with your visited wineries, wishlist and nearby wineries in different colors.',
+  eyebrow: 'The map',
+  heading: 'Where should we go next?',
+  body: 'Your map fills in as you travel — visited wineries in green, your wishlist in blue. With Pro, wineries near you appear around them, and you can search a directory of 14,000+ US wineries by name — so the record of your last trip plans the next one.',
+  points: [
+    'Long-press to pin anywhere on any plan — your places are never gated.',
+    'Tap a nearby winery and its page opens with live hours and ratings, ready to visit.',
   ],
 };
 
@@ -188,18 +204,23 @@ const WINDOWS = [
   ['past', 'Past peak', 'Tonight, or never.'],
 ];
 
+// Why cards: the 2026-09-08 draft's editorial-row format (numbered, headline,
+// body, detail line), owner-preferred, with copy updated to the current app.
 const WHY = [
   [
-    'The bottle and the place',
-    'Rating apps know the wine but not the trip. Passport apps stamp the visit but forget the wine. Cork & Note keeps what you drank together with where you were — and knows the winery, too.',
+    'Find the wine you meant to buy again.',
+    'Keep the label, vintage and your own verdict together. When you’re looking for that bottle weeks later, you have more to go on than a camera roll.',
+    'Your rating answers the useful question: did you like it?',
   ],
   [
-    'A sommelier with your palate',
-    'Cork & Note’s sommelier reasons from your own ratings, visits and cellar. It has read your journal — because you wrote it — so its advice starts from what you actually liked.',
+    'Learn the words as you taste.',
+    'Ask the sommelier about the dry feeling after a sip or the flavour you can’t quite name. It has read your journal — because you wrote it — so its advice starts from what you actually liked.',
+    'Keep the suggestions that fit. Your rating is still yours.',
   ],
   [
-    'A journal, not a feed',
-    'No followers, no public ratings, no performing. Your notes are private to you — and they are never deleted, on any plan. A memory app that holds your memories hostage isn’t one.',
+    'Remember why you brought it home.',
+    'Link a bottle in your cellar to the tasting that sold you on it. Open your original notes when you open the bottle, then record what you think this time.',
+    'The wine, the visit and the bottle stay connected — privately, and never deleted, on any plan.',
   ],
 ];
 
@@ -360,6 +381,7 @@ const home = page({
 <section class="features">
   <div class="wide">
     ${chapterBlock(PLACES_CHAPTER, true)}
+    ${chapterBlock(MAP_CHAPTER)}
   </div>
 </section>
 
@@ -381,11 +403,11 @@ const home = page({
   <div class="wide">
     <div class="section-head">
       <p class="eyebrow">Why Cork &amp; Note</p>
-      <h2>Wine apps make you choose: rate bottles, or track trips.</h2>
-      <p class="section-lede">Cork &amp; Note keeps the whole story together — and hands it to a sommelier.</p>
+      <h2>More useful every time you come back to it.</h2>
+      <p class="section-lede">Rating apps know the wine but not the trip. Passport apps stamp the visit but forget the wine. Cork &amp; Note keeps the whole story together — and hands it to a sommelier.</p>
     </div>
     <div class="cards">
-      ${WHY.map(([h, p]) => `<div class="card"><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join('\n      ')}
+      ${WHY.map(([h, p, detail], i) => `<article class="card"><span class="why-number" aria-hidden="true">0${i + 1}</span><h3>${esc(h)}</h3><div><p>${esc(p)}</p><p class="why-detail">${esc(detail)}</p></div></article>`).join('\n      ')}
     </div>
   </div>
 </section>
@@ -397,6 +419,20 @@ const home = page({
       <h2>Start with a free journal. Get more help with Pro.</h2>
       <p class="section-lede">Logging is never gated: every tasting, place, photo and note is free for as long as you use the app — and never deleted. Pro adds the parts that help: an unlimited sommelier and scanner, live winery details, and the full cellar.</p>
     </div>
+    <div class="plan-cards">
+      <article class="plan-card">
+        <p class="eyebrow">Free</p><h3>Your everyday wine journal.</h3><p class="card-price">$0</p><p class="plan-description">For keeping track of what you taste, and trying everything once.</p>
+        <ul class="plan-features"><li>Unlimited tastings, notes and photos</li><li>Winery visits, your map and wishlist</li><li>Up to 25 bottles in your cellar</li><li>3 label or tasting-card scans to try</li><li>5 sommelier messages a month</li></ul>
+        <div class="plan-action"><p>Coming soon for iPhone</p><a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
+      </article>
+      <article class="plan-card pro-card">
+        <p class="eyebrow">Pro</p><h3>More guidance with every tasting.</h3><p class="card-price">$9.99<span>/ month</span></p><p class="annual-price">or $59.99 / year with 3 days free</p><p class="plan-description">Everything in Free, with more room to ask, scan and explore.</p>
+        <ul class="plan-features"><li>Unlimited sommelier conversations — photos and web lookups included</li><li>Live winery ratings, hours &amp; websites, plus nearby-winery discovery</li><li>Unlimited label and tasting-card scans</li><li>Unlimited cellar with drink windows and Tonight’s Pick</li><li>Export your journal to CSV</li></ul>
+        <div class="plan-action"><p>Coming soon for iPhone</p><a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
+      </article>
+    </div>
+    <div id="plan-comparison" class="comparison-section">
+    <h3>Compare all features</h3>
     <div class="compare-wrap">
     <table class="compare">
       <thead>
@@ -421,6 +457,7 @@ const home = page({
         ${compareRows}
       </tbody>
     </table>
+    </div>
     </div>
     <div class="wins">
       ${PRO_WINS.map(([h, p]) => `<div class="win"><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join('\n      ')}
@@ -548,7 +585,7 @@ section{scroll-margin-top:16px}
     radial-gradient(48% 55% at 78% 62%,rgba(244,162,89,.28),rgba(244,162,89,0) 70%),
     linear-gradient(180deg,var(--wine) 0%,var(--merlot) 100%);
   color:var(--cream);overflow:hidden}
-.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:end}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:32px;align-items:center}
 .hero-text{padding:88px 0 96px}
 .hero .eyebrow{color:var(--gold-light)}
 .hero .eyebrow::before{background:var(--gold)}
@@ -560,8 +597,10 @@ section{scroll-margin-top:16px}
 .hero .textlink{color:var(--cream)}
 .hero .textlink:hover{color:var(--gold-light)}
 .hero .subnote{color:var(--gold-light)}
-.hero-stage{position:relative;height:580px;align-self:end}
-.hero-stage .phone{position:absolute;left:50%;top:72px;transform:translateX(-50%);width:360px}
+/* Full phone, in normal flow — never cropped, no plate behind it (owner
+   feedback 2026-09-09: the cut-off phones in boxes looked terrible). */
+.hero-stage{display:flex;justify-content:center;padding:24px 0}
+.hero-stage .phone{width:min(340px,80vw)}
 
 /* ---- Pull quote band ---- */
 .pain{background:var(--linen);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone)}
@@ -579,10 +618,8 @@ section{scroll-margin-top:16px}
 .points{margin:0;padding:0;list-style:none}
 .points li{position:relative;padding-left:24px;margin:0 0 10px;color:var(--graphite);font-size:15.5px}
 .points li::before{content:'';position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:999px;background:var(--gold)}
-.stage{position:relative;height:520px;border-radius:24px;border:1px solid var(--stone);overflow:hidden;
-  background:radial-gradient(70% 60% at 50% 20%,var(--gold-light),var(--parchment) 75%)}
-.stage::after{content:'';position:absolute;inset:14px;border:1px solid rgba(244,162,89,.35);border-radius:14px;pointer-events:none}
-.stage .phone{position:absolute;z-index:1;left:50%;top:56px;transform:translateX(-50%);width:290px}
+.stage{display:flex;justify-content:center;align-items:center}
+.stage .phone{width:min(300px,78vw)}
 
 /* ---- Sommelier: merlot block ---- */
 .somm{background:
@@ -602,8 +639,8 @@ section{scroll-margin-top:16px}
 .asks li::before{content:'“';color:var(--gold-shimmer)}
 .asks li::after{content:'”';color:var(--gold-shimmer)}
 .somm-note{font-size:14px;color:var(--gold-light);margin:0;max-width:48ch}
-.somm-stage{position:relative;height:520px}
-.somm-stage .phone{position:absolute;left:50%;top:150px;transform:translateX(-50%);width:320px}
+.somm-stage{display:flex;justify-content:center;align-items:center;padding:24px 0}
+.somm-stage .phone{width:min(300px,78vw)}
 
 /* ---- Cellar: parchment band ---- */
 .cellar{background:var(--parchment);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:88px 0}
@@ -620,11 +657,12 @@ section{scroll-margin-top:16px}
 
 /* ---- Why ---- */
 .why{padding:96px 0 88px}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.card{background:var(--parchment);border:1px solid var(--stone);border-radius:14px;padding:28px 26px;position:relative}
-.card::before{content:'';display:block;width:36px;height:1px;background:var(--gold);margin-bottom:18px}
-.card h3{font-size:22px;margin:0 0 10px;color:var(--wine)}
+.cards{border-top:1px solid var(--stone)}
+.card{display:grid;grid-template-columns:48px .85fr 1.2fr;gap:28px;padding:32px 0;border-bottom:1px solid var(--stone);align-items:start}
+.why-number{font-family:var(--serif);font-size:22px;color:var(--gold-text)}
+.card h3{font-size:27px;line-height:1.25;margin:0;color:var(--wine);max-width:21ch}
 .card p{margin:0;font-size:15.5px;color:var(--graphite)}
+.card .why-detail{margin-top:12px;font-size:14px;color:var(--wine)}
 
 /* ---- Pricing: linen band ---- */
 .pricing{background:var(--linen);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:88px 0}
@@ -657,6 +695,26 @@ section{scroll-margin-top:16px}
 .wins{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px}
 .win h3{font-size:19px;color:var(--wine);margin:0 0 8px;padding-top:16px;border-top:1px solid var(--gold-muted)}
 .win p{margin:0;font-size:15px;color:var(--graphite)}
+/* Plan cards (ported from the 2026-09-08 question-led draft, owner-preferred) */
+.plan-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:stretch;margin-bottom:12px}
+.plan-card{background:var(--cream);border:1px solid var(--stone);border-radius:16px;padding:32px;display:flex;flex-direction:column}
+.plan-card h3{font-size:30px;line-height:1.2;margin:6px 0 0;max-width:18ch;min-height:72px}
+.card-price{font-family:var(--serif);font-size:48px;line-height:1.1;margin:24px 0 8px;color:var(--burgundy)}
+.card-price span{font-family:var(--sans);font-size:15px;color:var(--graphite);margin-left:6px}
+.annual-price{font-size:14px;margin:0 0 10px;color:var(--burgundy)}
+.plan-description{font-size:16px;color:var(--graphite);max-width:36ch}
+.plan-features{padding:0;list-style:none;margin:20px 0 28px;display:grid;gap:12px;font-size:15px}
+.plan-features li{padding-left:24px;position:relative}
+.plan-features li::before{content:'✓';position:absolute;left:0;color:var(--sage)}
+.plan-action{margin-top:auto}
+.plan-action p{font-size:12px;color:var(--pewter);margin:0 0 12px}
+.plan-button{display:block;border:1px solid var(--burgundy);color:var(--burgundy);border-radius:6px;padding:13px 20px;text-align:center;font-size:15px;font-weight:600;text-decoration:none}
+.plan-button:hover{background:var(--parchment)}
+.pro-card{border-top:5px solid var(--burgundy);padding-top:28px;background:linear-gradient(155deg,var(--gold-light),var(--cream) 55%)}
+.pro-card .plan-button{background:var(--burgundy);color:var(--cream)}
+.pro-card .plan-button:hover{background:var(--wine)}
+.comparison-section{margin-top:52px;scroll-margin-top:24px}
+.comparison-section>h3{font-size:27px;margin-bottom:22px}
 .fineprint{font-size:13px;color:var(--pewter);margin:32px 0 0}
 
 /* ---- FAQ ---- */
@@ -701,18 +759,17 @@ footer{background:var(--merlot);color:var(--gold-muted);font-size:14px}
   .hero-text{padding:56px 0 40px;text-align:center}
   .hero .eyebrow,.hero-actions{justify-content:center}
   .hero .lede{margin-left:auto;margin-right:auto}
-  .hero-stage{height:400px}
-  .hero-stage .phone{top:0;width:min(300px,78vw)}
+  .hero-stage .phone{width:min(280px,78vw)}
   .section-head{margin-bottom:36px}
   .chapter{grid-template-columns:1fr;gap:28px;padding:24px 0 48px}
   .chapter.flip .stage{order:0}
-  .stage{height:420px}
-  .stage .phone{top:40px;width:min(270px,70vw)}
+  .stage .phone{width:min(270px,74vw)}
   .somm-text{padding:64px 0 40px}
-  .somm-stage{height:380px}
-  .somm-stage .phone{top:0;width:min(300px,78vw)}
+  .somm-stage .phone{width:min(280px,78vw)}
   .windows{grid-template-columns:repeat(2,1fr)}
-  .cards,.wins{grid-template-columns:1fr}
+  .wins{grid-template-columns:1fr}
+  .card{grid-template-columns:32px .9fr 1.1fr;gap:20px}
+  .plan-cards{grid-template-columns:1fr}
   .compare{font-size:14px}
   .compare th,.compare td{padding:12px 12px}
   .compare thead th{padding:18px 12px 16px}
@@ -721,13 +778,14 @@ footer{background:var(--merlot);color:var(--gold-muted);font-size:14px}
   .feat-col-note{font-size:15px}
   .plan-price{font-size:28px}
   .plan-tag{font-size:12px}
-  .somm-stage{height:340px}
   .features,.why,.faq{padding-top:72px}
   .cellar,.pricing{padding:64px 0}
   .foot{flex-direction:column;align-items:flex-start}
   .prose h1{font-size:30px}
 }
 @media (max-width:480px){
+  .card{grid-template-columns:28px 1fr;gap:12px 18px;padding:28px 0}
+  .card h3{max-width:none;font-size:25px}
   .bar-inner{padding:16px 20px}
   .bar nav{gap:16px}
   .bar nav a{font-size:14px}
