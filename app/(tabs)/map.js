@@ -60,6 +60,9 @@ export default function MapScreen() {
   // Searchable list of places you've visited (#101).
   const [showPlacesList, setShowPlacesList] = useState(false);
   const [placeSearch, setPlaceSearch] = useState('');
+  // "Find" tab (Pro, owner feedback 2026-09-09): search the whole winery
+  // directory by name, nearest first. Debounced; our own table, zero API cost.
+  const [directoryResults, setDirectoryResults] = useState([]);
   const [listTab, setListTab] = useState('visited'); // 'visited' | 'wishlist' (#97)
 
   // Places you've actually been (visited) and wineries you've saved (wishlist).
@@ -174,6 +177,25 @@ export default function MapScreen() {
     // userPins in deps so a newly-saved winery immediately swallows its
     // duplicate discovery pin.
   }, [isPro, userLocation, userPins]);
+
+  // Debounced directory search for the Find tab.
+  useEffect(() => {
+    if (listTab !== 'find' || !isPro) return;
+    const q = placeSearch.trim();
+    if (q.length < 2) {
+      setDirectoryResults([]);
+      return;
+    }
+    const t = setTimeout(async () => {
+      const res = await wineryDirectoryService.searchByName({
+        query: q,
+        latitude: userLocation?.latitude ?? null,
+        longitude: userLocation?.longitude ?? null,
+      });
+      if (res.success) setDirectoryResults(res.wineries);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [listTab, placeSearch, isPro, userLocation]);
 
   // Tapping a discovery pin promotes it to a real winery record and opens its
   // page (same flow as Home's Near You row) — where the Google card enriches it.
@@ -792,13 +814,34 @@ export default function MapScreen() {
                   Wishlist ({wishlistPlaces.length})
                 </Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.segmentBtn, listTab === 'find' && styles.segmentBtnActive]}
+                activeOpacity={0.8}
+                onPress={() => {
+                  if (!isPro) {
+                    presentPaywall('places');
+                    return;
+                  }
+                  setListTab('find');
+                }}
+              >
+                <Text style={[styles.segmentText, listTab === 'find' && styles.segmentTextActive]}>
+                  Find{!isPro ? ' ·PRO' : ''}
+                </Text>
+              </TouchableOpacity>
             </View>
 
             <View style={styles.searchBox}>
               <Ionicons name="search" size={18} color={colors.neutral.inkTertiary} />
               <TextInput
                 style={styles.searchInput}
-                placeholder={listTab === 'wishlist' ? 'Search your wishlist' : "Search wineries you've visited"}
+                placeholder={
+                  listTab === 'find'
+                    ? 'Search 14,000+ US wineries'
+                    : listTab === 'wishlist'
+                      ? 'Search your wishlist'
+                      : "Search wineries you've visited"
+                }
                 placeholderTextColor={colors.neutral.placeholder}
                 value={placeSearch}
                 onChangeText={setPlaceSearch}
@@ -819,38 +862,71 @@ export default function MapScreen() {
             </View>
 
             <FlatList
-              data={filteredPlaces}
-              keyExtractor={(item) => String(item.id)}
+              data={listTab === 'find' ? directoryResults : filteredPlaces}
+              keyExtractor={(item) => (listTab === 'find' ? `dir-${item.id}` : String(item.id))}
               keyboardShouldPersistTaps="handled"
               style={styles.listScroll}
               ItemSeparatorComponent={() => <View style={styles.listSeparator} />}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.placeRow}
-                  activeOpacity={0.7}
-                  onPress={() => openPlace(item)}
-                >
-                  <View style={styles.placeIcon}>
-                    <Ionicons
-                      name={listTab === 'wishlist' ? 'bookmark' : 'location'}
-                      size={18}
-                      color={listTab === 'wishlist' ? colors.status.wishlist : colors.primary.base}
-                    />
-                  </View>
-                  <View style={styles.placeMeta}>
-                    <Text style={styles.placeName} numberOfLines={1}>{item.name}</Text>
-                    {item.address ? (
-                      <Text style={styles.placeAddress} numberOfLines={1}>{item.address}</Text>
-                    ) : null}
-                  </View>
-                  <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
-                </TouchableOpacity>
-              )}
+              renderItem={({ item }) =>
+                listTab === 'find' ? (
+                  <TouchableOpacity
+                    style={styles.placeRow}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setShowPlacesList(false);
+                      handleDiscoverPinPress(item);
+                    }}
+                  >
+                    <View style={styles.placeIcon}>
+                      <Ionicons name="wine-outline" size={18} color={colors.accent.strong} />
+                    </View>
+                    <View style={styles.placeMeta}>
+                      <Text style={styles.placeName} numberOfLines={1}>{item.name}</Text>
+                      <Text style={styles.placeAddress} numberOfLines={1}>
+                        {[
+                          item.distanceKm != null
+                            ? `${(item.distanceKm * 0.621371).toFixed(item.distanceKm * 0.621371 < 10 ? 1 : 0)} mi`
+                            : null,
+                          [item.city, item.state].filter(Boolean).join(', ') || null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.placeRow}
+                    activeOpacity={0.7}
+                    onPress={() => openPlace(item)}
+                  >
+                    <View style={styles.placeIcon}>
+                      <Ionicons
+                        name={listTab === 'wishlist' ? 'bookmark' : 'location'}
+                        size={18}
+                        color={listTab === 'wishlist' ? colors.status.wishlist : colors.primary.base}
+                      />
+                    </View>
+                    <View style={styles.placeMeta}>
+                      <Text style={styles.placeName} numberOfLines={1}>{item.name}</Text>
+                      {item.address ? (
+                        <Text style={styles.placeAddress} numberOfLines={1}>{item.address}</Text>
+                      ) : null}
+                    </View>
+                    <Ionicons name="chevron-forward" size={18} color={colors.accent.strong} />
+                  </TouchableOpacity>
+                )
+              }
               ListEmptyComponent={
                 <View style={styles.listEmpty}>
                   <Ionicons name="wine-outline" size={28} color={colors.accent.border} />
                   <Text style={styles.listEmptyText}>
-                    {placeSearch.trim()
+                    {listTab === 'find'
+                      ? placeSearch.trim().length >= 2
+                        ? 'No wineries match that name'
+                        : 'Type a winery name — or browse the apricot pins on the map'
+                      : placeSearch.trim()
                       ? 'No matches for your search'
                       : listTab === 'wishlist'
                       ? 'No saved wineries yet — add some from the map or the ＋ menu'
