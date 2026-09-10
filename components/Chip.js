@@ -11,6 +11,7 @@ import { borderRadius, colors, spacing } from '../styles/theme';
 
 export default function Chip({
   label,
+  hint, // optional small muted suffix, e.g. the flavor category on search results
   selected = false,
   onPress,
   onRemove,
@@ -21,6 +22,9 @@ export default function Chip({
     <>
       <Text style={[styles.label, selected && styles.labelSelected]} numberOfLines={1}>
         {label}
+        {hint ? (
+          <Text style={[styles.hint, selected && styles.hintSelected]}> {hint}</Text>
+        ) : null}
       </Text>
       {onRemove ? (
         <TouchableOpacity
@@ -91,6 +95,14 @@ const styles = StyleSheet.create({
   },
   labelSelected: {
     color: colors.neutral.bg,
+  },
+  hint: {
+    fontSize: 10,
+    fontWeight: '400',
+    color: colors.neutral.placeholder,
+  },
+  hintSelected: {
+    color: colors.neutral.divider,
   },
   removeBtn: {
     marginLeft: spacing.xs,

@@ -4,6 +4,7 @@
 import {
   WINE_VARIETALS,
   inferTypeFromVarietal,
+  inferTypeFromVarietals,
   matchVarietal,
   parseVarietals,
   searchVarietals,
@@ -142,5 +143,45 @@ describe('searchVarietals', () => {
   it('has no duplicate catalogue labels', () => {
     const keys = WINE_VARIETALS.map((name) => name.toLowerCase());
     expect(new Set(keys).size).toBe(keys.length);
+  });
+});
+
+// Blend-aware inference behind the log form's varietal→type autofill (#216).
+describe('inferTypeFromVarietals', () => {
+  it('infers the plain colour from a single grape', () => {
+    expect(inferTypeFromVarietals(['Cabernet Sauvignon'])).toBe('Red');
+    expect(inferTypeFromVarietals(['Chardonnay'])).toBe('White');
+  });
+
+  it('upgrades two or more same-colour grapes to a blend', () => {
+    // The Bordeaux-blend case from the feature request.
+    expect(inferTypeFromVarietals(['Cabernet Sauvignon', 'Merlot'])).toBe('Red Blend');
+    expect(
+      inferTypeFromVarietals(['Cabernet Sauvignon', 'Merlot', 'Petit Verdot'])
+    ).toBe('Red Blend');
+    expect(inferTypeFromVarietals(['Sémillon', 'Sauvignon Blanc'])).toBe('White Blend');
+  });
+
+  it('refuses to guess for mixed red + white lists', () => {
+    expect(inferTypeFromVarietals(['Pinot Noir', 'Chardonnay'])).toBeNull();
+  });
+
+  it('lets sparkling and dessert win outright', () => {
+    expect(inferTypeFromVarietals(['Champagne', 'Chardonnay'])).toBe('Sparkling');
+    expect(inferTypeFromVarietals(['Port', 'Touriga Nacional'])).toBe('Dessert');
+  });
+
+  it('maps unambiguous named blends but not ambiguous ones', () => {
+    expect(inferTypeFromVarietals(['Red Blend'])).toBe('Red Blend');
+    expect(inferTypeFromVarietals(['GSM'])).toBe('Red Blend');
+    expect(inferTypeFromVarietals(['Bordeaux Blend'])).toBeNull(); // has a white variant
+    expect(inferTypeFromVarietals(['Meritage'])).toBeNull();
+  });
+
+  it('ignores unrecognised grapes rather than blocking inference', () => {
+    expect(inferTypeFromVarietals(['Some Local Grape', 'Merlot'])).toBe('Red');
+    expect(inferTypeFromVarietals(['Some Local Grape'])).toBeNull();
+    expect(inferTypeFromVarietals([])).toBeNull();
+    expect(inferTypeFromVarietals(null)).toBeNull();
   });
 });

@@ -2,7 +2,7 @@
 // Canonical read-only star-rating display. Unifies the four ad-hoc rating
 // treatments (bare star row, bordered score pill, 12/13/16px star+number) into
 // one: a row of gold stars (filled / half / empty) with an optional "N.N/5".
-// For RATING INPUT, use RatingSlider — this component is display-only.
+// For RATING INPUT, use StarRatingInput — this component is display-only.
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../styles/theme';

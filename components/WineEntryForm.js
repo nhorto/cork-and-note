@@ -22,13 +22,15 @@ import {
 import theme from '../styles/theme';
 
 import { findPriorTastings } from '../lib/cellarMatch';
-import { parseVarietals } from '../lib/varietals';
+import { inferTypeFromVarietals, parseVarietals } from '../lib/varietals';
 import AutocompleteVarietal from './AutocompleteVarietal';
 import Button from './Button';
+import CollapsibleSection from './CollapsibleSection';
 import FlavorTagSelector from './FlavorTagSelector';
 import LabelScanner from './LabelScanner';
 import PriorTastingBanner from './PriorTastingBanner';
-import RatingSlider from './RatingSlider';
+import SegmentedRating from './SegmentedRating';
+import StarRatingInput from './StarRatingInput';
 import WineChatModal from './WineChatModal';
 
 const { colors, typography, spacing, shadows, borderRadius } = theme;
@@ -57,6 +59,11 @@ export default function WineEntryForm({
   const [winemaker, setWinemaker] = useState(defaultWinemaker);
   const [wineName, setWineName] = useState('');
   const [wineType, setWineType] = useState(''); // optional — no longer defaults to "Red"
+  // Who set the type (#216): 'none' | 'auto' (inferred from varietals) |
+  // 'user' (picked in the modal, scanned off the label, edited data, or an
+  // applied AI suggestion). Varietal-based inference only ever writes over
+  // 'none'/'auto' — a type the user chose is never silently replaced.
+  const [typeSource, setTypeSource] = useState('none');
   // Varietals are now a list (a blend can have several grapes, #135). The text
   // box feeds `varietalInput`; confirmed grapes live in `wineVarietals`.
   const [wineVarietals, setWineVarietals] = useState([]);
@@ -84,11 +91,6 @@ export default function WineEntryForm({
   // SAME thread instead of starting over (#121). Resets when the form remounts.
   const [chatConversationId, setChatConversationId] = useState(null);
 
-  // Scroll handle so focusing the bottom-most field ("Additional notes") can pull
-  // it above the keyboard — the form is a plain ScrollView that otherwise leaves
-  // the field hidden behind the keyboard (#129).
-  const scrollRef = useRef(null);
-
   // AI suggestion confirmation state
   const [pendingFields, setPendingFields] = useState([]); // [{ key, label, current, suggested, apply, set }]
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -110,6 +112,9 @@ export default function WineEntryForm({
       setWinemaker(initialData.winemaker || defaultWinemaker || '');
       setWineName(initialData.name || '');
       setWineType(initialData.type || '');
+      // An existing type came from the user (or a scan they accepted) — don't
+      // let varietal edits overwrite it.
+      setTypeSource(initialData.type ? 'user' : 'none');
       setWineVarietals(parseVarietals(initialData.varietal));
       setWineYear(initialData.year || '');
       setOverallRating(initialData.overallRating || 0);
@@ -285,9 +290,33 @@ export default function WineEntryForm({
   
   // Handle wine type selection
   const handleWineTypeSelect = (type) => {
-    setWineType(type);
+    setWineTypeByUser(type);
     setShowTypeModal(false);
   };
+
+  // A deliberate type choice — from the picker modal, a label scan, or an
+  // applied AI suggestion. Marks the field user-owned so inference backs off.
+  const setWineTypeByUser = (type) => {
+    setWineType(type);
+    setTypeSource('user');
+  };
+
+  // Varietal → type inference (#216): adding "Cabernet Sauvignon" flips the
+  // type to Red; a second red grape upgrades it to Red Blend. Only fires while
+  // the type is unset or was itself inferred, and clears an inferred type when
+  // the varietals stop supporting it (e.g. all chips removed) — so the field
+  // never keeps a stale guess, and never fights the user.
+  useEffect(() => {
+    if (typeSource === 'user') return;
+    const inferred = inferTypeFromVarietals(wineVarietals);
+    if (inferred) {
+      setWineType(inferred);
+      setTypeSource('auto');
+    } else if (typeSource === 'auto') {
+      setWineType('');
+      setTypeSource('none');
+    }
+  }, [wineVarietals, typeSource]);
 
   // Label scan → prefill (#138). Reuses the cellar's LabelScanner; we map the
   // whitelisted, normalized fields onto the form's state. Only non-null values
@@ -297,7 +326,7 @@ export default function WineEntryForm({
     if (!fields) return;
     if (fields.producer != null) setWinemaker(fields.producer);
     if (fields.wine_name != null) setWineName(fields.wine_name);
-    if (fields.wine_type != null) setWineType(fields.wine_type);
+    if (fields.wine_type != null) setWineTypeByUser(fields.wine_type);
     if (fields.vintage != null) setWineYear(String(fields.vintage));
     if (fields.varietal != null) {
       const incoming = parseVarietals(fields.varietal);
@@ -361,7 +390,7 @@ export default function WineEntryForm({
 
     addTextField('winemaker', 'Winemaker', suggestions.winemaker, winemaker, setWinemaker);
     addTextField('wine_name', 'Wine name', suggestions.wine_name, wineName, setWineName);
-    addTextField('wine_type', 'Type', suggestions.wine_type, wineType, setWineType);
+    addTextField('wine_type', 'Type', suggestions.wine_type, wineType, setWineTypeByUser);
     addTextField('year', 'Year', suggestions.year, wineYear, setWineYear);
 
     // Varietal(s): MERGE into the chip list (multi-varietal, #135) — never discard
@@ -581,13 +610,27 @@ export default function WineEntryForm({
     );
   };
 
+  // Live summaries for the collapsed sections (#216) — collapsed must never
+  // mean hidden, so each header shows what's inside once data exists.
+  const ratingsSummaryParts = Object.entries(ratings)
+    .filter(([, v]) => v > 0)
+    .map(([k, v]) => `${k.charAt(0).toUpperCase() + k.slice(1)} ${v % 1 ? v.toFixed(1) : v}`);
+  const ratingsSummary = ratingsSummaryParts.length
+    ? ratingsSummaryParts.join(' · ')
+    : 'Sweetness, tannins, acidity, body, alcohol';
+  const flavorSummary = flavorNotes.length
+    ? flavorNotes.slice(0, 3).join(', ') + (flavorNotes.length > 3 ? ` +${flavorNotes.length - 3}` : '')
+    : 'What did you taste?';
+  const photosSummary = photos.length
+    ? `${photos.length} photo${photos.length === 1 ? '' : 's'}`
+    : 'Label, glass, the view…';
+
   return (
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
     <ScrollView
-      ref={scrollRef}
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
@@ -720,34 +763,62 @@ export default function WineEntryForm({
         </TouchableOpacity>
       </View>
 
-      {/* Detailed Ratings */}
+      {/* Your verdict — stars + notes, right after the identity fields so a
+          quick log is info → stars → save with zero scrolling (#216). The
+          old "verdict last" ordering (#170 item 10) lost to logging speed:
+          the deep-dive sections below are optional and collapsed. */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Detailed ratings</Text>
-        
+        <Text style={styles.sectionTitle}>Your verdict</Text>
+        <StarRatingInput value={overallRating} onChange={setOverallRating} />
+        <Text style={[styles.label, styles.notesLabel]}>Notes</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={additionalNotes}
+          onChangeText={setAdditionalNotes}
+          placeholder="Any additional thoughts about this wine..."
+          placeholderTextColor="#999"
+          multiline
+          textAlignVertical="top"
+        />
+      </View>
+
+      {/* Optional deep-dive sections — collapsed by default (#216) */}
+      <Text style={styles.moreDetailLabel}>More detail — optional</Text>
+
+      <CollapsibleSection
+        icon="options-outline"
+        title="Detailed ratings"
+        summary={ratingsSummary}
+        hasData={ratingsSummaryParts.length > 0}
+      >
         {Object.entries(ratings).map(([key, value]) => (
-          <RatingSlider
+          <SegmentedRating
             key={key}
             value={value}
             onValueChange={(newValue) => updateRating(key, newValue)}
             label={key.charAt(0).toUpperCase() + key.slice(1)}
           />
         ))}
-      </View>
+      </CollapsibleSection>
 
-      {/* Flavor Notes */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Flavor notes</Text>
+      <CollapsibleSection
+        icon="pricetags-outline"
+        title="Flavor notes"
+        summary={flavorSummary}
+        hasData={flavorNotes.length > 0}
+      >
         <FlavorTagSelector
           selectedTags={flavorNotes}
           onTagsChange={setFlavorNotes}
         />
-      </View>
+      </CollapsibleSection>
 
-      {/* Photos Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Photos ({photos.length})</Text>
-        
-        {/* Photo buttons */}
+      <CollapsibleSection
+        icon="camera-outline"
+        title="Photos"
+        summary={photosSummary}
+        hasData={photos.length > 0}
+      >
         <View style={styles.photoButtons}>
           <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
             <Ionicons name="camera" size={20} color={colors.neutral.bg} />
@@ -760,46 +831,8 @@ export default function WineEntryForm({
           </TouchableOpacity>
         </View>
 
-        {/* Photo gallery */}
         {renderPhotoGallery()}
-      </View>
-
-      {/* Additional Notes */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Additional notes</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          value={additionalNotes}
-          onChangeText={setAdditionalNotes}
-          placeholder="Any additional thoughts about this wine..."
-          placeholderTextColor="#999"
-          multiline
-          textAlignVertical="top"
-          // This field sits at the bottom of the form; scroll it into view once
-          // the keyboard has animated in so it isn't hidden behind it (#129).
-          onFocus={() => {
-            setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 150);
-          }}
-        />
-      </View>
-
-      {/* Overall Rating — last, so it's a verdict you give after working
-          through the characteristics, notes and photos (#170 item 10). */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Overall rating</Text>
-        <RatingSlider
-          value={overallRating}
-          onValueChange={setOverallRating}
-          label="Overall Rating"
-          showLabel={false}
-        />
-      </View>
-
-      {/* Action Buttons */}
-      <View style={styles.actionButtons}>
-        <Button variant="secondary" title="Cancel" onPress={onCancel} style={{ flex: 1 }} />
-        <Button variant="primary" title="Save wine" onPress={handleSave} style={{ flex: 1 }} />
-      </View>
+      </CollapsibleSection>
 
       {/* Wine Type Modal */}
       <Modal
@@ -977,6 +1010,13 @@ export default function WineEntryForm({
         </View>
       </Modal>
     </ScrollView>
+
+    {/* Sticky save bar (#216) — Save/Cancel always reachable, so a quick log
+        never scrolls past the optional sections just to find the button. */}
+    <View style={styles.saveBar}>
+      <Button variant="secondary" title="Cancel" onPress={onCancel} style={{ flex: 1 }} />
+      <Button variant="primary" title="Save wine" onPress={handleSave} style={{ flex: 2 }} />
+    </View>
     </KeyboardAvoidingView>
   );
 }
@@ -1025,6 +1065,18 @@ const styles = StyleSheet.create({
   textArea: {
     height: 120,
     textAlignVertical: 'top',
+  },
+  notesLabel: {
+    marginTop: spacing.md,
+  },
+  // Kicker above the collapsed deep-dive sections (#216)
+  moreDetailLabel: {
+    ...typography.body.caption,
+    color: colors.neutral.inkTertiary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    fontWeight: '700',
+    marginBottom: spacing.sm,
   },
   selectorButton: {
     flexDirection: 'row',
@@ -1176,12 +1228,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
 
-  // Action Buttons
-  actionButtons: {
+  // Sticky save bar (#216)
+  saveBar: {
     flexDirection: 'row',
     gap: spacing.md,
-    marginTop: spacing.xl,
-    marginBottom: spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.neutral.divider,
+    backgroundColor: colors.neutral.bg,
   },
 
   // Wine Type Modal

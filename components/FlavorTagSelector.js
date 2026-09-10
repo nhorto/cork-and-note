@@ -1,131 +1,98 @@
 // components/FlavorTagSelector.js
-// Château Label Design - Elegant & Refined
+// Flavor-note picker, rebuilt for #216. What changed vs. the original:
+//   • Searching shows ONE flat, ranked list of tappable pills (with a small
+//     category hint on each) — no more collapsed per-category headers to open
+//     one by one just to reach "Strawberry".
+//   • A ⭐ Popular tab is the default browse view; the five categories follow.
+//   • ONE input does both search and add-custom: when nothing matches exactly,
+//     the first result becomes an "Add “…”" pill (the old separate custom-note
+//     input row is gone).
+//   • The library itself moved to lib/flavorNotes.js and grew ~45 notes.
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
-import Chip from './Chip';
+import {
+  FLAVOR_CATEGORIES,
+  POPULAR_FLAVORS,
+  flavorCategoryOf,
+  searchFlavorNotes,
+} from '../lib/flavorNotes';
 import theme from '../styles/theme';
+import Chip from './Chip';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
-// Predefined flavor categories and notes (#136). Custom descriptors can still be
-// typed in via the "add custom" field; this is just the quick-pick palette.
-const FLAVOR_CATEGORIES = {
-  'Fruit': [
-    'Green Apple', 'Red Apple', 'Baked Apple', 'Pear', 'Quince', 'Peach',
-    'White Peach', 'Apricot', 'Nectarine', 'Red Cherry', 'Black Cherry',
-    'Sour Cherry', 'Plum', 'Black Plum', 'Strawberry', 'Raspberry', 'Blackberry',
-    'Blueberry', 'Boysenberry', 'Cranberry', 'Red Currant', 'Blackcurrant (Cassis)',
-    'Lemon', 'Lime', 'Orange', 'Orange Peel', 'Grapefruit', 'Tangerine',
-    'Pineapple', 'Mango', 'Passion Fruit', 'Lychee', 'Guava', 'Banana', 'Melon',
-    'Watermelon', 'Fig', 'Date', 'Raisin', 'Prune', 'Dried Cherry', 'Pomegranate',
-    'Jam', 'Stewed Fruit',
-  ],
-  'Floral & Herbal': [
-    'Rose', 'Violet', 'Lavender', 'Honeysuckle', 'Jasmine', 'Elderflower',
-    'Orange Blossom', 'Acacia', 'Potpourri', 'Geranium', 'Thyme', 'Rosemary',
-    'Mint', 'Eucalyptus', 'Sage', 'Basil', 'Oregano', 'Fennel', 'Dill',
-    'Green Bell Pepper', 'Jalapeño', 'Tomato Leaf', 'Fresh Cut Grass', 'Hay',
-    'Dried Herbs', 'Black Tea', 'Green Tea',
-  ],
-  'Spice & Wood': [
-    'Cinnamon', 'Vanilla', 'Clove', 'Nutmeg', 'Allspice', 'Anise', 'Star Anise',
-    'Black Pepper', 'White Pepper', 'Licorice', 'Ginger', 'Cardamom', 'Cedar',
-    'Oak', 'Toasted Oak', 'Coconut', 'Sandalwood', 'Tobacco', 'Cigar Box',
-    'Leather', 'Pencil Shavings',
-  ],
-  'Earth & Mineral': [
-    'Forest Floor', 'Mushroom', 'Truffle', 'Wet Stone', 'Chalk', 'Slate',
-    'Graphite', 'Flint', 'Clay', 'Petrol', 'Wet Leaves', 'Barnyard', 'Game',
-    'Iron/Blood', 'Saline', 'Sea Spray', 'Crushed Rock', 'Tar', 'Dust',
-  ],
-  'Other': [
-    'Honey', 'Caramel', 'Butterscotch', 'Toffee', 'Chocolate', 'Dark Chocolate',
-    'Cocoa', 'Coffee', 'Espresso', 'Mocha', 'Smoke', 'Toast', 'Butter', 'Cream',
-    'Bread', 'Yeast', 'Biscuit', 'Brioche', 'Sourdough', 'Almond', 'Hazelnut',
-    'Walnut', 'Marzipan', 'Molasses', 'Brown Sugar', 'Cola', 'Beeswax', 'Rubber',
-  ]
+const POPULAR_TAB = 'Popular';
+const TABS = [POPULAR_TAB, ...Object.keys(FLAVOR_CATEGORIES)];
+
+// Category names get shortened on result pills so they stay pill-sized.
+const HINT_LABEL = {
+  'Fruit': 'fruit',
+  'Floral & Herbal': 'floral·herbal',
+  'Spice & Wood': 'spice·wood',
+  'Earth & Mineral': 'earth·mineral',
+  'Other': 'other',
 };
 
 const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('Fruit');
-  const [customTag, setCustomTag] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState({});
+  const [activeTab, setActiveTab] = useState(POPULAR_TAB);
 
-  // Toggle a tag's selection status
+  const query = searchQuery.trim();
+  const results = useMemo(() => searchFlavorNotes(query), [query]);
+  const hasExactMatch = useMemo(
+    () => results.some((t) => t.toLowerCase() === query.toLowerCase()),
+    [results, query]
+  );
+
   const toggleTag = (tag) => {
     if (selectedTags.includes(tag)) {
-      onTagsChange(selectedTags.filter(t => t !== tag));
+      onTagsChange(selectedTags.filter((t) => t !== tag));
     } else {
       onTagsChange([...selectedTags, tag]);
     }
   };
 
-  // Add a custom tag
-  const addCustomTag = () => {
-    if (customTag.trim() !== '' && !selectedTags.includes(customTag.trim())) {
-      onTagsChange([...selectedTags, customTag.trim()]);
-      setCustomTag('');
+  // Add whatever was typed as a custom note (capitalized like the library).
+  const addCustom = () => {
+    const label = query.replace(/^\w/, (c) => c.toUpperCase());
+    if (!label) return;
+    if (!selectedTags.includes(label)) onTagsChange([...selectedTags, label]);
+    setSearchQuery('');
+  };
+
+  // Keyboard "done" on the search field: pick the exact match if there is one,
+  // otherwise add the query as a custom note.
+  const submitSearch = () => {
+    if (!query) return;
+    const exact = results.find((t) => t.toLowerCase() === query.toLowerCase());
+    if (exact) {
+      if (!selectedTags.includes(exact)) onTagsChange([...selectedTags, exact]);
+      setSearchQuery('');
+    } else {
+      addCustom();
     }
   };
 
-  // Toggle category expansion
-  const toggleCategory = (category) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
-  };
-
-  // Filter tags based on search query
-  const filterTags = () => {
-    if (!searchQuery.trim()) {
-      return FLAVOR_CATEGORIES;
-    }
-
-    const filtered = {};
-    const query = searchQuery.toLowerCase().trim();
-
-    Object.entries(FLAVOR_CATEGORIES).forEach(([category, tags]) => {
-      const matchingTags = tags.filter(tag => 
-        tag.toLowerCase().includes(query)
-      );
-      
-      if (matchingTags.length > 0) {
-        filtered[category] = matchingTags;
-      }
-    });
-
-    return filtered;
-  };
-
-  const filteredCategories = filterTags();
+  const browseTags = activeTab === POPULAR_TAB ? POPULAR_FLAVORS : FLAVOR_CATEGORIES[activeTab];
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Flavor notes:</Text>
-      
-      {/* Selected Tags */}
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        style={styles.selectedTagsScroll}
-        contentContainerStyle={styles.selectedTagsContainer}
-      >
+      {/* Selected notes — wraps so everything picked stays visible */}
+      <View style={styles.selectedWrap}>
         {selectedTags.length === 0 ? (
-          <Text style={styles.noTagsText}>No flavor notes selected</Text>
+          <Text style={styles.noTagsText}>Nothing picked yet</Text>
         ) : (
-          selectedTags.map((tag, index) => (
+          selectedTags.map((tag) => (
             <Chip
-              key={index}
+              key={tag}
               label={tag}
               selected
               onRemove={() => toggleTag(tag)}
@@ -133,161 +100,136 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             />
           ))
         )}
-      </ScrollView>
-      
-      {/* Search and Custom Tag Input */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={18} color={colors.primary.base} style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search flavor notes..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor={colors.neutral.placeholder}
-            selectionColor={colors.primary.base}
-          />
-          {searchQuery !== '' && (
-            <TouchableOpacity
-              onPress={() => setSearchQuery('')}
-              accessibilityRole="button"
-              accessibilityLabel="Clear"
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Ionicons name="close-circle" size={18} color={colors.primary.base} />
-            </TouchableOpacity>
-          )}
-        </View>
+      </View>
 
-        <View style={styles.customTagContainer}>
-          <TextInput
-            style={styles.customTagInput}
-            placeholder="Add custom flavor note..."
-            value={customTag}
-            onChangeText={setCustomTag}
-            onSubmitEditing={addCustomTag}
-            placeholderTextColor={colors.neutral.placeholder}
-            selectionColor={colors.primary.base}
-          />
+      {/* One input: search the library, or add a custom note */}
+      <View style={styles.searchInputContainer}>
+        <Ionicons name="search" size={18} color={colors.primary.base} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search or add a note…"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSubmitEditing={submitSearch}
+          returnKeyType="done"
+          placeholderTextColor={colors.neutral.placeholder}
+          selectionColor={colors.primary.base}
+        />
+        {searchQuery !== '' && (
           <TouchableOpacity
-            style={styles.addButton}
-            onPress={addCustomTag}
-            disabled={customTag.trim() === ''}
+            onPress={() => setSearchQuery('')}
             accessibilityRole="button"
-            accessibilityLabel="Add"
+            accessibilityLabel="Clear"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons
-              name="add-circle"
-              size={24}
-              color={customTag.trim() === '' ? colors.neutral.border : colors.primary.base}
-            />
+            <Ionicons name="close-circle" size={18} color={colors.primary.base} />
           </TouchableOpacity>
-        </View>
+        )}
       </View>
-      
-      {/* Category Tabs */}
-      {!searchQuery && (
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryTabsScroll}
-        >
-          {Object.keys(FLAVOR_CATEGORIES).map((category) => (
-            <TouchableOpacity
-              key={category}
-              style={[
-                styles.categoryTab,
-                activeCategory === category && styles.activeCategoryTab
-              ]}
-              onPress={() => setActiveCategory(category)}
-            >
-              <Text 
-                style={[
-                  styles.categoryTabText,
-                  activeCategory === category && styles.activeCategoryTabText
-                ]}
-              >
-                {category}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      )}
-      
-      {/* Flavor Tags */}
-      <ScrollView 
-        style={styles.tagsScrollView}
-        nestedScrollEnabled={true}
-      >
-        {Object.entries(filteredCategories).map(([category, tags]) => (
-          <View key={category} style={styles.categorySection}>
-            {searchQuery ? (
+
+      {query ? (
+        /* ── Searching: flat ranked pills, category shown as a hint ── */
+        <View>
+          <Text style={styles.matchCount}>
+            {results.length > 0
+              ? `${results.length} match${results.length === 1 ? '' : 'es'} — tap to add`
+              : 'No matches in the library'}
+          </Text>
+          <View style={styles.pillsWrap}>
+            {!hasExactMatch && query.length > 1 && (
               <TouchableOpacity
-                style={styles.categoryHeader}
-                onPress={() => toggleCategory(category)}
+                style={styles.addCustomChip}
+                onPress={addCustom}
+                accessibilityRole="button"
+                accessibilityLabel={`Add custom note ${query}`}
               >
-                <Text style={styles.categoryTitle}>{category}</Text>
-                <Ionicons
-                  name={expandedCategories[category] ? "chevron-up" : "chevron-down"}
-                  size={18}
-                  color={colors.primary.base}
-                />
+                <Ionicons name="add" size={14} color={colors.accent.ink} />
+                <Text style={styles.addCustomText}>
+                  Add “{query.replace(/^\w/, (c) => c.toUpperCase())}”
+                </Text>
               </TouchableOpacity>
-            ) : (
-              activeCategory === category && (
-                <Text style={styles.categoryTitle}>{category}</Text>
-              )
             )}
-            
-            {((searchQuery && expandedCategories[category]) || 
-              (!searchQuery && activeCategory === category)) && (
-              <View style={styles.tagsContainer}>
-                {tags.map((tag, index) => (
-                  <Chip
-                    key={index}
-                    label={tag}
-                    selected={selectedTags.includes(tag)}
-                    onPress={() => toggleTag(tag)}
-                    style={styles.tagChip}
-                  />
-                ))}
-              </View>
-            )}
+            {results.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                hint={HINT_LABEL[flavorCategoryOf(tag)]}
+                selected={selectedTags.includes(tag)}
+                onPress={() => toggleTag(tag)}
+                style={styles.tagChip}
+              />
+            ))}
           </View>
-        ))}
-      </ScrollView>
+        </View>
+      ) : (
+        /* ── Browsing: Popular first, then the categories ── */
+        <View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryTabsScroll}
+          >
+            {TABS.map((tab) => {
+              const active = activeTab === tab;
+              return (
+                <TouchableOpacity
+                  key={tab}
+                  style={[styles.categoryTab, active && styles.activeCategoryTab]}
+                  onPress={() => setActiveTab(tab)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  {tab === POPULAR_TAB && (
+                    <Ionicons
+                      name="star"
+                      size={11}
+                      color={active ? colors.neutral.bg : colors.accent.base}
+                      style={styles.popularStar}
+                    />
+                  )}
+                  <Text style={[styles.categoryTabText, active && styles.activeCategoryTabText]}>
+                    {tab}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+          <View style={styles.pillsWrap}>
+            {browseTags.map((tag) => (
+              <Chip
+                key={tag}
+                label={tag}
+                selected={selectedTags.includes(tag)}
+                onPress={() => toggleTag(tag)}
+                style={styles.tagChip}
+              />
+            ))}
+          </View>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: spacing.md,
+    marginTop: spacing.xs,
   },
-  label: {
-    ...typography.body.caption,
-    color: colors.accent.ink,
+  selectedWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
     marginBottom: spacing.sm,
-  },
-  selectedTagsScroll: {
-    maxHeight: 50,
-  },
-  selectedTagsContainer: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.xs,
+    minHeight: 30,
+    alignItems: 'center',
   },
   noTagsText: {
     ...typography.body.small,
     fontStyle: 'italic',
     color: colors.neutral.placeholder,
-    paddingHorizontal: spacing.xs,
   },
   selectedChip: {
-    marginRight: spacing.sm,
-  },
-  searchContainer: {
-    marginVertical: spacing.md,
+    marginRight: 0,
   },
   searchInputContainer: {
     flexDirection: 'row',
@@ -296,7 +238,8 @@ const styles = StyleSheet.create({
     borderColor: colors.neutral.border,
     borderRadius: borderRadius.md,
     paddingHorizontal: spacing.sm,
-    backgroundColor: colors.neutral.surface,
+    backgroundColor: colors.neutral.bg,
+    marginBottom: spacing.sm,
   },
   searchIcon: {
     marginRight: spacing.sm,
@@ -307,31 +250,18 @@ const styles = StyleSheet.create({
     ...typography.body.regular,
     color: colors.neutral.ink,
   },
-  customTagContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  customTagInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: colors.neutral.border,
-    borderRadius: borderRadius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    backgroundColor: colors.neutral.surface,
-    ...typography.body.regular,
-    color: colors.neutral.ink,
-  },
-  addButton: {
-    marginLeft: spacing.sm,
-    padding: spacing.xs,
+  matchCount: {
+    ...typography.body.small,
+    color: colors.neutral.inkTertiary,
+    marginBottom: spacing.sm,
   },
   categoryTabsScroll: {
     maxHeight: 44,
     marginBottom: spacing.sm,
   },
   categoryTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: borderRadius.full,
@@ -344,6 +274,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary.base,
     borderColor: colors.primary.base,
   },
+  popularStar: {
+    marginRight: 4,
+  },
   categoryTabText: {
     ...typography.body.small,
     color: colors.neutral.inkSecondary,
@@ -352,38 +285,31 @@ const styles = StyleSheet.create({
   activeCategoryTabText: {
     color: colors.neutral.bg,
   },
-  tagsScrollView: {
-    maxHeight: 200,
-  },
-  categorySection: {
-    marginBottom: spacing.md,
-  },
-  categoryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: colors.neutral.surface,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.sm,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.neutral.border,
-  },
-  categoryTitle: {
-    ...typography.body.regular,
-    fontWeight: 'bold',
-    color: colors.neutral.ink,
-    marginBottom: spacing.sm,
-  },
-  tagsContainer: {
+  pillsWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: spacing.xs,
+    gap: spacing.sm,
   },
   tagChip: {
-    marginRight: spacing.sm,
-    marginBottom: spacing.sm,
+    marginRight: 0,
+    marginBottom: 0,
+  },
+  addCustomChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.xs + 2,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.accent.strong,
+    backgroundColor: colors.accent.surface,
+  },
+  addCustomText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.accent.ink,
   },
 });
 
