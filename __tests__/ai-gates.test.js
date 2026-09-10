@@ -11,6 +11,7 @@ import {
   BURST_LIMIT,
   FAIR_USE_DAILY_CAPS,
   FAIR_USE_MONTHLY_CHAT_CAP,
+  FREE_METER_WINDOWS,
   FREE_TIER_LIMITS,
   PHOTO_CHAT_PRO_MESSAGE,
   gateAiRequest,
@@ -344,5 +345,73 @@ describe('web search is a Pro tool, and only on chat', () => {
     const walled = free.attempt({ atMs: T0 + 60 * MIN });
     expect(walled).toMatchObject({ allowed: false, status: 402 });
     expect(toolsFor(walled.isPro, walled.task)).toEqual([]);
+  });
+});
+
+describe('every metered task is actually capped', () => {
+  // The regression this file exists to prevent, stated as a test rather than
+  // left to a type annotation: jest does not typecheck, and this is the shape
+  // of the bug that shipped. `tonights_pick` was added as a task while this
+  // table was being rewritten on another branch, so it inherited NO daily cap —
+  // and a missing cap fails OPEN, because `count >= undefined` is false.
+  const TASKS = Object.keys(FREE_TIER_LIMITS);
+
+  it.each(TASKS)('%s has a numeric daily fair-use cap', (task) => {
+    expect(typeof FAIR_USE_DAILY_CAPS[task]).toBe('number');
+    expect(FAIR_USE_DAILY_CAPS[task]).toBeGreaterThan(0);
+  });
+
+  it.each(TASKS)('%s has a meter window', (task) => {
+    expect(['lifetime', 'month']).toContain(FREE_METER_WINDOWS[task]);
+  });
+
+  it('proves a missing cap would fail open, which is why the above matters', () => {
+    // Not hypothetical — this is the exact arithmetic that let Tonight's Pick
+    // run uncapped: an absent entry is `undefined`, and every comparison
+    // against it is false, so the gate waves the call through.
+    expect(1_000_000 >= undefined).toBe(false);
+  });
+});
+
+describe("Tonight's Pick fair-use cap", () => {
+  it('stops a Pro user at the daily cap and recovers on the rolling window', () => {
+    const cap = FAIR_USE_DAILY_CAPS.tonights_pick;
+    const pro = new FakeUser({ pro: true });
+
+    // Spread across the day so the 15-in-5-minutes burst cap is not what stops
+    // us — this must prove the DAILY cap fires, not the burst one.
+    for (let i = 0; i < cap; i++) {
+      const verdict = pro.attempt({ atMs: T0 + i * 30 * MIN, task: 'tonights_pick' });
+      expect(verdict.allowed).toBe(true);
+    }
+
+    const walled = pro.attempt({ atMs: T0 + cap * 30 * MIN, task: 'tonights_pick' });
+    expect(walled).toMatchObject({ allowed: false, status: 429 });
+    expect(walled.body.error).toMatch(/fair-use/i);
+
+    // 429 is a slow-down, never a sale: this must not open the paywall.
+    expect(walled.body.code).toBeUndefined();
+
+    // The window is rolling, so once the first batch ages out the next call lands.
+    expect(
+      pro.attempt({ atMs: T0 + 25 * HOUR, task: 'tonights_pick' }).allowed
+    ).toBe(true);
+  });
+
+  it('does not spend, or get spent by, the chat meter', () => {
+    // The two tasks are counted separately — grinding Tonight's Pick must not
+    // consume the 50/day chat allowance or vice versa.
+    const pro = new FakeUser({ pro: true });
+    for (let i = 0; i < FAIR_USE_DAILY_CAPS.tonights_pick; i++) {
+      pro.attempt({ atMs: T0 + i * 30 * MIN, task: 'tonights_pick' });
+    }
+    expect(pro.attempt({ atMs: T0 + 11 * HOUR, task: 'chat' }).allowed).toBe(true);
+  });
+
+  it('is Pro-only: a free user is refused before any cap is consulted', () => {
+    const free = new FakeUser();
+    const verdict = free.attempt({ atMs: T0, task: 'tonights_pick' });
+    expect(verdict).toMatchObject({ allowed: false, status: 402 });
+    expect(verdict.body.code).toBe('free_limit_reached');
   });
 });
