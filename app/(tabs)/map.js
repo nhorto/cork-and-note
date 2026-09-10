@@ -10,6 +10,7 @@ import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import PinActionModal from '../../components/PinActionModal';
 import WineryNameModal from '../../components/WineryNameModal';
 import { usePro } from '../../hooks/usePro';
+import { getMapLocation } from '../../lib/mapLocation';
 import { haversineKm } from '../../lib/geo';
 import { wineriesService } from '../../lib/wineries';
 import { wineryDirectoryService } from '../../lib/wineryDirectory';
@@ -44,12 +45,13 @@ export default function MapScreen() {
   });
 
   const [userLocation, setUserLocation] = useState(null);
+  const [locationUnavailable, setLocationUnavailable] = useState(false);
   const [userPins, setUserPins] = useState([]);
   const [pinsLoaded, setPinsLoaded] = useState(false);
   const [pinsError, setPinsError] = useState(false);
-  // The welcome hint self-destructs after the first pin; the "?" button
-  // re-shows it on demand (#170 Layer C).
+  // Welcome can be dismissed even before saving a place; help reopens it.
   const [showHelpHint, setShowHelpHint] = useState(false);
+  const [welcomeDismissed, setWelcomeDismissed] = useState(false);
   const [tempPin, setTempPin] = useState(null);
   const [showNameModal, setShowNameModal] = useState(false);
   const [selectedPin, setSelectedPin] = useState(null);
@@ -64,6 +66,8 @@ export default function MapScreen() {
   // our own table (Overture seed).
   const { isPro, presentPaywall } = usePro();
   const [discoverPins, setDiscoverPins] = useState([]);
+  const [discoveryStatus, setDiscoveryStatus] = useState('loading');
+  const [discoveryRetry, setDiscoveryRetry] = useState(0);
   const [pinFilter, setPinFilter] = useState('all'); // 'all' | 'visited' | 'wishlist' | 'nearby'
   const [openingDiscoverId, setOpeningDiscoverId] = useState(null);
 
@@ -73,6 +77,7 @@ export default function MapScreen() {
   // "Find" tab (Pro, owner feedback 2026-09-09): search the whole winery
   // directory by name, nearest first. Debounced; our own table, zero API cost.
   const [directoryResults, setDirectoryResults] = useState([]);
+  const [searchStatus, setSearchStatus] = useState('idle');
   const [listTab, setListTab] = useState('visited'); // 'visited' | 'wishlist' (#97)
 
   // Places you've actually been (visited) and wineries you've saved (wishlist).
@@ -133,16 +138,18 @@ export default function MapScreen() {
     (async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') return;
+        if (status !== 'granted') {
+          setLocationUnavailable(true);
+          return;
+        }
 
-        const loc = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced
-        });
+        const loc = await getMapLocation();
         const coords = {
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude
         };
         setUserLocation(coords);
+        setLocationUnavailable(false);
 
         // Center the map on the user's location once we have it.
         const userRegion = {
@@ -153,6 +160,7 @@ export default function MapScreen() {
         setRegion(userRegion);
         mapRef.current?.animateToRegion(userRegion, 1000);
       } catch (error) {
+        setLocationUnavailable(true);
         console.error('Error getting location:', error);
       }
     })();
@@ -167,11 +175,18 @@ export default function MapScreen() {
   useEffect(() => {
     if (!isPro) return;
     let active = true;
+    setDiscoveryStatus('loading');
     const t = setTimeout(async () => {
       const res = await wineryDirectoryService.getInBounds(
         regionToBoundingBox(region, 0.3)
       );
-      if (!active || !res.success) return;
+      if (!active) return;
+      if (!res.success) {
+        setDiscoverPins([]);
+        setDiscoveryStatus('error');
+        return;
+      }
+      setDiscoveryStatus(res.wineries.length ? 'ready' : 'empty');
       const fresh = res.wineries.filter(
         (w) =>
           !userPins.some(
@@ -188,7 +203,7 @@ export default function MapScreen() {
     };
     // userPins in deps so a newly-saved winery immediately swallows its
     // duplicate discovery pin.
-  }, [isPro, region, userPins]);
+  }, [isPro, region, userPins, discoveryRetry]);
 
   // Clustering (#224): all visible pins go through one supercluster index so
   // a zoomed-out region shows count bubbles instead of a wall of overlapping
@@ -301,17 +316,23 @@ export default function MapScreen() {
     const q = placeSearch.trim();
     if (q.length < 2) {
       setDirectoryResults([]);
+      setSearchStatus('idle');
       return;
     }
+    let active = true;
+    setDirectoryResults([]);
+    setSearchStatus('loading');
     const t = setTimeout(async () => {
       const res = await wineryDirectoryService.searchByName({
         query: q,
         latitude: userLocation?.latitude ?? null,
         longitude: userLocation?.longitude ?? null,
       });
+      if (!active) return;
+      setSearchStatus(res.success ? 'ready' : 'error');
       if (res.success) setDirectoryResults(res.wineries);
     }, 300);
-    return () => clearTimeout(t);
+    return () => { active = false; clearTimeout(t); };
   }, [listTab, placeSearch, isPro, userLocation]);
 
   // Tapping a discovery pin promotes it to a real winery record and opens its
@@ -346,24 +367,27 @@ export default function MapScreen() {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
-          Alert.alert('Permission Denied', 'Location permission is required.');
+          setLocationUnavailable(true);
+          Alert.alert('Location unavailable', 'You can still pan the map and search wineries. Enable location access in Settings to center on your position.');
           return;
         }
 
-        const loc = await Location.getCurrentPositionAsync({});
+        const loc = await getMapLocation();
         const userLoc = {
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude
         };
         setUserLocation(userLoc);
+        setLocationUnavailable(false);
 
         mapRef.current?.animateToRegion({
           ...userLoc,
           latitudeDelta: 0.05,
           longitudeDelta: 0.05,
         }, 1000);
-      } catch (error) {
-        Alert.alert('Location Error', 'Unable to get your current location.');
+      } catch {
+        setLocationUnavailable(true);
+        Alert.alert('Location unavailable', 'No location was returned. You can still pan the map and search wineries, or long-press to place a pin.');
       }
     } else {
       mapRef.current?.animateToRegion({
@@ -394,16 +418,18 @@ export default function MapScreen() {
           return;
         }
 
-        const loc = await Location.getCurrentPositionAsync({});
+        const loc = await getMapLocation();
         const coordinate = {
           latitude: loc.coords.latitude,
           longitude: loc.coords.longitude
         };
         setUserLocation(coordinate);
+        setLocationUnavailable(false);
         setTempPin(coordinate);
         setShowNameModal(true);
-      } catch (error) {
-        Alert.alert('Location Error', 'Unable to get your current location.');
+      } catch {
+        setLocationUnavailable(true);
+        Alert.alert('Location unavailable', 'No location was returned. You can still pan the map and search wineries, or long-press to place a pin.');
       }
     }
   };
@@ -668,21 +694,22 @@ export default function MapScreen() {
         )}
       </MapView>
 
-      {/* Search your visited places (#101). Shown once there's at least one
-          place to search; sits where the welcome hint would otherwise be. */}
-      {(visitedPlaces.length > 0 || wishlistPlaces.length > 0) && (
+      {/* Search stays available before the first saved or visited winery. */}
+      {(
         <TouchableOpacity
           style={styles.searchPill}
           activeOpacity={0.85}
           onPress={() => {
             // Open to whichever list has something to show.
-            setListTab(visitedPlaces.length === 0 && wishlistPlaces.length > 0 ? 'wishlist' : 'visited');
+            setListTab(isPro ? 'find' : wishlistPlaces.length > 0 && visitedPlaces.length === 0 ? 'wishlist' : 'visited');
+            setWelcomeDismissed(true);
+            setShowHelpHint(false);
             setShowPlacesList(true);
           }}
         >
           <Ionicons name="search" size={18} color={colors.neutral.inkTertiary} />
           <Text style={styles.searchPillText} numberOfLines={1}>
-            Your places &amp; wishlist
+            Search wineries &amp; your places
           </Text>
           <Ionicons name="list" size={18} color={colors.primary.ink} />
         </TouchableOpacity>
@@ -694,7 +721,7 @@ export default function MapScreen() {
       <View
         style={[
           styles.filterChips,
-          { top: visitedPlaces.length > 0 || wishlistPlaces.length > 0 ? 112 : 60 },
+          { top: 112 },
         ]}
       >
         {[
@@ -835,56 +862,52 @@ export default function MapScreen() {
         <Ionicons name="help" size={20} color={colors.primary.ink} />
       </TouchableOpacity>
 
-      {/* Re-shown hint via the "?" button — dismissable by tapping it. */}
-      {showHelpHint && !(pinsLoaded && userPins.length === 0 && !pinsError) && (
-        <TouchableOpacity
-          style={styles.hintContainer}
-          activeOpacity={0.85}
-          onPress={() => setShowHelpHint(false)}
-        >
-          <View style={styles.hintIcon}>
-            <Ionicons name="wine-outline" size={20} color={colors.onPrimary} />
-          </View>
-          <View style={styles.hintContent}>
-            <Text style={styles.hintTitle}>Getting around</Text>
-            <Text style={styles.hintText}>
-              Long-press on the map to drop a pin, or tap + to get started
-            </Text>
-          </View>
-        </TouchableOpacity>
-      )}
-
-      {/* Hint text for first-time users — or an error banner when the pins
-          failed to load, so we don't show onboarding over a wrongly-empty map. */}
-      {pinsLoaded && userPins.length === 0 && (
-        pinsError ? (
-          <TouchableOpacity
-            style={styles.hintContainer}
-            activeOpacity={0.85}
-            onPress={loadUserPins}
-          >
-            <View style={styles.hintIcon}>
-              <Ionicons name="cloud-offline-outline" size={20} color={colors.onPrimary} />
-            </View>
-            <View style={styles.hintContent}>
-              <Text style={styles.hintTitle}>Couldn&apos;t load your places</Text>
-              <Text style={styles.hintText}>Tap to try again</Text>
-            </View>
-          </TouchableOpacity>
-        ) : (
+      <View style={styles.mapNotices} pointerEvents="box-none">
+        {(showHelpHint || (pinsLoaded && !pinsError && userPins.length === 0 && !welcomeDismissed)) && (
           <View style={styles.hintContainer}>
-            <View style={styles.hintIcon}>
-              <Ionicons name="wine-outline" size={20} color={colors.onPrimary} />
-            </View>
             <View style={styles.hintContent}>
-              <Text style={styles.hintTitle}>Welcome</Text>
+              <Text style={styles.hintTitle}>{showHelpHint ? 'Getting around' : 'Welcome'}</Text>
               <Text style={styles.hintText}>
-                Long-press on the map to drop a pin, or tap + to get started
+                Search above, long-press the map to drop a pin, or tap + to log a visit.
               </Text>
             </View>
+            <TouchableOpacity
+              onPress={() => { setWelcomeDismissed(true); setShowHelpHint(false); }}
+              accessibilityRole="button"
+              accessibilityLabel="Dismiss map help"
+              style={styles.dismissHint}
+            >
+              <Ionicons name="close" size={22} color={colors.onPrimary} />
+            </TouchableOpacity>
           </View>
-        )
-      )}
+        )}
+        {locationUnavailable && (
+          <Text style={styles.mapStatus}>Location unavailable. Pan the map or search to explore.</Text>
+        )}
+        {pinsError && (
+          <TouchableOpacity onPress={loadUserPins} accessibilityRole="button">
+            <Text style={styles.mapStatus}>Couldn’t load your places. Tap to retry.</Text>
+          </TouchableOpacity>
+        )}
+        {!isPro && (pinFilter === 'all' || pinFilter === 'nearby') && (
+          <TouchableOpacity onPress={() => presentPaywall('places')} accessibilityRole="button">
+            <Text style={styles.mapStatus}>Winery discovery is included with Pro. Tap to explore Pro. Your saved places appear here for free.</Text>
+          </TouchableOpacity>
+        )}
+        {isPro && (pinFilter === 'all' || pinFilter === 'nearby') && discoveryStatus !== 'ready' && (
+          <TouchableOpacity
+            disabled={discoveryStatus !== 'error'}
+            onPress={() => setDiscoveryRetry((value) => value + 1)}
+            accessibilityRole={discoveryStatus === 'error' ? 'button' : 'text'}
+          >
+            <Text style={styles.mapStatus}>
+              {discoveryStatus === 'error' ? 'Couldn’t load wineries. Tap to retry.'
+                : discoveryStatus === 'loading' ? 'Loading wineries…'
+                  : 'No directory wineries in this area. Move the map or search by name.'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {/* Modals */}
       <WineryNameModal
@@ -1076,7 +1099,11 @@ export default function MapScreen() {
                   <Ionicons name="wine-outline" size={28} color={colors.accent.border} />
                   <Text style={styles.listEmptyText}>
                     {listTab === 'find'
-                      ? placeSearch.trim().length >= 2
+                      ? searchStatus === 'loading'
+                        ? 'Searching wineries…'
+                        : searchStatus === 'error'
+                        ? 'Couldn’t search wineries. Edit your search to try again.'
+                        : placeSearch.trim().length >= 2
                         ? 'No wineries match that name'
                         : 'Type a winery name — or browse the apricot pins on the map'
                       : placeSearch.trim()
@@ -1481,11 +1508,22 @@ const styles = StyleSheet.create({
   },
 
   // Hint Container
-  hintContainer: {
+  mapNotices: {
     position: 'absolute',
-    top: 60,
+    top: 152,
     left: 16,
     right: 16,
+    gap: 8,
+  },
+  mapStatus: {
+    ...typography.body.small,
+    color: colors.neutral.ink,
+    backgroundColor: colors.neutral.bg,
+    padding: spacing.sm,
+    borderRadius: borderRadius.md,
+  },
+  dismissHint: { padding: 10 },
+  hintContainer: {
     backgroundColor: colors.primary.base,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
