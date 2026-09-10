@@ -90,7 +90,7 @@ ${main}
         <p class="foot-tag">Remember what you tasted.</p>
       </div>
     </div>
-    <p class="foot-links"><a href="/#features">Features</a><a href="/#pricing">Pricing</a><a href="/support">Support</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a></p>
+    <p class="foot-links"><a href="/#features">Features</a><a href="/#pricing">Pricing</a><a href="/support">Support</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/delete-account">Delete account</a></p>
   </div>
   <div class="wide foot-legal">
     <p>Cork &amp; Note is for people of legal drinking age. Please drink responsibly.</p>
@@ -102,13 +102,16 @@ ${main}
 `;
 }
 
-function legalPage(doc, active) {
+// `sectionExtras` maps a section heading to extra HTML appended inside that
+// section — used to add site-only links (like /delete-account) to the hosted
+// legal pages without touching lib/legalContent.js, which the app renders.
+function legalPage(doc, active, sectionExtras = {}) {
   const body = doc.sections
     .map(
       (s) =>
         `<section><h2>${esc(s.heading)}</h2>${s.paragraphs
           .map((p) => `<p>${esc(p)}</p>`)
-          .join('')}</section>`
+          .join('')}${sectionExtras[s.heading] || ''}</section>`
     )
     .join('\n');
   return page({
@@ -511,6 +514,65 @@ const support = page({
   <section>
     <h2>Privacy</h2>
     <p>Our <a href="/privacy">privacy policy</a> explains exactly what we collect and who we share it with, including what happens when you talk to the sommelier.</p>
+    <p>You can delete your account and all of its data at any time — see <a href="/delete-account">Delete your account</a>.</p>
+  </section>
+</article></div>`,
+});
+
+// Account-deletion page — required by Google Play's account-deletion policy:
+// a web page, reachable without the app installed, that explains both the
+// in-app deletion path and an out-of-app way to request deletion. What is
+// deleted and the retention statement mirror lib/legalContent.js ("Retention
+// and deletion") and supabase/functions/delete-account/index.ts (photos →
+// database rows → auth user, all-or-nothing).
+// TODO(owner): confirm cork_and_note@yahoo.com is the live support mailbox
+// before submitting this URL to Play Console.
+const SUPPORT_EMAIL = 'cork_and_note@yahoo.com';
+const deleteAccount = page({
+  title: 'Delete your account · Cork & Note',
+  description:
+    'How to permanently delete your Cork & Note account and all of its data — in the app, or by email without the app installed.',
+  active: '/delete-account',
+  main: `<div class="wrap"><article class="prose">
+  <h1>Delete your account</h1>
+  <p>Cork &amp; Note is a wine tasting journal operated by Nicholas Horton (app: <strong>Cork &amp; Note</strong>, package <code>com.nicholashorton.corkandnote</code>). This page explains how to permanently delete your Cork &amp; Note account and everything in it — whether or not you still have the app installed.</p>
+
+  <section>
+    <h2>Delete from inside the app</h2>
+    <p>Open <strong>Profile → Account settings → Delete account</strong> and confirm. Deletion is immediate and cannot be undone.</p>
+  </section>
+
+  <section>
+    <h2>Request deletion without the app</h2>
+    <!-- TODO(owner): confirm this mailbox (cork_and_note@yahoo.com) exists and is monitored before the Play listing goes live. -->
+    <p>If you no longer have the app installed, email <a href="mailto:${SUPPORT_EMAIL}?subject=Delete%20my%20Cork%20%26%20Note%20account"><strong>${SUPPORT_EMAIL}</strong></a> with the subject line <strong>“Delete my Cork &amp; Note account”</strong>.</p>
+    <p>Send the request <strong>from the email address your account is registered under</strong> — that is how we verify the request is really yours. We will confirm by reply and permanently delete the account.</p>
+  </section>
+
+  <section>
+    <h2>What gets deleted</h2>
+    <p>Account deletion permanently removes everything associated with your account:</p>
+    <p><strong>Your account itself</strong> — email address and sign-in credentials.<br>
+    <strong>Your journal</strong> — tastings, ratings, flavor notes, written notes, places and visits, and wishlist entries.<br>
+    <strong>Your photos</strong> — every photo you attached to wines, visits, and scans, including the stored files.<br>
+    <strong>Your cellar</strong> — all tracked bottles and their history.<br>
+    <strong>Your sommelier conversations</strong> — the AI chat history and the journal context it drew on.</p>
+    <p>Deletion is all-or-nothing by design: if any step fails, nothing is removed and you can try again. There is no partial account deletion, but you can delete individual entries in the app at any time.</p>
+  </section>
+
+  <section>
+    <h2>Retention</h2>
+    <p>We keep your data only for as long as your account exists. When your account is deleted, your data is deleted with it — immediately, and it cannot be recovered. We do not keep copies of your journal, photos, or chat history after deletion.</p>
+  </section>
+
+  <section>
+    <h2>Subscriptions</h2>
+    <p>Pro subscriptions are billed by Apple or Google, not by us, and <strong>deleting your account does not cancel a subscription</strong>. Cancel it separately in your App&nbsp;Store subscription settings (iPhone) or Google&nbsp;Play subscription settings (Android) — ideally before deleting the account.</p>
+  </section>
+
+  <section>
+    <h2>Questions</h2>
+    <p>Anything unclear, or want a hand? Email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a> or see our <a href="/privacy">privacy policy</a> and <a href="/support">support page</a>.</p>
   </section>
 </article></div>`,
 });
@@ -808,9 +870,13 @@ cpSync(join(ROOT, 'site', 'assets'), join(OUT, 'assets'), { recursive: true });
 
 const files = {
   'index.html': home,
-  'privacy.html': legalPage(PRIVACY_POLICY, '/privacy'),
+  'privacy.html': legalPage(PRIVACY_POLICY, '/privacy', {
+    'Retention and deletion':
+      '<p>No longer have the app installed? You can <a href="/delete-account">request account deletion by email</a> instead.</p>',
+  }),
   'terms.html': legalPage(TERMS_OF_USE, '/terms'),
   'support.html': support,
+  'delete-account.html': deleteAccount,
   'styles.css': css,
 };
 
