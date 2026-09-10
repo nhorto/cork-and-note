@@ -67,3 +67,8 @@ test('screen and component colors come from palette roles', () => {
     expect(src).not.toMatch(/['"]#[0-9a-fA-F]{3,8}['"]|['"]rgba?\(/);
   }
 });
+
+test('standard modal backdrops do not gray out the screen beneath them', () => {
+  expect(lightTheme.colors.overlay.scrim).toBe('transparent');
+  expect(darkTheme.colors.overlay.scrim).toBe('transparent');
+});

@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     // Keep the map at full color behind this compact card. This view used to
     // share its scrim style with the KeyboardAvoidingView above, applying the
     // dimming layer twice and turning the map into a muddy gray backdrop.
-    backgroundColor: 'transparent',
+    backgroundColor: colors.overlay.scrim,
     justifyContent: 'center',
     alignItems: 'center',
   },
