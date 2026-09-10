@@ -39,7 +39,7 @@ const WineryNameModal = ({
       await onSave(name.trim(), coordinate);
       setName('');
       onClose();
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to save pin. Please try again.');
     } finally {
       setLoading(false);
@@ -60,7 +60,7 @@ const WineryNameModal = ({
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.overlay}
+        style={styles.keyboardView}
       >
         <TouchableOpacity
           style={styles.overlay}
@@ -151,8 +151,14 @@ const { colors, typography, spacing, shadows, borderRadius } = theme;
 const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+  },
   overlay: {
     flex: 1,
+    // Keep the map at full color behind this compact card. This view used to
+    // share its scrim style with the KeyboardAvoidingView above, applying the
+    // dimming layer twice and turning the map into a muddy gray backdrop.
     backgroundColor: colors.overlay.scrim,
     justifyContent: 'center',
     alignItems: 'center',
