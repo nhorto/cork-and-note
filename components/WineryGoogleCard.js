@@ -24,7 +24,11 @@ import theme from '../styles/theme';
 
 const { colors, typography, spacing, borderRadius } = theme;
 
-export default function WineryGoogleCard({ winery, onPlaceIdSaved }) {
+// directoryId (optional): the winery_directory row this page was opened from
+// (only known right after a discovery pin / Near You promotion). Passed to the
+// details call so the server can write Google's businessStatus back to the
+// exact directory row (#225).
+export default function WineryGoogleCard({ winery, directoryId = null, onPlaceIdSaved }) {
   const { isPro, presentPaywall } = usePro();
   const [details, setDetails] = useState(null);
   const [hoursOpen, setHoursOpen] = useState(false);
@@ -56,7 +60,7 @@ export default function WineryGoogleCard({ winery, onPlaceIdSaved }) {
       }
       if (!placeId) return;
 
-      const res = await placesService.getDetails(placeId);
+      const res = await placesService.getDetails(placeId, { directoryId });
       if (active && res.success) setDetails(res.details);
     })();
 
@@ -89,12 +93,38 @@ export default function WineryGoogleCard({ winery, onPlaceIdSaved }) {
 
   const hasRating = typeof details.rating === 'number';
   const hasHours = Array.isArray(details.weekday_hours) && details.weekday_hours.length > 0;
+  // businessStatus (#225): a permanent closure is a fact about the place, not
+  // an hours state — it gets its own badge (error red) and replaces the
+  // hours-based Open/Closed pill, which is meaningless for a closed business.
+  const permanentlyClosed = details.business_status === 'CLOSED_PERMANENTLY';
+  const temporarilyClosed = details.business_status === 'CLOSED_TEMPORARILY';
 
   return (
     <View style={styles.card}>
       <Text style={styles.label}>ABOUT THIS WINERY · GOOGLE</Text>
 
-      {(hasRating || details.open_now != null) && (
+      {(permanentlyClosed || temporarilyClosed) && (
+        <View style={styles.statusRow}>
+          <View style={permanentlyClosed ? styles.permanentlyClosedBadge : styles.temporarilyClosedBadge}>
+            <Ionicons
+              name="alert-circle"
+              size={14}
+              color={permanentlyClosed ? colors.neutral.bg : colors.neutral.inkSecondary}
+            />
+            <Text
+              style={
+                permanentlyClosed
+                  ? styles.permanentlyClosedText
+                  : styles.temporarilyClosedText
+              }
+            >
+              {permanentlyClosed ? 'Permanently closed' : 'Temporarily closed'}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {(hasRating || (details.open_now != null && !permanentlyClosed)) && (
         <View style={styles.topRow}>
           {hasRating && (
             <View style={styles.ratingWrap}>
@@ -105,7 +135,7 @@ export default function WineryGoogleCard({ winery, onPlaceIdSaved }) {
               )}
             </View>
           )}
-          {details.open_now != null && (
+          {details.open_now != null && !permanentlyClosed && (
             <View style={[styles.openPill, !details.open_now && styles.closedPill]}>
               <Text style={[styles.openPillText, !details.open_now && styles.closedPillText]}>
                 {details.open_now ? 'Open now' : 'Closed'}
@@ -244,6 +274,37 @@ const styles = StyleSheet.create({
   openPillText: { ...typography.body.small, color: colors.neutral.bg, fontWeight: '600' },
   closedPill: { backgroundColor: colors.neutral.divider },
   closedPillText: { color: colors.neutral.inkSecondary },
+
+  // businessStatus badges (#225) — deliberately distinct from the hours pill.
+  statusRow: { flexDirection: 'row', paddingVertical: spacing.xs },
+  permanentlyClosedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.status.error,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  permanentlyClosedText: {
+    ...typography.body.small,
+    color: colors.neutral.bg,
+    fontWeight: '700',
+  },
+  temporarilyClosedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: colors.neutral.divider,
+    borderRadius: borderRadius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+  },
+  temporarilyClosedText: {
+    ...typography.body.small,
+    color: colors.neutral.inkSecondary,
+    fontWeight: '600',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
