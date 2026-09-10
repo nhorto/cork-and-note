@@ -705,41 +705,44 @@ export default function WineEntryForm({
           </Text>
         </View>
 
+        {/* Name · Type · Year share one row (mockup Variant A) — all three are
+            optional identity details, so they don't each deserve a full-width
+            field. The type modal shows the full names the narrow cell truncates. */}
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Wine name</Text>
-          <TextInput
-            style={styles.input}
-            value={wineName}
-            onChangeText={setWineName}
-            placeholder="Optional — a specific bottling or label"
-            placeholderTextColor={colors.neutral.placeholder}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Type</Text>
-          <TouchableOpacity
-            style={styles.selectorButton}
-            onPress={() => setShowTypeModal(true)}
-          >
-            <Text style={[styles.selectorText, !wineType && styles.selectorPlaceholder]}>
-              {wineType || 'Select type (optional)'}
-            </Text>
-            <Ionicons name="chevron-down" size={20} color={colors.neutral.inkSecondary} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Year</Text>
-          <TextInput
-            style={styles.input}
-            value={wineYear}
-            onChangeText={setWineYear}
-            placeholder="e.g., 2021"
-            placeholderTextColor={colors.neutral.placeholder}
-            keyboardType="numeric"
-            maxLength={4}
-          />
+          <Text style={styles.label}>Wine name · Type · Year</Text>
+          <View style={styles.identityRow}>
+            <TextInput
+              style={[styles.input, styles.identityName]}
+              value={wineName}
+              onChangeText={setWineName}
+              placeholder="Name"
+              placeholderTextColor={colors.neutral.placeholder}
+            />
+            <TouchableOpacity
+              style={[styles.selectorButton, styles.identityType]}
+              onPress={() => setShowTypeModal(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Wine type"
+              accessibilityValue={{ text: wineType || 'not set' }}
+            >
+              <Text
+                style={[styles.selectorText, !wineType && styles.selectorPlaceholder]}
+                numberOfLines={1}
+              >
+                {wineType || 'Type'}
+              </Text>
+              <Ionicons name="chevron-down" size={16} color={colors.neutral.inkSecondary} />
+            </TouchableOpacity>
+            <TextInput
+              style={[styles.input, styles.identityYear]}
+              value={wineYear}
+              onChangeText={setWineYear}
+              placeholder="Year"
+              placeholderTextColor={colors.neutral.placeholder}
+              keyboardType="numeric"
+              maxLength={4}
+            />
+          </View>
         </View>
 
         {/* "You've logged this before" (#93). Sits with the identity fields it
@@ -786,8 +789,10 @@ export default function WineEntryForm({
       {/* Optional deep-dive sections — collapsed by default (#216) */}
       <Text style={styles.moreDetailLabel}>More detail — optional</Text>
 
+      {/* Section icons (owner feedback 2026-09-10): bars for the segmented
+          ratings inside, a rose for the bouquet, a photo stack for photos. */}
       <CollapsibleSection
-        icon="options-outline"
+        icon="stats-chart-outline"
         title="Detailed ratings"
         summary={ratingsSummary}
         hasData={ratingsSummaryParts.length > 0}
@@ -803,7 +808,7 @@ export default function WineEntryForm({
       </CollapsibleSection>
 
       <CollapsibleSection
-        icon="pricetags-outline"
+        icon="rose-outline"
         title="Flavor notes"
         summary={flavorSummary}
         hasData={flavorNotes.length > 0}
@@ -815,7 +820,7 @@ export default function WineEntryForm({
       </CollapsibleSection>
 
       <CollapsibleSection
-        icon="camera-outline"
+        icon="images-outline"
         title="Photos"
         summary={photosSummary}
         hasData={photos.length > 0}
@@ -1100,9 +1105,27 @@ const styles = StyleSheet.create({
   selectorText: {
     ...typography.body.regular,
     color: colors.neutral.ink,
+    flexShrink: 1,
   },
   selectorPlaceholder: {
     color: colors.neutral.placeholder,
+  },
+
+  // Consolidated name · type · year row. Flexes mirror the mockup (1.4/1/0.8)
+  // so the free-text name gets the most room and the 4-digit year the least.
+  identityRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  identityName: {
+    flex: 1.4,
+  },
+  identityType: {
+    flex: 1,
+    paddingHorizontal: spacing.sm,
+  },
+  identityYear: {
+    flex: 0.8,
   },
 
   // Multi-varietal chips + add row (#135)
