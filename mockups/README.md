@@ -9,6 +9,26 @@ is self-contained and works directly from a local file. See the
 [campaign plan](../docs/marketing/ad-campaign-plan-2026-09-09.md) for the test
 sequence and image-production briefs.
 
+## Log-a-wine UX explorations
+
+Open `log-wine-ux.html` in any browser (no build or server needed) — everything is
+interactive and styled in the Spritz palette:
+
+```sh
+open mockups/log-wine-ux.html
+```
+
+Three tabs (deep-linkable via `#layout`, `#ratings`, `#flavors`):
+
+| Tab | What it explores |
+| --- | --- |
+| **1 · Form layout** | Quick-by-default logging: wine info + star verdict + notes always visible; detailed ratings / flavor notes / photos tucked behind either inline collapsibles (Variant A) or bottom-sheet sections (Variant B), both with live summaries on the collapsed rows and a sticky Save bar. |
+| **2 · Rating controls** | Five tap-first replacements for the 0.1-step drag sliders: segmented bar (suggested), tap dots, descriptor chips ("Grippy" instead of 4.0), a fixed snap-slider, and a stepper — plus tappable stars for the overall rating. |
+| **3 · Flavor notes** | Side-by-side: today's search (collapsed category headers) vs. flat pill results while typing, a default ⭐ Popular tab, ~40 added notes, and a single input that both searches and adds customs. |
+
+`log-wine-ux-preview.png` is a static overview of the form-layout tab (regenerate with the
+headless-Chrome command shown in the color-scheme section, pointing at `log-wine-ux.html`).
+
 ## Round 03 — The wine ampersand
 
 Open `logo-round-3/index.html` for three AI-generated C & N concepts where the
