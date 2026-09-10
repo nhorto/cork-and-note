@@ -15,7 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
 import MeterHint from '../../components/MeterHint';
@@ -164,6 +164,28 @@ export default function SommelierScreen() {
     setMessages([]);
     loadConversations();
   }, []);
+
+  // Home's "Ask the sommelier" box hands its question over via ?ask=… (the
+  // Tonight's Pick card left Home for this — owner feedback 2026-09-09).
+  // Two steps on purpose: handleSend closes over activeConversation, so the
+  // question is parked in state and fired only once the fresh conversation
+  // has actually landed — calling handleSend right after startNewChat would
+  // read the stale null conversation and silently drop the question.
+  const params = useLocalSearchParams();
+  const [pendingAsk, setPendingAsk] = useState(null);
+  useEffect(() => {
+    const ask = typeof params.ask === 'string' ? params.ask.trim() : '';
+    if (!ask) return;
+    router.setParams({ ask: undefined });
+    setPendingAsk(ask);
+    startNewChat();
+  }, [params.ask]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!pendingAsk || view !== 'chat' || !activeConversation) return;
+    const question = pendingAsk;
+    setPendingAsk(null);
+    handleSend(question);
+  }, [pendingAsk, view, activeConversation]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDeleteConversation = useCallback(async (id) => {
     try {

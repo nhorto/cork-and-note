@@ -16,9 +16,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AskSommelierBox from '../../components/AskSommelierBox';
 import LogFab from '../../components/LogFab';
 import NearYouRow from '../../components/NearYouRow';
-import TonightsPickCard from '../../components/TonightsPickCard';
 import { DRINK_WINDOW_META, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
 import { varietalText } from '../../lib/varietals';
@@ -182,10 +182,17 @@ export default function HomeScreen() {
             Hides itself entirely when location is denied or nothing is near. */}
         <NearYouRow />
 
-        {/* Tonight's pick — AI sommelier grounded in the user's own cellar (#51) */}
-        <View style={styles.tonightsPick}>
-          <TonightsPickCard onRequireCellar={() => router.push('/cellar/add')} />
-        </View>
+        {/* Ask the sommelier — a real input, not a card (owner feedback
+            2026-09-09: Tonight's Pick moved to the Somm tab and the Cellar;
+            Home's job is starting a conversation). Submitting hands the
+            question to the Somm tab via ?ask=…, which opens a fresh chat and
+            sends it. */}
+        <AskSommelierBox
+          onAsk={(question) =>
+            router.push({ pathname: '/(tabs)/sommelier', params: { ask: question } })
+          }
+          onOpen={() => router.push('/(tabs)/sommelier')}
+        />
 
         {/* Ready-to-Drink strip — first-class drink-window surface (R4 / #54).
             Per-status counts tap through to the cellar pre-filtered to that status. */}
