@@ -21,13 +21,15 @@ import TypingDots from './TypingDots';
 import { usePro } from '../hooks/usePro';
 import { aiService } from '../lib/ai';
 import { chatService } from '../lib/chat';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius, shadows } = theme;
+
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MODAL_HEIGHT = SCREEN_HEIGHT * 0.65;
 
 export default function WineChatModal({ visible, onClose, onUseSuggestions, onConversationStarted, onDismiss, existingConversationId, currentWineData }) {
+  const { colors, styles } = useScreenTheme();
+
   const { gate, isPro, presentPaywall } = usePro();
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -242,7 +244,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.headerLeft}>
-              <Ionicons name="wine" size={18} color={colors.primary.base} />
+              <Ionicons name="wine" size={18} color={colors.primary.ink} />
               <Text style={styles.headerTitle}>Ask the sommelier</Text>
             </View>
             <TouchableOpacity
@@ -259,7 +261,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           {/* Messages */}
           {loading ? (
             <View style={styles.centered}>
-              <ActivityIndicator size="large" color={colors.primary.base} />
+              <ActivityIndicator size="large" color={colors.primary.ink} />
             </View>
           ) : messages.length === 0 ? (
             <View style={styles.emptyState}>
@@ -307,6 +309,12 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius, shadows } = theme;
+
 const styles = StyleSheet.create({
   meterHint: {
     paddingHorizontal: spacing.md,
@@ -317,7 +325,7 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(61, 43, 61, 0.4)', // colors.neutral.ink (plum ink) at 40%
+    backgroundColor: colors.overlay.scrim, // colors.neutral.ink (plum ink) at 40%
   },
   modalContainer: {
     height: MODAL_HEIGHT,
@@ -399,4 +407,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginLeft: 36,
   },
+});
+return { colors, styles };
 });

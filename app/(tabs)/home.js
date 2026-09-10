@@ -19,18 +19,18 @@ import {
 import AskSommelierBox from '../../components/AskSommelierBox';
 import LogFab from '../../components/LogFab';
 import NearYouRow from '../../components/NearYouRow';
-import { DRINK_WINDOW_META, cellarService } from '../../lib/cellar';
+import { drinkWindowMeta, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
 import { varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
 import { wishlistService } from '../../lib/wishlist';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function HomeScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const { user } = useContext(AuthContext);
 
@@ -160,7 +160,7 @@ export default function HomeScreen() {
             activeOpacity={0.85}
             onPress={() => setReloadKey((k) => k + 1)}
           >
-            <Ionicons name="cloud-offline-outline" size={18} color={colors.primary.base} />
+            <Ionicons name="cloud-offline-outline" size={18} color={colors.primary.ink} />
             <Text style={styles.errorBannerText}>Couldn&apos;t load your data</Text>
             <Text style={styles.errorBannerAction}>Retry</Text>
           </TouchableOpacity>
@@ -216,7 +216,7 @@ export default function HomeScreen() {
           onPress={() => router.push('/(tabs)/cellar')}
         >
           <View style={styles.cellarIcon}>
-            <Ionicons name="file-tray-stacked-outline" size={22} color={colors.primary.base} />
+            <Ionicons name="file-tray-stacked-outline" size={22} color={colors.primary.ink} />
           </View>
           <View style={styles.cellarMeta}>
             <Text style={styles.cellarTitle}>
@@ -232,7 +232,7 @@ export default function HomeScreen() {
                 : 'Track the bottles you own'}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.primary.base} />
+          <Ionicons name="chevron-forward" size={20} color={colors.primary.ink} />
         </TouchableOpacity>
 
         {/* Collection at a glance — compact insights entry (R6 / #56). Shows 1–2
@@ -260,7 +260,7 @@ export default function HomeScreen() {
               onPress={() => router.push(`/wine/${w.id}`)}
             >
               <View style={styles.wineGlass}>
-                <Ionicons name="wine-outline" size={18} color={colors.primary.base} />
+                <Ionicons name="wine-outline" size={18} color={colors.primary.ink} />
               </View>
               <View style={styles.wineMeta}>
                 <Text style={styles.wineName}>{w.name}</Text>
@@ -310,6 +310,8 @@ function timeAgo(dateString) {
 // link, and the three stat links that used to be the stat strip. Empty state
 // keeps the same silhouette with an invitation instead of numbers.
 function JourneyCard({ stats, highlights, onOpenMap, onPressWines, onPressPlaces, onPressWishlist }) {
+  const { colors, styles } = useScreenTheme();
+
   const hasJourney = stats.places > 0 || stats.wines > 0;
   const lastVisit = highlights?.mostRecentPlace;
 
@@ -333,7 +335,7 @@ function JourneyCard({ stats, highlights, onOpenMap, onPressWines, onPressPlaces
         accessibilityRole="button"
         accessibilityLabel="Open your map"
       >
-        <Ionicons name="map-outline" size={16} color={colors.primary.base} />
+        <Ionicons name="map-outline" size={16} color={colors.journey.accent} />
         <Text style={styles.journeyMapLinkText}>Open your map ›</Text>
       </TouchableOpacity>
 
@@ -348,6 +350,8 @@ function JourneyCard({ stats, highlights, onOpenMap, onPressWines, onPressPlaces
 }
 
 function JourneyStat({ n, label, onPress }) {
+  const { styles } = useScreenTheme();
+
   return (
     <TouchableOpacity style={styles.journeyStat} activeOpacity={0.85} onPress={onPress}>
       <Text style={styles.journeyStatNum}>{n}</Text>
@@ -361,6 +365,8 @@ function JourneyStat({ n, label, onPress }) {
 const READY_STRIP_ORDER = ['drink_up', 'ready', 'too_young', 'past_peak'];
 
 function ReadyToDrinkStrip({ byStatus, onPressStatus }) {
+  const { colors, styles } = useScreenTheme();
+
   // Hide until we have counts and at least one bottle has a derived status.
   if (!byStatus) return null;
   const total = READY_STRIP_ORDER.reduce((sum, s) => sum + (byStatus[s] || 0), 0);
@@ -373,7 +379,7 @@ function ReadyToDrinkStrip({ byStatus, onPressStatus }) {
       </View>
       <View style={styles.rtdStrip}>
         {READY_STRIP_ORDER.map((status) => {
-          const meta = DRINK_WINDOW_META[status];
+          const meta = drinkWindowMeta(status, colors);
           const count = byStatus[status] || 0;
           return (
             <TouchableOpacity
@@ -398,6 +404,8 @@ function ReadyToDrinkStrip({ byStatus, onPressStatus }) {
 // from the insights view-model and taps through to the full dashboard. Renders
 // nothing until there's a non-empty cellar to describe.
 function InsightsEntryCard({ insights, onPress }) {
+  const { colors, styles } = useScreenTheme();
+
   if (!insights || insights.isEmpty) return null;
 
   // Highlight 1: the dominant type/region (whichever is more concentrated), so the
@@ -443,6 +451,14 @@ function InsightsEntryCard({ insights, onPress }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
 
@@ -474,7 +490,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontFamily: SERIF,
     fontSize: 18,
-    color: colors.primary.base,
+    color: colors.primary.ink,
   },
   headerBorder: {
     height: 1,
@@ -500,27 +516,27 @@ const styles = StyleSheet.create({
   errorBannerText: { ...typography.body.small, color: colors.neutral.inkSecondary, flex: 1 },
   errorBannerAction: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
 
   // Your Journey — passport card
   journeyCard: {
-    backgroundColor: colors.neutral.divider,
+    backgroundColor: colors.journey.bg,
     borderWidth: 1,
-    borderColor: colors.neutral.border,
+    borderColor: colors.journey.border,
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     marginTop: spacing.lg,
   },
-  journeyLabel: { ...typography.body.caption, color: colors.accent.ink },
+  journeyLabel: { ...typography.body.caption, color: colors.journey.accent },
   journeyTitle: {
     fontFamily: SERIF,
     fontSize: 22,
-    color: colors.neutral.ink,
+    color: colors.journey.ink,
     marginTop: spacing.xs,
   },
-  journeySub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 2 },
+  journeySub: { ...typography.body.small, color: colors.journey.secondary, marginTop: 2 },
   journeyMapLink: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -531,12 +547,12 @@ const styles = StyleSheet.create({
   },
   journeyMapLinkText: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.journey.accent,
     fontWeight: '600',
   },
   journeyDivider: {
     height: 1,
-    backgroundColor: colors.neutral.border,
+    backgroundColor: colors.journey.border,
     marginTop: spacing.sm,
     marginBottom: spacing.sm,
   },
@@ -545,9 +561,9 @@ const styles = StyleSheet.create({
   journeyStatNum: {
     fontFamily: SERIF,
     fontSize: 20,
-    color: colors.primary.base,
+    color: colors.journey.accent,
   },
-  journeyStatLabel: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginTop: 2 },
+  journeyStatLabel: { ...typography.body.caption, color: colors.journey.secondary, marginTop: 2 },
 
   // Tonight's pick hero
   tonightsPick: { marginTop: spacing.lg },
@@ -630,7 +646,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   sectionLabel: { ...typography.body.caption, color: colors.accent.ink },
-  sectionAction: { ...typography.body.small, color: colors.primary.base },
+  sectionAction: { ...typography.body.small, color: colors.primary.ink },
 
   // Wine card
   wineCard: {
@@ -655,7 +671,7 @@ const styles = StyleSheet.create({
   wineMeta: { flex: 1 },
   wineName: { ...typography.body.regular, color: colors.neutral.ink, fontWeight: '600' },
   wineDetail: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
-  wineScore: { fontFamily: SERIF, fontSize: 16, color: colors.primary.base },
+  wineScore: { fontFamily: SERIF, fontSize: 16, color: colors.primary.ink },
 
   // Empty state
   empty: {
@@ -674,4 +690,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   emptySub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 2 },
+});
+return { colors, styles };
 });

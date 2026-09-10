@@ -5,7 +5,7 @@
 // For RATING INPUT, use StarRatingInput — this component is display-only.
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
 export default function StarRating({
   value = 0,
@@ -14,6 +14,8 @@ export default function StarRating({
   showValue = true,
   style,
 }) {
+  const { colors, styles } = useScreenTheme();
+
   const v = Math.max(0, Math.min(max, Number(value) || 0));
   const stars = [];
   for (let i = 1; i <= max; i++) {
@@ -25,7 +27,7 @@ export default function StarRating({
         key={i}
         name={name}
         size={size}
-        color={name === 'star-outline' ? colors.neutral.border : colors.accent.base}
+        color={name === 'star-outline' ? colors.neutral.inkTertiary : colors.accent.base}
         style={styles.star}
       />
     );
@@ -47,6 +49,11 @@ export default function StarRating({
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors } = theme;
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   star: { marginRight: 1 },
@@ -55,4 +62,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkSecondary,
     fontWeight: '600',
   },
+});
+return { colors, styles };
 });

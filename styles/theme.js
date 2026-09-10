@@ -1,65 +1,25 @@
-// styles/theme.js
-// "Château Label" Design System - Elegant & Refined
-// Inspired by fine French wine label typography and aesthetics
-
+// Royal Velvet (light) and Purple After Dark (dark).
+// Fill colors and readable ink colors are distinct roles: deep purple remains
+// the brand fill in dark mode while lavender keeps links and icons legible.
 import { Platform } from 'react-native';
 
-// NOTE: Token *names* below are role-based (base/deep/darkest/soft, accent
-// base/border/surface/strong/ink, neutral bg/surface/divider/border/ink/
-// inkSecondary/inkTertiary/placeholder) so future re-themes only need new
-// VALUES, not a rename. Values below are the "Spritz" palette (direction D —
-// sunset coral + apricot on warm ivory, plum ink).
-export const colors = {
-  // Primary - Spritz coral family
-  primary: {
-    base: '#E4573D',          // Main accent - sunset coral
-    deep: '#B03A24',          // Deeper, pressed coral-red for highlights/active states
-    darkest: '#6B2A3A',       // Deepest variant - coral-plum, for depth
-    soft: '#F0A99A',          // Soft coral-pink for subtle accents
-  },
-
-  // Accent - Spritz apricot accents
-  accent: {
-    base: '#F4A259',          // Primary apricot - warm, golden-hour
-    border: '#F8CBA0',        // Subtle apricot for borders
-    surface: '#FDE9D2',       // Very light apricot for backgrounds
-    strong: '#C97A3D',        // Darker apricot/amber for contrast
-    ink: '#8C5A12',           // Readable amber for ink — AA on ivory (5.56:1)
-    // Use base/border/surface/strong for rules, borders, icons, stars only — never as small text.
-  },
-
-  // Neutrals - Warm ivory tones
-  neutral: {
-    bg: '#FFF8F0',             // Primary background - warm ivory
-    surface: '#FFF3E6',        // Card backgrounds
-    divider: '#F2E2D2',        // Subtle dividers
-    border: '#DCC0AC',         // Borders and muted elements
-    ink: '#3D2B3D',            // Primary text - plum ink
-    inkSecondary: '#5A4550',   // Secondary text - plum-tinted gray
-    inkTertiary: '#7A5A4E',    // Tertiary text — AA on ivory (5.86:1)
-    placeholder: '#B09A8C',    // Placeholder text (decorative / non-essential only)
-  },
-
-  // Status colors - kept distinguishable from the new coral primary
-  status: {
-    visited: '#557753',       // Warmed sage green - visited wineries
-    wishlist: '#6B7B8B',      // Slate blue - want to visit (unchanged, already reads distinct)
-    success: '#557753',       // Same warmed sage for success states
-    error: '#C1293E',         // Shifted cooler/crimson so it doesn't collide with primary coral
-  },
-
-  // Overlay
-  overlay: {
-    light: 'rgba(255, 248, 240, 0.95)',
-    // Behind a sheet or dialog. A warm, light wash — it separates the sheet from
-    // the screen without turning the whole app grey, which is what the old 60%
-    // neutral scrim did. Raise the alpha if a sheet ever needs more separation.
-    scrim: 'rgba(61, 43, 61, 0.25)',
-    // ON TOP of a photo: the contrast plate behind white icons and counters
-    // (thumbnail badges, the "3 of 7" pill in the photo viewer). Stays heavy on
-    // purpose — this one is about legibility, not depth. Not a sheet backdrop.
-    dark: 'rgba(61, 43, 61, 0.6)',
-  },
+const lightColors = {
+  primary: { base: '#54258A', deep: '#421B70', darkest: '#32165E', soft: '#C9AEDF', ink: '#54258A', surface: '#EEE6F7' },
+  accent: { base: '#D6B45D', border: '#E8D9B4', surface: '#F7F0DF', strong: '#96752B', ink: '#806124' },
+  neutral: { bg: '#FAF8F4', surface: '#FFFFFF', divider: '#EEE6F7', border: '#D9D1E0', ink: '#2E2438', inkSecondary: '#5E506A', inkTertiary: '#746779', placeholder: '#746779' },
+  status: { visited: '#55745E', wishlist: '#596F8B', success: '#55745E', error: '#AD354F', drinkSoon: '#806124', unknown: '#746779' },
+  onPrimary: '#FFFFFF', onAccent: '#2E2438', onStatus: '#FFFFFF', onPhoto: '#FFFFFF', shadow: '#21152E',
+  journey: { bg: '#54258A', ink: '#FFFFFF', secondary: '#E6D7F4', accent: '#D6B45D', border: '#78509D' },
+  overlay: { light: 'rgba(250,248,244,0.95)', scrim: 'rgba(46,36,56,0.25)', dark: 'rgba(25,19,33,0.65)', photo: 'rgba(0,0,0,0.95)', onImage: 'rgba(255,255,255,0.2)' },
+};
+const darkColors = {
+  primary: { base: '#64399B', deep: '#542B86', darkest: '#32165E', soft: '#BDA0DA', ink: '#C9A7F1', surface: '#362643' },
+  accent: { base: '#E0BE6C', border: '#655233', surface: '#362D24', strong: '#D4B060', ink: '#E0BE6C' },
+  neutral: { bg: '#191321', surface: '#261D31', divider: '#362643', border: '#51405F', ink: '#F5EEF9', inkSecondary: '#D5C8E0', inkTertiary: '#B9A9C8', placeholder: '#B9A9C8' },
+  status: { visited: '#90B49A', wishlist: '#A8B8D4', success: '#90B49A', error: '#F090A5', drinkSoon: '#E0BE6C', unknown: '#B9A9C8' },
+  onPrimary: '#FFFFFF', onAccent: '#2E2438', onStatus: '#191321', onPhoto: '#FFFFFF', shadow: '#000000',
+  journey: { bg: '#64399B', ink: '#FFFFFF', secondary: '#EBDEF7', accent: '#E0BE6C', border: '#9874BE' },
+  overlay: { light: 'rgba(25,19,33,0.95)', scrim: 'rgba(9,5,15,0.65)', dark: 'rgba(9,5,15,0.72)', photo: 'rgba(0,0,0,0.95)', onImage: 'rgba(255,255,255,0.2)' },
 };
 
 export const typography = {
@@ -145,24 +105,25 @@ export const borderRadius = {
   full: 999, // alias — several components reference borderRadius.full
 };
 
-export const shadows = {
+function createTheme(colors, mode) {
+const shadows = {
   // Subtle, elegant shadows
   soft: {
-    shadowColor: colors.neutral.ink,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 2,
   },
   medium: {
-    shadowColor: colors.neutral.ink,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.08,
     shadowRadius: 12,
     elevation: 4,
   },
   strong: {
-    shadowColor: colors.neutral.ink,
+    shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 24,
@@ -171,7 +132,7 @@ export const shadows = {
 };
 
 // Decorative elements
-export const decorative = {
+const decorative = {
   // Thin gold rule/divider
   goldRule: {
     height: 1,
@@ -190,7 +151,7 @@ export const decorative = {
 };
 
 // Common component styles
-export const components = {
+const components = {
   // Refined card style
   card: {
     backgroundColor: colors.neutral.surface,
@@ -253,12 +214,13 @@ export const components = {
   },
 };
 
-export default {
-  colors,
-  typography,
-  spacing,
-  borderRadius,
-  shadows,
-  decorative,
-  components,
-};
+return { colors, typography, spacing, borderRadius, shadows, decorative, components, mode, isDark: mode === 'dark' };
+}
+
+export const lightTheme = createTheme(lightColors, 'light');
+export const darkTheme = createTheme(darkColors, 'dark');
+export const themes = { light: lightTheme, dark: darkTheme };
+// Static exports support non-rendering consumers and token validation only.
+// Screens subscribe through styles/ThemeProvider instead.
+export const { colors, shadows, decorative, components } = lightTheme;
+export default lightTheme;

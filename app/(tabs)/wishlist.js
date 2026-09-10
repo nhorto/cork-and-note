@@ -15,13 +15,13 @@ import {
 import ScreenHeader from '../../components/ScreenHeader';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import { wishlistService } from '../../lib/wishlist';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function WishlistScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const [loading, setLoading] = useState(true);
   const [wishlist, setWishlist] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -103,7 +103,7 @@ export default function WishlistScreen() {
       activeOpacity={0.7}
     >
       <View style={styles.wineryIcon}>
-        <Ionicons name="wine" size={20} color={colors.primary.base} />
+        <Ionicons name="wine" size={20} color={colors.primary.ink} />
       </View>
 
       <View style={styles.wineryInfo}>
@@ -214,7 +214,7 @@ export default function WishlistScreen() {
               onPress={() => router.push('/(tabs)/map')}
               activeOpacity={0.7}
             >
-              <Ionicons name="map-outline" size={18} color={colors.neutral.bg} />
+              <Ionicons name="map-outline" size={18} color={colors.onPrimary} />
               <Text style={styles.exploreButtonText}>Explore map</Text>
             </TouchableOpacity>
           </View>
@@ -223,6 +223,14 @@ export default function WishlistScreen() {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -241,7 +249,7 @@ const styles = StyleSheet.create({
   },
   countBadgeText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
   // Section Header
@@ -400,7 +408,7 @@ const styles = StyleSheet.create({
   },
   exploreButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
 
@@ -417,4 +425,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: 280,
   },
+});
+return { colors, styles };
 });

@@ -7,11 +7,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing } = theme;
 
 export default function StarRatingInput({ value = 0, onChange, size = 36 }) {
+  const { colors, styles } = useScreenTheme();
+
   const handleTap = (star) => {
     let next;
     if (value === star) next = star - 0.5;
@@ -38,7 +39,7 @@ export default function StarRatingInput({ value = 0, onChange, size = 36 }) {
         <Ionicons
           name={name}
           size={size}
-          color={name === 'star-outline' ? colors.neutral.border : colors.accent.base}
+          color={name === 'star-outline' ? colors.neutral.inkTertiary : colors.accent.base}
           style={styles.star}
         />
       </TouchableOpacity>
@@ -61,6 +62,12 @@ export default function StarRatingInput({ value = 0, onChange, size = 36 }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing } = theme;
+
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center' },
   star: { marginRight: spacing.xs },
@@ -69,4 +76,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkTertiary,
     marginTop: spacing.xs,
   },
+});
+return { colors, styles };
 });

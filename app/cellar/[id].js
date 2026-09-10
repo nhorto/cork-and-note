@@ -29,11 +29,9 @@ import { KEEP_BOTTLE_REASON, cellarService, drinkWindowMeta } from '../../lib/ce
 import { flattenTastedWines } from '../../lib/cellarMatch';
 import { knownRegions } from '../../lib/cellarRegion';
 import { visitsService } from '../../lib/visits';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius, shadows } = theme;
 
-const SERIF = typography.fonts.serif;
 // Draw-down reasons (everything but the keep-the-bottle sample).
 const REASONS = [
   { key: 'consumed', label: 'Drank it' },
@@ -43,6 +41,8 @@ const REASONS = [
 ];
 
 export default function BottleDetailScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const { id } = useLocalSearchParams();
   const router = useRouter();
 
@@ -219,7 +219,7 @@ export default function BottleDetailScreen() {
   if (!loaded) {
     return (
       <View style={[styles.container, styles.center]}>
-        <ActivityIndicator color={colors.primary.base} />
+        <ActivityIndicator color={colors.primary.ink} />
       </View>
     );
   }
@@ -236,7 +236,7 @@ export default function BottleDetailScreen() {
   }
 
   const producer = bottle.producer || bottle.wineries?.name;
-  const badge = bottle.drinkStatus ? drinkWindowMeta(bottle.drinkStatus) : null;
+  const badge = bottle.drinkStatus ? drinkWindowMeta(bottle.drinkStatus, colors) : null;
   const removed = bottle.status !== 'in_cellar';
   const consumptions = bottle.cellar_consumptions || [];
   // Whether the open/taste sheet will write a tasting (drives the rating + note
@@ -256,7 +256,7 @@ export default function BottleDetailScreen() {
               accessibilityRole="button"
               accessibilityLabel="Edit"
             >
-              <Ionicons name="create-outline" size={22} color={colors.primary.base} />
+              <Ionicons name="create-outline" size={22} color={colors.primary.ink} />
             </TouchableOpacity>
           ) : null
         }
@@ -305,7 +305,7 @@ export default function BottleDetailScreen() {
                 </View>
                 {!removed && (
                   <TouchableOpacity style={styles.adjustBtn} onPress={openAdjustSheet} hitSlop={8}>
-                    <Ionicons name="create-outline" size={15} color={colors.primary.base} />
+                    <Ionicons name="create-outline" size={15} color={colors.primary.ink} />
                     <Text style={styles.adjustBtnText}>Adjust</Text>
                   </TouchableOpacity>
                 )}
@@ -370,7 +370,7 @@ export default function BottleDetailScreen() {
               {!removed && bottle.quantity > 0 && (
                 <>
                   <TouchableOpacity style={styles.openBtn} activeOpacity={0.9} onPress={() => openOpenSheet('open')}>
-                    <Ionicons name="wine" size={20} color={colors.neutral.bg} />
+                    <Ionicons name="wine" size={20} color={colors.onPrimary} />
                     <Text style={styles.openBtnText}>Open a bottle</Text>
                   </TouchableOpacity>
                   <Button
@@ -415,7 +415,7 @@ export default function BottleDetailScreen() {
                       accessibilityRole="button"
                       accessibilityLabel="Decrease"
                     >
-                      <Ionicons name="remove" size={20} color={colors.primary.base} />
+                      <Ionicons name="remove" size={20} color={colors.primary.ink} />
                     </TouchableOpacity>
                     <Text style={styles.stepValue}>{openQty}</Text>
                     <TouchableOpacity
@@ -424,7 +424,7 @@ export default function BottleDetailScreen() {
                       accessibilityRole="button"
                       accessibilityLabel="Increase"
                     >
-                      <Ionicons name="add" size={20} color={colors.primary.base} />
+                      <Ionicons name="add" size={20} color={colors.primary.ink} />
                     </TouchableOpacity>
                   </View>
 
@@ -450,7 +450,7 @@ export default function BottleDetailScreen() {
                         value={logTasting}
                         onValueChange={setLogTasting}
                         trackColor={{ true: colors.primary.base, false: colors.neutral.border }}
-                        thumbColor={colors.neutral.bg}
+                        thumbColor={colors.onPrimary}
                       />
                     </View>
                   )}
@@ -535,7 +535,7 @@ export default function BottleDetailScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Decrease"
               >
-                <Ionicons name="remove" size={20} color={colors.primary.base} />
+                <Ionicons name="remove" size={20} color={colors.primary.ink} />
               </TouchableOpacity>
               <Text style={styles.stepValue}>{adjustQty}</Text>
               <TouchableOpacity
@@ -544,7 +544,7 @@ export default function BottleDetailScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Increase"
               >
-                <Ionicons name="add" size={20} color={colors.primary.base} />
+                <Ionicons name="add" size={20} color={colors.primary.ink} />
               </TouchableOpacity>
             </View>
             {adjustQty <= 0 && (
@@ -567,6 +567,8 @@ export default function BottleDetailScreen() {
 }
 
 function DetailRow({ label, value, last }) {
+  const { styles } = useScreenTheme();
+
   if (!value) return null;
   return (
     <View style={[styles.detailRow, !last && styles.detailRowBorder]}>
@@ -576,12 +578,20 @@ function DetailRow({ label, value, last }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius, shadows } = theme;
+
+const SERIF = typography.fonts.serif;
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
   flex: { flex: 1 },
   center: { alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
   missing: { ...typography.body.regular, color: colors.neutral.inkSecondary },
-  link: { ...typography.body.regular, color: colors.primary.base },
+  link: { ...typography.body.regular, color: colors.primary.ink },
 
   iconBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
@@ -599,7 +609,7 @@ const styles = StyleSheet.create({
   producer: { ...typography.body.large, color: colors.neutral.inkSecondary, marginTop: 2 },
   badgeRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   badge: { paddingVertical: 3, paddingHorizontal: spacing.sm, borderRadius: borderRadius.sm },
-  badgeText: { ...typography.body.caption, color: colors.neutral.bg },
+  badgeText: { ...typography.body.caption, color: colors.onStatus },
 
   qtyCard: {
     flexDirection: 'row',
@@ -613,7 +623,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   qtyMain: { flexDirection: 'row', alignItems: 'baseline', gap: spacing.sm, flexShrink: 1 },
-  qtyNum: { fontFamily: SERIF, fontSize: 32, color: colors.primary.base },
+  qtyNum: { fontFamily: SERIF, fontSize: 32, color: colors.primary.ink },
   qtyLabel: { ...typography.body.regular, color: colors.neutral.inkSecondary },
   adjustBtn: {
     flexDirection: 'row',
@@ -626,7 +636,7 @@ const styles = StyleSheet.create({
     borderColor: colors.accent.border,
     backgroundColor: colors.neutral.bg,
   },
-  adjustBtnText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  adjustBtnText: { ...typography.body.small, color: colors.primary.ink, fontWeight: '600' },
 
   detailCard: {
     backgroundColor: colors.neutral.surface,
@@ -662,7 +672,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     marginTop: spacing.xl,
   },
-  openBtnText: { ...typography.body.large, color: colors.neutral.bg, fontWeight: '600' },
+  openBtnText: { ...typography.body.large, color: colors.onPrimary, fontWeight: '600' },
   tasteBtn: { marginTop: spacing.sm },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.sm, paddingVertical: spacing.md, marginTop: spacing.sm },
   deleteText: { ...typography.body.regular, color: colors.status.error },
@@ -682,7 +692,7 @@ const styles = StyleSheet.create({
   sheetLabel: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginBottom: spacing.sm, marginTop: spacing.md },
 
   ratingHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  clearRating: { ...typography.body.small, color: colors.primary.base, fontWeight: '600', marginTop: spacing.md },
+  clearRating: { ...typography.body.small, color: colors.primary.ink, fontWeight: '600', marginTop: spacing.md },
   starsRow: { flexDirection: 'row', gap: spacing.xs, alignSelf: 'flex-start' },
   // 44pt touch target (§3.3) — sized, not hitSlopped, so adjacent stars can't overlap
   starBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
@@ -724,8 +734,10 @@ const styles = StyleSheet.create({
 
   sheetActions: { flexDirection: 'row', gap: spacing.md, marginTop: spacing.xl },
   sheetCancel: { flex: 1, paddingVertical: spacing.md, borderRadius: borderRadius.sm, borderWidth: 1, borderColor: colors.primary.base, alignItems: 'center' },
-  sheetCancelText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
+  sheetCancelText: { ...typography.body.regular, color: colors.primary.ink, fontWeight: '600' },
   sheetConfirm: { flex: 1, paddingVertical: spacing.md, borderRadius: borderRadius.sm, backgroundColor: colors.primary.base, alignItems: 'center' },
-  sheetConfirmText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
+  sheetConfirmText: { ...typography.body.regular, color: colors.onPrimary, fontWeight: '600' },
   submitDisabled: { opacity: 0.6 },
+});
+return { colors, styles };
 });

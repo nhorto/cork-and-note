@@ -19,7 +19,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
 import { findPriorTastings } from '../lib/cellarMatch';
 import { inferTypeFromVarietals, parseVarietals } from '../lib/varietals';
@@ -33,8 +33,7 @@ import SegmentedRating from './SegmentedRating';
 import StarRatingInput from './StarRatingInput';
 import WineChatModal from './WineChatModal';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
-const SERIF = typography.fonts.serif;
+
 // pagingEnabled snaps to the screen width, so the photo pages must match it —
 // a hardcoded 400 desyncs the pager and the "N of M" indicator.
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -55,6 +54,8 @@ export default function WineEntryForm({
   sessionWines = [], // match-shaped drafts already on the current visit
   onOpenTasting, // (wine) => void — deep-link to a prior tasting
 }) {
+  const { colors, styles } = useScreenTheme();
+
   // Form state
   const [winemaker, setWinemaker] = useState(defaultWinemaker);
   const [wineName, setWineName] = useState('');
@@ -580,7 +581,7 @@ export default function WineEntryForm({
     if (photos.length === 0) {
       return (
         <View style={styles.noPhotosContainer}>
-          <Ionicons name="camera-outline" size={32} color="#999" />
+          <Ionicons name="camera-outline" size={32} color={colors.neutral.placeholder} />
           <Text style={styles.noPhotosText}>No photos added</Text>
         </View>
       );
@@ -601,7 +602,7 @@ export default function WineEntryForm({
                 accessibilityLabel="Remove"
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="close-circle" size={24} color="#FF4444" />
+                <Ionicons name="close-circle" size={24} color={colors.status.error} />
               </TouchableOpacity>
             </View>
           ))}
@@ -651,7 +652,7 @@ export default function WineEntryForm({
             value={winemaker}
             onChangeText={setWinemaker}
             placeholder="Winery or producer — whatever made it"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.neutral.placeholder}
           />
         </View>
 
@@ -671,7 +672,7 @@ export default function WineEntryForm({
                   activeOpacity={0.7}
                 >
                   <Text style={styles.varietalChipText}>{g}</Text>
-                  <Ionicons name="close" size={14} color={colors.primary.base} />
+                  <Ionicons name="close" size={14} color={colors.primary.ink} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -696,7 +697,7 @@ export default function WineEntryForm({
               accessibilityRole="button"
               accessibilityLabel="Add grape"
             >
-              <Ionicons name="add" size={22} color={colors.neutral.bg} />
+              <Ionicons name="add" size={22} color={colors.onPrimary} />
             </TouchableOpacity>
           </View>
           <Text style={styles.varietalHint}>
@@ -711,7 +712,7 @@ export default function WineEntryForm({
             value={wineName}
             onChangeText={setWineName}
             placeholder="Optional — a specific bottling or label"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.neutral.placeholder}
           />
         </View>
 
@@ -724,7 +725,7 @@ export default function WineEntryForm({
             <Text style={[styles.selectorText, !wineType && styles.selectorPlaceholder]}>
               {wineType || 'Select type (optional)'}
             </Text>
-            <Ionicons name="chevron-down" size={20} color="#666" />
+            <Ionicons name="chevron-down" size={20} color={colors.neutral.inkSecondary} />
           </TouchableOpacity>
         </View>
 
@@ -735,7 +736,7 @@ export default function WineEntryForm({
             value={wineYear}
             onChangeText={setWineYear}
             placeholder="e.g., 2021"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.neutral.placeholder}
             keyboardType="numeric"
             maxLength={4}
           />
@@ -776,7 +777,7 @@ export default function WineEntryForm({
           value={additionalNotes}
           onChangeText={setAdditionalNotes}
           placeholder="Any additional thoughts about this wine..."
-          placeholderTextColor="#999"
+          placeholderTextColor={colors.neutral.placeholder}
           multiline
           textAlignVertical="top"
         />
@@ -821,12 +822,12 @@ export default function WineEntryForm({
       >
         <View style={styles.photoButtons}>
           <TouchableOpacity style={styles.photoButton} onPress={takePhoto}>
-            <Ionicons name="camera" size={20} color={colors.neutral.bg} />
+            <Ionicons name="camera" size={20} color={colors.onPrimary} />
             <Text style={styles.photoButtonText}>Take photo</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.photoButton} onPress={pickImage}>
-            <Ionicons name="images" size={20} color={colors.neutral.bg} />
+            <Ionicons name="images" size={20} color={colors.onPrimary} />
             <Text style={styles.photoButtonText}>Choose photos</Text>
           </TouchableOpacity>
         </View>
@@ -850,7 +851,7 @@ export default function WineEntryForm({
                 accessibilityLabel="Close"
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={colors.neutral.ink} />
               </TouchableOpacity>
             </View>
             
@@ -871,7 +872,7 @@ export default function WineEntryForm({
                     {type}
                   </Text>
                   {wineType === type && (
-                    <Ionicons name="checkmark" size={20} color={colors.primary.deep} />
+                    <Ionicons name="checkmark" size={20} color={colors.primary.ink} />
                   )}
                 </TouchableOpacity>
               ))}
@@ -922,7 +923,7 @@ export default function WineEntryForm({
                 accessibilityLabel="Close"
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={24} color={colors.neutral.ink} />
               </TouchableOpacity>
             </View>
 
@@ -942,7 +943,7 @@ export default function WineEntryForm({
                   <Ionicons
                     name={field.apply ? 'checkbox' : 'square-outline'}
                     size={22}
-                    color={field.apply ? colors.primary.base : colors.neutral.placeholder}
+                    color={field.apply ? colors.primary.ink : colors.neutral.placeholder}
                     style={styles.confirmCheckbox}
                   />
                   <View style={styles.confirmRowBody}>
@@ -980,7 +981,7 @@ export default function WineEntryForm({
             accessibilityLabel="Close"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="close" size={32} color="#fff" />
+            <Ionicons name="close" size={32} color={colors.onPhoto} />
           </TouchableOpacity>
           
           {photos.length > 0 && (
@@ -1020,6 +1021,14 @@ export default function WineEntryForm({
     </KeyboardAvoidingView>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   flex: {
@@ -1121,7 +1130,7 @@ const styles = StyleSheet.create({
   },
   varietalChipText: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
   varietalAddRow: {
@@ -1184,7 +1193,7 @@ const styles = StyleSheet.create({
   },
   photoButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '500',
   },
   noPhotosContainer: {
@@ -1282,7 +1291,7 @@ const styles = StyleSheet.create({
   },
   selectedTypeOptionText: {
     fontWeight: '600',
-    color: colors.primary.base,
+    color: colors.primary.ink,
   },
 
   // AI Suggestions Confirmation Modal
@@ -1348,7 +1357,7 @@ const styles = StyleSheet.create({
   // Photo Modal
   photoModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    backgroundColor: colors.overlay.photo,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -1381,6 +1390,8 @@ const styles = StyleSheet.create({
   },
   photoModalText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
   },
+});
+return { colors, styles };
 });

@@ -5,12 +5,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function LogScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
 
   return (
@@ -40,7 +40,7 @@ export default function LogScreen() {
           onPress={() => router.push('/log-session?mode=wine')}
         >
           <View style={styles.choiceIcon}>
-            <Ionicons name="wine" size={24} color={colors.primary.base} />
+            <Ionicons name="wine" size={24} color={colors.primary.ink} />
           </View>
           <View style={styles.choiceText}>
             <Text style={styles.choiceTitle}>Log a wine</Text>
@@ -57,7 +57,7 @@ export default function LogScreen() {
           onPress={() => router.push('/log-session?mode=winery')}
         >
           <View style={styles.choiceIcon}>
-            <Ionicons name="location" size={24} color={colors.primary.base} />
+            <Ionicons name="location" size={24} color={colors.primary.ink} />
           </View>
           <View style={styles.choiceText}>
             <Text style={styles.choiceTitle}>Start a winery visit</Text>
@@ -71,6 +71,14 @@ export default function LogScreen() {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
@@ -144,4 +152,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     fontStyle: 'italic',
   },
+});
+return { colors, styles };
 });

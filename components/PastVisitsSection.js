@@ -16,15 +16,16 @@ import {
 } from 'react-native';
 import { varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
-const SERIF = typography.fonts.serif;
+
 // pagingEnabled snaps to the screen width, so the photo pages must match it —
 // a hardcoded 400 desyncs the pager and the "N of M" indicator.
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const PastVisitsSection = ({ wineryId, wineryName }) => {
+  const { colors, styles } = useScreenTheme();
+
   const [loading, setLoading] = useState(true);
   const [visits, setVisits] = useState([]);
   const [expandedVisit, setExpandedVisit] = useState(null);
@@ -176,7 +177,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
           }
           activeOpacity={0.7}
         >
-          <Ionicons name="add" size={18} color={colors.neutral.bg} />
+          <Ionicons name="add" size={18} color={colors.onPrimary} />
           <Text style={styles.addVisitButtonText}>Log your first visit</Text>
         </TouchableOpacity>
       </View>
@@ -214,7 +215,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
             <Ionicons
               name={expandedVisit === visit.id ? "chevron-up" : "chevron-down"}
               size={20}
-              color={colors.primary.base}
+              color={colors.primary.ink}
             />
           </TouchableOpacity>
 
@@ -246,7 +247,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
                     onPress={() => router.push(`/log-session?editVisitId=${visit.id}`)}
                     accessibilityLabel="Edit log"
                   >
-                    <Ionicons name="pencil-outline" size={15} color={colors.primary.base} />
+                    <Ionicons name="pencil-outline" size={15} color={colors.primary.ink} />
                     <Text style={styles.editLogLinkText}>Edit log</Text>
                   </TouchableOpacity>
                 </View>
@@ -288,7 +289,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
                             </Text>
                           </>
                         )}
-                        <Ionicons name="chevron-forward" size={16} color={colors.primary.base} />
+                        <Ionicons name="chevron-forward" size={16} color={colors.primary.ink} />
                       </View>
                     </TouchableOpacity>
                   ))
@@ -317,7 +318,7 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
               accessibilityLabel="Close"
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Ionicons name="close" size={28} color="#fff" />
+              <Ionicons name="close" size={28} color={colors.onPhoto} />
             </TouchableOpacity>
           </View>
           
@@ -350,6 +351,14 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
     </View>
   );
 };
+
+
+export default PastVisitsSection;
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -444,7 +453,7 @@ const styles = StyleSheet.create({
   },
   addVisitButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
 
@@ -480,7 +489,7 @@ const styles = StyleSheet.create({
   },
   photoCount: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontSize: 12,
   },
 
@@ -525,7 +534,7 @@ const styles = StyleSheet.create({
   },
   moreThumbnailText: {
     ...typography.body.small,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
 
@@ -572,7 +581,7 @@ const styles = StyleSheet.create({
   },
   editLogLinkText: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
   wineItem: {
@@ -625,7 +634,7 @@ const styles = StyleSheet.create({
   // Photo Modal
   photoModalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    backgroundColor: colors.overlay.photo,
   },
   photoModalHeader: {
     flexDirection: 'row',
@@ -637,7 +646,7 @@ const styles = StyleSheet.create({
   },
   photoModalTitle: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
     flex: 1,
   },
@@ -666,8 +675,8 @@ const styles = StyleSheet.create({
   },
   photoModalText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
   },
 });
-
-export default PastVisitsSection;
+return { colors, styles };
+});

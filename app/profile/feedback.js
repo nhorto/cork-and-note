@@ -16,12 +16,13 @@ import {
 import Button from '../../components/Button';
 import ScreenHeader from '../../components/ScreenHeader';
 import { supabase } from '../../lib/supabase';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors } = theme;
 
 export default function FeedbackScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const { user } = useContext(AuthContext);
 
   const [activeSection, setActiveSection] = useState(null);
@@ -212,7 +213,7 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('feedback')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="chatbubble" size={22} color={colors.primary.base} style={styles.sectionIcon} />
+                <Ionicons name="chatbubble" size={22} color={colors.primary.ink} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Share feedback</Text>
               </View>
               <Ionicons
@@ -311,7 +312,7 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('bug')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="bug" size={22} color={colors.primary.base} style={styles.sectionIcon} />
+                <Ionicons name="bug" size={22} color={colors.primary.ink} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Report a bug</Text>
               </View>
               <Ionicons
@@ -372,7 +373,7 @@ export default function FeedbackScreen() {
               onPress={() => toggleSection('contact')}
             >
               <View style={styles.sectionTitle}>
-                <Ionicons name="mail" size={22} color={colors.primary.base} style={styles.sectionIcon} />
+                <Ionicons name="mail" size={22} color={colors.primary.ink} style={styles.sectionIcon} />
                 <Text style={styles.sectionTitleText}>Contact support</Text>
               </View>
               <Ionicons
@@ -435,6 +436,11 @@ export default function FeedbackScreen() {
     </View>
   );
 };
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -525,7 +531,7 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkTertiary,
   },
   segmentButtonTextActive: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '500',
   },
   ratingContainer: {
@@ -540,4 +546,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+});
+return { colors, styles };
 });

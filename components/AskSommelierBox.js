@@ -8,11 +8,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 export default function AskSommelierBox({ onAsk, onOpen }) {
+  const { colors, styles } = useScreenTheme();
+
   const [text, setText] = useState('');
 
   const submit = () => {
@@ -36,7 +37,7 @@ export default function AskSommelierBox({ onAsk, onOpen }) {
           onChangeText={setText}
           placeholder="What should I open tonight?"
           placeholderTextColor={colors.neutral.placeholder}
-          selectionColor={colors.primary.base}
+          selectionColor={colors.primary.ink}
           returnKeyType="send"
           onSubmitEditing={submit}
           accessibilityLabel="Ask your sommelier a question"
@@ -51,7 +52,7 @@ export default function AskSommelierBox({ onAsk, onOpen }) {
           <Ionicons
             name={text.trim() ? 'arrow-up-circle' : 'chevron-forward-circle'}
             size={28}
-            color={colors.primary.base}
+            color={colors.primary.ink}
           />
         </TouchableOpacity>
       </View>
@@ -59,6 +60,12 @@ export default function AskSommelierBox({ onAsk, onOpen }) {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   wrap: { marginTop: spacing.lg },
@@ -83,4 +90,6 @@ const styles = StyleSheet.create({
   },
   send: { padding: spacing.xs },
   hint: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginTop: spacing.xs },
+});
+return { colors, styles };
 });

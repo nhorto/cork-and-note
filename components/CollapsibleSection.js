@@ -15,9 +15,8 @@ import {
   UIManager,
   View,
 } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -31,6 +30,8 @@ export default function CollapsibleSection({
   initiallyOpen = false,
   children,
 }) {
+  const { colors, styles } = useScreenTheme();
+
   const [open, setOpen] = useState(initiallyOpen);
 
   const toggle = () => {
@@ -50,7 +51,7 @@ export default function CollapsibleSection({
         accessibilityHint={summary}
       >
         <View style={styles.iconBadge}>
-          <Ionicons name={icon} size={18} color={colors.primary.deep} />
+          <Ionicons name={icon} size={18} color={colors.primary.ink} />
         </View>
         <View style={styles.textCol}>
           <Text style={styles.title}>{title}</Text>
@@ -71,6 +72,12 @@ export default function CollapsibleSection({
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   card: {
@@ -111,7 +118,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   summaryData: {
-    color: colors.primary.deep,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
   body: {
@@ -121,4 +128,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.neutral.divider,
     paddingTop: spacing.sm,
   },
+});
+return { colors, styles };
 });

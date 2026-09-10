@@ -22,13 +22,14 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { usePro } from '../hooks/usePro';
 import { wineriesService } from '../lib/wineries';
 import { wineryDirectoryService } from '../lib/wineryDirectory';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 const KM_TO_MI = 0.621371;
 
 export default function NearYouRow() {
+  const { colors, styles } = useScreenTheme();
+
   const { isPro, presentPaywall } = usePro();
   const router = useRouter();
 
@@ -151,7 +152,7 @@ export default function NearYouRow() {
           accessibilityRole="button"
           accessibilityLabel="Show wineries near you"
         >
-          <Ionicons name="navigate-outline" size={18} color={colors.primary.base} />
+          <Ionicons name="navigate-outline" size={18} color={colors.primary.ink} />
           <Text style={styles.teaserText}>Show wineries near you</Text>
           <Text style={styles.teaserSub}>Uses location only while open</Text>
         </TouchableOpacity>
@@ -193,6 +194,12 @@ export default function NearYouRow() {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
 const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
@@ -212,7 +219,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.6,
-    color: colors.neutral.ink,
+    color: colors.onAccent,
   },
   teaser: {
     flexDirection: 'row',
@@ -246,4 +253,6 @@ const styles = StyleSheet.create({
   },
   cardName: { ...typography.body.small, color: colors.neutral.ink, fontWeight: '700' },
   cardMeta: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginTop: 2 },
+});
+return { colors, styles };
 });

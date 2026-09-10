@@ -10,15 +10,10 @@
 // Labels are sans (System) weight 600; serif is reserved for headings/titles.
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { borderRadius, colors, spacing } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
 // Ink (label + icon + spinner) color per variant.
-const INK = {
-  primary: colors.neutral.bg,
-  secondary: colors.neutral.inkSecondary,
-  outline: colors.primary.base,
-  ghost: colors.primary.base,
-};
+
 
 export default function Button({
   title,
@@ -32,6 +27,8 @@ export default function Button({
   accessibilityLabel,
   ...rest
 }) {
+  const { INK, styles } = useScreenTheme();
+
   const isDisabled = disabled || loading;
   const ink = INK[variant] || INK.primary;
 
@@ -66,6 +63,18 @@ export default function Button({
     </TouchableOpacity>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { borderRadius, colors, spacing } = theme;
+const INK = {
+  primary: colors.onPrimary,
+  secondary: colors.neutral.inkSecondary,
+  outline: colors.primary.ink,
+  ghost: colors.primary.ink,
+};
 
 const styles = StyleSheet.create({
   base: {
@@ -111,4 +120,6 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
+});
+return { INK, styles };
 });

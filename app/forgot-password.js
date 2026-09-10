@@ -14,12 +14,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { borderRadius, colors, spacing, typography } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import { AuthContext } from './_layout';
 
-const SERIF = typography.fonts.serif;
 
 export default function ForgotPasswordScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const { resetPassword } = useContext(AuthContext);
   const [email, setEmail] = useState('');
@@ -96,7 +97,7 @@ export default function ForgotPasswordScreen() {
             </Text>
 
             <View style={styles.inputContainer}>
-              <Ionicons name="mail" size={20} color={colors.primary.base} style={styles.inputIcon} />
+              <Ionicons name="mail" size={20} color={colors.primary.ink} style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
                 placeholder="Email address"
@@ -114,7 +115,7 @@ export default function ForgotPasswordScreen() {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color={colors.neutral.bg} />
+                <ActivityIndicator color={colors.onPrimary} />
               ) : (
                 <Text style={styles.resetButtonText}>Send reset link</Text>
               )}
@@ -132,6 +133,13 @@ export default function ForgotPasswordScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { borderRadius, colors, spacing, typography } = theme;
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -206,7 +214,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   resetButtonText: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,
@@ -245,9 +253,11 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   backToLoginText: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontSize: 16,
     fontWeight: '600',
     letterSpacing: 0.3,
   },
+});
+return { colors, styles };
 });

@@ -35,9 +35,8 @@ import {
   packageTrialLabel,
 } from '../lib/pro';
 import { fetchOffering, purchasePackage } from '../lib/purchases';
-import { colors, spacing, typography } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const SERIF = typography.fonts.serif;
 
 // Lead with the sommelier and unlimited scans, not "more journaling" — at $9.99
 // this sits with the AI/collector tools, not with the $5 journal apps (§4.2).
@@ -51,6 +50,8 @@ const BENEFITS = [
 ];
 
 export default function PaywallScreen() {
+  const { colors, spacing, styles } = useScreenTheme();
+
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { source } = useLocalSearchParams();
@@ -133,7 +134,7 @@ export default function PaywallScreen() {
           accessibilityLabel="Close"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons name="close" size={26} color={colors.primary.base} />
+          <Ionicons name="close" size={26} color={colors.primary.ink} />
         </TouchableOpacity>
       </View>
 
@@ -162,7 +163,7 @@ export default function PaywallScreen() {
         <View style={styles.benefits}>
           {BENEFITS.map((benefit) => (
             <View key={benefit.text} style={styles.benefitRow}>
-              <Ionicons name={benefit.icon} size={18} color={colors.primary.base} />
+              <Ionicons name={benefit.icon} size={18} color={colors.primary.ink} />
               <Text style={styles.benefitText}>{benefit.text}</Text>
             </View>
           ))}
@@ -170,7 +171,7 @@ export default function PaywallScreen() {
 
         {loading ? (
           <View style={styles.loading}>
-            <ActivityIndicator color={colors.primary.base} />
+            <ActivityIndicator color={colors.primary.ink} />
             <Text style={styles.loadingText}>Loading plans…</Text>
           </View>
         ) : !purchasesAvailable || !packages?.length ? (
@@ -206,7 +207,7 @@ export default function PaywallScreen() {
                   <Ionicons
                     name={isSelected ? 'radio-button-on' : 'radio-button-off'}
                     size={22}
-                    color={isSelected ? colors.primary.base : colors.neutral.border}
+                    color={isSelected ? colors.primary.ink : colors.neutral.border}
                   />
                 </TouchableOpacity>
               );
@@ -222,7 +223,7 @@ export default function PaywallScreen() {
           activeOpacity={0.9}
         >
           {busy ? (
-            <ActivityIndicator color={colors.neutral.bg} />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <Text style={styles.ctaText}>
               {isPro ? 'You already have Pro' : packageTrialLabel(selected) ? 'Start free trial' : 'Continue'}
@@ -257,6 +258,13 @@ export default function PaywallScreen() {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, spacing, typography } = theme;
+const SERIF = typography.fonts.serif;
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
   topBar: {
@@ -271,7 +279,7 @@ const styles = StyleSheet.create({
     fontFamily: SERIF,
     fontSize: 30,
     fontWeight: '600',
-    color: colors.primary.base,
+    color: colors.primary.ink,
     textAlign: 'center',
   },
   subtitle: {
@@ -304,7 +312,7 @@ const styles = StyleSheet.create({
   planMain: { flex: 1 },
   planPeriod: { fontFamily: SERIF, fontSize: 17, fontWeight: '600', color: colors.neutral.ink },
   planPrice: { fontSize: 15, color: colors.neutral.ink, marginTop: 2 },
-  planTrial: { fontSize: 13, color: colors.primary.base, marginTop: 2 },
+  planTrial: { fontSize: 13, color: colors.primary.ink, marginTop: 2 },
   cta: {
     backgroundColor: colors.primary.base,
     borderRadius: 8,
@@ -315,7 +323,7 @@ const styles = StyleSheet.create({
     minHeight: 48,
   },
   ctaDisabled: { opacity: 0.5 },
-  ctaText: { color: colors.neutral.bg, fontSize: 16, fontWeight: '600' },
+  ctaText: { color: colors.onPrimary, fontSize: 16, fontWeight: '600' },
   legalese: {
     fontSize: 11,
     lineHeight: 16,
@@ -333,9 +341,11 @@ const styles = StyleSheet.create({
   },
   link: {
     fontSize: 13,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     textDecorationLine: 'underline',
     paddingVertical: spacing.xs,
   },
   linkDivider: { fontSize: 13, color: colors.neutral.inkTertiary },
+});
+return { colors, spacing, styles };
 });

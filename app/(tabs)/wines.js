@@ -28,13 +28,13 @@ import {
   applySort,
   facetOptions,
 } from '../../lib/winesBrowse';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function Wines() {
+  const { colors, styles } = useScreenTheme();
+
   const [search, setSearch] = useState('');
   const [wines, setWines] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -167,7 +167,7 @@ export default function Wines() {
             <Ionicons
               name="wine"
               size={22}
-              color={item.wine_type === 'White' ? colors.neutral.ink : colors.neutral.bg}
+              color={item.wine_type === 'White' ? colors.neutral.ink : colors.onPrimary}
             />
           </View>
         </View>
@@ -264,7 +264,7 @@ export default function Wines() {
             <Ionicons
               name="options-outline"
               size={20}
-              color={filterCount > 0 ? colors.neutral.bg : colors.neutral.ink}
+              color={filterCount > 0 ? colors.onPrimary : colors.neutral.ink}
             />
             {filterCount > 0 && (
               <View style={styles.filterBadge}>
@@ -278,14 +278,14 @@ export default function Wines() {
       {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={18} color={colors.primary.base} style={styles.searchIcon} />
+          <Ionicons name="search" size={18} color={colors.primary.ink} style={styles.searchIcon} />
           <TextInput
             placeholder="Search wines or wineries..."
             value={search}
             onChangeText={setSearch}
             style={styles.searchInput}
             placeholderTextColor={colors.neutral.placeholder}
-            selectionColor={colors.primary.base}
+            selectionColor={colors.primary.ink}
           />
           {search.length > 0 && (
             <TouchableOpacity
@@ -374,6 +374,13 @@ export default function Wines() {
   );
 }
 
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -408,7 +415,7 @@ const styles = StyleSheet.create({
   filterBadgeText: {
     fontSize: 11,
     fontWeight: '700',
-    color: colors.neutral.bg,
+    color: colors.onAccent,
   },
 
   // Loading
@@ -520,7 +527,7 @@ const styles = StyleSheet.create({
   },
   wineVarietal: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '500',
     marginBottom: 2,
   },
@@ -613,8 +620,10 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
 
+});
+return { colors, styles };
 });

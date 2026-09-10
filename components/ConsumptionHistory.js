@@ -10,9 +10,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { KEEP_BOTTLE_REASON } from '../lib/cellar';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 // Human label + icon per reason (enum value → presentation).
 const REASON_META = {
@@ -36,6 +35,8 @@ function formatDate(value) {
 }
 
 export default function ConsumptionHistory({ consumptions }) {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
 
   const rows = (consumptions || [])
@@ -63,7 +64,7 @@ export default function ConsumptionHistory({ consumptions }) {
           return (
             <View key={row.id || i} style={[styles.row, i < rows.length - 1 && styles.rowBorder]}>
               <View style={styles.iconWrap}>
-                <Ionicons name={meta.icon} size={18} color={colors.primary.base} />
+                <Ionicons name={meta.icon} size={18} color={colors.primary.ink} />
               </View>
               <View style={styles.rowBody}>
                 <View style={styles.rowTop}>
@@ -98,6 +99,12 @@ export default function ConsumptionHistory({ consumptions }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.neutral.surface,
@@ -130,4 +137,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   tastingLinkText: { ...typography.body.small, color: colors.accent.ink, fontWeight: '600' },
+});
+return { colors, styles };
 });

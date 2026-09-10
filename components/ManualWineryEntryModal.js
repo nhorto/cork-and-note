@@ -15,18 +15,18 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const ManualWineryEntryModal = ({
   visible,
   onClose,
   onSave,
   actionType // 'visit' or 'wishlist'
 }) => {
+  const { colors, styles } = useScreenTheme();
+
   const [name, setName] = useState('');
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -147,7 +147,7 @@ const ManualWineryEntryModal = ({
               {/* Header */}
               <View style={styles.header}>
                 <View style={[styles.iconContainer, { backgroundColor: getIconColor() }]}>
-                  <Ionicons name={getIcon()} size={24} color={colors.neutral.bg} />
+                  <Ionicons name={getIcon()} size={24} color={colors.onPrimary} />
                 </View>
                 <View style={styles.headerText}>
                   <Text style={styles.title}>{getTitle()}</Text>
@@ -173,7 +173,7 @@ const ManualWineryEntryModal = ({
                   onChangeText={setName}
                   autoFocus={true}
                   returnKeyType="done"
-                  selectionColor={colors.primary.base}
+                  selectionColor={colors.primary.ink}
                 />
               </View>
 
@@ -182,7 +182,7 @@ const ManualWineryEntryModal = ({
                 <View style={styles.locationRow}>
                   <View style={styles.locationInfo}>
                     <View style={styles.locationIconContainer}>
-                      <Ionicons name="location" size={18} color={colors.primary.base} />
+                      <Ionicons name="location" size={18} color={colors.primary.ink} />
                     </View>
                     <View style={styles.locationTextWrap}>
                       <Text style={styles.locationLabel}>Use current location</Text>
@@ -195,7 +195,7 @@ const ManualWineryEntryModal = ({
                     value={useCurrentLocation}
                     onValueChange={setUseCurrentLocation}
                     trackColor={{ false: colors.neutral.border, true: colors.primary.soft }}
-                    thumbColor={useCurrentLocation ? colors.primary.base : colors.neutral.surface}
+                    thumbColor={useCurrentLocation ? colors.primary.ink : colors.neutral.surface}
                     ios_backgroundColor={colors.neutral.border}
                   />
                 </View>
@@ -224,6 +224,15 @@ const ManualWineryEntryModal = ({
     </Modal>
   );
 };
+
+
+export default ManualWineryEntryModal;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   root: {
@@ -369,5 +378,5 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
 });
-
-export default ManualWineryEntryModal;
+return { colors, styles };
+});

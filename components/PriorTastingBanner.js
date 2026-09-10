@@ -21,9 +21,8 @@ import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { TIER } from '../lib/cellarMatch';
 import { wineDisplayName } from '../lib/wineDisplay';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 const formatDate = (s) => {
   if (!s) return '';
@@ -66,6 +65,8 @@ function headline(result, variant) {
 }
 
 export default function PriorTastingBanner({ result, variant = 'prior', onDismiss, onOpen }) {
+  const { colors, styles } = useScreenTheme();
+
   const [showNote, setShowNote] = useState(false);
   if (!result?.mostRecent) return null;
 
@@ -83,7 +84,7 @@ export default function PriorTastingBanner({ result, variant = 'prior', onDismis
         <Ionicons
           name={variant === 'session' ? 'alert-circle' : 'wine'}
           size={18}
-          color={colors.primary.base}
+          color={colors.primary.ink}
         />
         <View style={styles.headBody}>
           <Text style={styles.headline}>{headline(result, variant)}</Text>
@@ -133,6 +134,12 @@ export default function PriorTastingBanner({ result, variant = 'prior', onDismis
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
 const styles = StyleSheet.create({
   banner: {
     backgroundColor: colors.accent.surface,
@@ -160,7 +167,7 @@ const styles = StyleSheet.create({
   sub: { ...typography.body.small, color: colors.neutral.inkTertiary, marginTop: 1 },
   reveal: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
     marginTop: spacing.sm,
   },
@@ -179,4 +186,6 @@ const styles = StyleSheet.create({
   },
   noteText: { ...typography.body.small, color: colors.neutral.inkSecondary, lineHeight: 19 },
   noteEmpty: { ...typography.body.small, color: colors.neutral.inkTertiary, fontStyle: 'italic' },
+});
+return { colors, styles };
 });

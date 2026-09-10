@@ -7,12 +7,12 @@ import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { varietalText } from '../lib/varietals';
 import { visitsService } from '../lib/visits';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const VisitStatsCard = () => {
+  const { colors, styles } = useScreenTheme();
+
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalWineries: 0,
@@ -114,7 +114,7 @@ const VisitStatsCard = () => {
   const getWineIconColor = (wineType) => {
     const type = wineType?.toLowerCase();
     if (type === 'white') return colors.neutral.ink;
-    return colors.neutral.bg;
+    return colors.onPrimary;
   };
 
   if (loading) {
@@ -141,7 +141,7 @@ const VisitStatsCard = () => {
       <View style={styles.statsRow}>
         <View style={styles.statItem}>
           <View style={styles.statIconContainer}>
-            <Ionicons name="business-outline" size={20} color={colors.primary.base} />
+            <Ionicons name="business-outline" size={20} color={colors.primary.ink} />
           </View>
           <Text style={styles.statValue}>{stats.totalWineries}</Text>
           <Text style={styles.statLabel}>Places</Text>
@@ -151,7 +151,7 @@ const VisitStatsCard = () => {
 
         <View style={styles.statItem}>
           <View style={styles.statIconContainer}>
-            <Ionicons name="calendar-outline" size={20} color={colors.primary.base} />
+            <Ionicons name="calendar-outline" size={20} color={colors.primary.ink} />
           </View>
           <Text style={styles.statValue}>{stats.totalVisits}</Text>
           <Text style={styles.statLabel}>Visits</Text>
@@ -161,7 +161,7 @@ const VisitStatsCard = () => {
 
         <View style={styles.statItem}>
           <View style={styles.statIconContainer}>
-            <Ionicons name="wine-outline" size={20} color={colors.primary.base} />
+            <Ionicons name="wine-outline" size={20} color={colors.primary.ink} />
           </View>
           <Text style={styles.statValue}>{stats.totalWines}</Text>
           <Text style={styles.statLabel}>Wines</Text>
@@ -178,7 +178,7 @@ const VisitStatsCard = () => {
               style={styles.seeAllButton}
             >
               <Text style={styles.seeAllText}>View all</Text>
-              <Ionicons name="arrow-forward" size={14} color={colors.primary.base} />
+              <Ionicons name="arrow-forward" size={14} color={colors.primary.ink} />
             </TouchableOpacity>
           </View>
 
@@ -194,7 +194,7 @@ const VisitStatsCard = () => {
                 activeOpacity={0.7}
               >
                 <View style={styles.listItemIcon}>
-                  <Ionicons name="location" size={18} color={colors.primary.base} />
+                  <Ionicons name="location" size={18} color={colors.primary.ink} />
                 </View>
                 <View style={styles.listItemContent}>
                   <Text style={styles.listItemTitle} numberOfLines={1}>
@@ -223,7 +223,7 @@ const VisitStatsCard = () => {
               style={styles.seeAllButton}
             >
               <Text style={styles.seeAllText}>View all</Text>
-              <Ionicons name="arrow-forward" size={14} color={colors.primary.base} />
+              <Ionicons name="arrow-forward" size={14} color={colors.primary.ink} />
             </TouchableOpacity>
           </View>
 
@@ -280,6 +280,15 @@ const VisitStatsCard = () => {
     </View>
   );
 };
+
+
+export default VisitStatsCard;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -397,7 +406,7 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '500',
   },
 
@@ -423,8 +432,8 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    // rosé (#F0A99A) at 30% alpha — container opacity would fade the icon too.
-    backgroundColor: 'rgba(240, 169, 154, 0.3)',
+    // Supporting purple tint keeps the summary card legible in both modes.
+    backgroundColor: colors.primary.surface,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: spacing.md,
@@ -489,5 +498,5 @@ const styles = StyleSheet.create({
     maxWidth: 240,
   },
 });
-
-export default VisitStatsCard;
+return { colors, styles };
+});

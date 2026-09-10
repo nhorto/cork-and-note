@@ -19,14 +19,12 @@ import {
   View,
 } from 'react-native';
 import { REPORT_REASONS, wineryReportsService } from '../lib/wineryReports';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
-
-const SERIF = typography.fonts.serif;
-
 export default function ReportWineryModal({ visible, winery, directoryId = null, onClose }) {
+  const { colors, styles } = useScreenTheme();
+
   const [reason, setReason] = useState(null);
   const [details, setDetails] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -131,6 +129,11 @@ export default function ReportWineryModal({ visible, winery, directoryId = null,
   );
 }
 
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
+
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -209,4 +212,6 @@ const styles = StyleSheet.create({
   submitButton: {
     marginBottom: spacing.sm,
   },
+});
+return { colors, styles };
 });

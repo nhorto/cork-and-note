@@ -1,12 +1,13 @@
 // components/LegalDocScreen.js — renders a legal document (privacy policy /
 // terms of use) from lib/legalContent.js (#162).
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import ScreenHeader from './ScreenHeader';
 
-const { colors } = theme;
 
 export default function LegalDocScreen({ doc }) {
+  const { styles } = useScreenTheme();
+
   return (
     <View style={styles.container}>
       <ScreenHeader title={doc.title} />
@@ -28,6 +29,12 @@ export default function LegalDocScreen({ doc }) {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -52,7 +59,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 17,
     fontWeight: '600',
-    color: colors.primary.base,
+    color: colors.primary.ink,
     marginBottom: 8,
   },
   paragraph: {
@@ -61,4 +68,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.ink,
     marginBottom: 10,
   },
+});
+return { styles };
 });

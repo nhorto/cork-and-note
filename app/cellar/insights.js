@@ -22,12 +22,12 @@ import {
 import { CompositionBars, TrendBars } from '../../components/CompositionBars';
 import ScreenHeader from '../../components/ScreenHeader';
 import { getCellarInsights } from '../../lib/cellarInsights';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function CellarInsightsScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const [insights, setInsights] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -57,7 +57,7 @@ export default function CellarInsightsScreen() {
 
       {!loaded ? (
         <View style={styles.center}>
-          <ActivityIndicator color={colors.primary.base} />
+          <ActivityIndicator color={colors.primary.ink} />
         </View>
       ) : !insights || insights.isEmpty ? (
         <EmptyState onAdd={() => router.push('/cellar/add')} />
@@ -98,6 +98,8 @@ export default function CellarInsightsScreen() {
 
 // Headline numbers: total bottles + ready, with a quiet breadth line beneath.
 function Totals({ summary }) {
+  const { colors, styles } = useScreenTheme();
+
   const { totalBottles, readyToDrink, lots, producers, regions } = summary;
   const breadth = [
     `${lots} lot${lots === 1 ? '' : 's'}`,
@@ -126,6 +128,8 @@ function Totals({ summary }) {
 }
 
 function Section({ title, caption, children }) {
+  const { styles } = useScreenTheme();
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionLabel}>{title}</Text>
@@ -136,6 +140,8 @@ function Section({ title, caption, children }) {
 }
 
 function EmptyState({ onAdd }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <View style={styles.empty}>
       <Ionicons name="analytics-outline" size={40} color={colors.accent.strong} />
@@ -145,12 +151,20 @@ function EmptyState({ onAdd }) {
         vintage — plus what you&apos;ve been enjoying lately.
       </Text>
       <TouchableOpacity style={styles.emptyBtn} activeOpacity={0.9} onPress={onAdd}>
-        <Ionicons name="add" size={18} color={colors.neutral.bg} />
+        <Ionicons name="add" size={18} color={colors.onPrimary} />
         <Text style={styles.emptyBtnText}>Add a bottle</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
@@ -171,7 +185,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   totalCard: { flex: 1, alignItems: 'center' },
-  totalNum: { fontFamily: SERIF, fontSize: 34, color: colors.primary.base },
+  totalNum: { fontFamily: SERIF, fontSize: 34, color: colors.primary.ink },
   totalLabel: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginTop: 2 },
   totalDivider: { width: 1, alignSelf: 'stretch', backgroundColor: colors.neutral.border },
   breadth: {
@@ -226,5 +240,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     marginTop: spacing.lg,
   },
-  emptyBtnText: { ...typography.body.regular, color: colors.neutral.bg, fontWeight: '600' },
+  emptyBtnText: { ...typography.body.regular, color: colors.onPrimary, fontWeight: '600' },
+});
+return { colors, styles };
 });

@@ -18,12 +18,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius, shadows } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function HubMenu({ visible, onClose }) {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
 
   // Dismiss the sheet, then navigate. Closing + pushing in the same tick is fine
@@ -43,7 +43,7 @@ export default function HubMenu({ visible, onClose }) {
 
           <Action
             icon="wine"
-            color={colors.primary.base}
+            color={colors.primary.ink}
             title="Log a wine"
             subtitle="Capture a wine you tasted"
             onPress={() => go('/(tabs)/log')}
@@ -70,6 +70,8 @@ export default function HubMenu({ visible, onClose }) {
 }
 
 function Action({ icon, color, title, subtitle, onPress, last }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <TouchableOpacity
       style={[styles.item, !last && styles.itemBorder]}
@@ -77,7 +79,7 @@ function Action({ icon, color, title, subtitle, onPress, last }) {
       onPress={onPress}
     >
       <View style={[styles.itemIcon, { backgroundColor: color }]}>
-        <Ionicons name={icon} size={20} color={colors.neutral.bg} />
+        <Ionicons name={icon} size={20} color={colors.onPrimary} />
       </View>
       <View style={styles.itemText}>
         <Text style={styles.itemTitle}>{title}</Text>
@@ -87,6 +89,14 @@ function Action({ icon, color, title, subtitle, onPress, last }) {
     </TouchableOpacity>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius, shadows } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   scrim: {
@@ -148,4 +158,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
+});
+return { colors, styles };
 });

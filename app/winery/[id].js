@@ -21,13 +21,13 @@ import WineryGoogleCard from '../../components/WineryGoogleCard';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import { wineriesService } from '../../lib/wineries';
 import { wineryStatusService } from '../../lib/wineryStatus';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function WineryDetail() {
+  const { colors, styles } = useScreenTheme();
+
   // directoryId rides along only when this page was opened from a directory
   // discovery pin (map / Near You) — promotion via findOrCreateWinery doesn't
   // persist the link on the wineries row, so this param is the one moment we
@@ -169,7 +169,7 @@ export default function WineryDetail() {
           <View style={styles.heroDecoration}>
             <View style={styles.decorativeLine} />
             <View style={styles.heroIcon}>
-              <Ionicons name="wine" size={28} color={colors.primary.base} />
+              <Ionicons name="wine" size={28} color={colors.primary.ink} />
             </View>
             <View style={styles.decorativeLine} />
           </View>
@@ -206,7 +206,7 @@ export default function WineryDetail() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: colors.primary.base }]}>
-                <Ionicons name="wine" size={22} color={colors.neutral.bg} />
+                <Ionicons name="wine" size={22} color={colors.onPrimary} />
               </View>
               <Text style={styles.actionLabel}>Log visit</Text>
             </TouchableOpacity>
@@ -217,7 +217,7 @@ export default function WineryDetail() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: colors.status.visited }]}>
-                <Ionicons name="navigate" size={22} color={colors.neutral.bg} />
+                <Ionicons name="navigate" size={22} color={colors.onStatus} />
               </View>
               <Text style={styles.actionLabel}>Directions</Text>
             </TouchableOpacity>
@@ -275,6 +275,14 @@ export default function WineryDetail() {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -450,4 +458,6 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginTop: spacing.lg,
   },
+});
+return { colors, styles };
 });

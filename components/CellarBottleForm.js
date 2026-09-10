@@ -13,14 +13,12 @@ import { canonicalizeRegion, normalizeRegion, regionSuggestions } from '../lib/c
 import { usePro } from '../hooks/usePro';
 import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
 import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal, searchVarietals, varietalText } from '../lib/varietals';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import AutocompleteInput from './AutocompleteInput';
 import BottlePhotoPicker from './BottlePhotoPicker';
 import Button from './Button';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const BOTTLE_SIZES = ['375ml', '750ml', '1.5L', '3L'];
 
 // Varietal picker options (#86): the canonical grape list as autocomplete items.
@@ -123,6 +121,8 @@ export default function CellarBottleForm({
   // #53 smart default: prefill purchase date with today (add screen opts in).
   defaultPurchaseToday = false,
 }) {
+  const { colors, spacing, styles } = useScreenTheme();
+
   const { gate } = usePro();
   const [form, setForm] = useState(() =>
     initialState(initialValues, { defaultPurchaseToday })
@@ -307,7 +307,7 @@ export default function CellarBottleForm({
               accessibilityRole="button"
               accessibilityLabel="Decrease"
             >
-              <Ionicons name="remove" size={20} color={colors.primary.base} />
+              <Ionicons name="remove" size={20} color={colors.primary.ink} />
             </TouchableOpacity>
             <TextInput
               style={styles.stepValue}
@@ -322,7 +322,7 @@ export default function CellarBottleForm({
               accessibilityRole="button"
               accessibilityLabel="Increase"
             >
-              <Ionicons name="add" size={20} color={colors.primary.base} />
+              <Ionicons name="add" size={20} color={colors.primary.ink} />
             </TouchableOpacity>
           </View>
         </View>
@@ -348,7 +348,7 @@ export default function CellarBottleForm({
         <Ionicons
           name={showMore ? 'chevron-up' : 'chevron-down'}
           size={18}
-          color={colors.primary.base}
+          color={colors.primary.ink}
         />
       </TouchableOpacity>
 
@@ -428,9 +428,9 @@ export default function CellarBottleForm({
             activeOpacity={0.85}
           >
             {windowSuggesting ? (
-              <ActivityIndicator size="small" color={colors.primary.base} />
+              <ActivityIndicator size="small" color={colors.primary.ink} />
             ) : (
-              <Ionicons name="sparkles" size={16} color={colors.primary.base} />
+              <Ionicons name="sparkles" size={16} color={colors.primary.ink} />
             )}
             <Text style={styles.suggestBtnText}>
               {windowSuggesting ? 'Asking the sommelier…' : 'Suggest a window'}
@@ -454,7 +454,7 @@ export default function CellarBottleForm({
               ) : null}
               <View style={styles.proposalActions}>
                 <TouchableOpacity style={styles.proposalAccept} onPress={acceptWindow} activeOpacity={0.85}>
-                  <Ionicons name="checkmark" size={16} color={colors.neutral.bg} />
+                  <Ionicons name="checkmark" size={16} color={colors.onPrimary} />
                   <Text style={styles.proposalAcceptText}>Use it</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.proposalDismiss} onPress={() => setWindowProposal(null)} activeOpacity={0.85}>
@@ -489,10 +489,14 @@ export default function CellarBottleForm({
 }
 
 function Row({ children }) {
+  const { styles } = useScreenTheme();
+
   return <View style={styles.row}>{children}</View>;
 }
 
 function Field({ label, required, flex, multiline, style, ...props }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <View style={[styles.field, flex && styles.flex, style]}>
       <Text style={styles.label}>
@@ -509,12 +513,20 @@ function Field({ label, required, flex, multiline, style, ...props }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
+
 const styles = StyleSheet.create({
   field: { marginBottom: spacing.md },
   flex: { flex: 1 },
   row: { flexDirection: 'row', gap: spacing.md },
   label: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginBottom: spacing.xs },
-  req: { color: colors.primary.deep },
+  req: { color: colors.primary.ink },
   input: {
     backgroundColor: colors.neutral.bg,
     borderWidth: 1,
@@ -541,7 +553,7 @@ const styles = StyleSheet.create({
   },
   moreToggleText: {
     ...typography.body.regular,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
   },
   moreSection: { marginBottom: spacing.sm },
@@ -557,7 +569,7 @@ const styles = StyleSheet.create({
   },
   sizeChipActive: { backgroundColor: colors.primary.base, borderColor: colors.primary.base },
   sizeChipText: { ...typography.body.small, color: colors.neutral.inkSecondary },
-  sizeChipTextActive: { color: colors.neutral.bg },
+  sizeChipTextActive: { color: colors.onPrimary },
 
   stepper: {
     flexDirection: 'row',
@@ -591,7 +603,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent.surface,
     marginBottom: spacing.sm,
   },
-  suggestBtnText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  suggestBtnText: { ...typography.body.small, color: colors.primary.ink, fontWeight: '600' },
   suggestHint: { ...typography.body.small, color: colors.neutral.inkTertiary, marginBottom: spacing.md, marginTop: -spacing.xs },
   suggestError: { ...typography.body.small, color: colors.status.error, marginBottom: spacing.md },
 
@@ -615,12 +627,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     borderRadius: borderRadius.sm,
   },
-  proposalAcceptText: { ...typography.body.small, color: colors.neutral.bg, fontWeight: '600' },
+  proposalAcceptText: { ...typography.body.small, color: colors.onPrimary, fontWeight: '600' },
   proposalDismiss: { paddingVertical: spacing.sm, paddingHorizontal: spacing.sm },
-  proposalDismissText: { ...typography.body.small, color: colors.primary.base },
+  proposalDismissText: { ...typography.body.small, color: colors.primary.ink },
   proposalNote: { ...typography.body.small, color: colors.neutral.inkTertiary, fontStyle: 'italic', marginTop: spacing.sm },
 
   // Still used by the AI "Suggest a window" button (suggestBtn), which is not a
   // primary/secondary CTA and is intentionally left as a hand-rolled touchable.
   submitDisabled: { opacity: 0.6 },
+});
+return { colors, spacing, styles };
 });

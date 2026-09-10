@@ -9,14 +9,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 // Single source of truth for the varietal list (shared with the cellar form) —
 // see lib/varietals.js (#134).
 import { searchVarietals } from '../lib/varietals';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const AutocompleteVarietal = ({
   value,
   onChangeText,
@@ -26,6 +24,8 @@ const AutocompleteVarietal = ({
   // grape as a chip and clear the box) instead of just filling the input (#135).
   onSelect,
 }) => {
+  const { colors, styles } = useScreenTheme();
+
   const [isFocused, setIsFocused] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -90,7 +90,7 @@ const AutocompleteVarietal = ({
           onBlur={handleBlur}
           placeholder={placeholder}
           placeholderTextColor={colors.neutral.placeholder}
-          selectionColor={colors.primary.base}
+          selectionColor={colors.primary.ink}
           autoCapitalize="words"
           autoCorrect={false}
         />
@@ -129,7 +129,7 @@ const AutocompleteVarietal = ({
                 activeOpacity={0.7}
               >
                 <Text style={styles.suggestionText}>{suggestion}</Text>
-                <Ionicons name="arrow-up-outline" size={16} color={colors.primary.base} />
+                <Ionicons name="arrow-up-outline" size={16} color={colors.primary.ink} />
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -138,6 +138,15 @@ const AutocompleteVarietal = ({
     </View>
   );
 };
+
+
+export default AutocompleteVarietal;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -220,5 +229,5 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-export default AutocompleteVarietal;
+return { colors, styles };
+});

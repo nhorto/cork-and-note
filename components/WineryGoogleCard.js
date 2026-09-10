@@ -20,15 +20,17 @@ import { useEffect, useState } from 'react';
 import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { usePro } from '../hooks/usePro';
 import { placesService } from '../lib/places';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 // directoryId (optional): the winery_directory row this page was opened from
 // (only known right after a discovery pin / Near You promotion). Passed to the
 // details call so the server can write Google's businessStatus back to the
 // exact directory row (#225).
 export default function WineryGoogleCard({ winery, directoryId = null, onPlaceIdSaved }) {
+  const { colors, styles } = useScreenTheme();
+
+
   const { isPro, presentPaywall } = usePro();
   const [details, setDetails] = useState(null);
   const [hoursOpen, setHoursOpen] = useState(false);
@@ -187,6 +189,8 @@ export default function WineryGoogleCard({ winery, directoryId = null, onPlaceId
 }
 
 function LinkRow({ icon, label, onPress }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <TouchableOpacity
       style={styles.row}
@@ -203,6 +207,12 @@ function LinkRow({ icon, label, onPress }) {
     </TouchableOpacity>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   // Free-tier teaser
@@ -234,7 +244,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.6,
-    color: colors.neutral.ink,
+    color: colors.onAccent,
   },
 
   // Pro card
@@ -271,7 +281,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
   },
-  openPillText: { ...typography.body.small, color: colors.neutral.bg, fontWeight: '600' },
+  openPillText: { ...typography.body.small, color: colors.onStatus, fontWeight: '600' },
   closedPill: { backgroundColor: colors.neutral.divider },
   closedPillText: { color: colors.neutral.inkSecondary },
 
@@ -320,4 +330,6 @@ const styles = StyleSheet.create({
     paddingLeft: spacing.lg + spacing.xs,
     paddingBottom: spacing.xs,
   },
+});
+return { colors, styles };
 });

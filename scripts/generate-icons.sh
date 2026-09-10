@@ -10,7 +10,7 @@ OUT=assets/images
 magick "$SRC" -resize 1024x1024 -alpha off -strip "PNG24:$OUT/icon.png"
 
 # Keep the glass within Android's central safe circle. Extend the source
-# edges to avoid a seam against the render's subtly varied coral background.
+# edges to avoid a seam against the render's subtly varied purple background.
 magick "$SRC" -resize 720x720 -virtual-pixel Edge \
   -set option:distort:viewport 1024x1024-152-152 -distort SRT 0 \
   -alpha off -strip "PNG24:$OUT/adaptive-icon.png"

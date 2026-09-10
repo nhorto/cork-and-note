@@ -2,12 +2,10 @@
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const PinActionModal = ({
   visible,
   winery,
@@ -17,6 +15,8 @@ const PinActionModal = ({
   onRemovePin,
   onViewDetails
 }) => {
+  const { colors, styles } = useScreenTheme();
+
   if (!winery) return null;
 
   return (
@@ -44,7 +44,7 @@ const PinActionModal = ({
               <View style={styles.headerDecoration}>
                 <View style={styles.decorativeLine} />
                 <View style={styles.headerIcon}>
-                  <Ionicons name="wine" size={20} color={colors.primary.base} />
+                  <Ionicons name="wine" size={20} color={colors.primary.ink} />
                 </View>
                 <View style={styles.decorativeLine} />
               </View>
@@ -66,7 +66,7 @@ const PinActionModal = ({
                   activeOpacity={0.7}
                 >
                   <View style={[styles.iconContainer, { backgroundColor: colors.status.visited }]}>
-                    <Ionicons name="reader" size={20} color={colors.neutral.bg} />
+                    <Ionicons name="reader" size={20} color={colors.onStatus} />
                   </View>
                   <View style={styles.optionTextContainer}>
                     <Text style={styles.optionText}>View winery & your notes</Text>
@@ -82,7 +82,7 @@ const PinActionModal = ({
                 activeOpacity={0.7}
               >
                 <View style={[styles.iconContainer, { backgroundColor: colors.primary.base }]}>
-                  <Ionicons name="wine" size={20} color={colors.neutral.bg} />
+                  <Ionicons name="wine" size={20} color={colors.onPrimary} />
                 </View>
                 <View style={styles.optionTextContainer}>
                   <Text style={styles.optionText}>Log a visit here</Text>
@@ -97,7 +97,7 @@ const PinActionModal = ({
                 activeOpacity={0.7}
               >
                 <View style={[styles.iconContainer, { backgroundColor: colors.status.wishlist }]}>
-                  <Ionicons name="bookmark" size={20} color={colors.neutral.bg} />
+                  <Ionicons name="bookmark" size={20} color={colors.onStatus} />
                 </View>
                 <View style={styles.optionTextContainer}>
                   <Text style={styles.optionText}>Add to wishlist</Text>
@@ -132,6 +132,15 @@ const PinActionModal = ({
     </Modal>
   );
 };
+
+
+export default PinActionModal;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -251,5 +260,5 @@ const styles = StyleSheet.create({
     color: colors.status.error,
   },
 });
-
-export default PinActionModal;
+return { colors, styles };
+});

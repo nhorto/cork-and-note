@@ -4,9 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { wishlistService } from '../lib/wishlist';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 const WineryActionButtons = ({
   winery,
@@ -14,6 +13,8 @@ const WineryActionButtons = ({
   onStatusChange = () => {},
   compact = false
 }) => {
+  const { colors, styles } = useScreenTheme();
+
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState({
     isWantToVisit: false
@@ -124,7 +125,7 @@ const WineryActionButtons = ({
           <Ionicons
             name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}
             size={24}
-            color={status.isWantToVisit ? colors.neutral.bg : colors.primary.base}
+            color={status.isWantToVisit ? colors.onPrimary : colors.primary.ink}
           />
         </TouchableOpacity>
       </View>
@@ -147,7 +148,7 @@ const WineryActionButtons = ({
         <Ionicons
           name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}
           size={isVeryNarrowScreen ? 20 : 24}
-          color={status.isWantToVisit ? colors.neutral.bg : colors.primary.base}
+          color={status.isWantToVisit ? colors.onPrimary : colors.primary.ink}
         />
         <Text
           style={[
@@ -161,6 +162,13 @@ const WineryActionButtons = ({
     </View>
   );
 };
+
+
+export default WineryActionButtons;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -213,13 +221,13 @@ const styles = StyleSheet.create({
     marginLeft: spacing.sm,
     ...typography.body.regular,
     fontWeight: '500',
-    color: colors.primary.base,
+    color: colors.primary.ink,
     textAlign: 'center',
     flexShrink: 1,
   },
   activeButtonText: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
   },
 });
-
-export default WineryActionButtons;
+return { colors, styles };
+});
