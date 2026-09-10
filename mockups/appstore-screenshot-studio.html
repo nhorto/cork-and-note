@@ -592,8 +592,8 @@
           <h2>00 / Ready-made set</h2>
           <div class="readymade">
             <p id="readymadeHint">
-              A finished seven-image Royal Velvet set with real app captures
-              from the demo account — load it, tweak anything, and export.
+              A finished six-image Royal Velvet set with real app captures from
+              the demo account — load it, tweak anything, and export.
             </p>
             <button id="loadPrebuilt" class="gold-button">
               Load the ready-made set
@@ -608,10 +608,10 @@
           <label>Collection template</label>
           <div class="templates" id="templates"></div>
           <p class="hint">
-            Four compositions in the Royal Velvet palette from theme PR #232:
+            Five compositions in the Royal Velvet palette from theme PR #232:
             ivory with purple &amp; gold, deep Purple After Dark, bold royal
-            purple, and a clean gallery. Your copy and uploaded screenshots stay
-            with their slides.
+            purple, an ivory→purple duotone, and a clean gallery. Your copy and
+            uploaded screenshots stay with their slides.
           </p>
           <details class="controls">
             <summary>Brand &amp; color</summary>
@@ -961,7 +961,7 @@
         velvet: {
           name: "Royal Velvet · Ivory",
           bg: "#FAF8F4",
-          bg2: "#EEE6F7",
+          bg2: "#E4D5F1",
           accent: "#D6B45D",
           ink: "#2E2438",
           highlight: "#54258A",
@@ -994,6 +994,18 @@
           align: "center",
           pattern: ["hero", "straight", "tilt", "straight", "hero", "tilt"],
         },
+        duotone: {
+          name: "Velvet Duotone · Ivory→Purple",
+          bg: "#FAF8F4",
+          bg2: "#5E2F96",
+          accent: "#D6B45D",
+          ink: "#2E2438",
+          highlight: "#54258A",
+          font: "Georgia",
+          decor: "glow",
+          align: "left",
+          pattern: ["hero", "tilt", "straight", "bridge", "straight", "tilt"],
+        },
         gallery: {
           name: "Ivory Gallery · Clean",
           bg: "#FAF8F4",
@@ -1011,25 +1023,31 @@
         [
           "YOUR WINE JOURNAL",
           "Remember every wine\n*you love*.",
-          "Your visits, tastings, and cellar — one beautiful journal.",
+          "Your visits, tastings, and bottles — one beautiful journal.",
           "Show a populated home screen with the Journey card, ready-to-drink counts, and cellar summary. Choose a screen that makes the app’s purpose clear at a glance.",
         ],
         [
-          "AI SOMMELIER",
-          "Ask anything.\n*Sip smarter.*",
-          "Wine questions in plain words, answered by your personal sommelier.",
-          "Capture the Sommelier tab with Tonight’s Pick, or a real, useful exchange with the keyboard dismissed.",
+          "LOG IT YOUR WAY",
+          "Your taste,\n*your words*.",
+          "Stars, sweetness, tannins, flavor notes — as quick or as deep as you like.",
+          "Show the log form filled in: stars set, a short note, and the detailed-ratings bars expanded with values. Pair with the saved wine detail for a two-phone slide.",
         ],
         [
-          "SCAN A LABEL",
-          "Snap the label.\n*We fill it in.*",
-          "Scan a bottle and check the details before you save.",
-          "Show the Add wine form with the label-scan card visible, or a successfully scanned wine in the real form.",
+          "AI SOMMELIER",
+          "A sommelier that\n*learns your palate*.",
+          "Ask anything — the answers are built on what you’ve tasted and loved.",
+          "Capture a real exchange where the answer references the user’s own tastings, with the keyboard dismissed.",
+        ],
+        [
+          "EXPLORE WINERIES",
+          "Find your\n*next favorite*.",
+          "Wineries near you on the map — tap one and log your tasting right there.",
+          "Show the winery map with several labeled pins near a real location, paired with a winery detail page showing the Log visit action.",
         ],
         [
           "YOUR TASTINGS",
-          "Your taste,\n*in your words*.",
-          "Ratings, flavor notes, and the details that matter to you.",
+          "Never forget\n*that bottle*.",
+          "Every rating and note you’ve made, one search away.",
           "Show the tastings list with several rated wines, or a saved wine detail with a rating and short personal note.",
         ],
         [
@@ -1037,12 +1055,6 @@
           "Know what’s *ready*\nto open tonight.",
           "Every bottle at home, from too young to past peak.",
           "Show a populated cellar with readiness badges and readable names and quantities.",
-        ],
-        [
-          "WINERY PASSPORT",
-          "Your winery\n*passport*.",
-          "Every visit and the wines you tried there, together.",
-          "Show a real saved winery with its visited badge and details. Capture the app’s visit details rather than an empty map.",
         ],
       ];
       const clone = (x) => JSON.parse(JSON.stringify(x));
@@ -1168,8 +1180,8 @@
         if (type === "bridge")
           Object.assign(d, { x: 84, y: 67, scale: 112, rotation: -13 });
         if (type === "duo") {
-          Object.assign(d, { x: 40, y: 61, scale: 86, rotation: -8 });
-          Object.assign(e, { x: 70, y: 76, scale: 76, rotation: 10 });
+          Object.assign(d, { x: 38, y: 60, scale: 88, rotation: -8 });
+          Object.assign(e, { x: 68, y: 74, scale: 80, rotation: 9 });
         }
       }
       function applyTheme(key, save = true) {
@@ -1186,8 +1198,11 @@
         project.font = t.font;
         project.decor = t.decor;
         project.slides.forEach((s, i) => {
-          s.textPosition = "top";
           s.align = t.align;
+          // Slides that already hold screenshots keep their curated
+          // composition — switching templates only restyles them.
+          if (s.devices.some((d) => d.image)) return;
+          s.textPosition = "top";
           s.textSize = t.align === "center" ? 9.3 : 9;
           arrange(s, t.pattern[i % t.pattern.length]);
         });
@@ -1363,7 +1378,10 @@
       }
       function background(ctx, index, W, H) {
         const grad = ctx.createLinearGradient(0, 0, 0, H);
+        // Hold the top color through the text zone, then blend — keeps
+        // headlines on a calm field even with a strong bottom color.
         grad.addColorStop(0, project.colors.background);
+        grad.addColorStop(0.3, project.colors.background);
         grad.addColorStop(1, project.colors.background2);
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, W, H);
@@ -1555,12 +1573,14 @@
       function parseHeadline(text) {
         return text.split("\n").map((line) => {
           const words = [];
-          const re = /\*([^*]*)\*|([^*]+)/g;
+          // Third alternative: a lone "*" (unclosed span) stays literal text
+          // instead of being dropped.
+          const re = /\*([^*]*)\*|([^*]+)|\*/g;
           let m;
           let prevEndedWithSpace = true;
           while ((m = re.exec(line))) {
             const hl = m[1] !== undefined;
-            const chunk = hl ? m[1] : m[2];
+            const chunk = hl ? m[1] : (m[2] ?? "*");
             // Punctuation straight after a *span* (e.g. "*you love*.") sticks
             // to the previous word instead of becoming " ." on its own.
             const glue =
@@ -2468,70 +2488,94 @@
       /*PREBUILT:START*/
       const PREBUILT_IMAGES = {};
       /*PREBUILT:END*/
+      // Slide order follows the marketing pillars (owner, 2026-09-10):
+      // 1 remember/journal · 2 log ratings & notes · 3 sommelier that learns
+      // your palate · 4 explore wineries & log there · 5 find it again ·
+      // 6 cellar. No dark-mode slide.
       const PREBUILT_SET = [
         {
-          key: "1-home",
+          key: "home",
           layout: "hero",
           eyebrow: "YOUR WINE JOURNAL",
           headline: "Remember every wine\n*you love*.",
           subtitle:
-            "Your visits, tastings, and cellar — one beautiful journal.",
+            "Your visits, tastings, and bottles — one beautiful journal.",
           capture:
-            "Home screen with the Journey card, Near You, ready-to-drink counts, and cellar summary.",
+            "Home screen with the Journey card, Near You wineries, ready-to-drink counts, and cellar summary.",
         },
         {
-          key: "4-sommelier",
+          key: "wine-detail",
+          key2: "log-form-filled",
+          layout: "duo",
+          eyebrow: "LOG IT YOUR WAY",
+          headline: "Your taste,\n*your words*.",
+          subtitle:
+            "Stars, sweetness, tannins, flavor notes — as quick or as deep as you like.",
+          capture:
+            "Filled log form (4.5 stars, notes, sweetness/tannin bars) with the saved wine detail behind it.",
+        },
+        {
+          key: "sommelier-ask",
           layout: "tilt",
           eyebrow: "AI SOMMELIER",
-          headline: "Ask anything.\n*Sip smarter.*",
+          headline: "A sommelier that\n*learns your palate*.",
           subtitle:
-            "Wine questions in plain words, answered by your personal sommelier.",
+            "Ask anything — the answers are built on what you’ve tasted and loved.",
           capture:
-            "Sommelier tab with Tonight’s Pick and a recent conversation.",
+            "A real sommelier answer referencing the user’s own 5/5 Petit Manseng and home wineries.",
         },
         {
-          key: "2-log",
-          layout: "straight",
-          eyebrow: "SCAN A LABEL",
-          headline: "Snap the label.\n*We fill it in.*",
-          subtitle: "Scan a bottle and check the details before you save.",
-          capture: "Add wine form with the label-scan card at the top.",
+          key: "map",
+          key2: "winery",
+          layout: "duo",
+          eyebrow: "EXPLORE WINERIES",
+          headline: "Find your\n*next favorite*.",
+          subtitle:
+            "Wineries near you on the map — tap one and log your tasting right there.",
+          capture:
+            "Winery map around Delaplane VA with visited pins, and the Barrel Oak detail page behind it.",
         },
         {
-          key: "6-journal",
+          key: "tastings",
           layout: "bridge",
           eyebrow: "YOUR TASTINGS",
-          headline: "Your taste,\n*in your words*.",
-          subtitle: "Ratings, flavor notes, and the details that matter.",
+          headline: "Never forget\n*that bottle*.",
+          subtitle: "Every rating and note you’ve made, one search away.",
           capture: "Your tastings list with several rated wines.",
         },
         {
-          key: "5-cellar",
+          key: "cellar",
           layout: "straight",
           eyebrow: "WINE CELLAR",
           headline: "Know what’s *ready*\nto open tonight.",
           subtitle: "Every bottle at home, from too young to past peak.",
-          capture: "Cellar with readiness filters, Tonight’s Pick, and status badges.",
-        },
-        {
-          key: "3-winery",
-          layout: "tilt",
-          eyebrow: "WINERY PASSPORT",
-          headline: "Your winery\n*passport*.",
-          subtitle: "Every visit and the wines you tried there, together.",
-          capture: "Barrel Oak Winery detail with its visited badge and info card.",
-        },
-        {
-          key: "8-dark-home",
-          layout: "hero",
-          eyebrow: "PURPLE AFTER DARK",
-          headline: "Beautiful,\n*after dark*.",
-          subtitle: "A full dark mode for late-night pours.",
-          capture: "Home screen in Purple After Dark.",
+          capture:
+            "Cellar with readiness filters, Tonight’s Pick, and status badges.",
         },
       ];
       function prebuiltProject() {
         const base = initial();
+        // Ships in the Velvet Duotone treatment; switching templates on the
+        // loaded set restyles without disturbing the curated layouts.
+        const t = THEMES.duotone;
+        base.theme = "duotone";
+        base.colors = {
+          background: t.bg,
+          background2: t.bg2,
+          accent: t.accent,
+          ink: t.ink,
+          highlight: t.highlight,
+        };
+        base.font = t.font;
+        base.decor = t.decor;
+        const asset = (key) => ({
+          id: "prebuilt-" + key,
+          name: key + ".jpg",
+          data: PREBUILT_IMAGES[key],
+          width: 1,
+          height: 1,
+          family: "iphone",
+        });
         return {
           ...base,
           slides: PREBUILT_SET.map((entry) => {
@@ -2542,14 +2586,8 @@
             s.capture = entry.capture;
             arrange(s, entry.layout);
             s.textSize = 9;
-            s.devices[0].image = {
-              id: "prebuilt",
-              name: entry.key + ".jpg",
-              data: PREBUILT_IMAGES[entry.key],
-              width: 1,
-              height: 1,
-              family: "iphone",
-            };
+            s.devices[0].image = asset(entry.key);
+            if (entry.key2) s.devices[1].image = asset(entry.key2);
             return s;
           }),
         };
