@@ -20,6 +20,13 @@ import theme from '../../styles/theme';
 const { colors, typography, spacing, shadows, borderRadius } = theme;
 const SERIF = typography.fonts.serif;
 
+// One identity per map feature, shared by the render keys, the stable sort,
+// and the two-phase commit below.
+const featureKey = (f) =>
+  f.properties.cluster
+    ? `cluster-${f.properties.cluster_id}`
+    : `${f.properties.kind}-${f.properties.pin.id}`;
+
 export default function MapScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -189,6 +196,22 @@ export default function MapScreen() {
   const zoom = regionToZoom(region);
   const showLabels = zoom >= 11.5;
 
+  // Marker keys must stay STABLE across the label threshold. Remounting every
+  // marker at once (key churn) piles remove+insert pairs onto the cluster
+  // expansion mutation and crashes AIRMap's insertReactSubview on the new
+  // architecture (the "clustering crash" of old). Instead, when label
+  // visibility flips, briefly turn tracksViewChanges on so iOS re-snapshots
+  // the existing markers with/without their label, then freeze them again.
+  const [labelPulse, setLabelPulse] = useState(false);
+  const prevShowLabels = useRef(showLabels);
+  useEffect(() => {
+    if (prevShowLabels.current === showLabels) return;
+    prevShowLabels.current = showLabels;
+    setLabelPulse(true);
+    const t = setTimeout(() => setLabelPulse(false), 700);
+    return () => clearTimeout(t);
+  }, [showLabels]);
+
   const visibleUserPins = useMemo(
     () =>
       userPins
@@ -221,8 +244,32 @@ export default function MapScreen() {
 
   const mapFeatures = useMemo(() => {
     const { west, south, east, north } = regionToBoundingBox(region, 0.2);
-    return clusterIndex.getClusters([west, south, east, north], Math.round(zoom));
+    const features = clusterIndex.getClusters([west, south, east, north], Math.round(zoom));
+    // Deterministic order: supercluster returns features in arbitrary order,
+    // and letting React reorder dozens of Marker children stresses the
+    // new-arch interop layer's child-index bookkeeping (the AIRMap
+    // insertReactSubview crash). A stable sort turns reorders into plain
+    // inserts/removes.
+    return features.sort((a, b) => featureKey(a).localeCompare(featureKey(b)));
   }, [clusterIndex, region, zoom]);
+
+  // Two-phase marker commit: a cluster expansion swaps dozens of markers at
+  // once, and a single mount transaction that mixes removes with inserts
+  // desyncs the new-arch interop's child indices from AIRMap's own subview
+  // array (NSRangeException in insertReactSubview — this exact tap crashed
+  // the app in verification). So each change lands as two React commits:
+  // first drop the markers that vanished (removes only, survivors keep their
+  // order), then mount the new set on the next frame (inserts only).
+  const [renderedFeatures, setRenderedFeatures] = useState([]);
+  useEffect(() => {
+    const nextKeys = new Set(mapFeatures.map(featureKey));
+    setRenderedFeatures((prev) => {
+      const kept = prev.filter((f) => nextKeys.has(featureKey(f)));
+      return kept.length === prev.length ? prev : kept;
+    });
+    const id = requestAnimationFrame(() => setRenderedFeatures(mapFeatures));
+    return () => cancelAnimationFrame(id);
+  }, [mapFeatures]);
 
   // Tapping a bubble zooms to just past the level where it breaks apart.
   const handleClusterPress = (cluster) => {
@@ -488,17 +535,14 @@ export default function MapScreen() {
       );
     }
 
-    // showLabels in the key: with tracksViewChanges off the marker is a
-    // one-time snapshot, so crossing the label zoom threshold has to remount
-    // the marker for the label to actually appear/disappear.
     return (
       <Marker
-        key={`${pin.id}-${showLabels ? 'lbl' : 'dot'}`}
+        key={pin.id}
         coordinate={{
           latitude: pin.latitude,
           longitude: pin.longitude
         }}
-        tracksViewChanges={false}
+        tracksViewChanges={labelPulse}
         onPress={() => handlePinPress(pin)}
       >
         <View style={styles.markerContainer}>
@@ -535,9 +579,9 @@ export default function MapScreen() {
       />
     ) : (
       <Marker
-        key={`dir-${w.id}-${showLabels ? 'lbl' : 'dot'}`}
+        key={`dir-${w.id}`}
         coordinate={{ latitude: w.latitude, longitude: w.longitude }}
-        tracksViewChanges={false}
+        tracksViewChanges={labelPulse}
         onPress={() => handleDiscoverPinPress(w)}
       >
         <View style={styles.markerContainer}>
@@ -601,7 +645,7 @@ export default function MapScreen() {
       >
         {/* User + discovery pins, clustered (#224): overlapping pins collapse
             into count bubbles until you zoom in; tap a bubble to expand. */}
-        {mapFeatures.map((f) =>
+        {renderedFeatures.map((f) =>
           f.properties.cluster
             ? renderClusterMarker(f)
             : f.properties.kind === 'discover'
