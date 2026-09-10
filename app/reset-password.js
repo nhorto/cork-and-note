@@ -25,30 +25,11 @@ import {
   View,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
+import { establishPasswordRecovery } from '../lib/passwordRecovery';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
 
 const SERIF = Platform.OS === 'ios' ? 'Georgia' : 'serif';
-
-// Pull recovery credentials out of the deep link. Implicit-flow links carry
-// `#access_token=…&refresh_token=…&type=recovery`; PKCE links carry `?code=…`.
-function parseRecoveryParams(url) {
-  if (!url) return null;
-  try {
-    const fragment = url.split('#')[1];
-    if (fragment) {
-      const params = new URLSearchParams(fragment);
-      const access_token = params.get('access_token');
-      const refresh_token = params.get('refresh_token');
-      if (access_token && refresh_token) return { access_token, refresh_token };
-    }
-    const { queryParams } = Linking.parse(url);
-    if (queryParams?.code) return { code: String(queryParams.code) };
-  } catch {
-    // fall through — treated as "no credentials in this URL"
-  }
-  return null;
-}
 
 export default function ResetPasswordScreen() {
   const { colors, styles } = useScreenTheme();
@@ -64,36 +45,25 @@ export default function ResetPasswordScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState(null);
-  const exchangedRef = useRef(false);
+  const exchangeRef = useRef(null);
 
   useEffect(() => {
     let active = true;
 
     const establishRecoverySession = async () => {
-      // Already signed in (e.g. supabase handled the PASSWORD_RECOVERY event,
-      // or the exchange ran for a previous URL value) → straight to the form.
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!active) return;
-      if (session) {
-        setStatus('ready');
-        return;
+      try {
+        const recoveryUrl = url ?? await Linking.getInitialURL();
+        if (!active) return;
+        setStatus('checking');
+        // Reuse the exchange if the hook re-renders with the same one-time link.
+        if (!exchangeRef.current || exchangeRef.current.url !== recoveryUrl) {
+          exchangeRef.current = { url: recoveryUrl, promise: establishPasswordRecovery(recoveryUrl, supabase.auth) };
+        }
+        await exchangeRef.current.promise;
+        if (active) setStatus('ready');
+      } catch {
+        if (active) setStatus('invalid');
       }
-
-      const creds = parseRecoveryParams(url);
-      if (!creds) {
-        // No usable credentials in the link and no session — expired or malformed.
-        if (url !== null) setStatus('invalid');
-        return;
-      }
-      if (exchangedRef.current) return;
-      exchangedRef.current = true;
-
-      const { error } = creds.code
-        ? await supabase.auth.exchangeCodeForSession(creds.code)
-        : await supabase.auth.setSession(creds);
-
-      if (!active) return;
-      setStatus(error ? 'invalid' : 'ready');
     };
 
     establishRecoverySession();

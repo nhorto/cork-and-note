@@ -5,6 +5,7 @@ import { useContext, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -173,6 +174,7 @@ export default function RegisterScreen() {
           <Ionicons name="arrow-back" size={24} color={colors.neutral.ink} />
         </TouchableOpacity>
 
+        <Image source={require('../assets/images/cork_and_note_logo.png')} style={styles.brandMark} resizeMode="contain" accessibilityLabel="Cork & Note" />
         <Text style={styles.title}>Create account</Text>
         <Text style={styles.subtitle}>Join Cork &amp; Note to track your wine adventures</Text>
 
@@ -340,6 +342,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  brandMark: { width: 80, height: 80, alignSelf: 'center', marginBottom: 12 },
   title: {
     fontFamily: SERIF,
     fontSize: 26,

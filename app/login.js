@@ -68,6 +68,7 @@ export default function LoginScreen() {
               source={require('../assets/images/cork_and_note_logo.png')}
               style={styles.logoImage}
               resizeMode="contain"
+              accessibilityLabel="Cork & Note"
             />
           </View>
           <Text style={styles.appName}>Welcome to Cork &amp; Note</Text>
