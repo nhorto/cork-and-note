@@ -170,7 +170,10 @@ function AppRoot() {
 
     if (isAuthenticated && (inAuthFlow || onIndexPage)) {
       // Authenticated but on an auth screen or the index page → main app.
-      router.replace('/(tabs)/home');
+      // A session that appears while still on the register screen is a fresh
+      // sign-up: those get the Free/Pro choice first (owner ask 2026-09-10),
+      // everyone else lands on Home.
+      router.replace(segments[0] === 'register' ? '/choose-plan' : '/(tabs)/home');
     } else if (!isAuthenticated && !inAuthFlow) {
       // Not authenticated and outside the auth flow (incl. index) → login.
       router.replace('/login');
@@ -396,6 +399,7 @@ function AppRoot() {
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="login" />
                 <Stack.Screen name="register" />
+                <Stack.Screen name="choose-plan" />
                 <Stack.Screen name="forgot-password" />
                 <Stack.Screen name="reset-password" />
                 <Stack.Screen name="profile/account-settings" />

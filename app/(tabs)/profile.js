@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import ProUpsellCard from '../../components/ProUpsellCard';
 import VisitStatsCard from '../../components/VisitStatsCard';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
@@ -105,6 +106,16 @@ export default function ProfileScreen() {
             <View style={styles.dividerDiamond} />
             <View style={styles.dividerLine} />
           </View>
+        </View>
+
+        {/* Standing upgrade entry (owner ask 2026-09-10) — Pro used to be
+            findable here only inside Account Settings. Renders nothing for
+            Pro subscribers. */}
+        <View style={styles.upsellContainer}>
+          <ProUpsellCard
+            title="Cork & Note Pro"
+            subtitle="Unlimited sommelier, scans & cellar"
+          />
         </View>
 
         {/* Visit Stats */}
@@ -459,6 +470,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent.base,
     transform: [{ rotate: '45deg' }],
     marginHorizontal: spacing.sm,
+  },
+
+  // Pro upsell
+  upsellContainer: {
+    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
 
   // Stats Container
