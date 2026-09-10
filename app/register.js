@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PRIVACY_URL, TERMS_URL } from '../lib/pro';
 import { createThemedStyles } from '../styles/ThemeProvider';
 import { AuthContext } from './_layout';
@@ -24,7 +25,8 @@ export default function RegisterScreen() {
   const { colors, styles } = useScreenTheme();
 
   const router = useRouter();
-  const { signUp } = useContext(AuthContext);
+  const insets = useSafeAreaInsets();
+  const { signUp, signIn } = useContext(AuthContext);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -94,50 +96,57 @@ export default function RegisterScreen() {
       return;
     }
 
+    // Keyboards and password managers happily hand us " Nick@Example.com ".
+    // Supabase stores addresses lower-cased, and a stray space is rejected
+    // outright — normalise once here so the account is created under the same
+    // address the user will later type on the login screen.
+    const cleanEmail = email.trim().toLowerCase();
+
     setIsLoading(true);
 
+    const alreadyExists = () =>
+      Alert.alert(
+        'Account Already Exists',
+        'An account with this email already exists. Would you like to sign in instead?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign In', onPress: () => router.replace('/login') }
+        ]
+      );
+
     try {
-      const { error, data } = await signUp(email, password, name);
+      const { error, data } = await signUp(cleanEmail, password, name);
 
       if (error) {
         if (error.message.includes('User already registered')) {
-          Alert.alert(
-            'Account Already Exists',
-            'An account with this email already exists. Would you like to sign in instead?',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Sign In', onPress: () => router.replace('/login') }
-            ]
-          );
+          alreadyExists();
         } else {
           Alert.alert('Error', error.message);
         }
+      } else if (data?.user && (data.user.identities?.length ?? 0) === 0) {
+        // When email confirmation is enabled, Supabase returns NO error for an
+        // address that is already registered — the giveaway is an empty
+        // identities array on the returned user.
+        alreadyExists();
+      } else if (data?.session && data?.user) {
+        // Signed straight in — AuthContext + the navigation guard take it from here.
       } else {
-          // With email confirmation enabled, Supabase returns NO error when the
-          // email is already registered — the giveaway is an empty identities
-          // array on the returned user.
-          if (data?.user && (data.user.identities?.length ?? 0) === 0) {
-            Alert.alert(
-              'Account Already Exists',
-              'An account with this email already exists. Would you like to sign in instead?',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Sign In', onPress: () => router.replace('/login') }
-              ]
-            );
-          } else if (data.session && data.user) {
-            // AuthContext + index.js handle navigation automatically.
-          } else {
-            // If for some reason they need to confirm email or sign in manually
-            Alert.alert(
-              'Account Created!',
-              'Your account has been successfully created. You can now sign in.',
-              [
-                { text: 'OK', onPress: () => router.replace('/login') }
-              ]
-            );
-          }
+        // No session came back, so this project still requires email
+        // confirmation. Try to sign in anyway: if the account is usable the
+        // user lands in the app instead of being bounced to the login screen
+        // to retype what they just typed.
+        const { error: signInError } = await signIn(cleanEmail, password);
+        if (signInError) {
+          Alert.alert(
+            'Confirm your email',
+            'Your account has been created. Check your inbox for a confirmation link, then sign in.',
+            [
+              { text: 'OK', onPress: () => router.replace('/login') }
+            ]
+          );
         }
+        // On success the navigation guard moves them into the app.
+      }
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
@@ -155,7 +164,7 @@ export default function RegisterScreen() {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={[styles.backButton, { top: insets.top + 4 }]}
           onPress={() => router.back()}
           accessibilityRole="button"
           accessibilityLabel="Go back"
@@ -320,11 +329,16 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   backButton: {
+    // `top` is applied inline from the safe-area inset: hardcoded, it sat
+    // underneath the status bar / notch and could not be tapped at all.
     position: 'absolute',
-    top: 20,
-    left: 20,
+    left: spacing.md,
     zIndex: 10,
-    padding: 8,
+    // 44pt minimum touch target (launch plan §3.3)
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: {
     fontFamily: SERIF,

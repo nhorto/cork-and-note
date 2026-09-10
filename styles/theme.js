@@ -10,7 +10,9 @@ const lightColors = {
   status: { visited: '#55745E', wishlist: '#596F8B', success: '#55745E', error: '#AD354F', drinkSoon: '#806124', unknown: '#746779' },
   onPrimary: '#FFFFFF', onAccent: '#2E2438', onStatus: '#FFFFFF', onPhoto: '#FFFFFF', shadow: '#21152E',
   journey: { bg: '#54258A', ink: '#FFFFFF', secondary: '#E6D7F4', accent: '#D6B45D', border: '#78509D' },
-  overlay: { light: 'rgba(250,248,244,0.95)', scrim: 'rgba(46,36,56,0.25)', dark: 'rgba(25,19,33,0.65)', photo: 'rgba(0,0,0,0.95)', onImage: 'rgba(255,255,255,0.2)' },
+  // Standard cards and sheets stay over the live screen without washing it in
+  // gray. Photo-specific overlays retain their dark treatment for legibility.
+  overlay: { light: 'rgba(250,248,244,0.95)', scrim: 'transparent', dark: 'rgba(25,19,33,0.65)', photo: 'rgba(0,0,0,0.95)', onImage: 'rgba(255,255,255,0.2)' },
 };
 const darkColors = {
   primary: { base: '#64399B', deep: '#542B86', darkest: '#32165E', soft: '#BDA0DA', ink: '#C9A7F1', surface: '#362643' },
@@ -19,7 +21,7 @@ const darkColors = {
   status: { visited: '#90B49A', wishlist: '#A8B8D4', success: '#90B49A', error: '#F090A5', drinkSoon: '#E0BE6C', unknown: '#B9A9C8' },
   onPrimary: '#FFFFFF', onAccent: '#2E2438', onStatus: '#191321', onPhoto: '#FFFFFF', shadow: '#000000',
   journey: { bg: '#64399B', ink: '#FFFFFF', secondary: '#EBDEF7', accent: '#E0BE6C', border: '#9874BE' },
-  overlay: { light: 'rgba(25,19,33,0.95)', scrim: 'rgba(9,5,15,0.65)', dark: 'rgba(9,5,15,0.72)', photo: 'rgba(0,0,0,0.95)', onImage: 'rgba(255,255,255,0.2)' },
+  overlay: { light: 'rgba(25,19,33,0.95)', scrim: 'transparent', dark: 'rgba(9,5,15,0.72)', photo: 'rgba(0,0,0,0.95)', onImage: 'rgba(255,255,255,0.2)' },
 };
 
 export const typography = {

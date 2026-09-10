@@ -1,0 +1,2809 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cork &amp; Note · Screenshot Studio</title>
+    <style>
+      :root {
+        --paper: #faf8f4;
+        --panel: #ffffff;
+        --ink: #2e2438;
+        --muted: #5e506a;
+        --line: #e6dff0;
+        --purple: #54258a;
+        --purple-deep: #421b70;
+        --soft: #eee6f7;
+        --gold: #d6b45d;
+        --gold-ink: #806124;
+        --green: #55745e;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          14px -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+      button,
+      .file-button {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        color: var(--ink);
+        border-radius: 8px;
+        padding: 9px 12px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 12px;
+      }
+      button:hover,
+      .file-button:hover {
+        background: var(--soft);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .primary {
+        background: var(--purple);
+        color: white;
+        border-color: var(--purple);
+      }
+      .primary:hover {
+        background: var(--purple-deep);
+      }
+      .gold-button {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: #2e2438;
+      }
+      .gold-button:hover {
+        background: #c5a34c;
+      }
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible,
+      textarea:focus-visible,
+      select:focus-visible {
+        outline: 3px solid var(--gold-ink);
+        outline-offset: 3px;
+      }
+      a {
+        color: var(--purple);
+      }
+      header {
+        min-height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px 25px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .monogram {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        border: 0;
+        border-radius: 10px;
+        object-fit: contain;
+      }
+      h1 {
+        font: 600 19px Georgia;
+        margin: 0 0 5px;
+      }
+      .eyebrow {
+        text-transform: uppercase;
+        letter-spacing: 1.9px;
+        font-size: 10px;
+        color: var(--gold-ink);
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex-wrap: wrap;
+      }
+      .save-state {
+        font-size: 11px;
+        color: var(--muted);
+        max-width: 180px;
+      }
+      .app {
+        display: grid;
+        grid-template-columns: 310px minmax(0, 1fr);
+        height: calc(100vh - 82px);
+      }
+      aside {
+        overflow: auto;
+        background: var(--panel);
+        border-right: 1px solid var(--line);
+        padding: 20px;
+      }
+      main {
+        overflow: auto;
+        min-width: 0;
+        padding: 26px 28px 50px;
+      }
+      h2 {
+        font-size: 12px;
+        margin: 0 0 14px;
+      }
+      h3 {
+        font-size: 13px;
+        margin: 0 0 8px;
+      }
+      .section {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        margin: 12px 0 6px;
+      }
+      input[type="text"],
+      input[type="number"],
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 9px;
+        background: white;
+        color: var(--ink);
+        font-size: 12px;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 62px;
+        line-height: 1.5;
+      }
+      input[type="range"] {
+        width: 100%;
+        accent-color: var(--purple);
+      }
+      input[type="color"] {
+        width: 100%;
+        height: 32px;
+        border: 1px solid var(--line);
+        background: transparent;
+        border-radius: 6px;
+        padding: 3px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .hint {
+        font-size: 11px;
+        line-height: 1.65;
+        color: var(--muted);
+        margin: 8px 0 0;
+      }
+      .templates {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+      }
+      .template {
+        text-align: left;
+        padding: 8px;
+      }
+      .template.active {
+        border-color: var(--purple);
+        box-shadow: 0 0 0 1px var(--purple);
+      }
+      .swatch {
+        height: 34px;
+        display: flex;
+        gap: 4px;
+        align-items: flex-end;
+        justify-content: center;
+        border-radius: 5px;
+        margin-bottom: 7px;
+        overflow: hidden;
+      }
+      .swatch i {
+        width: 16px;
+        height: 25px;
+        border: 2px solid currentColor;
+        border-radius: 4px;
+        background: #faf8f4;
+      }
+      .swatch i:nth-child(2) {
+        transform: translateY(6px) rotate(12deg);
+      }
+      .editor-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .slide-tabs {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+      }
+      .slide-tabs button {
+        padding: 7px 10px;
+      }
+      .slide-tabs button.active,
+      .segmented button.active {
+        background: var(--purple);
+        color: white;
+        border-color: var(--purple);
+      }
+      .segmented {
+        display: flex;
+        gap: 5px;
+        margin: 10px 0;
+      }
+      .segmented button {
+        flex: 1;
+      }
+      .upload {
+        position: relative;
+        display: block;
+        text-align: center;
+        border: 1px dashed #b3a3c6;
+        border-radius: 8px;
+        padding: 14px 8px;
+        background: #f6f2fb;
+        color: var(--purple);
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .upload.drag {
+        background: var(--soft);
+        border-color: var(--purple);
+      }
+      .upload input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+      }
+      .file-button {
+        display: inline-block;
+        margin: 0;
+      }
+      .sr-file {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        opacity: 0;
+      }
+      .intro {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        align-items: flex-start;
+        margin-bottom: 22px;
+      }
+      .intro h2 {
+        font: 30px Georgia;
+        margin: 7px 0 10px;
+      }
+      .intro p {
+        font-size: 13px;
+        color: var(--muted);
+        max-width: 620px;
+        line-height: 1.7;
+        margin: 0;
+      }
+      .badge {
+        display: inline-block;
+        padding: 6px 9px;
+        border: 1px solid #cbd7ca;
+        border-radius: 20px;
+        color: var(--green);
+        font-size: 10px;
+        white-space: nowrap;
+      }
+      .toolbar {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+      }
+      .toolbar label {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+      }
+      .toolbar input {
+        width: 85px;
+      }
+      .viewport {
+        overflow: auto;
+        padding: 5px 4px 14px;
+      }
+      .gallery {
+        display: flex;
+        gap: 14px;
+        width: max-content;
+        align-items: flex-start;
+      }
+      .gallery.connected {
+        gap: 0;
+      }
+      .card {
+        width: var(--tile-width, 240px);
+        flex-shrink: 0;
+        position: relative;
+      }
+      .cardhead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 9px 11px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .cardhead button {
+        padding: 4px 6px;
+        font-size: 10px;
+      }
+      .card canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+        cursor: grab;
+        touch-action: pan-y;
+        background: #f1ecf7;
+      }
+      .card.active canvas {
+        outline: 2px solid var(--purple);
+        outline-offset: 2px;
+        position: relative;
+        z-index: 1;
+      }
+      .connected .card.active canvas {
+        outline-offset: -2px;
+      }
+      .cardfoot {
+        font-size: 10px;
+        line-height: 1.5;
+        padding: 12px 9px;
+        max-width: 240px;
+        color: var(--muted);
+      }
+      .cardfoot strong {
+        display: block;
+        color: var(--ink);
+        font-size: 11px;
+        margin-bottom: 3px;
+      }
+      .card:focus-visible {
+        outline: 3px solid var(--purple);
+      }
+      .notice {
+        background: #eeebe3;
+        border-radius: 8px;
+        padding: 12px 15px;
+        font-size: 12px;
+        line-height: 1.6;
+        margin: 16px 0;
+      }
+      .notice ul {
+        padding-left: 18px;
+        margin: 5px 0;
+      }
+      .notice.ready {
+        background: #e7eee6;
+        color: #335640;
+      }
+      .notice.error {
+        background: #f4e0e6;
+        color: #852f45;
+      }
+      #status {
+        min-height: 20px;
+        color: var(--purple);
+        font-size: 12px;
+        margin: 14px 0;
+      }
+      .guide {
+        margin-top: 28px;
+        border-top: 1px solid var(--line);
+        padding-top: 20px;
+      }
+      .guide summary {
+        cursor: pointer;
+        font: 20px Georgia;
+      }
+      .guide table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 16px 0;
+        font-size: 12px;
+      }
+      .guide td,
+      .guide th {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+        line-height: 1.6;
+      }
+      .guide th {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .guide p,
+      .guide li {
+        font-size: 12px;
+        line-height: 1.8;
+      }
+      .value {
+        float: right;
+        font-weight: 400;
+        color: var(--muted);
+      }
+      details.controls summary {
+        font-size: 12px;
+        cursor: pointer;
+        padding: 8px 0;
+      }
+      .danger {
+        color: #963c50;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .exporting {
+        pointer-events: none;
+        opacity: 0.7;
+      }
+      .guide .callout {
+        padding: 14px;
+        background: var(--paper);
+        border-radius: 8px;
+      }
+      .check {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 11px;
+      }
+      .check input {
+        accent-color: var(--purple);
+      }
+      .readymade {
+        border: 1px solid var(--gold);
+        background: #fbf7ec;
+        border-radius: 10px;
+        padding: 14px;
+      }
+      .readymade p {
+        font-size: 11px;
+        line-height: 1.65;
+        color: var(--gold-ink);
+        margin: 0 0 10px;
+      }
+      .readymade button {
+        width: 100%;
+      }
+      @media (min-width: 1600px) {
+        .app {
+          grid-template-columns: 330px minmax(0, 1fr);
+        }
+        aside {
+          padding: 24px;
+        }
+        .gallery {
+          --tile-width: 265px;
+        }
+      }
+      @media (max-width: 850px) {
+        header {
+          padding: 14px;
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .app {
+          height: auto;
+          display: flex;
+          flex-direction: column;
+        }
+        main {
+          order: 0;
+          padding: 20px 14px;
+        }
+        aside {
+          order: 1;
+          border-top: 1px solid var(--line);
+          overflow: visible;
+        }
+        .intro {
+          display: block;
+        }
+        .intro .badge {
+          margin-top: 10px;
+        }
+        .toolbar {
+          flex-wrap: wrap;
+        }
+        .save-state {
+          max-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <!-- Royal Velvet wine-glass / pen-nib mark from theme PR #232. Embedded for offline use. --><img
+          class="monogram"
+          alt="Cork &amp; Note logo"
+          id="logoImg"
+          src=""
+        />
+        <div>
+          <h1>Cork &amp; Note</h1>
+          <div class="eyebrow">Screenshot studio</div>
+        </div>
+      </div>
+      <div class="actions">
+        <span class="save-state" id="saveState">Opening studio…</span
+        ><button id="undo" disabled>Undo</button
+        ><button id="saveProject">Save project</button
+        ><label for="openProject" class="file-button">Open project</label
+        ><input
+          class="sr-file"
+          id="openProject"
+          type="file"
+          accept=".json,application/json"
+        /><button id="exportAll" class="primary">Export set · ZIP</button>
+      </div>
+    </header>
+    <div class="app">
+      <aside>
+        <section class="section">
+          <h2>00 / Ready-made set</h2>
+          <div class="readymade">
+            <p id="readymadeHint">
+              A finished six-image Royal Velvet set with real app captures from
+              the demo account — load it, tweak anything, and export.
+            </p>
+            <button id="loadPrebuilt" class="gold-button">
+              Load the ready-made set
+            </button>
+          </div>
+        </section>
+        <section class="section">
+          <h2>01 / Format &amp; art direction</h2>
+          <label for="format">Store &amp; device</label
+          ><select id="format"></select>
+          <p class="hint" id="formatHint"></p>
+          <label>Collection template</label>
+          <div class="templates" id="templates"></div>
+          <p class="hint">
+            Five compositions in the Royal Velvet palette from theme PR #232:
+            ivory with purple &amp; gold, deep Purple After Dark, bold royal
+            purple, an ivory→purple duotone, and a clean gallery. Your copy and
+            uploaded screenshots stay with their slides.
+          </p>
+          <details class="controls">
+            <summary>Brand &amp; color</summary>
+            <div class="row">
+              <div>
+                <label for="background">Background · top</label
+                ><input id="background" type="color" />
+              </div>
+              <div>
+                <label for="background2">Background · bottom</label
+                ><input id="background2" type="color" />
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label for="ink">Headline</label><input id="ink" type="color" />
+              </div>
+              <div>
+                <label for="highlight">Highlighted words</label
+                ><input id="highlight" type="color" />
+              </div>
+            </div>
+            <label for="accent">Gold accent / background art</label
+            ><input id="accent" type="color" />
+            <label for="font">Headline font</label
+            ><select id="font">
+              <option value="Georgia">Editorial · Georgia</option>
+              <option value="system-ui">Modern · System Bold</option>
+              <option value="Avenir Next">Geometric · Avenir Next</option>
+              <option value="Helvetica Neue">Swiss · Helvetica Neue</option>
+            </select>
+            <label for="brand">Brand name</label
+            ><input id="brand" type="text" maxlength="60" />
+            <label for="decor">Background art</label
+            ><select id="decor">
+              <option value="both">Gold wave + soft glow</option>
+              <option value="arc">Gold wave only</option>
+              <option value="glow">Soft glow only</option>
+              <option value="none">None</option>
+            </select>
+          </details>
+        </section>
+        <section class="section">
+          <div class="editor-title">
+            <h2 style="margin: 0">02 / Your story</h2>
+            <button id="addSlide">+ Slide</button>
+          </div>
+          <div class="slide-tabs" id="slideTabs"></div>
+          <div class="actions">
+            <button id="moveLeft" aria-label="Move slide earlier">←</button
+            ><button id="moveRight" aria-label="Move slide later">→</button
+            ><button id="duplicateSlide">Duplicate</button
+            ><button id="removeSlide" class="danger">Remove</button>
+          </div>
+          <label for="eyebrow">Eyebrow chip · optional, e.g. AI SOMMELIER</label
+          ><input id="eyebrow" type="text" maxlength="40" />
+          <label for="headline"
+            >Headline · *stars* highlight words · line breaks supported</label
+          ><textarea id="headline" maxlength="240"></textarea>
+          <label for="subtitle">Supporting copy</label
+          ><textarea id="subtitle" maxlength="360"></textarea>
+          <div class="row">
+            <div>
+              <label for="textPosition">Text position</label
+              ><select id="textPosition">
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+              </select>
+            </div>
+            <div>
+              <label for="align">Alignment</label
+              ><select id="align">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+              </select>
+            </div>
+          </div>
+          <label for="textSize"
+            >Headline size <span class="value" id="textSizeValue"></span></label
+          ><input id="textSize" type="range" min="5" max="13" step="0.25" />
+          <label class="check"
+            ><input id="accentLast" type="checkbox" />Accent the final headline
+            line (when no *stars* are used)</label
+          >
+          <label for="capture">What to capture (private planning note)</label
+          ><textarea id="capture" maxlength="700"></textarea>
+        </section>
+        <section class="section">
+          <h2>03 / Screenshot &amp; composition</h2>
+          <label for="layout">Slide layout</label
+          ><select id="layout">
+            <option value="hero">Hero · large centered</option>
+            <option value="straight">Straight device</option>
+            <option value="tilt">Tilted</option>
+            <option value="bridge">Cross the right edge</option>
+            <option value="duo">Two overlapping devices</option>
+          </select>
+          <div class="segmented" id="deviceTabs">
+            <button data-slot="0" class="active">Main screenshot</button
+            ><button data-slot="1">Second screenshot</button>
+          </div>
+          <label class="upload" id="dropzone"
+            >Choose or drop a PNG / JPEG<input
+              id="screenshot"
+              type="file"
+              accept="image/png,image/jpeg"
+          /></label>
+          <p id="imageInfo" class="hint"></p>
+          <button id="clearImage" style="margin-top: 8px">
+            Remove screenshot
+          </button>
+          <p class="hint">
+            Drag a device on the canvas, including across a slide boundary. Use
+            the controls below for precise placement. Screenshots keep their
+            original proportions.
+          </p>
+          <label for="deviceX"
+            >Horizontal center
+            <span class="value" id="deviceXValue"></span></label
+          ><input id="deviceX" type="range" min="-40" max="140" step="1" />
+          <label for="deviceY"
+            >Vertical center
+            <span class="value" id="deviceYValue"></span></label
+          ><input id="deviceY" type="range" min="-30" max="130" step="1" />
+          <label for="deviceScale"
+            >Device size
+            <span class="value" id="deviceScaleValue"></span></label
+          ><input id="deviceScale" type="range" min="35" max="160" step="1" />
+          <label for="rotation"
+            >Rotation <span class="value" id="rotationValue"></span></label
+          ><input id="rotation" type="range" min="-35" max="35" step="1" />
+          <details class="controls">
+            <summary>Frame &amp; screenshot crop</summary>
+            <label for="frame">Device frame</label
+            ><select id="frame">
+              <option value="dark">Graphite</option>
+              <option value="light">Pearl</option>
+              <option value="accent">Gold</option>
+              <option value="none">No frame</option>
+            </select>
+            <label for="zoom"
+              >Image zoom <span class="value" id="zoomValue"></span></label
+            ><input id="zoom" type="range" min="1" max="2.5" step="0.01" />
+            <label for="cropX"
+              >Crop left / right
+              <span class="value" id="cropXValue"></span></label
+            ><input id="cropX" type="range" min="-100" max="100" step="1" />
+            <label for="cropY"
+              >Crop up / down <span class="value" id="cropYValue"></span></label
+            ><input id="cropY" type="range" min="-100" max="100" step="1" />
+            <button id="resetCrop">Show full screenshot</button>
+          </details>
+        </section>
+        <p class="hint">
+          Works locally. No screenshots are uploaded. Save a project file to
+          keep your images and edits together or move between browsers.
+        </p>
+      </aside>
+      <main>
+        <div class="intro">
+          <div>
+            <div class="eyebrow">Your next favorite starts with a memory</div>
+            <h2>A story worth swiping through.</h2>
+            <p>
+              Load the ready-made Royal Velvet set or start from a template,
+              swap in your own captures, and make it yours. Devices and the
+              background art flow between images; exports are sliced at the
+              exact store dimensions.
+            </p>
+          </div>
+          <span class="badge">LOCAL &amp; OFFLINE</span>
+        </div>
+        <div class="toolbar">
+          <div class="actions">
+            <button id="viewMode">View with gaps</button
+            ><button id="exportOne">Export selected PNG</button
+            ><button id="exportDraft">Draft overview</button>
+          </div>
+          <label for="previewSize"
+            >Preview size<input
+              id="previewSize"
+              type="range"
+              min="180"
+              max="380"
+              value="240"
+          /></label>
+        </div>
+        <div class="viewport" id="viewport">
+          <div class="gallery connected" id="gallery"></div>
+        </div>
+        <div id="status" role="status" aria-live="polite"></div>
+        <div id="validation" class="notice"></div>
+        <details class="guide" open>
+          <summary>Your screenshot plan</summary>
+          <p>
+            The colors follow the Royal Velvet theme from PR #232. The opening
+            three images should make the journal and personal help clear. These
+            are editable starting points based on the Cork &amp; Note marketing
+            report.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Message</th>
+                <th>Capture from the app</th>
+              </tr>
+            </thead>
+            <tbody id="storyTable"></tbody>
+          </table>
+          <div class="callout">
+            <strong>Capture once for each platform.</strong>
+            <p>
+              Use actual iPhone, iPad, or Android app captures for that listing.
+              Select the matching format, then add your screenshots. Changing
+              the canvas size does not turn an iPhone interface into an Android
+              or iPad interface. The frame has no extra notch, so it won’t cover
+              your screenshot’s status bar.
+            </p>
+            <p>
+              Keep the first image understandable by itself. Stores add spacing
+              and may show images separately. Cross-edge layouts are a visual
+              continuation, so keep essential controls and words away from the
+              seams.
+            </p>
+          </div>
+        </details>
+        <details class="guide">
+          <summary>Export sizes &amp; a few useful details</summary>
+          <p>
+            Checked September 9, 2026 against
+            <a
+              href="https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/"
+              target="_blank"
+              rel="noreferrer"
+              >Apple’s screenshot specifications</a
+            >
+            and
+            <a
+              href="https://support.google.com/googleplay/android-developer/answer/9866151?hl=en"
+              target="_blank"
+              rel="noreferrer"
+              >Google Play’s asset guidelines</a
+            >.
+          </p>
+          <ul>
+            <li>
+              iPhone: 1320 × 2868 or 1290 × 2796 for the 6.9-inch slot; 1242 ×
+              2688 for the 6.5-inch fallback. Apple accepts 1–10 screenshots per
+              set.
+            </li>
+            <li>
+              iPad: 2064 × 2752 or 2048 × 2732 for the 13-inch slot. This app
+              currently enables iPad support, so prepare actual iPad screenshots
+              too.
+            </li>
+            <li>
+              Google Play phone: 1080 × 1920, 9:16. A listing needs at least two
+              screenshots; four or more at this resolution supports eligibility
+              for screenshot-based promotion. Up to eight per device type. The
+              text region is smaller for this preset.
+            </li>
+            <li>
+              Exports use real 24-bit RGB PNG files without an alpha channel.
+              Each file has the preset’s exact pixel dimensions, regardless of
+              preview zoom or screen resolution.
+            </li>
+            <li>
+              The ZIP contains numbered PNGs plus a text manifest. Unzip it and
+              upload the individual PNG files in order. The draft overview is
+              watermarked and is not a store upload.
+            </li>
+          </ul>
+          <p>
+            Google Play also needs a separate 1024 × 500 feature graphic and 512
+            × 512 app icon. This studio creates listing screenshots; those other
+            assets are separate. Store review also considers the accuracy and
+            quality of what you show.
+          </p>
+        </details>
+      </main>
+    </div>
+    <script>
+      "use strict";
+      const $ = (id) => document.getElementById(id);
+      const LOGO =
+        "data:image/png;base64,__LOGO_BASE64__";
+      $("logoImg").src = LOGO;
+      const FORMATS = {
+        iphone69: {
+          name: "App Store · iPhone 6.9″",
+          w: 1320,
+          h: 2868,
+          family: "iphone",
+          min: 1,
+          max: 10,
+          hint: "1320 × 2868 px · primary iPhone set",
+        },
+        iphone69alt: {
+          name: "App Store · iPhone 6.9″ (1290)",
+          w: 1290,
+          h: 2796,
+          family: "iphone",
+          min: 1,
+          max: 10,
+          hint: "1290 × 2796 px · also accepted in the 6.9″ slot",
+        },
+        iphone65: {
+          name: "App Store · iPhone 6.5″",
+          w: 1242,
+          h: 2688,
+          family: "iphone",
+          min: 1,
+          max: 10,
+          hint: "1242 × 2688 px · fallback if no 6.9″ set is supplied",
+        },
+        ipad13: {
+          name: "App Store · iPad 13″",
+          w: 2064,
+          h: 2752,
+          family: "ipad",
+          min: 1,
+          max: 10,
+          hint: "2064 × 2752 px · use real iPad captures",
+        },
+        ipad13alt: {
+          name: "App Store · iPad 13″ (2048)",
+          w: 2048,
+          h: 2732,
+          family: "ipad",
+          min: 1,
+          max: 10,
+          hint: "2048 × 2732 px · use real iPad captures",
+        },
+        android: {
+          name: "Google Play · Android phone",
+          w: 1080,
+          h: 1920,
+          family: "android",
+          min: 2,
+          max: 8,
+          hint: "1080 × 1920 px · 9:16 · use Android captures",
+        },
+      };
+      // Royal Velvet palette from styles/theme.js on PR #232.
+      const THEMES = {
+        velvet: {
+          name: "Royal Velvet · Ivory",
+          bg: "#FAF8F4",
+          bg2: "#E4D5F1",
+          accent: "#D6B45D",
+          ink: "#2E2438",
+          highlight: "#54258A",
+          font: "Georgia",
+          decor: "both",
+          align: "left",
+          pattern: ["hero", "tilt", "straight", "bridge", "straight", "tilt"],
+        },
+        midnight: {
+          name: "Purple After Dark",
+          bg: "#191321",
+          bg2: "#31204B",
+          accent: "#D6B45D",
+          ink: "#F5EEF9",
+          highlight: "#E0BE6C",
+          font: "system-ui",
+          decor: "both",
+          align: "left",
+          pattern: ["hero", "tilt", "straight", "bridge", "straight", "tilt"],
+        },
+        royal: {
+          name: "Royal Purple · Bold",
+          bg: "#54258A",
+          bg2: "#38186B",
+          accent: "#D6B45D",
+          ink: "#FFFFFF",
+          highlight: "#EFCF8B",
+          font: "system-ui",
+          decor: "glow",
+          align: "center",
+          pattern: ["hero", "straight", "tilt", "straight", "hero", "tilt"],
+        },
+        duotone: {
+          name: "Velvet Duotone · Ivory→Purple",
+          bg: "#FAF8F4",
+          bg2: "#5E2F96",
+          accent: "#D6B45D",
+          ink: "#2E2438",
+          highlight: "#54258A",
+          font: "Georgia",
+          decor: "glow",
+          align: "left",
+          pattern: ["hero", "tilt", "straight", "bridge", "straight", "tilt"],
+        },
+        gallery: {
+          name: "Ivory Gallery · Clean",
+          bg: "#FAF8F4",
+          bg2: "#F3EEE9",
+          accent: "#D6B45D",
+          ink: "#2E2438",
+          highlight: "#54258A",
+          font: "Georgia",
+          decor: "none",
+          align: "left",
+          pattern: ["straight"],
+        },
+      };
+      const STORY = [
+        [
+          "YOUR WINE JOURNAL",
+          "Remember every wine\n*you love*.",
+          "Your visits, tastings, and bottles — one beautiful journal.",
+          "Show a populated home screen with the Journey card, ready-to-drink counts, and cellar summary. Choose a screen that makes the app’s purpose clear at a glance.",
+        ],
+        [
+          "LOG IT YOUR WAY",
+          "Your taste,\n*your words*.",
+          "Stars, sweetness, tannins, flavor notes — as quick or as deep as you like.",
+          "Show the log form filled in: stars set, a short note, and the detailed-ratings bars expanded with values. Pair with the saved wine detail for a two-phone slide.",
+        ],
+        [
+          "AI SOMMELIER",
+          "A sommelier that\n*learns your palate*.",
+          "Ask anything — the answers are built on what you’ve tasted and loved.",
+          "Capture a real exchange where the answer references the user’s own tastings, with the keyboard dismissed.",
+        ],
+        [
+          "EXPLORE WINERIES",
+          "Find your\n*next favorite*.",
+          "Wineries near you on the map — tap one and log your tasting right there.",
+          "Show the winery map with several labeled pins near a real location, paired with a winery detail page showing the Log visit action.",
+        ],
+        [
+          "YOUR TASTINGS",
+          "Never forget\n*that bottle*.",
+          "Every rating and note you’ve made, one search away.",
+          "Show the tastings list with several rated wines, or a saved wine detail with a rating and short personal note.",
+        ],
+        [
+          "WINE CELLAR",
+          "Know what’s *ready*\nto open tonight.",
+          "Every bottle at home, from too young to past peak.",
+          "Show a populated cellar with readiness badges and readable names and quantities.",
+        ],
+      ];
+      const clone = (x) => JSON.parse(JSON.stringify(x));
+      function device() {
+        return {
+          x: 50,
+          y: 66,
+          scale: 100,
+          rotation: 0,
+          zoom: 1,
+          cropX: 0,
+          cropY: 0,
+          frame: "dark",
+          image: null,
+        };
+      }
+      function slide(i) {
+        const a = STORY[i % STORY.length];
+        return {
+          eyebrow: a[0],
+          headline: a[1],
+          subtitle: a[2],
+          capture: a[3],
+          layout: "straight",
+          textPosition: "top",
+          align: "left",
+          textSize: 9,
+          accentLast: true,
+          devices: [device(), device()],
+        };
+      }
+      function initial() {
+        return {
+          version: 3,
+          format: "iphone69",
+          theme: "velvet",
+          brand: "Cork & Note",
+          colors: {
+            background: THEMES.velvet.bg,
+            background2: THEMES.velvet.bg2,
+            accent: THEMES.velvet.accent,
+            ink: THEMES.velvet.ink,
+            highlight: THEMES.velvet.highlight,
+          },
+          font: "Georgia",
+          decor: "both",
+          slides: Array.from({ length: 6 }, (_, i) => slide(i)),
+        };
+      }
+      let project = initial(),
+        active = 0,
+        slot = 0,
+        cache = new Map(),
+        busy = false,
+        renderPending = false,
+        saveTimer,
+        db = null,
+        dirty = false,
+        revision = 0;
+      const history = [];
+      function checkpoint() {
+        history.push({
+          active,
+          slot,
+          project: {
+            ...project,
+            colors: { ...project.colors },
+            slides: project.slides.map((s) => ({
+              ...s,
+              devices: s.devices.map((d) => ({ ...d })),
+            })),
+          },
+        });
+        if (history.length > 30) history.shift();
+        $("undo").disabled = false;
+      }
+      $("undo").onclick = () => {
+        if (!history.length) return;
+        const previous = history.pop();
+        project = previous.project;
+        active = previous.active;
+        slot = previous.slot;
+        syncGlobal();
+        createCards();
+        update();
+        $("undo").disabled = !history.length;
+        say("Restored the previous edit.");
+      };
+      document.querySelector("aside").addEventListener("focusin", (e) => {
+        if (e.target.matches("textarea,input:not([type=file]),select"))
+          checkpoint();
+      });
+      const format = () => FORMATS[project.format];
+      const selected = () => project.slides[active];
+      const selectedDevice = () => selected().devices[slot];
+      const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+      const plain = (t) => t.replaceAll("*", "");
+      function isDark(hex) {
+        const n = parseInt(hex.slice(1), 16);
+        return (
+          0.2126 * ((n >> 16) & 255) +
+            0.7152 * ((n >> 8) & 255) +
+            0.0722 * (n & 255) <
+          140
+        );
+      }
+      function fontFamily() {
+        return project.font === "system-ui"
+          ? "system-ui, sans-serif"
+          : `"${project.font}", serif`;
+      }
+      const headlineWeight = () => (project.font === "Georgia" ? 700 : 800);
+      function arrange(s, type) {
+        s.layout = type;
+        const d = s.devices[0],
+          e = s.devices[1];
+        Object.assign(d, { x: 50, y: 66, scale: 100, rotation: 0 });
+        Object.assign(e, { x: 70, y: 74, scale: 76, rotation: 10 });
+        if (type === "hero")
+          Object.assign(d, { x: 50, y: 72, scale: 119, rotation: 0 });
+        if (type === "tilt")
+          Object.assign(d, { x: 52, y: 67, scale: 105, rotation: -8 });
+        if (type === "bridge")
+          Object.assign(d, { x: 84, y: 67, scale: 112, rotation: -13 });
+        if (type === "duo") {
+          Object.assign(d, { x: 38, y: 60, scale: 88, rotation: -8 });
+          Object.assign(e, { x: 68, y: 74, scale: 80, rotation: 9 });
+        }
+      }
+      function applyTheme(key, save = true) {
+        if (save) checkpoint();
+        const t = THEMES[key];
+        project.theme = key;
+        project.colors = {
+          background: t.bg,
+          background2: t.bg2,
+          accent: t.accent,
+          ink: t.ink,
+          highlight: t.highlight,
+        };
+        project.font = t.font;
+        project.decor = t.decor;
+        project.slides.forEach((s, i) => {
+          s.align = t.align;
+          // Slides that already hold screenshots keep their curated
+          // composition — switching templates only restyles them.
+          if (s.devices.some((d) => d.image)) return;
+          s.textPosition = "top";
+          s.textSize = t.align === "center" ? 9.3 : 9;
+          arrange(s, t.pattern[i % t.pattern.length]);
+        });
+        syncGlobal();
+        syncEditor();
+        update(save);
+      }
+      function say(message) {
+        $("status").textContent = message;
+      }
+      function syncGlobal() {
+        $("format").value = project.format;
+        for (const k of [
+          "background",
+          "background2",
+          "accent",
+          "ink",
+          "highlight",
+        ])
+          $(k).value = project.colors[k];
+        for (const k of ["brand", "font", "decor"]) $(k).value = project[k];
+        $("formatHint").textContent = format().hint;
+        document
+          .querySelectorAll(".template")
+          .forEach((b) =>
+            b.classList.toggle("active", b.dataset.theme === project.theme),
+          );
+      }
+      function syncEditor() {
+        const s = selected(),
+          d = selectedDevice();
+        for (const k of [
+          "eyebrow",
+          "headline",
+          "subtitle",
+          "capture",
+          "layout",
+          "textPosition",
+          "align",
+          "textSize",
+        ])
+          $(k).value = s[k];
+        $("accentLast").checked = s.accentLast;
+        for (const k of ["rotation", "zoom", "cropX", "cropY", "frame"])
+          $(k).value = d[k];
+        $("deviceX").value = d.x;
+        $("deviceY").value = d.y;
+        $("deviceScale").value = d.scale;
+        for (const [k, v, suffix] of [
+          ["textSize", s.textSize, "% width"],
+          ["deviceX", d.x, "%"],
+          ["deviceY", d.y, "%"],
+          ["deviceScale", d.scale, "%"],
+          ["rotation", d.rotation, "°"],
+          ["zoom", d.zoom, "×"],
+          ["cropX", d.cropX, "%"],
+          ["cropY", d.cropY, "%"],
+        ])
+          $(k + "Value").textContent = v + suffix;
+        document.querySelectorAll("#deviceTabs button").forEach((b) => {
+          b.classList.toggle("active", Number(b.dataset.slot) === slot);
+          b.disabled = b.dataset.slot === "1" && s.layout !== "duo";
+        });
+        $("imageInfo").textContent = d.image
+          ? `${d.image.name} · ${d.image.width} × ${d.image.height} · captured for ${d.image.family}`
+          : "No screenshot yet. The numbered placeholder is a planning aid only.";
+        $("clearImage").disabled = !d.image;
+        $("moveLeft").disabled = active === 0;
+        $("moveRight").disabled = active === project.slides.length - 1;
+        $("removeSlide").disabled = project.slides.length <= 1;
+        $("addSlide").disabled = project.slides.length >= format().max;
+        $("duplicateSlide").disabled = project.slides.length >= format().max;
+        document.querySelectorAll("#slideTabs button").forEach((b, i) => {
+          b.classList.toggle("active", i === active);
+          b.setAttribute("aria-pressed", String(i === active));
+        });
+        document
+          .querySelectorAll(".card")
+          .forEach((b, i) => b.classList.toggle("active", i === active));
+      }
+      function selectSlide(i, newSlot = 0) {
+        active = i;
+        slot = newSlot;
+        syncEditor();
+      }
+      function createCards() {
+        $("gallery").replaceChildren();
+        $("slideTabs").replaceChildren();
+        project.slides.forEach((s, i) => {
+          const b = document.createElement("button");
+          b.textContent = i + 1;
+          b.setAttribute("aria-label", `Edit slide ${i + 1}`);
+          b.onclick = () => selectSlide(i);
+          $("slideTabs").append(b);
+          const card = document.createElement("article");
+          card.className = "card";
+          card.tabIndex = 0;
+          card.setAttribute(
+            "aria-label",
+            `Slide ${i + 1}: ${plain(s.headline).replaceAll("\n", " ")}`,
+          );
+          const head = document.createElement("div");
+          head.className = "cardhead";
+          const title = document.createElement("span");
+          title.textContent = `${String(i + 1).padStart(2, "0")} / ${project.slides.length}`;
+          const edit = document.createElement("button");
+          edit.textContent = "Edit";
+          edit.onclick = () => selectSlide(i);
+          head.append(title, edit);
+          const canvas = document.createElement("canvas");
+          canvas.id = "canvas" + i;
+          canvas.setAttribute("aria-label", `Preview slide ${i + 1}`);
+          const foot = document.createElement("div");
+          foot.className = "cardfoot";
+          foot.id = "foot" + i;
+          card.append(head, canvas, foot);
+          card.onkeydown = (e) => {
+            if (e.target === card && (e.key === "Enter" || e.key === " ")) {
+              e.preventDefault();
+              selectSlide(i);
+            }
+          };
+          canvas.addEventListener("pointerdown", (e) => startDrag(e, i));
+          card.ondragover = (e) => {
+            e.preventDefault();
+          };
+          card.ondrop = (e) => {
+            e.preventDefault();
+            selectSlide(i);
+            loadFile(e.dataTransfer.files[0], i, 0);
+          };
+          $("gallery").append(card);
+        });
+        syncEditor();
+      }
+      function update(save = true) {
+        if (!renderPending) {
+          renderPending = true;
+          requestAnimationFrame(() => {
+            renderPending = false;
+            renderAll();
+          });
+        }
+        if (save) scheduleSave();
+      }
+      function round(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, r);
+      }
+      function geometry(s, d, f = format()) {
+        const W = 1000,
+          H = (1000 * f.h) / f.w;
+        const img = d.image;
+        const ratio = img
+          ? img.height / img.width
+          : f.family === "ipad"
+            ? 4 / 3
+            : 2.16;
+        const baseH = H * (f.family === "android" ? 0.71 : 0.65);
+        const sw = (Math.min(W * 0.78, baseH / ratio) * d.scale) / 100,
+          sh = sw * ratio;
+        const bezel = d.frame === "none" ? 0 : sw * 0.025;
+        return {
+          x: (d.x / 100) * W,
+          y: ((s.textPosition === "bottom" ? d.y - 30 : d.y) / 100) * H,
+          w: sw + 2 * bezel,
+          h: sh + 2 * bezel,
+          sw,
+          sh,
+          bezel,
+          rotation: (d.rotation * Math.PI) / 180,
+        };
+      }
+      function background(ctx, index, W, H) {
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        // Hold the top color through the text zone, then blend — keeps
+        // headlines on a calm field even with a strong bottom color.
+        grad.addColorStop(0, project.colors.background);
+        grad.addColorStop(0.3, project.colors.background);
+        grad.addColorStop(1, project.colors.background2);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+        const dark = isDark(project.colors.background);
+        const decor = project.decor;
+        if (decor === "none") return;
+        ctx.save();
+        ctx.translate(-index * W, 0);
+        if (decor === "glow" || decor === "both") {
+          for (let n = 0; n < project.slides.length; n++) {
+            const gx = (n + 0.72 + 0.18 * Math.sin(n * 2.1)) * W,
+              gy = H * (0.16 + 0.05 * ((n * 13) % 3));
+            const g1 = ctx.createRadialGradient(gx, gy, 0, gx, gy, W * 0.55);
+            g1.addColorStop(0, project.colors.accent);
+            g1.addColorStop(1, "#00000000");
+            ctx.globalAlpha = dark ? 0.2 : 0.17;
+            ctx.fillStyle = g1;
+            ctx.fillRect(gx - W * 0.55, gy - W * 0.55, W * 1.1, W * 1.1);
+            const hx = (n + 0.12) * W,
+              hy = H * 0.8;
+            const g2 = ctx.createRadialGradient(hx, hy, 0, hx, hy, W * 0.65);
+            g2.addColorStop(0, project.colors.highlight);
+            g2.addColorStop(1, "#00000000");
+            ctx.globalAlpha = dark ? 0.24 : 0.1;
+            ctx.fillStyle = g2;
+            ctx.fillRect(hx - W * 0.65, hy - W * 0.65, W * 1.3, W * 1.3);
+          }
+          ctx.globalAlpha = 1;
+        }
+        if (decor === "arc" || decor === "both") {
+          const count = project.slides.length;
+          const yAt = (n) => H * (0.6 + 0.05 * Math.sin(n * 1.9));
+          const wave = () => {
+            ctx.beginPath();
+            ctx.moveTo(-W, yAt(-1));
+            for (let n = -1; n < count; n++)
+              ctx.bezierCurveTo(
+                (n + 0.4) * W,
+                yAt(n) - H * 0.07,
+                (n + 0.6) * W,
+                yAt(n + 1) + H * 0.07,
+                (n + 1) * W,
+                yAt(n + 1),
+              );
+          };
+          wave();
+          ctx.lineTo(count * W, H);
+          ctx.lineTo(-W, H);
+          ctx.closePath();
+          ctx.fillStyle = project.colors.accent;
+          ctx.globalAlpha = dark ? 0.16 : 0.2;
+          ctx.fill();
+          wave();
+          ctx.strokeStyle = project.colors.accent;
+          ctx.globalAlpha = dark ? 0.55 : 0.7;
+          ctx.lineWidth = 4;
+          ctx.stroke();
+          // A second, thinner echo line above the band.
+          ctx.save();
+          ctx.translate(0, -H * 0.018);
+          wave();
+          ctx.globalAlpha = dark ? 0.3 : 0.4;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.restore();
+          ctx.globalAlpha = 1;
+        }
+        ctx.restore();
+      }
+      function drawDevice(ctx, s, d, index, slotIndex) {
+        const g = geometry(s, d);
+        ctx.save();
+        ctx.translate(index * 1000 + g.x, g.y);
+        ctx.rotate(g.rotation);
+        const x = -g.w / 2,
+          y = -g.h / 2,
+          r = d.frame === "none" ? 0 : g.w * 0.148;
+        const shadowScale = Math.hypot(
+          ctx.getTransform().a,
+          ctx.getTransform().b,
+        );
+        const frameFill =
+          d.frame === "light"
+            ? "#e9e5ee"
+            : d.frame === "accent"
+              ? project.colors.accent
+              : "#1c1a20";
+        // Two shadow passes: a wide ambient wash, then a tighter contact shadow.
+        ctx.shadowColor = "#21152e44";
+        ctx.shadowBlur = 64 * shadowScale;
+        ctx.shadowOffsetY = 34 * shadowScale;
+        ctx.fillStyle = frameFill;
+        round(ctx, x, y, g.w, g.h, r);
+        ctx.fill();
+        ctx.shadowColor = "#21152e38";
+        ctx.shadowBlur = 18 * shadowScale;
+        ctx.shadowOffsetY = 10 * shadowScale;
+        round(ctx, x, y, g.w, g.h, r);
+        ctx.fill();
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        if (d.frame !== "none") {
+          // Side buttons, drawn behind the rounded frame edge.
+          ctx.fillStyle =
+            d.frame === "dark"
+              ? "#312d38"
+              : d.frame === "accent"
+                ? "#a8854a"
+                : "#c6bccf";
+          const bw = Math.max(2.5, g.w * 0.012);
+          round(ctx, x + g.w - 1.5, y + g.h * 0.28, bw, g.h * 0.085, bw / 2);
+          ctx.fill();
+          round(ctx, x + 1.5 - bw, y + g.h * 0.2, bw, g.h * 0.055, bw / 2);
+          ctx.fill();
+          round(ctx, x + 1.5 - bw, y + g.h * 0.27, bw, g.h * 0.055, bw / 2);
+          ctx.fill();
+          round(ctx, x, y, g.w, g.h, r);
+          ctx.fillStyle = frameFill;
+          ctx.fill();
+          ctx.strokeStyle =
+            d.frame === "dark"
+              ? "#57515f"
+              : d.frame === "accent"
+                ? "#f2e3b8"
+                : "#b3a8bf";
+          ctx.lineWidth = 1.5;
+          round(ctx, x + 1, y + 1, g.w - 2, g.h - 2, r);
+          ctx.stroke();
+        }
+        ctx.save();
+        round(
+          ctx,
+          -g.sw / 2,
+          -g.sh / 2,
+          g.sw,
+          g.sh,
+          Math.max(0, r - g.bezel * 0.85),
+        );
+        ctx.clip();
+        ctx.fillStyle = "#f6f3ef";
+        ctx.fillRect(-g.sw / 2, -g.sh / 2, g.sw, g.sh);
+        const img = d.image && cache.get(d.image.id);
+        if (img) {
+          const dw = g.sw * d.zoom,
+            dh = g.sh * d.zoom;
+          ctx.drawImage(
+            img,
+            -dw / 2 + (((dw - g.sw) / 2) * d.cropX) / 100,
+            -dh / 2 + (((dh - g.sh) / 2) * d.cropY) / 100,
+            dw,
+            dh,
+          );
+        } else {
+          ctx.fillStyle = isDark(project.colors.background)
+            ? "#efe9f4"
+            : "#ece5f2";
+          ctx.fillRect(-g.sw / 2, -g.sh / 2, g.sw, g.sh);
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#a793bd";
+          ctx.font = `400 ${g.sw * 0.25}px Georgia`;
+          ctx.fillText(String(index + 1).padStart(2, "0"), 0, -g.sh * 0.06);
+          ctx.font = `600 ${g.sw * 0.039}px system-ui, sans-serif`;
+          ctx.fillStyle = "#6b5a7d";
+          ctx.fillText(
+            slotIndex ? "ADD SECOND SCREENSHOT" : "ADD YOUR SCREENSHOT",
+            0,
+            g.sh * 0.07,
+          );
+          ctx.font = `400 ${g.sw * 0.032}px system-ui, sans-serif`;
+          ctx.fillText("Your real app goes here", 0, g.sh * 0.12);
+          ctx.strokeStyle = "#bcaacb";
+          ctx.lineWidth = 1;
+          round(
+            ctx,
+            -g.sw * 0.4,
+            -g.sh * 0.43,
+            g.sw * 0.8,
+            g.sh * 0.86,
+            g.sw * 0.035,
+          );
+          ctx.stroke();
+        }
+        ctx.restore();
+        ctx.restore();
+      }
+      // Headline text with *highlight* spans: parse to words tagged with their color.
+      function parseHeadline(text) {
+        return text.split("\n").map((line) => {
+          const words = [];
+          // Third alternative: a lone "*" (unclosed span) stays literal text
+          // instead of being dropped.
+          const re = /\*([^*]*)\*|([^*]+)|\*/g;
+          let m;
+          let prevEndedWithSpace = true;
+          while ((m = re.exec(line))) {
+            const hl = m[1] !== undefined;
+            const chunk = hl ? m[1] : (m[2] ?? "*");
+            // Punctuation straight after a *span* (e.g. "*you love*.") sticks
+            // to the previous word instead of becoming " ." on its own.
+            const glue =
+              words.length && !/^\s/.test(chunk) && !prevEndedWithSpace;
+            prevEndedWithSpace = /\s$/.test(chunk);
+            chunk
+              .split(/\s+/)
+              .filter(Boolean)
+              .forEach((w, i) => {
+                if (i === 0 && glue) words[words.length - 1].w += w;
+                else words.push({ w, hl });
+              });
+          }
+          return words;
+        });
+      }
+      // Wrap tagged words; split long unbroken words; never silently truncate copy.
+      function wrapWords(ctx, paragraphs, width) {
+        const lines = [];
+        for (const words of paragraphs) {
+          let line = [];
+          const lineText = () => line.map((x) => x.w).join(" ");
+          for (const item of words) {
+            if (
+              ctx.measureText(line.length ? lineText() + " " + item.w : item.w)
+                .width <= width
+            ) {
+              line.push(item);
+              continue;
+            }
+            if (line.length) {
+              lines.push(line);
+              line = [];
+            }
+            if (ctx.measureText(item.w).width <= width) {
+              line.push(item);
+              continue;
+            }
+            let chunk = "";
+            for (const ch of item.w) {
+              if (ctx.measureText(chunk + ch).width > width && chunk) {
+                lines.push([{ w: chunk, hl: item.hl }]);
+                chunk = "";
+              }
+              chunk += ch;
+            }
+            if (chunk) line.push({ w: chunk, hl: item.hl });
+          }
+          lines.push(line);
+        }
+        return lines;
+      }
+      // Plain-text wrap for the subtitle.
+      function wrap(ctx, text, width) {
+        return wrapWords(
+          ctx,
+          text.split("\n").map((line) =>
+            line
+              .split(/\s+/)
+              .filter(Boolean)
+              .map((w) => ({ w, hl: false })),
+          ),
+          width,
+        ).map((line) => line.map((x) => x.w).join(" "));
+      }
+      function textLayout(ctx, s) {
+        const H = (1000 * format().h) / format().w,
+          isGoogle = format().family === "android";
+        const maxH = H * (isGoogle ? 0.175 : 0.235);
+        const chipH = s.eyebrow.trim() ? 46 + 26 : 0;
+        let size = Math.min(s.textSize * 10, isGoogle ? 82 : 130),
+          lines,
+          sub,
+          subSize;
+        for (;;) {
+          ctx.font = `${headlineWeight()} ${size}px ${fontFamily()}`;
+          lines = wrapWords(ctx, parseHeadline(s.headline), 844);
+          subSize = Math.max(23, size * 0.36);
+          ctx.font = `400 ${subSize}px system-ui, sans-serif`;
+          sub = s.subtitle ? wrap(ctx, s.subtitle, 830) : [];
+          const height =
+            chipH +
+            lines.length * size * 1.08 +
+            (sub.length ? 22 + sub.length * subSize * 1.35 : 0);
+          if (height <= maxH || size <= 36)
+            return {
+              size,
+              lines,
+              sub,
+              subSize,
+              chipH,
+              height,
+              overflow: height > maxH,
+            };
+          size -= 1;
+        }
+      }
+      function drawText(ctx, s) {
+        const H = (1000 * format().h) / format().w;
+        const t = textLayout(ctx, s);
+        const hasMarkup = s.headline.includes("*");
+        let y = s.textPosition === "top" ? H * 0.05 : H * 0.755;
+        ctx.textBaseline = "top";
+        const centered = s.align === "center";
+        // Eyebrow chip.
+        if (t.chipH) {
+          const label = s.eyebrow.trim().toUpperCase();
+          ctx.font = "600 23px system-ui, sans-serif";
+          ctx.letterSpacing = "3px";
+          const tw = ctx.measureText(label).width;
+          const cw = tw + 44,
+            cx = centered ? 500 - cw / 2 : 78;
+          ctx.globalAlpha = 0.14;
+          ctx.fillStyle = project.colors.accent;
+          round(ctx, cx, y, cw, 46, 23);
+          ctx.fill();
+          ctx.globalAlpha = 0.85;
+          ctx.strokeStyle = project.colors.accent;
+          ctx.lineWidth = 1.5;
+          round(ctx, cx + 0.75, y + 0.75, cw - 1.5, 44.5, 22);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = isDark(project.colors.background)
+            ? project.colors.accent
+            : "#806124";
+          ctx.textAlign = "left";
+          ctx.fillText(label, cx + 22, y + 12);
+          ctx.letterSpacing = "0px";
+          y += t.chipH;
+        }
+        // Headline: draw run by run so *highlighted* words get the accent color.
+        ctx.font = `${headlineWeight()} ${t.size}px ${fontFamily()}`;
+        ctx.textAlign = "left";
+        t.lines.forEach((line, i) => {
+          const text = line.map((x) => x.w).join(" ");
+          const lineWidth = ctx.measureText(text).width;
+          let x = centered ? 500 - lineWidth / 2 : 78;
+          const lastLineAccent =
+            !hasMarkup && s.accentLast && i === t.lines.length - 1;
+          for (let k = 0; k < line.length; k++) {
+            const word = line[k].w + (k < line.length - 1 ? " " : "");
+            ctx.fillStyle =
+              line[k].hl || lastLineAccent
+                ? project.colors.highlight
+                : project.colors.ink;
+            ctx.fillText(word, x, y);
+            x += ctx.measureText(word).width;
+          }
+          y += t.size * 1.08;
+        });
+        y += 22;
+        ctx.font = `400 ${t.subSize}px system-ui, sans-serif`;
+        ctx.fillStyle = project.colors.ink;
+        ctx.globalAlpha = 0.75;
+        ctx.textAlign = centered ? "center" : "left";
+        const sx = centered ? 500 : 78;
+        for (const line of t.sub) {
+          ctx.fillText(line, sx, y);
+          y += t.subSize * 1.35;
+        }
+        ctx.globalAlpha = 1;
+        // Brand wordmark with a small gold diamond, above the headline.
+        ctx.textAlign = "left";
+        ctx.font = "600 20px Georgia";
+        ctx.fillStyle = project.colors.ink;
+        const by = H * 0.02;
+        ctx.save();
+        ctx.translate(84, by + 9);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = project.colors.accent;
+        ctx.fillRect(-5, -5, 10, 10);
+        ctx.restore();
+        ctx.fillStyle = project.colors.ink;
+        ctx.globalAlpha = 0.9;
+        ctx.fillText(project.brand, 102, by);
+        ctx.globalAlpha = 1;
+        return t;
+      }
+      // Each slice renders the same world coordinates. No giant panorama bitmap is needed.
+      function renderTile(canvas, index, pixelWidth) {
+        const f = format(),
+          W = 1000,
+          H = (W * f.h) / f.w;
+        canvas.width = pixelWidth;
+        canvas.height = Math.round((pixelWidth * f.h) / f.w);
+        const ctx = canvas.getContext("2d", { alpha: false });
+        ctx.scale(canvas.width / W, canvas.height / H);
+        background(ctx, index, W, H);
+        ctx.save();
+        ctx.translate(-index * W, 0);
+        project.slides.forEach((s, j) =>
+          s.devices.slice(0, s.layout === "duo" ? 2 : 1).forEach((d, k) => {
+            const g = geometry(s, d);
+            const radius =
+              (Math.abs(g.w * Math.cos(g.rotation)) +
+                Math.abs(g.h * Math.sin(g.rotation))) /
+                2 +
+              80;
+            const center = j * W + g.x;
+            if (
+              center + radius > index * W &&
+              center - radius < (index + 1) * W
+            )
+              drawDevice(ctx, s, d, j, k);
+          }),
+        );
+        ctx.restore();
+        drawText(ctx, project.slides[index]);
+        return canvas;
+      }
+      function storyUI() {
+        const tbody = $("storyTable");
+        tbody.replaceChildren();
+        project.slides.forEach((s, i) => {
+          const tr = document.createElement("tr");
+          for (const value of [
+            String(i + 1).padStart(2, "0"),
+            plain(s.headline).replaceAll("\n", " "),
+            s.capture,
+          ]) {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.append(td);
+          }
+          tbody.append(tr);
+          const foot = $("foot" + i);
+          foot.replaceChildren();
+          const strong = document.createElement("strong");
+          strong.textContent = plain(s.headline).replaceAll("\n", " ");
+          foot.append(strong, document.createTextNode(s.capture));
+        });
+      }
+      function issues(indices = project.slides.map((_, i) => i), set = true) {
+        const errors = [],
+          warnings = [],
+          f = format();
+        if (
+          set &&
+          (project.slides.length < f.min || project.slides.length > f.max)
+        )
+          errors.push(
+            `${f.name} needs ${f.min}–${f.max} images per set in this studio; you have ${project.slides.length}.`,
+          );
+        const c = document.createElement("canvas").getContext("2d");
+        for (const i of indices) {
+          const s = project.slides[i];
+          if (textLayout(c, s).overflow)
+            errors.push(
+              `Slide ${i + 1}: shorten the text so it fits the headline area.`,
+            );
+          s.devices.slice(0, s.layout === "duo" ? 2 : 1).forEach((d, k) => {
+            if (!d.image)
+              errors.push(
+                `Slide ${i + 1}: add ${k ? "the second" : "a"} screenshot.`,
+              );
+            else {
+              if (d.image.family !== f.family)
+                errors.push(
+                  `Slide ${i + 1}: replace the ${d.image.family} capture with a ${f.family} screenshot for this format.`,
+                );
+              const g = geometry(s, d);
+              if (d.image.width < ((g.sw * f.w) / 1000) * d.zoom)
+                warnings.push(
+                  `Slide ${i + 1}${k ? " second image" : ""}: this screenshot will be enlarged; use a higher-resolution capture for sharper text.`,
+                );
+            }
+            const g = geometry(s, d);
+            if (
+              g.x + Math.hypot(g.w, g.h) / 2 < 0 ||
+              g.x - Math.hypot(g.w, g.h) / 2 > 1000 ||
+              g.y + Math.hypot(g.w, g.h) / 2 < 0 ||
+              g.y - Math.hypot(g.w, g.h) / 2 > (1000 * f.h) / f.w
+            )
+              warnings.push(
+                `Slide ${i + 1}: a device is outside its own image; check the neighboring slices.`,
+              );
+          });
+        }
+        if (f.family === "android" && project.slides.length < 4)
+          warnings.push(
+            "For Google Play screenshot-based promotion, prepare at least four 1080 × 1920 screenshots.",
+          );
+        return { errors, warnings };
+      }
+      function renderAll() {
+        for (let i = 0; i < project.slides.length; i++)
+          renderTile(
+            $("canvas" + i),
+            i,
+            Math.min(760, Number($("previewSize").value) * 2),
+          );
+        storyUI();
+        const v = issues();
+        $("validation").className =
+          "notice" + (v.errors.length ? "" : " ready");
+        $("validation").replaceChildren();
+        const strong = document.createElement("strong");
+        strong.textContent = v.errors.length
+          ? `${v.errors.length} item${v.errors.length === 1 ? "" : "s"} to finish before exporting`
+          : `Ready to export · ${project.slides.length} images · ${format().w} × ${format().h} · RGB PNG`;
+        $("validation").append(strong);
+        const list = document.createElement("ul");
+        for (const line of [...v.errors, ...v.warnings]) {
+          const li = document.createElement("li");
+          li.textContent = line;
+          list.append(li);
+        }
+        $("validation").append(list);
+      }
+      function startDrag(e, index) {
+        if (busy || e.button !== 0) return;
+        const canvas = e.currentTarget,
+          rect = canvas.getBoundingClientRect(),
+          H = (1000 * format().h) / format().w;
+        const x = ((e.clientX - rect.left) / rect.width) * 1000 + index * 1000,
+          y = ((e.clientY - rect.top) / rect.height) * H;
+        let hit = null;
+        for (let j = project.slides.length - 1; j >= 0 && !hit; j--) {
+          const s = project.slides[j];
+          for (let k = s.layout === "duo" ? 1 : 0; k >= 0; k--) {
+            const d = s.devices[k],
+              g = geometry(s, d),
+              dx = x - (j * 1000 + g.x),
+              dy = y - g.y,
+              rx = dx * Math.cos(g.rotation) + dy * Math.sin(g.rotation),
+              ry = -dx * Math.sin(g.rotation) + dy * Math.cos(g.rotation);
+            if (Math.abs(rx) <= g.w / 2 && Math.abs(ry) <= g.h / 2) {
+              hit = { j, k, d };
+              break;
+            }
+          }
+        }
+        if (!hit) {
+          selectSlide(index);
+          return;
+        }
+        checkpoint();
+        selectSlide(hit.j, hit.k);
+        const start = { x: e.clientX, y: e.clientY, dx: hit.d.x, dy: hit.d.y };
+        canvas.setPointerCapture(e.pointerId);
+        canvas.style.cursor = "grabbing";
+        const move = (ev) => {
+          hit.d.x = clamp(
+            Math.round(start.dx + ((ev.clientX - start.x) / rect.width) * 100),
+            -40,
+            140,
+          );
+          hit.d.y = clamp(
+            Math.round(start.dy + ((ev.clientY - start.y) / rect.height) * 100),
+            -30,
+            130,
+          );
+          syncEditor();
+          update(false);
+        };
+        const end = () => {
+          canvas.style.cursor = "grab";
+          canvas.removeEventListener("pointermove", move);
+          canvas.removeEventListener("pointerup", end);
+          canvas.removeEventListener("pointercancel", end);
+          scheduleSave();
+        };
+        canvas.addEventListener("pointermove", move);
+        canvas.addEventListener("pointerup", end);
+        canvas.addEventListener("pointercancel", end);
+      }
+      async function task(label, fn) {
+        if (busy) return;
+        busy = true;
+        say(label);
+        document.querySelector(".app").inert = true;
+        document.querySelector("header .actions").inert = true;
+        try {
+          await fn();
+        } catch (e) {
+          say(
+            e.message || "That operation could not finish. Please try again.",
+          );
+          console.error(e);
+        } finally {
+          busy = false;
+          document.querySelector(".app").inert = false;
+          document.querySelector("header .actions").inert = false;
+        }
+      }
+      const readData = (file) =>
+        new Promise((resolve, reject) => {
+          const r = new FileReader();
+          r.onload = () => resolve(r.result);
+          r.onerror = () => reject(new Error("Could not read the file."));
+          r.readAsDataURL(file);
+        });
+      const decode = (data) =>
+        new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            if (
+              !img.naturalWidth ||
+              img.naturalWidth * img.naturalHeight > 60000000
+            )
+              reject(new Error("Use an image smaller than 60 megapixels."));
+            else resolve(img);
+          };
+          img.onerror = () =>
+            reject(
+              new Error(
+                "This image could not be opened. Choose a PNG or JPEG screenshot.",
+              ),
+            );
+          img.src = data;
+        });
+      async function loadFile(file, i = active, k = slot) {
+        if (!file) return;
+        return task("Opening screenshot…", async () => {
+          if (
+            !["image/png", "image/jpeg"].includes(file.type) ||
+            file.size > 30 * 1024 * 1024
+          )
+            throw new Error("Choose a PNG or JPEG screenshot under 30 MB.");
+          const data = await readData(file),
+            img = await decode(data),
+            id =
+              "image-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+          const asset = {
+            id,
+            name: file.name,
+            data,
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+            family: format().family,
+          };
+          cache.set(id, img);
+          checkpoint();
+          project.slides[i].devices[k].image = asset;
+          selectSlide(i, k);
+          update();
+          say(
+            `Added ${file.name}. The frame now matches this screenshot’s proportions.`,
+          );
+          $("screenshot").value = "";
+        });
+      }
+      function scheduleSave() {
+        dirty = true;
+        revision++;
+        clearTimeout(saveTimer);
+        $("saveState").textContent = "Unsaved changes";
+        saveTimer = setTimeout(saveLocal, 650);
+      }
+      async function saveLocal() {
+        if (!db) {
+          $("saveState").textContent = "Use Save project to keep edits";
+          return;
+        }
+        try {
+          const snapshot = clone(project),
+            savedRevision = revision;
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction("projects", "readwrite");
+            tx.objectStore("projects").put(snapshot, "current");
+            tx.oncomplete = resolve;
+            tx.onerror = () => reject(tx.error);
+            tx.onabort = () => reject(tx.error);
+          });
+          if (revision === savedRevision) {
+            dirty = false;
+            $("saveState").textContent = "Saved in this browser";
+          }
+        } catch {
+          $("saveState").textContent =
+            "Local save unavailable · save a project";
+        }
+      }
+      function textField(v, max) {
+        if (typeof v !== "string" || v.length > max)
+          throw new Error("The project contains invalid text.");
+        return v;
+      }
+      function numberField(v, min, max) {
+        if (typeof v !== "number" || !Number.isFinite(v) || v < min || v > max)
+          throw new Error("The project contains invalid positioning values.");
+        return v;
+      }
+      function enumField(v, values) {
+        if (!values.includes(v))
+          throw new Error("The project uses an unsupported setting.");
+        return v;
+      }
+      // Imported files are rebuilt from known fields before replacing the current
+      // project. Version 2 (Spritz-era) projects are migrated on open.
+      const V2_THEMES = {
+        editorial: "velvet",
+        bold: "royal",
+        clean: "gallery",
+        blush: "velvet",
+      };
+      const V2_FONTS = { Arial: "system-ui" };
+      async function validateProject(raw) {
+        if (
+          !raw ||
+          ![2, 3].includes(raw.version) ||
+          !Array.isArray(raw.slides) ||
+          raw.slides.length < 1 ||
+          raw.slides.length > 10
+        )
+          throw new Error(
+            "Choose a Screenshot Studio version 2 or 3 project file.",
+          );
+        const v2 = raw.version === 2;
+        const p = initial();
+        p.format = enumField(raw.format, Object.keys(FORMATS));
+        p.theme = enumField(
+          v2 ? V2_THEMES[raw.theme] || raw.theme : raw.theme,
+          Object.keys(THEMES),
+        );
+        p.brand = textField(raw.brand, 60);
+        p.font = enumField(V2_FONTS[raw.font] || raw.font, [
+          "Georgia",
+          "system-ui",
+          "Avenir Next",
+          "Helvetica Neue",
+        ]);
+        p.decor = v2
+          ? raw.ribbon
+            ? "both"
+            : "none"
+          : enumField(raw.decor, ["both", "arc", "glow", "none"]);
+        for (const key of Object.keys(p.colors)) {
+          const value =
+            raw.colors?.[key] ??
+            (key === "background2" ? raw.colors?.background : undefined);
+          if (!/^#[0-9a-f]{6}$/i.test(value || ""))
+            throw new Error("The project contains an invalid color.");
+          p.colors[key] = value;
+        }
+        const nextCache = new Map();
+        p.slides = [];
+        for (const rawSlide of raw.slides) {
+          const s = slide(0);
+          s.eyebrow = textField(rawSlide.eyebrow ?? "", 40);
+          for (const key of ["headline", "subtitle", "capture"])
+            s[key] = textField(
+              rawSlide[key],
+              key === "headline" ? 240 : key === "subtitle" ? 360 : 700,
+            );
+          s.layout = enumField(rawSlide.layout, [
+            "straight",
+            "hero",
+            "tilt",
+            "bridge",
+            "duo",
+          ]);
+          s.textPosition = enumField(rawSlide.textPosition, ["top", "bottom"]);
+          s.align = enumField(rawSlide.align, ["left", "center"]);
+          s.textSize = numberField(rawSlide.textSize, 5, 13);
+          s.accentLast = !!rawSlide.accentLast;
+          if (!Array.isArray(rawSlide.devices) || rawSlide.devices.length !== 2)
+            throw new Error("The project has missing device settings.");
+          s.devices = [];
+          for (const rd of rawSlide.devices) {
+            const d = device();
+            for (const [key, min, max] of [
+              ["x", -40, 140],
+              ["y", -30, 130],
+              ["scale", 35, 160],
+              ["rotation", -35, 35],
+              ["zoom", 1, 2.5],
+              ["cropX", -100, 100],
+              ["cropY", -100, 100],
+            ])
+              d[key] = numberField(rd[key], min, max);
+            d.frame = enumField(rd.frame, ["dark", "light", "accent", "none"]);
+            if (rd.image) {
+              const a = rd.image;
+              if (
+                typeof a.data !== "string" ||
+                !/^data:image\/(png|jpeg);base64,/.test(a.data) ||
+                a.data.length > 42000000
+              )
+                throw new Error(
+                  "A saved screenshot is not a supported PNG or JPEG.",
+                );
+              const id = "restored-" + nextCache.size,
+                img = await decode(a.data);
+              nextCache.set(id, img);
+              d.image = {
+                id,
+                name: textField(a.name, 500),
+                data: a.data,
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+                family: enumField(a.family, ["iphone", "ipad", "android"]),
+              };
+            }
+            s.devices.push(d);
+          }
+          p.slides.push(s);
+        }
+        return { project: p, cache: nextCache };
+      }
+      async function initStorage() {
+        try {
+          db = await new Promise((resolve, reject) => {
+            const req = indexedDB.open("cork-note-screenshot-studio-v3", 1);
+            req.onupgradeneeded = () =>
+              req.result.createObjectStore("projects");
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+            req.onblocked = () => reject(new Error("Storage is busy."));
+          });
+          const raw = await new Promise((resolve, reject) => {
+            const req = db
+              .transaction("projects")
+              .objectStore("projects")
+              .get("current");
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+          });
+          if (raw) {
+            const restored = await validateProject(raw);
+            project = restored.project;
+            cache = restored.cache;
+            say("Restored your last project from this browser.");
+          } else applyTheme("velvet", false);
+          $("saveState").textContent = raw
+            ? "Restored local project"
+            : "Ready · changes save locally";
+        } catch {
+          $("saveState").textContent = "Use Save project to keep edits";
+          applyTheme("velvet", false);
+        }
+        syncGlobal();
+        createCards();
+        renderAll();
+      }
+      function download(blob, name) {
+        const url = URL.createObjectURL(blob),
+          a = document.createElement("a");
+        a.href = url;
+        a.download = name;
+        document.body.append(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 30000);
+      }
+      const utf8 = (s) => new TextEncoder().encode(s);
+      const crcTable = Array.from({ length: 256 }, (_, n) => {
+        for (let k = 0; k < 8; k++)
+          n = n & 1 ? 0xedb88320 ^ (n >>> 1) : n >>> 1;
+        return n >>> 0;
+      });
+      function crc32(bytes) {
+        let n = 0xffffffff;
+        for (const b of bytes) n = crcTable[(n ^ b) & 255] ^ (n >>> 8);
+        return (n ^ 0xffffffff) >>> 0;
+      }
+      function pngChunk(type, data) {
+        const t = utf8(type),
+          out = new Uint8Array(data.length + 12),
+          dv = new DataView(out.buffer);
+        dv.setUint32(0, data.length);
+        out.set(t, 4);
+        out.set(data, 8);
+        dv.setUint32(out.length - 4, crc32(out.subarray(4, out.length - 4)));
+        return out;
+      }
+      // Canvas PNG encoders may include an alpha channel even on opaque canvases.
+      // Encode RGB explicitly, with Sub row filtering and native zlib compression.
+      async function rgbPNG(canvas) {
+        if (typeof CompressionStream === "undefined")
+          throw new Error(
+            "PNG export needs a current Chrome, Edge, Firefox, or Safari browser with CompressionStream support.",
+          );
+        const { width: w, height: h } = canvas,
+          pixels = canvas.getContext("2d").getImageData(0, 0, w, h).data,
+          stride = w * 3 + 1,
+          raw = new Uint8Array(stride * h);
+        for (let y = 0; y < h; y++) {
+          const row = y * stride;
+          raw[row] = 1;
+          for (let x = 0; x < w; x++)
+            for (let c = 0; c < 3; c++) {
+              const i = (y * w + x) * 4 + c;
+              raw[row + 1 + x * 3 + c] =
+                (pixels[i] - (x ? pixels[i - 4] : 0) + 256) & 255;
+            }
+        }
+        const compressed = new Uint8Array(
+          await new Response(
+            new Blob([raw])
+              .stream()
+              .pipeThrough(new CompressionStream("deflate")),
+          ).arrayBuffer(),
+        );
+        const ihdr = new Uint8Array(13),
+          dv = new DataView(ihdr.buffer);
+        dv.setUint32(0, w);
+        dv.setUint32(4, h);
+        ihdr[8] = 8;
+        ihdr[9] = 2;
+        return new Blob(
+          [
+            new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]),
+            pngChunk("IHDR", ihdr),
+            pngChunk("sRGB", new Uint8Array([0])),
+            pngChunk("IDAT", compressed),
+            pngChunk("IEND", new Uint8Array()),
+          ],
+          { type: "image/png" },
+        );
+      }
+      // ZIP STORE keeps already-compressed PNGs intact and needs no CDN library.
+      async function makeZip(files) {
+        const parts = [],
+          central = [];
+        let offset = 0;
+        const now = new Date(),
+          date =
+            ((now.getFullYear() - 1980) << 9) |
+            ((now.getMonth() + 1) << 5) |
+            now.getDate(),
+          time =
+            (now.getHours() << 11) |
+            (now.getMinutes() << 5) |
+            (now.getSeconds() >> 1);
+        for (const file of files) {
+          const name = utf8(file.name),
+            bytes = new Uint8Array(await file.blob.arrayBuffer()),
+            crc = crc32(bytes),
+            local = new Uint8Array(30 + name.length),
+            l = new DataView(local.buffer);
+          l.setUint32(0, 0x04034b50, true);
+          l.setUint16(4, 20, true);
+          l.setUint16(6, 0x0800, true);
+          l.setUint16(10, time, true);
+          l.setUint16(12, date, true);
+          l.setUint32(14, crc, true);
+          l.setUint32(18, bytes.length, true);
+          l.setUint32(22, bytes.length, true);
+          l.setUint16(26, name.length, true);
+          local.set(name, 30);
+          parts.push(local, bytes);
+          const dir = new Uint8Array(46 + name.length),
+            d = new DataView(dir.buffer);
+          d.setUint32(0, 0x02014b50, true);
+          d.setUint16(4, 20, true);
+          d.setUint16(6, 20, true);
+          d.setUint16(8, 0x0800, true);
+          d.setUint16(12, time, true);
+          d.setUint16(14, date, true);
+          d.setUint32(16, crc, true);
+          d.setUint32(20, bytes.length, true);
+          d.setUint32(24, bytes.length, true);
+          d.setUint16(28, name.length, true);
+          d.setUint32(42, offset, true);
+          dir.set(name, 46);
+          central.push(dir);
+          offset += local.length + bytes.length;
+        }
+        const end = new Uint8Array(22),
+          e = new DataView(end.buffer);
+        e.setUint32(0, 0x06054b50, true);
+        e.setUint16(8, files.length, true);
+        e.setUint16(10, files.length, true);
+        e.setUint32(
+          12,
+          central.reduce((n, a) => n + a.length, 0),
+          true,
+        );
+        e.setUint32(16, offset, true);
+        return new Blob([...parts, ...central, end], {
+          type: "application/zip",
+        });
+      }
+      function filename(i) {
+        return `cork-note-${project.format}-${String(i + 1).padStart(2, "0")}-${format().w}x${format().h}.png`;
+      }
+      function assertExport(indices, set = true) {
+        const v = issues(indices, set);
+        if (v.errors.length)
+          throw new Error("Finish these items first: " + v.errors.join(" "));
+      }
+      async function exportImages(all) {
+        return task("Preparing exact-size PNGs…", async () => {
+          const indices = all ? project.slides.map((_, i) => i) : [active];
+          assertExport(indices, all); // A slice can contain its neighbors’ devices, so validate the whole scene too.
+          if (!all) {
+            project.slides.forEach((s, j) => {
+              if (j === active) return;
+              s.devices.slice(0, s.layout === "duo" ? 2 : 1).forEach((d) => {
+                const g = geometry(s, d),
+                  r =
+                    (Math.abs(g.w * Math.cos(g.rotation)) +
+                      Math.abs(g.h * Math.sin(g.rotation))) /
+                      2 +
+                    80,
+                  c = j * 1000 + g.x;
+                if (
+                  c + r > active * 1000 &&
+                  c - r < (active + 1) * 1000 &&
+                  (!d.image || d.image.family !== format().family)
+                )
+                  throw new Error(
+                    `Slide ${j + 1} crosses into this image. Add its matching ${format().family} screenshot first.`,
+                  );
+              });
+            });
+          }
+          const files = [],
+            canvas = document.createElement("canvas");
+          for (const i of indices) {
+            say(
+              `Rendering ${i + 1} of ${project.slides.length} · ${format().w} × ${format().h}…`,
+            );
+            await new Promise(requestAnimationFrame);
+            renderTile(canvas, i, format().w);
+            if (canvas.width !== format().w || canvas.height !== format().h)
+              throw new Error(
+                "The export dimensions did not match the selected format.",
+              );
+            files.push({ name: filename(i), blob: await rgbPNG(canvas) });
+          }
+          canvas.width = canvas.height = 1;
+          if (all) {
+            const manifest = `Cork & Note screenshot set\n${format().name}\n${format().w} × ${format().h} pixels, 24-bit RGB PNG, no alpha channel\n\nUpload the numbered PNG files in order. This text file is not a store asset.\n\n${project.slides.map((s, i) => `${i + 1}. ${plain(s.headline).replaceAll("\n", " ")}\n${s.subtitle}`).join("\n\n")}\n\nReview each image for readability and accurate current app content.\nStore specifications checked 2026-09-09.\n`;
+            files.push({
+              name: "READ-ME.txt",
+              blob: new Blob([manifest], { type: "text/plain" }),
+            });
+            download(
+              await makeZip(files),
+              `cork-note-${project.format}-${format().w}x${format().h}.zip`,
+            );
+          } else download(files[0].blob, files[0].name);
+          say(
+            `Exported ${indices.length} exact-size RGB PNG${indices.length === 1 ? "" : "s"}${all ? " in one ZIP" : ""}.`,
+          );
+        });
+      }
+      $("exportAll").onclick = () => exportImages(true);
+      $("exportOne").onclick = () => exportImages(false);
+      $("exportDraft").onclick = () =>
+        task("Building draft overview…", async () => {
+          const w = 260,
+            h = Math.round((w * format().h) / format().w),
+            c = document.createElement("canvas");
+          c.width = w * project.slides.length;
+          c.height = h + 60;
+          const ctx = c.getContext("2d", { alpha: false });
+          ctx.fillStyle = project.colors.background;
+          ctx.fillRect(0, 0, c.width, c.height);
+          const tile = document.createElement("canvas");
+          for (let i = 0; i < project.slides.length; i++) {
+            renderTile(tile, i, w * 2);
+            ctx.drawImage(tile, i * w, 0, w, h);
+          }
+          ctx.fillStyle = "#ffffffdd";
+          ctx.fillRect(0, h, c.width, 60);
+          ctx.fillStyle = "#3d2d52";
+          ctx.font = "600 16px Arial";
+          ctx.fillText("DRAFT OVERVIEW · NOT FOR STORE UPLOAD", 20, h + 36);
+          download(await rgbPNG(c), "cork-note-DRAFT-overview.png");
+          say("Saved a watermarked overview for reviewing the composition.");
+        });
+      $("saveProject").onclick = () => {
+        const file = new Blob([JSON.stringify(project)], {
+          type: "application/json",
+        });
+        if (file.size > 250 * 1024 * 1024) {
+          say(
+            "This project is over 250 MB. Replace large screenshots with smaller PNGs or JPEGs before saving.",
+          );
+          return;
+        }
+        download(file, `cork-note-${project.format}-project.json`);
+        dirty = false;
+        say(
+          "Saved your project, including screenshots. Open project restores it later.",
+        );
+      };
+      $("openProject").onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        task("Opening saved project…", async () => {
+          if (file.size > 250 * 1024 * 1024)
+            throw new Error("Project files must be under 250 MB.");
+          const restored = await validateProject(JSON.parse(await file.text()));
+          project = restored.project;
+          cache = restored.cache;
+          history.length = 0;
+          $("undo").disabled = true;
+          active = slot = 0;
+          syncGlobal();
+          createCards();
+          update();
+          say("Project opened, including its screenshots and layout.");
+        }).finally(() => {
+          $("openProject").value = "";
+        });
+      };
+      // ---------------------------------------------------------------------
+      // Ready-made Royal Velvet set. PREBUILT_IMAGES is filled in by
+      // scripts/embed-studio-screenshots.mjs from real simulator captures of
+      // the demo account; in the bare source copy the button explains itself.
+      /*PREBUILT:START*/
+      const PREBUILT_IMAGES = {};
+      /*PREBUILT:END*/
+      // Slide order follows the marketing pillars (owner, 2026-09-10):
+      // 1 remember/journal · 2 log ratings & notes · 3 sommelier that learns
+      // your palate · 4 explore wineries & log there · 5 find it again ·
+      // 6 cellar. No dark-mode slide.
+      const PREBUILT_SET = [
+        {
+          key: "home",
+          layout: "hero",
+          eyebrow: "YOUR WINE JOURNAL",
+          headline: "Remember every wine\n*you love*.",
+          subtitle:
+            "Your visits, tastings, and bottles — one beautiful journal.",
+          capture:
+            "Home screen with the Journey card, Near You wineries, ready-to-drink counts, and cellar summary.",
+        },
+        {
+          key: "wine-detail",
+          key2: "log-form-filled",
+          layout: "duo",
+          eyebrow: "LOG IT YOUR WAY",
+          headline: "Your taste,\n*your words*.",
+          subtitle:
+            "Stars, sweetness, tannins, flavor notes — as quick or as deep as you like.",
+          capture:
+            "Filled log form (4.5 stars, notes, sweetness/tannin bars) with the saved wine detail behind it.",
+        },
+        {
+          key: "sommelier-ask",
+          layout: "tilt",
+          eyebrow: "AI SOMMELIER",
+          headline: "A sommelier that\n*learns your palate*.",
+          subtitle:
+            "Ask anything — the answers are built on what you’ve tasted and loved.",
+          capture:
+            "A real sommelier answer referencing the user’s own 5/5 Petit Manseng and home wineries.",
+        },
+        {
+          key: "map",
+          key2: "winery",
+          layout: "duo",
+          eyebrow: "EXPLORE WINERIES",
+          headline: "Find your\n*next favorite*.",
+          subtitle:
+            "Wineries near you on the map — tap one and log your tasting right there.",
+          capture:
+            "Winery map around Delaplane VA with visited pins, and the Barrel Oak detail page behind it.",
+        },
+        {
+          key: "tastings",
+          layout: "bridge",
+          eyebrow: "YOUR TASTINGS",
+          headline: "Never forget\n*that bottle*.",
+          subtitle: "Every rating and note you’ve made, one search away.",
+          capture: "Your tastings list with several rated wines.",
+        },
+        {
+          key: "cellar",
+          layout: "straight",
+          eyebrow: "WINE CELLAR",
+          headline: "Know what’s *ready*\nto open tonight.",
+          subtitle: "Every bottle at home, from too young to past peak.",
+          capture:
+            "Cellar with readiness filters, Tonight’s Pick, and status badges.",
+        },
+      ];
+      function prebuiltProject() {
+        const base = initial();
+        // Ships in the Velvet Duotone treatment; switching templates on the
+        // loaded set restyles without disturbing the curated layouts.
+        const t = THEMES.duotone;
+        base.theme = "duotone";
+        base.colors = {
+          background: t.bg,
+          background2: t.bg2,
+          accent: t.accent,
+          ink: t.ink,
+          highlight: t.highlight,
+        };
+        base.font = t.font;
+        base.decor = t.decor;
+        const asset = (key) => ({
+          id: "prebuilt-" + key,
+          name: key + ".jpg",
+          data: PREBUILT_IMAGES[key],
+          width: 1,
+          height: 1,
+          family: "iphone",
+        });
+        return {
+          ...base,
+          slides: PREBUILT_SET.map((entry) => {
+            const s = slide(0);
+            s.eyebrow = entry.eyebrow;
+            s.headline = entry.headline;
+            s.subtitle = entry.subtitle;
+            s.capture = entry.capture;
+            arrange(s, entry.layout);
+            s.textSize = 9;
+            s.devices[0].image = asset(entry.key);
+            if (entry.key2) s.devices[1].image = asset(entry.key2);
+            return s;
+          }),
+        };
+      }
+      if (!Object.keys(PREBUILT_IMAGES).length) {
+        $("loadPrebuilt").disabled = true;
+        $("readymadeHint").textContent =
+          "This copy of the studio was built without the embedded screenshots. Use the full file from the marketing folder, or add captures manually below.";
+      }
+      $("loadPrebuilt").onclick = () =>
+        task("Loading the ready-made set…", async () => {
+          const restored = await validateProject(prebuiltProject());
+          checkpoint();
+          project = restored.project;
+          cache = restored.cache;
+          active = slot = 0;
+          syncGlobal();
+          createCards();
+          update();
+          say(
+            "Loaded the ready-made Royal Velvet set with real app captures. Every slide stays fully editable — Undo restores your previous work.",
+          );
+        });
+      // ---------------------------------------------------------------------
+      for (const [key, f] of Object.entries(FORMATS)) {
+        const o = document.createElement("option");
+        o.value = key;
+        o.textContent = f.name;
+        $("format").append(o);
+      }
+      for (const [key, t] of Object.entries(THEMES)) {
+        const b = document.createElement("button");
+        b.className = "template";
+        b.dataset.theme = key;
+        const sw = document.createElement("span");
+        sw.className = "swatch";
+        sw.style.background = t.bg;
+        sw.style.color = t.accent;
+        for (let i = 0; i < 3; i++) sw.append(document.createElement("i"));
+        b.append(sw, document.createTextNode(t.name));
+        b.onclick = () => {
+          applyTheme(key);
+          say(
+            `Applied ${t.name}. Copy and uploaded screenshots are preserved.`,
+          );
+        };
+        $("templates").append(b);
+      }
+      $("format").onchange = () => {
+        project.format = $("format").value;
+        syncGlobal();
+        syncEditor();
+        update();
+        say(
+          `Switched to ${format().name}. Review the composition and use captures from the matching platform.`,
+        );
+      };
+      for (const key of [
+        "background",
+        "background2",
+        "accent",
+        "ink",
+        "highlight",
+      ])
+        $(key).oninput = () => {
+          project.colors[key] = $(key).value;
+          update();
+        };
+      for (const key of ["font", "brand", "decor"])
+        $(key).oninput = () => {
+          project[key] = $(key).value;
+          update();
+        };
+      for (const key of [
+        "eyebrow",
+        "headline",
+        "subtitle",
+        "capture",
+        "textPosition",
+        "align",
+        "textSize",
+      ])
+        $(key).oninput = () => {
+          selected()[key] =
+            key === "textSize" ? Number($(key).value) : $(key).value;
+          syncEditor();
+          update();
+        };
+      $("accentLast").onchange = () => {
+        selected().accentLast = $("accentLast").checked;
+        update();
+      };
+      $("layout").onchange = () => {
+        arrange(selected(), $("layout").value);
+        slot = 0;
+        syncEditor();
+        update();
+      };
+      for (const [id, key] of [
+        ["deviceX", "x"],
+        ["deviceY", "y"],
+        ["deviceScale", "scale"],
+        ["rotation", "rotation"],
+        ["zoom", "zoom"],
+        ["cropX", "cropX"],
+        ["cropY", "cropY"],
+        ["frame", "frame"],
+      ])
+        $(id).oninput = () => {
+          selectedDevice()[key] =
+            key === "frame" ? $(id).value : Number($(id).value);
+          syncEditor();
+          update();
+        };
+      $("resetCrop").onclick = () => {
+        checkpoint();
+        Object.assign(selectedDevice(), { zoom: 1, cropX: 0, cropY: 0 });
+        syncEditor();
+        update();
+      };
+      document.querySelectorAll("#deviceTabs button").forEach(
+        (b) =>
+          (b.onclick = () => {
+            slot = Number(b.dataset.slot);
+            syncEditor();
+          }),
+      );
+      $("screenshot").onchange = (e) => loadFile(e.target.files[0]);
+      $("clearImage").onclick = () => {
+        checkpoint();
+        selectedDevice().image = null;
+        syncEditor();
+        update();
+      };
+      for (const event of ["dragenter", "dragover"])
+        $("dropzone").addEventListener(event, (e) => {
+          e.preventDefault();
+          $("dropzone").classList.add("drag");
+        });
+      for (const event of ["dragleave", "drop"])
+        $("dropzone").addEventListener(event, (e) => {
+          e.preventDefault();
+          $("dropzone").classList.remove("drag");
+        });
+      $("dropzone").addEventListener("drop", (e) =>
+        loadFile(e.dataTransfer.files[0]),
+      );
+      function rebuild() {
+        slot = 0;
+        createCards();
+        update();
+      }
+      $("addSlide").onclick = () => {
+        if (project.slides.length >= format().max) return;
+        checkpoint();
+        project.slides.push(slide(project.slides.length));
+        active = project.slides.length - 1;
+        rebuild();
+      };
+      $("duplicateSlide").onclick = () => {
+        if (project.slides.length >= format().max) return;
+        checkpoint();
+        project.slides.splice(active + 1, 0, clone(selected()));
+        active++;
+        rebuild();
+      };
+      $("removeSlide").onclick = () => {
+        if (project.slides.length <= 1) return;
+        checkpoint();
+        project.slides.splice(active, 1);
+        active = Math.min(active, project.slides.length - 1);
+        rebuild();
+      };
+      for (const [id, dir] of [
+        ["moveLeft", -1],
+        ["moveRight", 1],
+      ])
+        $(id).onclick = () => {
+          const next = active + dir;
+          if (next < 0 || next >= project.slides.length) return;
+          checkpoint();
+          [project.slides[active], project.slides[next]] = [
+            project.slides[next],
+            project.slides[active],
+          ];
+          active = next;
+          rebuild();
+        };
+      $("viewMode").onclick = () => {
+        const connected = $("gallery").classList.toggle("connected");
+        $("viewMode").textContent = connected
+          ? "View with gaps"
+          : "View connected";
+      };
+      $("previewSize").oninput = () => {
+        $("gallery").style.setProperty(
+          "--tile-width",
+          $("previewSize").value + "px",
+        );
+        update(false);
+      };
+      window.addEventListener("beforeunload", (e) => {
+        if (dirty) {
+          e.preventDefault();
+          e.returnValue = "";
+        }
+      });
+      syncGlobal();
+      createCards();
+      renderAll();
+      task("Opening studio…", initStorage).then(() => {
+        if ($("status").textContent === "Opening studio…")
+          say(
+            "Load the ready-made set, or start with a template and add your first screenshot.",
+          );
+      });
+    </script>
+  </body>
+</html>
