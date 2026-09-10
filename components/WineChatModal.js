@@ -274,10 +274,16 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
               ref={flatListRef}
               data={messages}
               keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
+              renderItem={({ item, index }) => (
                 <ChatBubble
                   message={item}
                   onUseSuggestions={item.ai_suggestions ? handleUseSuggestions : undefined}
+                  // Preceding user prompt, for AI-response reports (see ChatBubble).
+                  reportContext={
+                    index > 0 && messages[index - 1].role === 'user'
+                      ? messages[index - 1].content
+                      : null
+                  }
                 />
               )}
               contentContainerStyle={styles.messageList}
