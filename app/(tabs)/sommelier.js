@@ -248,7 +248,10 @@ export default function SommelierScreen() {
         suggestions
       );
 
-      setMessages(prev => [...prev, { ...aiMsg, displayText }]);
+      // `sources` rides along on the in-memory message only — the messages
+      // table has no column for it, so they show for this reply and are gone on
+      // reload. Worth persisting later; not worth a schema change to ship this.
+      setMessages(prev => [...prev, { ...aiMsg, displayText, sources: aiResponse.sources || [] }]);
     } catch (err) {
       console.error('Send error:', err);
       // Add error message locally

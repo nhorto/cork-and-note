@@ -17,7 +17,13 @@ import {
   needsWindowCount,
   normalizeTask,
   usageWindowStart,
+  webSearchToolsFor,
 } from "../_shared/entitlements.ts";
+import {
+  collectSources,
+  textFromContent,
+  webSearchRequestCount,
+} from "../_shared/claudeResponse.ts";
 
 // ── Limits ──────────────────────────────────────────────────────────────
 const MAX_BODY_BYTES = 25_000_000; // ~25MB (base64 images are large)
@@ -252,58 +258,100 @@ Deno.serve(async (req: Request) => {
         ? MODELS[task]
         : MODELS.chat;
 
-    // ── Call Claude ───────────────────────────────────────────────────
-    const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": anthropicApiKey,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: 1024,
-        // Prompt caching (launch plan §4.3): the system prompt is stable across
-        // the turns of a sommelier conversation (and byte-identical across all
-        // label scans), so mark it as a cache breakpoint — cached reads bill at
-        // ~10% of input price. Prompts under the model's minimum cacheable size
-        // silently skip the cache, so this is safe for short prompts too.
-        system: [
-          {
-            type: "text",
-            text: (system_prompt as string) || "You are a helpful wine sommelier.",
-            cache_control: { type: "ephemeral" },
-          },
-        ],
-        messages: claudeMessages,
-      }),
-    });
+    // ── Server tools ──────────────────────────────────────────────────
+    // Pro-only web search, so the sommelier can look a wine up instead of
+    // recalling it. Empty for free users — an absent tool is the only kind a
+    // patched client cannot talk us into using. See webSearchToolsFor().
+    //
+    // Note this splits the prompt cache by tier: `tools` renders BEFORE `system`,
+    // so Pro and free users have different cached prefixes. That is correct
+    // (they are different requests), just worth knowing when reading cache stats.
+    const tools = webSearchToolsFor({ isPro, task: meteredTask });
+    const canSearch = tools.length > 0;
 
-    if (!claudeResponse.ok) {
-      const errorText = await claudeResponse.text();
-      console.error("Claude API error:", claudeResponse.status, errorText);
-      // Log details server-side; return a generic message + a proper status code.
-      const status = claudeResponse.status === 429 ? 429 : 502;
-      return json(
-        { error: "The sommelier is unavailable right now. Please try again." },
-        status
-      );
+    // ── Call Claude ───────────────────────────────────────────────────
+    // A searched reply is a MIXED content list (server_tool_use +
+    // web_search_tool_result + several cited text blocks) spread over a
+    // server-side sampling loop, and if that loop hits its iteration limit the
+    // turn comes back `pause_turn` — finished thinking, not finished talking.
+    // Resuming is just re-sending the same messages with the partial assistant
+    // turn appended; the server sees the trailing tool block and picks up. We
+    // bound it because "loop until the model says stop" is how a $0.03 message
+    // becomes a $3 one.
+    const MAX_PAUSE_RESUMES = 2;
+    const conversation: Array<Record<string, unknown>> = [...claudeMessages];
+    const responseBlocks: unknown[] = [];
+    let usageInputTokens = 0;
+    let usageOutputTokens = 0;
+    let webSearches = 0;
+
+    for (let resume = 0; ; resume++) {
+      const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": anthropicApiKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model,
+          // Room for a cited answer without truncating mid-sentence. max_tokens
+          // is a ceiling, not a spend — unused headroom costs nothing.
+          max_tokens: canSearch ? 2048 : 1024,
+          // Prompt caching (launch plan §4.3): the system prompt is stable across
+          // the turns of a sommelier conversation (and byte-identical across all
+          // label scans), so mark it as a cache breakpoint — cached reads bill at
+          // ~10% of input price. Prompts under the model's minimum cacheable size
+          // silently skip the cache, so this is safe for short prompts too.
+          system: [
+            {
+              type: "text",
+              text: (system_prompt as string) || "You are a helpful wine sommelier.",
+              cache_control: { type: "ephemeral" },
+            },
+          ],
+          messages: conversation,
+          ...(canSearch ? { tools } : {}),
+        }),
+      });
+
+      if (!claudeResponse.ok) {
+        const errorText = await claudeResponse.text();
+        console.error("Claude API error:", claudeResponse.status, errorText);
+        // Log details server-side; return a generic message + a proper status code.
+        const status = claudeResponse.status === 429 ? 429 : 502;
+        return json(
+          { error: "The sommelier is unavailable right now. Please try again." },
+          status
+        );
+      }
+
+      const claudeData = await claudeResponse.json();
+      if (Array.isArray(claudeData.content)) responseBlocks.push(...claudeData.content);
+      usageInputTokens += claudeData.usage?.input_tokens ?? 0;
+      usageOutputTokens += claudeData.usage?.output_tokens ?? 0;
+      webSearches += webSearchRequestCount(claudeData.usage);
+
+      if (claudeData.stop_reason !== "pause_turn" || resume >= MAX_PAUSE_RESUMES) break;
+      // Resume: append the paused turn verbatim. Do NOT add a "continue" message —
+      // the API detects the trailing server_tool_use block and carries on itself.
+      conversation.push({ role: "assistant", content: claudeData.content });
     }
 
-    const claudeData = await claudeResponse.json();
-
-    const responseText =
-      claudeData.content
-        ?.filter((block: { type: string }) => block.type === "text")
-        .map((block: { text: string }) => block.text)
-        .join("") || "";
+    // Text and sources are read across every turn at once, so a paused-and-
+    // resumed answer reads as one reply and cites each page only once.
+    const responseText = textFromContent(responseBlocks);
+    const sources = collectSources(responseBlocks);
 
     // ── Record usage (append-only; best-effort) ───────────────────────
     const { error: usageError } = await supabaseClient.from("chat_usage").insert({
       user_id: user.id,
       task: meteredTask,
-      input_tokens: claudeData.usage?.input_tokens ?? null,
-      output_tokens: claudeData.usage?.output_tokens ?? null,
+      input_tokens: usageInputTokens || null,
+      output_tokens: usageOutputTokens || null,
+      // Only meaningful where search was actually on the table; null elsewhere
+      // keeps "free users never search" readable straight off the table.
+      web_searches: canSearch ? webSearches : null,
     });
     if (usageError) console.error("Failed to record chat_usage:", usageError);
 
@@ -311,7 +359,14 @@ Deno.serve(async (req: Request) => {
     // "2 free scans left" hint without a second round-trip.
     return json({
       response: responseText,
-      usage: claudeData.usage,
+      // Pages behind the answer, for the "Sources" row under a reply. Always an
+      // array so the client never has to null-check it.
+      sources,
+      usage: {
+        input_tokens: usageInputTokens,
+        output_tokens: usageOutputTokens,
+        web_searches: webSearches,
+      },
       meter: {
         task: meter.task,
         limit: meter.limit,

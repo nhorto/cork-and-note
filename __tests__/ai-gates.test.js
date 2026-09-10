@@ -17,6 +17,9 @@ import {
   needsWindowCount,
   normalizeTask,
   usageWindowStart,
+  WEB_SEARCH_MAX_USES,
+  WEB_SEARCH_TOOL_TYPE,
+  webSearchToolsFor,
 } from '../supabase/functions/_shared/entitlements.ts';
 
 const MIN = 60_000;
@@ -266,5 +269,80 @@ describe('what the edge function may skip fetching', () => {
   it('maps meter windows to SQL exactly once: scans lifetime, chat monthly', () => {
     expect(usageWindowStart('label_scan', T0)).toBeNull();
     expect(usageWindowStart('chat', T0)).toBe('2026-09-01T00:00:00.000Z');
+  });
+});
+
+describe('web search is a Pro tool, and only on chat', () => {
+  const toolsFor = (isPro, task) => webSearchToolsFor({ isPro, task });
+
+  it('gives a Pro chat exactly one bounded web_search tool', () => {
+    const tools = toolsFor(true, 'chat');
+    expect(tools).toEqual([
+      { type: WEB_SEARCH_TOOL_TYPE, name: 'web_search', max_uses: WEB_SEARCH_MAX_USES },
+    ]);
+    // max_uses IS the per-message cost ceiling — if this ever creeps up, the
+    // worst-case monthly bill in launch plan §4.2 creeps with it.
+    expect(WEB_SEARCH_MAX_USES).toBe(2);
+    // The dated tool version matters: the older type has no dynamic filtering
+    // (more input tokens), and a wrong string is a 400 at runtime, not a typo
+    // anything else would catch.
+    expect(WEB_SEARCH_TOOL_TYPE).toBe('web_search_20260209');
+  });
+
+  it('gives a free user nothing, on either task', () => {
+    expect(toolsFor(false, 'chat')).toEqual([]);
+    expect(toolsFor(false, 'label_scan')).toEqual([]);
+  });
+
+  it('gives scans nothing even for Pro — they run on Haiku, which would 400', () => {
+    expect(toolsFor(true, 'label_scan')).toEqual([]);
+  });
+
+  it('follows the entitlement the gate computed, not a claim from the client', () => {
+    // The edge function passes gateAiRequest()'s own isPro into webSearchToolsFor,
+    // so an expired subscription loses the tool on the same tick it loses Pro.
+    const expired = { is_pro: true, expires_at: new Date(T0 - DAY).toISOString() };
+    const verdict = gateAiRequest({
+      nowMs: T0,
+      task: 'chat',
+      hasImages: false,
+      entitlement: expired,
+      counts: { burst: 0, day: 0, window: 0 },
+    });
+    expect(verdict.isPro).toBe(false);
+    expect(toolsFor(verdict.isPro, verdict.task)).toEqual([]);
+
+    // A live trial (is_pro with a future expiry) is Pro and does get to search.
+    const trialing = { is_pro: true, expires_at: new Date(T0 + 2 * DAY).toISOString() };
+    const trialVerdict = gateAiRequest({
+      nowMs: T0,
+      task: 'chat',
+      hasImages: false,
+      entitlement: trialing,
+      counts: { burst: 0, day: 0, window: 0 },
+    });
+    expect(trialVerdict.isPro).toBe(true);
+    expect(toolsFor(trialVerdict.isPro, trialVerdict.task)).toHaveLength(1);
+  });
+
+  it('cannot be talked into a search by an invented task name', () => {
+    // normalizeTask folds anything unknown to 'chat', so a client sending
+    // task:'label_scan ' or task:'search' gets the chat meter AND chat's tools —
+    // never a cheaper meter with a paid tool attached.
+    expect(toolsFor(true, normalizeTask('web_search'))).toHaveLength(1);
+    expect(toolsFor(false, normalizeTask('web_search'))).toEqual([]);
+    expect(toolsFor(true, normalizeTask('label_scan'))).toEqual([]);
+  });
+
+  it('never reaches a refused call at all: the gate returns before tools are built', () => {
+    // A free user at their monthly wall is refused 402, so no request is ever
+    // built and no search can be billed. Belt-and-braces on top of toolsFor().
+    const free = new FakeUser();
+    for (let i = 0; i < FREE_TIER_LIMITS.chat; i++) {
+      expect(free.attempt({ atMs: T0 + i * MIN * 10 }).allowed).toBe(true);
+    }
+    const walled = free.attempt({ atMs: T0 + 60 * MIN });
+    expect(walled).toMatchObject({ allowed: false, status: 402 });
+    expect(toolsFor(walled.isPro, walled.task)).toEqual([]);
   });
 });

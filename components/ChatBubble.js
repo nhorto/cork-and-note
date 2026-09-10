@@ -3,7 +3,7 @@
 // AI messages render markdown, user messages render plain text
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { chatService } from '../lib/chat';
 import theme from '../styles/theme';
@@ -107,10 +107,22 @@ const mdStyles = {
   },
 };
 
+// The chip label for a source. The hostname, not the page title: "vawine.org"
+// tells you at a glance whether the sommelier read the winery's own site or a
+// stranger's blog, and it fits on one line where a title never does. Parsed with
+// a regex rather than `new URL()` — Hermes' URL support has been partial.
+function sourceLabel(url) {
+  const match = /^https?:\/\/(?:www\.)?([^/?#]+)/i.exec(url || '');
+  return match ? match[1] : url;
+}
+
 export default function ChatBubble({ message, onUseSuggestions }) {
   const isUser = message.role === 'user';
   const hasSuggestions = message.ai_suggestions && Object.keys(message.ai_suggestions).length > 0;
   const displayContent = message.displayText || message.content;
+  // Pages the Pro web search leaned on. Present only on a live reply — they are
+  // not persisted with the message, so reopening an old chat shows none.
+  const sources = Array.isArray(message.sources) ? message.sources : [];
 
   // chat-photos is a private bucket — resolve stored paths to short-lived signed
   // URLs for display (handles both new path-based rows and legacy public URLs).
@@ -159,6 +171,30 @@ export default function ChatBubble({ message, onUseSuggestions }) {
           <Text style={[styles.text, styles.userText]}>{displayContent}</Text>
         ) : (
           <Markdown style={mdStyles}>{displayContent}</Markdown>
+        )}
+
+        {/* Sources — what the sommelier actually read, so a claim about a
+            specific bottle can be checked rather than taken on faith. */}
+        {!isUser && sources.length > 0 && (
+          <View style={styles.sources}>
+            <Text style={styles.sourcesLabel}>Sources</Text>
+            <View style={styles.sourceChips}>
+              {sources.map((source) => (
+                <TouchableOpacity
+                  key={source.url}
+                  style={styles.sourceChip}
+                  onPress={() => Linking.openURL(source.url).catch(() => {})}
+                  accessibilityRole="link"
+                  accessibilityLabel={source.title || sourceLabel(source.url)}
+                >
+                  <Ionicons name="globe-outline" size={11} color={colors.gold.text} />
+                  <Text style={styles.sourceChipText} numberOfLines={1}>
+                    {sourceLabel(source.url)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         )}
 
         {/* Use Suggestions button */}
@@ -240,6 +276,39 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     borderWidth: 1,
     borderColor: colors.neutral.border,
+  },
+  sources: {
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors.neutral.stone,
+  },
+  sourcesLabel: {
+    ...typography.body.caption,
+    color: colors.neutral.pewter,
+    marginBottom: spacing.xs,
+  },
+  sourceChips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
+  sourceChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    maxWidth: '100%',
+    paddingVertical: 3,
+    paddingHorizontal: spacing.xs,
+    backgroundColor: colors.neutral.cream,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.gold.muted,
+  },
+  sourceChipText: {
+    ...typography.body.small,
+    color: colors.gold.text,
+    flexShrink: 1,
   },
   suggestionsButton: {
     flexDirection: 'row',

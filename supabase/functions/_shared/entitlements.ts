@@ -163,6 +163,57 @@ export function limitReachedMessage(task: MeteredTask): string {
 export const PHOTO_CHAT_PRO_MESSAGE =
   "Asking the sommelier about a photo is a Pro feature. Upgrade to Pro to send photos in chat.";
 
+/**
+ * Anthropic's server-side web search, which is what lets the sommelier answer
+ * "what is the 2021 Octagon like?" from the actual world rather than from what
+ * the model happens to remember about a 4,000-case Virginia producer.
+ *
+ * The dated `_20260209` type is the dynamic-filtering variant: Claude filters
+ * results in a sandbox before they reach the context window, so a search costs
+ * far fewer input tokens than the raw pages would. Do NOT also declare
+ * `code_execution` alongside it — that sandbox is already running under the
+ * hood, and a second one confuses the model.
+ */
+export const WEB_SEARCH_TOOL_TYPE = "web_search_20260209";
+
+/**
+ * Searches Claude may run per message. Each one bills $10/1,000 plus the
+ * retrieved text as input tokens (~3-4c for a searched message vs ~1.2c for an
+ * unsearched one), so this number IS the per-message cost ceiling. Two is
+ * enough to look a wine up and check a second source; it is not enough for a
+ * research binge on our dime.
+ */
+export const WEB_SEARCH_MAX_USES = 2;
+
+export type ServerTool = {
+  type: typeof WEB_SEARCH_TOOL_TYPE;
+  name: "web_search";
+  max_uses: number;
+};
+
+/**
+ * The server tools one AI call may use. Empty is the common case — and the
+ * important one, since an empty `tools` array is how a free user is kept off a
+ * paid tool no matter what their client sends.
+ *
+ * Pro-only for two reasons: it caps our exposure to people who are paying us,
+ * and "the sommelier can look the wine up" is a far better reason to subscribe
+ * than a bigger message count.
+ *
+ * Scans are excluded on both tiers. They run on Haiku 4.5, which does not
+ * support this tool version at all (the request would 400), and reading a label
+ * off a photo needs no web access — the answer is in the picture.
+ */
+export function webSearchToolsFor(input: {
+  isPro: boolean;
+  task: MeteredTask;
+}): ServerTool[] {
+  if (!input.isPro || input.task !== "chat") return [];
+  return [
+    { type: WEB_SEARCH_TOOL_TYPE, name: "web_search", max_uses: WEB_SEARCH_MAX_USES },
+  ];
+}
+
 // ── The whole request gate, as one pure function ───────────────────────────
 // Everything above are the parts; this is the decision the chat function acts
 // on. It exists so __tests__/ai-gates.test.js can walk realistic multi-day

@@ -183,7 +183,10 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
         activeConv.id, 'assistant', responseText, [], suggestions
       );
 
-      setMessages(prev => [...prev, { ...aiMsg, displayText }]);
+      // Sources ride along in memory only (see ChatBubble) — this is the most
+      // likely place to get them, since "what is this bottle?" while logging it
+      // is exactly the question the Pro sommelier searches for.
+      setMessages(prev => [...prev, { ...aiMsg, displayText, sources: aiResponse.sources || [] }]);
     } catch (err) {
       console.error('WineChatModal send error:', err);
       setMessages(prev => [...prev, {
