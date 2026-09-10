@@ -85,7 +85,7 @@ function ConversationRow({ conversation, onPress, onDelete }) {
 }
 
 export default function SommelierScreen() {
-  const { gate } = usePro();
+  const { gate, isPro, presentPaywall } = usePro();
   const router = useRouter();
   // State
   const [view, setView] = useState('list'); // 'list' or 'chat'
@@ -401,7 +401,12 @@ export default function SommelierScreen() {
 
         {/* Input */}
         <MeterHint task="chat" style={styles.meterHint} />
-        <ChatInput onSend={handleSend} disabled={sending} />
+        <ChatInput
+          onSend={handleSend}
+          disabled={sending}
+          photosLocked={!isPro}
+          onLockedPhotoPress={() => presentPaywall('chat')}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

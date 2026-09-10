@@ -11,7 +11,8 @@
 //
 // Images in site/assets/ are pre-downscaled copies (committed, since this build
 // runs with no image tooling): screenshots from docs/marketing/screenshots/,
-// logo from mockups/logo-round-3/ (placeholder until the final mark is chosen).
+// logo is the final nib-in-glass mark (the render Nick picked, PR #196),
+// downscaled from ~/Downloads/render-01-tasting-nib-2.png via sips.
 // Marketing copy mirrors docs/business/app-store-listing.md; the Free/Pro split
 // mirrors docs/business/launch-plan-2026-09.md §4.2.
 //
@@ -71,7 +72,7 @@ ${extraHead}</head>
 <header class="bar">
   <div class="bar-inner">
     <a class="brand" href="/">
-      <img class="mark" src="/assets/logo.jpg" alt="" width="40" height="40">
+      <img class="mark" src="/assets/logo.jpg" alt="" width="54" height="54">
       <span class="wordmark">Cork&nbsp;&amp;&nbsp;Note</span>
     </a>
     <nav>${nav}</nav>
@@ -220,8 +221,8 @@ const COMPARE = [
     ['Tonight’s Pick', NO, YES],
   ]],
   ['Sommelier & scanning', [
-    ['Label & tasting-card scans', '3 a month', 'Unlimited'],
-    ['Sommelier messages', '5 a month', 'Unlimited'],
+    ['Label & tasting-card scans', '3 to try', 'Unlimited'],
+    ['Sommelier messages', '5 a month, text only', 'Unlimited, photos included'],
   ]],
   ['Your data', [
     ['Export your journal to CSV', NO, YES],
@@ -412,7 +413,7 @@ const home = page({
           <th scope="col" class="plan pro">
             <span class="plan-name">Pro</span>
             <span class="plan-price">$9.99<small>/month</small></span>
-            <span class="plan-tag">or $59.99/year with a 7-day free trial</span>
+            <span class="plan-tag">or $59.99/year with a 3-day free trial</span>
           </th>
         </tr>
       </thead>
@@ -424,7 +425,7 @@ const home = page({
     <div class="wins">
       ${PRO_WINS.map(([h, p]) => `<div class="win"><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join('\n      ')}
     </div>
-    <p class="fineprint">Pro arrives with the App Store launch. Annual is six months’ price. Billed through Apple, cancel any time. Prices in USD.</p>
+    <p class="fineprint">Pro arrives with the App Store launch. Annual is six months’ price. Billed through Apple, cancel any time. Prices in USD. Unlimited features are subject to fair-use limits no wine journaler will ever meet.</p>
   </div>
 </section>
 
@@ -537,7 +538,7 @@ section{scroll-margin-top:16px}
 .bar-inner{max-width:1120px;margin:0 auto;padding:22px 24px;display:flex;align-items:center;
   justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid rgba(244,162,89,.35)}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-.mark{border-radius:10px;display:block;box-shadow:0 0 0 1px rgba(244,162,89,.5)}
+.mark{border-radius:22.4%;display:block;box-shadow:0 0 0 1px rgba(244,162,89,.5)}
 .wordmark{font-family:var(--serif);font-size:23px;letter-spacing:.4px;color:var(--cream)}
 .bar nav{display:flex;gap:26px}
 .bar nav a{font-size:15px;color:var(--gold-light);text-decoration:none}

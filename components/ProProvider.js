@@ -12,7 +12,8 @@
 //   - public.entitlements is the server's truth, but lags by one webhook.
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  FREE_MONTHLY_LIMITS,
+  FREE_METER_WINDOWS,
+  FREE_TIER_LIMITS,
   onMeterUpdate,
   remainingFree,
 } from '../lib/pro';
@@ -81,15 +82,18 @@ export function ProProvider({ userId, children }) {
     if (!uid) return EMPTY_USAGE;
     const since = monthStartIso();
     const counts = await Promise.all(
-      Object.keys(FREE_MONTHLY_LIMITS).map(async (task) => {
-        const { count, error } = await supabase
+      Object.keys(FREE_TIER_LIMITS).map(async (task) => {
+        // Each meter counts over its own window — scans are spent for life,
+        // chat resets each calendar month — matching the server exactly.
+        let query = supabase
           .from('chat_usage')
           .select('id', { count: 'exact', head: true })
-          .eq('task', task)
-          .gte('created_at', since);
+          .eq('task', task);
+        if (FREE_METER_WINDOWS[task] === 'month') query = query.gte('created_at', since);
+        const { count, error } = await query;
         // An unreadable counter must not invent headroom: assume the worst, and
         // let the server have the final say when the call is actually made.
-        return [task, error ? FREE_MONTHLY_LIMITS[task] : count ?? 0];
+        return [task, error ? FREE_TIER_LIMITS[task] : count ?? 0];
       })
     );
     return Object.fromEntries(counts);

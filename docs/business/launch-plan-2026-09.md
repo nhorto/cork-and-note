@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-09-03
 **Owner-only tasks:** see [`owner-checklist.md`](owner-checklist.md).
-**Status (2026-09-08):** every business decision this plan was waiting on has now been made. Pricing ($9.99/mo · $59.99/yr, 7-day trial on **annual only**, no lifetime) and free meters were settled 2026-09-03; on **2026-09-08** the owner closed the four that were still open — **launch region Virginia** (§5), **v1 ships with the paywall** rather than free-first, **Anthropic capped at $100/month** (§4.3), and **no LLC: Nicholas Horton personally, Maryland law** (§7). Only **navigation Option A vs B** is left, and it still blocks the Journal tab.
+**Status (2026-09-08, trial revised 2026-09-09):** every business decision this plan was waiting on has now been made. Pricing ($9.99/mo · $59.99/yr, **3-day** trial on **annual only** — shortened from 7 days on 2026-09-09 and applied in App Store Connect the same day — no lifetime) and free meters were settled 2026-09-03; on **2026-09-08** the owner closed the four that were still open — **launch region Virginia** (§5), **v1 ships with the paywall** rather than free-first, **Anthropic capped at $100/month** (§4.3), and **no LLC: Nicholas Horton personally, Maryland law** (§7). Only **navigation Option A vs B** is left, and it still blocks the Journal tab.
 
 **What is actually left.** One Apple item — **the bank account** on the Paid Apps Agreement, which no subscription can be sold without. One engineering gate — **a fresh EAS build**, because `react-native-purchases` is native code, itself blocked on two EAS variables the owner has to hand over. Then the owner's read-through of the legal pages, a sandbox purchase, the paywall review screenshots, and the listing upload. Everything else in [`owner-checklist.md`](owner-checklist.md) is done or optional.
 
@@ -130,19 +130,29 @@ Apple Guideline 3.1.1 requires **in-app purchase** for anything that unlocks fea
 ### 4.2 Tiers: one paid tier at launch
 Two paid tiers before you have any conversion data is premature. Launch with Free + Pro and add a higher tier only if usage shows a heavy-AI segment.
 
+**Revised 2026-09-09** after the owner reopened monetization: free scans went from 3/month to **3 lifetime**, free chat became **text-only**, and Pro's "unlimited" gained explicit fair-use caps. Weekly pass and a third tier were considered and deferred (see the decision log below the table).
+
 | | **Free** | **Pro** |
 |---|---|---|
 | Manual logging: visits, tastings, ratings, flavor notes, photos | Unlimited | Unlimited |
 | Map, places, wishlist | Unlimited | Unlimited |
 | Cellar | Up to 25 bottles | Unlimited + insights, drink windows, Tonight's Pick |
-| Label scan / tasting-card scan | 3 per month | Unlimited |
-| AI sommelier chat | 5 messages per month | Unlimited (fair-use cap ~300/day, already enforced) |
+| Label scan / tasting-card scan | **3 lifetime** (to try; was 3/month until 2026-09-09) | Unlimited (fair use: 30/day) |
+| AI sommelier chat | 5 messages per month, **text-only** — photos in chat would be a free scan by the back door | Unlimited (fair use: 50/day and 1,000/month), photos allowed |
 | Export (CSV of tastings) | — | Yes |
-| Price | $0 | **$9.99/mo · $59.99/yr** — decided 2026-09-03; no lifetime SKU at launch. The **7-day free trial is on the annual product only**; monthly has none. Both live in App Store Connect since 2026-09-08, priced in all 175 territories |
+| Price | $0 | **$9.99/mo · $59.99/yr** — decided 2026-09-03, reconfirmed 2026-09-09; no lifetime SKU at launch. The free trial is on the annual product only (**3 days**, shortened from 7 on 2026-09-09 and updated in App Store Connect the same day); monthly has none. Both live in App Store Connect since 2026-09-08, priced in all 175 territories. Trial exposure is bounded either way: the fair-use caps apply during the trial, and Apple grants one intro offer per Apple ID per subscription group, ever |
 
-Reasoning:
+**2026-09-09 decision log** (owner reopened monetization before the build-out; all enforced server-side in `_shared/entitlements.ts`):
+- **Free scans: 3 lifetime, not 3/month.** The reason to gate scans is conversion, not cost (a Haiku scan is ~⅓¢): three-ever lets a new user feel the magic once, then the wall holds. This is Sommo's model (5 lifetime).
+- **Free chat: text-only.** The sommelier accepts photos, so a free user could attach a label and ask "what's this?" — a scan on the *more expensive* model. Server refuses with the paywall 402; the camera button in chat opens the paywall for free users.
+- **Pro fair-use caps: 50 chat/day + 1,000 chat/month, 30 scans/day.** The old 150/day global cap allowed ~$54/month of Sonnet against $8.49 net. These are abuse guards, not experienced limits — no human journaling wine hits them — so the marketing word stays "unlimited" with a fair-use line in the Terms (already there, deliberately without numbers).
+- **Weekly "tasting trip" pass: deferred, not rejected.** RevenueCat can add a `pro_weekly` SKU post-launch without an app release. Note: with the trial shortened to 3 days (2026-09-09) it covers a long weekend rather than a full trip week, which *strengthens* the weekly-pass case — revisit as soon as RevenueCat shows a burst-usage-then-churn cohort.
+- **Third tier (Pro+ with winery discovery via Google Places): deferred.** Two paid tiers with zero conversion data means guessing twice, and Places API costs (~$32/1k Nearby Search calls) need a higher price to carry them. It is the natural anchor for a ~$14.99–19.99/mo tier *after* data shows a trip-planning segment — and a future upgrade story for existing Pros.
+- **Chat stays on Sonnet.** Haiku would cut chat cost ~8× but the sommelier is the flagship the $9.99 positioning leans on, and chat is already only ~4% of net revenue per modeled user. Downgrading the product to save a cent a message optimizes the wrong side.
+
+Standing reasoning:
 - **Never gate the journal itself.** Logging is the habit loop and the data that makes the sommelier personal. Every rating benchmark says gating the core kills retention before conversion.
-- **Gate the things that cost you money or feel magical:** scans and AI. Metered free use (3 scans, 5 messages) lets people feel it, then locks. Sommo, the closest AI-native competitor, ships 5 lifetime scans + a 3-day trial at $4.99/mo. Those two numbers are also the app's only defence against the Anthropic bill — §4.3 works out exactly how much of the $100 cap they consume.
+- **Gate the things that cost you money or feel magical:** scans and AI. Metered free use (3 lifetime scans, 5 messages/month) lets people feel it, then locks. Sommo, the closest AI-native competitor, ships 5 lifetime scans + a 3-day trial at $4.99/mo. Those two numbers are also the app's only defence against the Anthropic bill — §4.3 works out exactly how much of the $100 cap they consume.
 - **Cellar cap** mirrors CellarTracker's bottle-tiered model and catches the collector segment without touching casual tasters.
 - **Price (decided: $9.99/mo · $59.99/yr):** consumer wine apps cluster at $5–6/mo (Vivino $4.99, Delectable $5.99); AI/collector tools at $10–15 (Wine-Searcher $10.99, InVintory $14.95). $9.99 places Cork & Note with the AI/collector tools, so the paywall must lead with the sommelier and unlimited scans, not with "more journaling." Annual at $59.99 (six months' price) is the plan to push, since annual subscribers retain 44% at 12 months versus 17.5% for monthly. If trial-to-paid comes in under ~25%, run a RevenueCat price experiment at $7.99 before touching features.
 - **No lifetime SKU at launch** (decided). Revisit after 90 days of data; about 40% of lifestyle apps blend one in later.
@@ -164,7 +174,7 @@ Both cheap wins have shipped (#187): photos are **downscaled to ~1,000px** on th
 
 | | Per user / month | $100 covers |
 |---|---|---|
-| Free user who spends the whole meter — 3 scans + 5 messages | **~$0.09** | **~1,150 free users** |
+| Free user who spends the whole meter — 5 messages/month (the 3 scans are lifetime, so ~3¢ once, ever) | **~$0.06/mo** | **~1,600 free users** |
 | Free user who never touches AI | $0 | unbounded |
 | Pro user at the modeled 30 chats + 20 scans | **~$0.54** | **~185 Pro users** |
 
@@ -186,10 +196,10 @@ RevenueCat's 2026 median for freemium is **2.1%** of downloads paying by day 35 
 Fixed costs: Apple $99/yr, Supabase Pro ~$25/mo (still to be turned on — the free tier auto-pauses the backend), Anthropic **capped at $100/mo** and realistically $20–40 at launch scale, RevenueCat $0 until $2.5k MTR, domain ~$15/yr. Note the interaction with §4.3: the 10,000-download row in this table is *already* past what a $100 Anthropic cap can serve. The first goal is not profit; it is **retention data and 100 real users** to learn what people pay for. The B2B winery line (sponsored placements, visit analytics) from the June doc is the eventual larger business, but it needs consumer scale first.
 
 ### 4.5 Implementation plan for Pro (about 4–5 days)
-1. ~~**Products in App Store Connect**~~ **✅ done 2026-09-08.** `pro_monthly` ($9.99/month, no trial) and `pro_annual` ($59.99/year, 7-day free trial) in the group "Cork & Note Pro", priced and available in all 175 territories. Two stray non-consumable IAPs left over from an earlier experiment were deleted at the same time, so the review submission has no unfinished products in it.
+1. ~~**Products in App Store Connect**~~ **✅ done 2026-09-08.** `pro_monthly` ($9.99/month, no trial) and `pro_annual` ($59.99/year, 3-day free trial — created as 7-day, switched to 3 days via the ASC API on 2026-09-09) in the group "Cork & Note Pro", priced and available in all 175 territories. Two stray non-consumable IAPs left over from an earlier experiment were deleted at the same time, so the review submission has no unfinished products in it.
 2. ~~**RevenueCat**~~ **✅ done 2026-09-08.** Project `proj3888109e`, App Store app `appa26facd9fb`, entitlement `pro`, offering `default`, both products attached. The App Store Connect **In-App Purchase key is generated and verified**: sandbox receipt validation authenticates, and the production check returns **401, which is expected** — Apple only serves production receipts for a released app. Do not regenerate the key on the strength of that 401; re-check it after the first release. What is still missing is the webhook (URL + shared secret) and the EAS variable, both in [`owner-checklist.md`](owner-checklist.md) §C.
 3. ~~**Client**~~ **✅ done.** `usePro()` exposes `isPro`, `remaining(task)`, `gate(task)` and `presentPaywall()`. The user is identified to RevenueCat by Supabase user id and logged out on sign-out, without which the next account on a device inherits the previous one's Pro.
-4. ~~**Server truth**~~ **✅ built; the chat half is deliberately not deployed yet.** `revenuecat-webhook` → `public.entitlements`, and the chat function decides Pro from that table and meters free users per calendar month on `chat_usage.task`. It refuses a spent meter with 402, which is what the app opens the paywall on. Deploying the metering before a build exists that can sell a subscription would wall testers with no way past, so it ships with that build.
+4. ~~**Server truth**~~ **✅ built; the chat half is deliberately not deployed yet.** `revenuecat-webhook` → `public.entitlements`, and the chat function decides Pro from that table and meters free users on `chat_usage.task` (scans over a lifetime window, chat per calendar month, per the 2026-09-09 revision; Pro gets per-task fair-use caps). It refuses a spent meter with 402, which is what the app opens the paywall on. Deploying the metering before a build exists that can sell a subscription would wall testers with no way past, so it ships with that build. The gate logic itself is already proven by `__tests__/ai-gates.test.js`, which walks multi-day usage sequences (a free user burning the lifetime scans across months, a Pro user grinding 50 chats/day into the 1,000/month ceiling, the photo-in-chat refusal) through the exact function production runs. **At deploy time, verify the wiring live** with a throwaway confirmed user (the pattern that verified #161): 4th scan → 402, photo in chat → 402, 6th chat message → 402, then `delete-account` to clean up.
 5. ~~**Gates in the app**~~ **✅ done.** Scans, sommelier send (both surfaces), cellar add past 25, and CSV export — which had to be built, since it did not exist.
 
 Two decisions taken while building that differ from the plan above:
@@ -266,7 +276,7 @@ Android can wait: it doubles QA and store work, and every tester today is on iOS
 
 1. **Journal tab (Layer B) or Profile-nesting only (Layer A)?** Recommendation: B. It demotes Cellar from the bar. *Owner asked for mockups of both before deciding (see `docs/design/mockups/`).*
 2. ~~**Pricing**~~ — **Decided:** $9.99/mo · $59.99/yr, no lifetime SKU at launch.
-3. ~~**Free meters**~~ — **Decided:** 3 scans + 5 AI messages per month, 25-bottle cellar cap, logging unlimited.
+3. ~~**Free meters**~~ — **Decided, revised 2026-09-09:** 3 **lifetime** scans + 5 AI messages per month (**text-only**), 25-bottle cellar cap, logging unlimited; Pro fair-use caps 50 chat/day, 1,000 chat/month, 30 scans/day. Weekly pass and a third tier considered and deferred — see the §4.2 decision log.
 4. ~~**Launch region**~~ — **Decided 2026-09-08: Virginia.** Drivable from Maryland and dense enough to place cards in clusters. Go-to-market, AVA targeting, the winery shortlist, the QR card copy and the outreach email are in §5 and [`virginia-launch.md`](virginia-launch.md). Note the wrinkle in §5.4: the app carried a shared Virginia winery catalog until June 2026 and deliberately deleted it, so a Virginia launch gets no data help from that history.
 5. **Domain:** do you own corkandnote.com or similar? Repurpose the Vercel deploy for the landing + legal pages, or delete it?
 6. ~~**Apple account**~~ — **DONE 2026-09-03:** agreement signed.

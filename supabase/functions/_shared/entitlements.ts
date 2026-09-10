@@ -8,19 +8,47 @@
 // callers pass `nowMs` — because a gate that depends on ambient state is a gate
 // nobody can test.
 
-/** Free-tier monthly allowances, by `chat_usage.task` (launch plan §4.2).
+/** Free-tier allowances, by `chat_usage.task` (launch plan §4.2, rev. 2026-09-09).
  * tonights_pick is 0 on purpose: Tonight's Pick is Pro-only (owner decision
  * 2026-09-09 — the marketing site always said so; the code now agrees). */
-export const FREE_MONTHLY_LIMITS = {
+export const FREE_TIER_LIMITS = {
   label_scan: 3,
   chat: 5,
   tonights_pick: 0,
 } as const;
 
+/**
+ * The window each free meter counts over. Scans are LIFETIME — three to feel
+ * the magic, then the wall, like Sommo's five — because a Haiku scan costs a
+ * third of a cent and the reason to gate it is conversion, not cost. Chat
+ * resets each calendar month because five-ever would starve the habit loop
+ * that makes the sommelier worth paying for.
+ */
+export const FREE_METER_WINDOWS = {
+  label_scan: "lifetime",
+  chat: "month",
+} as const;
+
 /** Free-tier cellar size. Enforced client-side; bottles cost us nothing to store. */
 export const FREE_CELLAR_BOTTLE_LIMIT = 25;
 
-export type MeteredTask = keyof typeof FREE_MONTHLY_LIMITS;
+/**
+ * Fair-use caps, applied to EVERYONE including Pro (launch plan §4.2). "Unlimited"
+ * is a marketing word for "more than a human wine journaler can use", not an
+ * invitation to script us: 50 Sonnet chats/day is ~$18/month at absolute worst
+ * against $8.49 net, and the monthly ceiling stops a bot that grinds every day.
+ */
+export const FAIR_USE_DAILY_CAPS = {
+  chat: 50,
+  label_scan: 30,
+} as const;
+export const FAIR_USE_MONTHLY_CHAT_CAP = 1_000;
+
+/** Burst cap, any task, any tier: nobody types 15 sommelier questions in 5 minutes. */
+export const BURST_WINDOW_MIN = 5;
+export const BURST_LIMIT = 15;
+
+export type MeteredTask = keyof typeof FREE_TIER_LIMITS;
 
 /** The RevenueCat entitlement identifier configured in the dashboard. */
 export const PRO_ENTITLEMENT_ID = "pro";
@@ -74,14 +102,15 @@ export type MeterDecision = {
   task: MeteredTask;
   limit: number | null;
   used: number;
-  /** Uses left in the current month; null when unlimited (Pro). */
+  /** Uses left in the meter's window; null when unlimited (Pro). */
   remaining: number | null;
   reason: "pro" | "within_free_allowance" | "free_limit_reached";
 };
 
 /**
- * The free-meter verdict for one AI call. Pro is unlimited here — the separate
- * abuse caps in the chat function (15/5min, 150/day) still apply to everyone.
+ * The free-meter verdict for one AI call. `used` must already be counted over
+ * the task's FREE_METER_WINDOWS window. Pro is unlimited here — the fair-use
+ * caps in the chat function still apply to everyone.
  */
 export function meterDecision(input: {
   isPro: boolean;
@@ -103,7 +132,7 @@ export function meterDecision(input: {
     };
   }
 
-  const limit = FREE_MONTHLY_LIMITS[task];
+  const limit = FREE_TIER_LIMITS[task];
   const remaining = Math.max(0, limit - used);
   return {
     allowed: remaining > 0,
@@ -119,12 +148,141 @@ export function meterDecision(input: {
 /** User-facing copy for a spent meter, so the app and the API agree on wording. */
 export function limitReachedMessage(task: MeteredTask): string {
   if (task === "label_scan") {
-    return `You've used all ${FREE_MONTHLY_LIMITS.label_scan} free scans this month. Upgrade to Pro for unlimited label and tasting-card scans.`;
+    return `You've used your ${FREE_TIER_LIMITS.label_scan} free scans. Upgrade to Pro for unlimited label and tasting-card scans.`;
   }
   if (task === "tonights_pick") {
     return "Tonight's Pick is part of Pro — upgrade and the sommelier will choose from your own cellar.";
   }
-  return `You've used all ${FREE_MONTHLY_LIMITS.chat} free sommelier messages this month. Upgrade to Pro for unlimited chat.`;
+  return `You've used all ${FREE_TIER_LIMITS.chat} free sommelier messages this month. Upgrade to Pro for unlimited chat.`;
+}
+
+/**
+ * Photo questions in chat are Pro-only: a free user who could attach a label
+ * photo and ask "what's this?" would have scan-by-chat — on the expensive model.
+ */
+export const PHOTO_CHAT_PRO_MESSAGE =
+  "Asking the sommelier about a photo is a Pro feature. Upgrade to Pro to send photos in chat.";
+
+// ── The whole request gate, as one pure function ───────────────────────────
+// Everything above are the parts; this is the decision the chat function acts
+// on. It exists so __tests__/ai-gates.test.js can walk realistic multi-day
+// sequences (a free user burning scans across months, a Pro user grinding
+// 50 chats a day) through the EXACT logic production runs — the edge function
+// only fetches the counts and returns what this says.
+
+/**
+ * Start of the counting window for `task` at `nowMs`; null means lifetime —
+ * count everything. This is the single place the meter windows become SQL:
+ * the edge function and the client provider both build their `created_at`
+ * filter from it, so neither can disagree with FREE_METER_WINDOWS.
+ */
+export function usageWindowStart(task: MeteredTask, nowMs: number): string | null {
+  return FREE_METER_WINDOWS[task] === "month" ? monthWindowStart(nowMs) : null;
+}
+
+export type GateCounts = {
+  /** Calls by this user, any task, in the last BURST_WINDOW_MIN minutes. */
+  burst: number;
+  /** Calls by this user, THIS task, in the last 24 hours. */
+  day: number;
+  /**
+   * Calls by this user, THIS task, since usageWindowStart(task) — i.e. this
+   * calendar month for chat, all time for scans. Only read when
+   * `needsWindowCount` says so; pass 0 otherwise.
+   */
+  window: number;
+};
+
+/** Whether the caller must fetch `counts.window`. Pro scans need no count at all. */
+export function needsWindowCount(isPro: boolean, task: MeteredTask): boolean {
+  return !isPro || task === "chat";
+}
+
+export type GateVerdict =
+  | { allowed: true; isPro: boolean; task: MeteredTask; meter: MeterDecision }
+  | {
+      allowed: false;
+      isPro: boolean;
+      task: MeteredTask;
+      /** 402 opens the paywall in the app; 429 is "slow down", never a sale. */
+      status: 402 | 429;
+      body: {
+        error: string;
+        code?: "free_limit_reached";
+        meter?: {
+          task: MeteredTask;
+          limit: number | null;
+          used: number;
+          remaining: number | null;
+          isPro: boolean;
+        };
+      };
+    };
+
+/**
+ * Decide one AI call. Checks run cheapest-lie-first: burst and daily fair-use
+ * caps apply to everyone before any question of payment; then free chat is
+ * refused photos (a label scan by the back door, on the dearer model); then the
+ * free meter or Pro's monthly chat ceiling settles it.
+ */
+export function gateAiRequest(input: {
+  nowMs: number;
+  task: unknown;
+  hasImages: boolean;
+  entitlement: EntitlementRow;
+  counts: GateCounts;
+}): GateVerdict {
+  const task = normalizeTask(input.task);
+  const isPro = isEntitlementActive(input.entitlement, input.nowMs);
+  const refuse = (
+    status: 402 | 429,
+    body: { error: string; code?: "free_limit_reached" }
+  ): GateVerdict => ({ allowed: false, isPro, task, status, body });
+
+  if (input.counts.burst >= BURST_LIMIT) {
+    return refuse(429, {
+      error: "Rate limit exceeded. Please wait a few minutes and try again.",
+    });
+  }
+  if (input.counts.day >= FAIR_USE_DAILY_CAPS[task]) {
+    return refuse(429, {
+      error: "Daily fair-use limit reached. Please try again tomorrow.",
+    });
+  }
+
+  if (!isPro && task === "chat" && input.hasImages) {
+    return refuse(402, { error: PHOTO_CHAT_PRO_MESSAGE, code: "free_limit_reached" });
+  }
+
+  if (isPro && task === "chat" && input.counts.window >= FAIR_USE_MONTHLY_CHAT_CAP) {
+    return refuse(429, {
+      error:
+        "You've reached this month's fair-use limit for the sommelier. It resets on the 1st.",
+    });
+  }
+
+  const meter = meterDecision({ isPro, task, used: input.counts.window });
+  if (!meter.allowed) {
+    return {
+      allowed: false,
+      isPro,
+      task,
+      status: 402,
+      body: {
+        error: limitReachedMessage(task),
+        code: "free_limit_reached",
+        meter: {
+          task: meter.task,
+          limit: meter.limit,
+          used: meter.used,
+          remaining: meter.remaining,
+          isPro: false,
+        },
+      },
+    };
+  }
+
+  return { allowed: true, isPro, task, meter };
 }
 
 // ── RevenueCat webhook → entitlement rows ──────────────────────────────────
