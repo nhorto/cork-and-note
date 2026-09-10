@@ -21,7 +21,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#6B2A3A"
+        "backgroundColor": "#E4573D"
       },
       "package": "com.nicholashorton.corkandnote",
       "edgeToEdgeEnabled": true,

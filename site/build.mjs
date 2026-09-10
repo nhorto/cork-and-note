@@ -11,8 +11,7 @@
 //
 // Images in site/assets/ are pre-downscaled copies (committed, since this build
 // runs with no image tooling): screenshots from docs/marketing/screenshots/,
-// logo is the final nib-in-glass mark (the render Nick picked, PR #196),
-// downscaled from ~/Downloads/render-01-tasting-nib-2.png via sips.
+// logo from assets/images/brand-mark.png (the selected Spritz tasting-nib mark).
 // Marketing copy mirrors docs/business/app-store-listing.md; the Free/Pro split
 // mirrors docs/business/launch-plan-2026-09.md §4.2.
 //
