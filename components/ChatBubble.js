@@ -187,7 +187,7 @@ export default function ChatBubble({ message, onUseSuggestions }) {
                   accessibilityRole="link"
                   accessibilityLabel={source.title || sourceLabel(source.url)}
                 >
-                  <Ionicons name="globe-outline" size={11} color={colors.gold.text} />
+                  <Ionicons name="globe-outline" size={11} color={colors.accent.ink} />
                   <Text style={styles.sourceChipText} numberOfLines={1}>
                     {sourceLabel(source.url)}
                   </Text>
@@ -281,11 +281,11 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     paddingTop: spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: colors.neutral.stone,
+    borderTopColor: colors.neutral.divider,
   },
   sourcesLabel: {
     ...typography.body.caption,
-    color: colors.neutral.pewter,
+    color: colors.neutral.inkTertiary,
     marginBottom: spacing.xs,
   },
   sourceChips: {
@@ -300,14 +300,14 @@ const styles = StyleSheet.create({
     maxWidth: '100%',
     paddingVertical: 3,
     paddingHorizontal: spacing.xs,
-    backgroundColor: colors.neutral.cream,
+    backgroundColor: colors.accent.surface,
     borderRadius: borderRadius.sm,
     borderWidth: 1,
-    borderColor: colors.gold.muted,
+    borderColor: colors.accent.border,
   },
   sourceChipText: {
     ...typography.body.small,
-    color: colors.gold.text,
+    color: colors.accent.ink,
     flexShrink: 1,
   },
   suggestionsButton: {
