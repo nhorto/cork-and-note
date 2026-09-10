@@ -30,6 +30,7 @@ export default function AutocompleteInput({
   items = [],
   getLabel = (item) => item?.name ?? '',
   getSubtitle, // optional (item) => string shown under the suggestion label
+  getSuggestions, // optional (query) => ranked items for domain-specific matching
   placeholder,
   linked = false, // true once the current value came from a picked suggestion
   maxResults = 6,
@@ -48,6 +49,7 @@ export default function AutocompleteInput({
   }, [value, debounceMs]);
 
   const suggestions = useMemo(() => {
+    if (getSuggestions) return getSuggestions(query).slice(0, maxResults);
     const q = (query || '').trim().toLowerCase();
     if (!q) return [];
     const matches = [];
@@ -63,7 +65,7 @@ export default function AutocompleteInput({
       }
     }
     return matches;
-  }, [query, items, getLabel, maxResults]);
+  }, [query, items, getLabel, maxResults, getSuggestions]);
 
   const showSuggestions = isFocused && !dismissed && suggestions.length > 0;
 

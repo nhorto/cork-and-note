@@ -12,7 +12,7 @@ import { ActivityIndicator, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import { canonicalizeRegion, normalizeRegion, regionSuggestions } from '../lib/cellarRegion';
 import { usePro } from '../hooks/usePro';
 import { drinkWindowAI, hasEnoughForWindow } from '../lib/drinkWindow';
-import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal, varietalText } from '../lib/varietals';
+import { WINE_VARIETALS, inferTypeFromVarietal, matchVarietal, searchVarietals, varietalText } from '../lib/varietals';
 import theme from '../styles/theme';
 import AutocompleteInput from './AutocompleteInput';
 import BottlePhotoPicker from './BottlePhotoPicker';
@@ -24,7 +24,7 @@ const SERIF = typography.fonts.serif;
 const BOTTLE_SIZES = ['375ml', '750ml', '1.5L', '3L'];
 
 // Varietal picker options (#86): the canonical grape list as autocomplete items.
-const VARIETAL_ITEMS = WINE_VARIETALS.map((name) => ({ name }));
+const varietalSuggestions = (query) => searchVarietals(query).map((name) => ({ name }));
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
@@ -376,9 +376,10 @@ export default function CellarBottleForm({
             value={form.varietal}
             onChangeText={onVarietalText}
             onSelect={onPickVarietal}
-            items={VARIETAL_ITEMS}
+            getSuggestions={varietalSuggestions}
+            maxResults={WINE_VARIETALS.length}
             getLabel={(v) => v.name}
-            placeholder="Cabernet Sauvignon…"
+            placeholder="Search or enter any grape…"
           />
           <Field label="Type" value={form.wine_type} onChangeText={set('wine_type')} placeholder="Red, White…" />
 
