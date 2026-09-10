@@ -30,7 +30,7 @@ const OUT = join(ROOT, 'site', 'dist');
 const SITE_URL = 'https://cork-and-note.vercel.app';
 
 const legalSrc = readFileSync(join(ROOT, 'lib', 'legalContent.js'), 'utf8');
-const { PRIVACY_POLICY, TERMS_OF_USE } = await import(
+const { PRIVACY_POLICY, TERMS_OF_USE, SUPPORT_EMAIL } = await import(
   'data:text/javascript;base64,' + Buffer.from(legalSrc).toString('base64')
 );
 
@@ -497,14 +497,15 @@ const support = page({
 
   <section>
     <h2>Get in touch</h2>
+    <p>Email <a href="mailto:${esc(SUPPORT_EMAIL)}">${esc(SUPPORT_EMAIL)}</a> for help, account access or privacy requests. You do not need to sign in to contact us.</p>
     <p>The fastest way to reach us is from inside the app: open <strong>Profile → Feedback</strong>. That form sends us your message along with your app version, which usually saves a round trip.</p>
     <p>You can also report a bug the same way — choose the bug option and describe what you were doing when it happened.</p>
   </section>
 
   <section>
     <h2>Common questions</h2>
-    <p><strong>How do I find the wines I have logged?</strong> Open <strong>Profile → Your tastings</strong>, or tap the “Wines tasted” tile on Home. Places you have visited live under <strong>Profile → Your places</strong>.</p>
-    <p><strong>How do I delete my account?</strong> Open <strong>Profile → Account settings → Delete account</strong>. This permanently removes your account and all of its data — journal entries, photos, cellar and chat history. It cannot be undone.</p>
+    <p><strong>How do I find the wines I have logged?</strong> Open the <strong>Journal</strong> tab. Open the <strong>Map</strong> to browse places.</p>
+    <p><strong>How do I delete my account?</strong> Open <strong>Profile → Account settings → Delete account</strong> to remove your account and its app data. Deleting your account does not cancel an Apple subscription. Cancel it separately in your Apple Account settings. For help accessing your account or a data request, email us above.</p>
     <p><strong>Is the sommelier always right?</strong> No. It is an AI assistant and it can be wrong about wine facts, pairings and drink windows. Treat it as a knowledgeable friend, not an authority — and please drink responsibly.</p>
   </section>
 

@@ -1,5 +1,7 @@
 # App Store Connect listing pack
 
+> **Before uploading:** follow the [September 10 readiness checklist](app-store-readiness-2026-09-10.md). It records the current listing/build state and required corrections to purchase privacy disclosures, support contact, EULA information, reviewer directions and iPad screenshot scope. Treat the copy and prior completion notes below as an earlier draft.
+
 **Prepared:** 2026-09-07 · Companion to [`launch-plan-2026-09.md`](launch-plan-2026-09.md) §2.2 and [`owner-checklist.md`](owner-checklist.md) §B
 
 Everything App Store Connect asks for, written out so it can be pasted in. Character counts are enforced against Apple's limits — **the name suggested in the launch plan ("Cork & Note: Wine Tasting Journal") is 33 characters and would be rejected**; the one below is 25.

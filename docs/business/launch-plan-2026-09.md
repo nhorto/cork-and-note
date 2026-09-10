@@ -1,5 +1,7 @@
 # Cork & Note — App Store Launch & Business Plan
 
+> **Current release status:** use the [September 10 readiness checklist](app-store-readiness-2026-09-10.md). Its live account/code audit supersedes the historical build numbers and remaining-work claims in this business plan; pricing and product decisions below remain useful context.
+
 **Prepared:** 2026-09-03
 **Owner-only tasks:** see [`owner-checklist.md`](owner-checklist.md).
 **Status (2026-09-08, trial revised 2026-09-09):** every business decision this plan was waiting on has now been made. Pricing ($9.99/mo · $59.99/yr, **3-day** trial on **annual only** — shortened from 7 days on 2026-09-09 and applied in App Store Connect the same day — no lifetime) and free meters were settled 2026-09-03; on **2026-09-08** the owner closed the four that were still open — **launch region Virginia** (§5), **v1 ships with the paywall** rather than free-first, **Anthropic capped at $100/month** (§4.3), and **no LLC: Nicholas Horton personally, Maryland law** (§7). Only **navigation Option A vs B** is left, and it still blocks the Journal tab.

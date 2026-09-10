@@ -1,6 +1,6 @@
 // app/login.js
 import { Ionicons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { useContext, useState } from 'react';
 import {
   ActivityIndicator,
@@ -22,7 +22,6 @@ import { AuthContext } from './_layout';
 export default function LoginScreen() {
   const { colors, styles } = useScreenTheme();
 
-  const router = useRouter();
   const { signIn } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -63,6 +62,7 @@ export default function LoginScreen() {
               source={require('../assets/images/cork_and_note_logo.png')}
               style={styles.logoImage}
               resizeMode="contain"
+              accessibilityLabel="Cork & Note"
             />
           </View>
           <Text style={styles.appName}>Welcome to Cork &amp; Note</Text>

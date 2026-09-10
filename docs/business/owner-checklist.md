@@ -1,5 +1,7 @@
 # Owner checklist — things only Nick can do
 
+> **Current release status:** use the [September 10 readiness checklist](app-store-readiness-2026-09-10.md), which includes live App Store Connect, RevenueCat and EAS checks. This document retains earlier setup history; its remaining-work claims below are superseded. Banking details have now been submitted, build 17 is uploaded, and additional submission gaps are recorded in the new checklist.
+
 **Updated:** 2026-09-08 · Companion to [`launch-plan-2026-09.md`](launch-plan-2026-09.md)
 
 Everything here needs your identity, your accounts, or your money. Items are in the order they unblock work. "Hand back" says what I need from you afterwards so engineering can continue.

@@ -16,6 +16,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Linking,
   ScrollView,
   StyleSheet,
@@ -34,8 +35,9 @@ import {
   packagePriceLine,
   packageTrialLabel,
 } from '../lib/pro';
-import { fetchOffering, purchasePackage } from '../lib/purchases';
+import { fetchOffering, fetchTrialEligibility, purchasePackage } from '../lib/purchases';
 import { createThemedStyles } from '../styles/ThemeProvider';
+import { SUPPORT_EMAIL } from '../lib/legalContent';
 
 
 // Lead with the sommelier and unlimited scans, not "more journaling" — at $9.99
@@ -61,25 +63,40 @@ export default function PaywallScreen() {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [attempt, setAttempt] = useState(0);
+  const [trialEligibility, setTrialEligibility] = useState({});
+  const trialFor = (pkg) => trialEligibility[pkg?.product?.identifier] ? packageTrialLabel(pkg) : null;
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const offering = await fetchOffering();
-      if (cancelled) return;
-      // Annual first: it is the plan to push (44% retention at 12 months versus
-      // 17.5% for monthly, §4.2) and it carries the trial.
-      const available = (offering?.availablePackages ?? [])
-        .slice()
-        .sort((a, b) => (packagePeriod(a) === 'year' ? -1 : 0) - (packagePeriod(b) === 'year' ? -1 : 0));
-      setPackages(available);
-      setSelected(available[0] ?? null);
-      setLoading(false);
+      setLoading(true);
+      setLoadError(null);
+      setSelected(null);
+      try {
+        const offering = await fetchOffering();
+        if (cancelled) return;
+        const available = (offering?.availablePackages ?? [])
+          .slice()
+          .sort((a, b) => (packagePeriod(a) === 'year' ? -1 : 0) - (packagePeriod(b) === 'year' ? -1 : 0));
+        const eligibility = await fetchTrialEligibility(available);
+        if (cancelled) return;
+        setTrialEligibility(eligibility);
+        setPackages(available);
+        setSelected(available[0] ?? null);
+      } catch (error) {
+        if (cancelled) return;
+        setPackages([]);
+        setLoadError({ message: error.message, code: error.code });
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   const handlePurchase = useCallback(async () => {
     if (!selected || busy) return;
@@ -142,6 +159,12 @@ export default function PaywallScreen() {
         style={styles.scroll}
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + spacing.xl }]}
       >
+        <Image
+          source={require('../assets/images/cork_and_note_logo.png')}
+          style={styles.brandMark}
+          resizeMode="contain"
+          accessibilityLabel="Cork & Note"
+        />
         {/* 3.1.2: the subscription's name. */}
         <Text style={styles.title}>Cork &amp; Note Pro</Text>
         <Text style={styles.subtitle}>
@@ -179,14 +202,18 @@ export default function PaywallScreen() {
           // build without the native SDK, or a store outage, actually looks like.
           <View style={styles.unavailable}>
             <Text style={styles.unavailableText}>
-              Subscriptions aren&apos;t available on this device right now. Please try again later.
+              {loadError?.message || 'Subscriptions are unavailable right now. Please try again.'}
             </Text>
+            {loadError?.code ? <Text style={styles.unavailableText}>Reference: {loadError.code}</Text> : null}
+            <TouchableOpacity onPress={() => setAttempt((value) => value + 1)} style={styles.retry} accessibilityRole="button">
+              <Text style={styles.link}>Try again</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.plans}>
             {packages.map((pkg) => {
               const isSelected = pkg.identifier === selected?.identifier;
-              const trial = packageTrialLabel(pkg);
+              const trial = trialFor(pkg);
               return (
                 <TouchableOpacity
                   key={pkg.identifier}
@@ -226,11 +253,14 @@ export default function PaywallScreen() {
             <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <Text style={styles.ctaText}>
-              {isPro ? 'You already have Pro' : packageTrialLabel(selected) ? 'Start free trial' : 'Continue'}
+              {isPro ? 'You already have Pro' : trialFor(selected) ? 'Start free trial' : 'Continue'}
             </Text>
           )}
         </TouchableOpacity>
 
+        {trialFor(selected) ? <Text style={styles.legalese}>
+          {trialFor(selected)}, then {packagePriceLine(selected)}. Cancel before the trial ends to avoid being charged.
+        </Text> : null}
         {/* 3.1.2: auto-renew disclosure, in plain language, before purchase. */}
         <Text style={styles.legalese}>
           Payment is charged to your Apple Account at confirmation of purchase. Your subscription
@@ -251,6 +281,10 @@ export default function PaywallScreen() {
           <Text style={styles.linkDivider}>·</Text>
           <TouchableOpacity onPress={() => openLink(PRIVACY_URL)} accessibilityRole="link">
             <Text style={styles.link}>Privacy Policy</Text>
+          </TouchableOpacity>
+          <Text style={styles.linkDivider}>·</Text>
+          <TouchableOpacity onPress={() => openLink(`mailto:${SUPPORT_EMAIL}`)} accessibilityRole="link">
+            <Text style={styles.link}>Support</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -275,6 +309,8 @@ const styles = StyleSheet.create({
   closeBtn: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   scroll: { flex: 1 },
   content: { paddingHorizontal: spacing.lg },
+  brandMark: { width: 88, height: 88, alignSelf: 'center', marginBottom: spacing.md },
+  retry: { alignSelf: 'center', minHeight: 44, justifyContent: 'center', paddingHorizontal: spacing.md },
   title: {
     fontFamily: SERIF,
     fontSize: 30,

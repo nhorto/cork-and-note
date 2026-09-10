@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
   Alert,
+  Linking,
   ScrollView,
   StyleSheet,
   Switch,
@@ -14,6 +15,7 @@ import {
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
 import AppearanceSettings from '../../components/AppearanceSettings';
+import AiSharingSettings from '../../components/AiSharingSettings';
 import { usePro } from '../../hooks/usePro';
 import { accountService } from '../../lib/account';
 import { shareTastingsCsv } from '../../lib/exportTastings';
@@ -177,6 +179,10 @@ export default function AccountSettingsScreen() {
           </View>
         </View>
 
+        <View style={styles.section}>
+          <AiSharingSettings userId={user?.id} />
+        </View>
+
         {/* Subscription Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Subscription</Text>
@@ -211,6 +217,13 @@ export default function AccountSettingsScreen() {
             <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
           </TouchableOpacity>
 
+          <TouchableOpacity style={styles.actionButton} accessibilityRole="link" onPress={() =>
+            Linking.openURL('https://apps.apple.com/account/subscriptions').catch(() =>
+              Alert.alert('Could not open subscriptions', 'Manage your subscription in your Apple Account settings.'))
+          }>
+            <Ionicons name="card-outline" size={20} color={colors.primary.ink} />
+            <Text style={styles.actionButtonText}>Manage subscription</Text>
+          </TouchableOpacity>
           <Text style={styles.infoNote}>
             Subscriptions are billed to your Apple Account and can be managed or cancelled there.
           </Text>
@@ -261,9 +274,10 @@ export default function AccountSettingsScreen() {
             onPress={() => {
               Alert.alert(
                 'Delete Account',
-                'This permanently deletes your account, tastings, photos, cellar and chat history. This cannot be undone. Are you sure?',
+                'This permanently deletes your account, tastings, photos, cellar and chat history. This cannot be undone. Deleting your account does not cancel an Apple subscription: billing continues until you cancel it in your Apple Account settings. You can manage your subscription here before deleting, or delete your account now.',
                 [
                   { text: 'Cancel', style: 'cancel' },
+                  { text: 'Manage subscription', onPress: () => Linking.openURL('https://apps.apple.com/account/subscriptions').catch(() => Alert.alert('Could not open subscriptions', 'Open your Apple Account subscription settings.')) },
                   {
                     text: 'Delete',
                     style: 'destructive',

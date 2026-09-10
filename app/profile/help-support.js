@@ -4,6 +4,8 @@ import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  Alert,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +13,7 @@ import {
   View
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
+import { SUPPORT_EMAIL } from '../../lib/legalContent';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 
 
@@ -406,6 +409,15 @@ const HelpSupportModal = () => {
       <ScreenHeader title="Help & support" onBack={handleBack} />
 
       <ScrollView style={styles.content}>
+        <TouchableOpacity style={styles.guideItem} accessibilityRole="link" onPress={() =>
+          Linking.openURL(`mailto:${SUPPORT_EMAIL}`).catch(() => Alert.alert('Email support', SUPPORT_EMAIL))
+        }>
+          <Ionicons name="mail-outline" size={24} color={colors.primary.ink} />
+          <View style={styles.guideInfo}>
+            <Text style={styles.guideTitle}>Email support</Text>
+            <Text style={styles.guideSubtitle}>{SUPPORT_EMAIL}</Text>
+          </View>
+        </TouchableOpacity>
         {activeGuide ? (
           // Display selected guide content
           <View style={styles.guideContent}>
