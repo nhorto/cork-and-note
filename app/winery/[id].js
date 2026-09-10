@@ -14,20 +14,28 @@ import {
   View,
 } from 'react-native';
 import PastVisitsSection from '../../components/PastVisitsSection';
+import ReportWineryModal from '../../components/ReportWineryModal';
 import ScreenHeader from '../../components/ScreenHeader';
 import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryGoogleCard from '../../components/WineryGoogleCard';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import { wineriesService } from '../../lib/wineries';
 import { wineryStatusService } from '../../lib/wineryStatus';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function WineryDetail() {
-  const { id } = useLocalSearchParams();
+  const { colors, styles } = useScreenTheme();
+
+  // directoryId rides along only when this page was opened from a directory
+  // discovery pin (map / Near You) — promotion via findOrCreateWinery doesn't
+  // persist the link on the wineries row, so this param is the one moment we
+  // still know which winery_directory row the page describes (#225).
+  const { id, directoryId: directoryIdParam } = useLocalSearchParams();
+  const directoryId = /^\d+$/.test(String(directoryIdParam ?? ''))
+    ? Number(directoryIdParam)
+    : null;
   const router = useRouter();
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
@@ -36,6 +44,7 @@ export default function WineryDetail() {
   const [wineryLoading, setWineryLoading] = useState(true);
   const [wineryStatus, setWineryStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(true);
+  const [reportVisible, setReportVisible] = useState(false);
 
   useEffect(() => {
     const fetchWinery = async () => {
@@ -160,7 +169,7 @@ export default function WineryDetail() {
           <View style={styles.heroDecoration}>
             <View style={styles.decorativeLine} />
             <View style={styles.heroIcon}>
-              <Ionicons name="wine" size={28} color={colors.primary.base} />
+              <Ionicons name="wine" size={28} color={colors.primary.ink} />
             </View>
             <View style={styles.decorativeLine} />
           </View>
@@ -197,7 +206,7 @@ export default function WineryDetail() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: colors.primary.base }]}>
-                <Ionicons name="wine" size={22} color={colors.neutral.bg} />
+                <Ionicons name="wine" size={22} color={colors.onPrimary} />
               </View>
               <Text style={styles.actionLabel}>Log visit</Text>
             </TouchableOpacity>
@@ -208,7 +217,7 @@ export default function WineryDetail() {
               activeOpacity={0.7}
             >
               <View style={[styles.actionIcon, { backgroundColor: colors.status.visited }]}>
-                <Ionicons name="navigate" size={22} color={colors.neutral.bg} />
+                <Ionicons name="navigate" size={22} color={colors.onStatus} />
               </View>
               <Text style={styles.actionLabel}>Directions</Text>
             </TouchableOpacity>
@@ -227,10 +236,26 @@ export default function WineryDetail() {
               your visits stay the content of this page (#170 item 7). */}
           <WineryGoogleCard
             winery={winery}
+            directoryId={directoryId}
             onPlaceIdSaved={(placeId) =>
               setWinery((prev) => (prev ? { ...prev, google_place_id: placeId } : prev))
             }
           />
+
+          {/* Report a problem (#225) — a quiet, secondary escape hatch that
+              feeds the directory-freshness queue (winery_reports). */}
+          {user && (
+            <TouchableOpacity
+              style={styles.reportRow}
+              onPress={() => setReportVisible(true)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Report a problem with this winery"
+            >
+              <Ionicons name="flag-outline" size={14} color={colors.neutral.inkTertiary} />
+              <Text style={styles.reportRowText}>Report a problem</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Past Visits Section */}
@@ -240,9 +265,24 @@ export default function WineryDetail() {
           </View>
         )}
       </ScrollView>
+
+      <ReportWineryModal
+        visible={reportVisible}
+        winery={winery}
+        directoryId={directoryId}
+        onClose={() => setReportVisible(false)}
+      />
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -399,9 +439,25 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.sm,
   },
 
+  // Report a problem (#225) — quiet by design, subordinate to everything else
+  reportRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    minHeight: 40,
+    marginTop: spacing.md,
+  },
+  reportRowText: {
+    ...typography.body.caption,
+    color: colors.neutral.inkTertiary,
+  },
+
   // Past Visits Container
   pastVisitsContainer: {
     marginHorizontal: spacing.md,
     marginTop: spacing.lg,
   },
+});
+return { colors, styles };
 });

@@ -9,9 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import { Dimensions, Platform, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors } = theme;
 
 // Get screen dimensions for responsive scaling
 const { width } = Dimensions.get('window');
@@ -38,48 +37,10 @@ const getIconSize = () => {
 const TAB_BAR_ROW_HEIGHT = 60;
 
 // Tab bar styling with Château Label aesthetic
-const tabBarStyles = {
-  tabBarStyle: {
-    backgroundColor: colors.neutral.bg,
-    borderTopWidth: 1,
-    borderTopColor: colors.accent.border,
-    paddingTop: 8,
-    shadowColor: colors.neutral.ink,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  tabBarLabelStyle: {
-    fontSize: moderateScale(11),
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  tabBarIconStyle: {
-    marginTop: 2,
-  },
-};
+
 
 // Header styling with Château Label aesthetic
-const headerStyles = {
-  headerStyle: {
-    backgroundColor: colors.neutral.bg,
-    shadowColor: colors.neutral.ink,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.accent.border,
-  },
-  headerTitleStyle: {
-    fontSize: moderateScale(18),
-    fontWeight: '600',
-    color: colors.neutral.ink,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-  },
-  headerTintColor: colors.primary.base,
-};
+
 
 // The active tab already reads as active from the primary.base tint on its icon and
 // label, so there is no separate indicator dot — a second marker under one of
@@ -91,6 +52,8 @@ const TabIcon = ({ name, color, size }) => (
 );
 
 export default function Layout() {
+  const { colors, tabBarStyles, headerStyles } = useScreenTheme();
+
   const iconSize = getIconSize();
 
   // Reserve exactly what the device reserves, on both platforms: the iOS home
@@ -111,7 +74,7 @@ export default function Layout() {
         ...tabBarStyles,
         tabBarStyle,
         ...headerStyles,
-        tabBarActiveTintColor: colors.primary.base,
+        tabBarActiveTintColor: colors.primary.ink,
         tabBarInactiveTintColor: colors.neutral.inkTertiary,
         tabBarAllowFontScaling: false,
       }}
@@ -182,4 +145,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+});
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors } = theme;
+
+const tabBarStyles = {
+  tabBarStyle: {
+    backgroundColor: colors.neutral.bg,
+    borderTopWidth: 1,
+    borderTopColor: colors.accent.border,
+    paddingTop: 8,
+    shadowColor: colors.neutral.ink,
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  tabBarLabelStyle: {
+    fontSize: moderateScale(11),
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  tabBarIconStyle: {
+    marginTop: 2,
+  },
+};
+
+const headerStyles = {
+  headerStyle: {
+    backgroundColor: colors.neutral.bg,
+    shadowColor: colors.neutral.ink,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.accent.border,
+  },
+  headerTitleStyle: {
+    fontSize: moderateScale(18),
+    fontWeight: '600',
+    color: colors.neutral.ink,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  headerTintColor: colors.primary.ink,
+};
+return { colors, tabBarStyles, headerStyles };
 });

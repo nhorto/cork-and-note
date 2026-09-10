@@ -1,41 +1,29 @@
 # App images
 
-Every current logo asset derives from `brand-mark.png`: the selected **Spritz /
-bolder (option 3)** ivory wine glass with a fountain-pen nib on coral, without
-an enclosing ring. The master is an unchanged copy of the approved
-`03-spritz-bold-symbol.png` from Downloads, selected on 2026-09-09.
+Current assets derive from `brand-mark.png`: Royal Velvet purple with a gold
+wine glass, fountain-pen-nib cutout, and enclosing circular gold ring. Generated
+with the built-in imagegen tool on 2026-09-10 using the previous Bordeaux
+Tasting Nib logo as the reference. The unchanged 1254×1254 PNG master is preserved.
+The color brief is purple `#54258A` and gold `#D6B45D`; generated raster pixels
+can vary slightly from the exact UI tokens.
 
-| File | Used by | Notes |
+| File | Use | Packaging |
 | --- | --- | --- |
-| `brand-mark.png` | Regeneration source | Original 1254×1254 PNG; preserve the selected artwork. |
-| `icon.png` | `app.json` → `expo.icon` | 1024×1024, full bleed, no alpha channel. |
-| `adaptive-icon.png` | `app.json` → `android.adaptiveIcon` | 1024×1024 with safe-zone padding. |
-| `splash-icon.png` | `expo-splash-screen` | 800×800 rounded tile with transparent corners. |
-| `cork_and_note_logo.png` | Login and forgot-password screens | 600×600 rounded tile with transparent corners. |
-| `favicon.png` | `app.json` → `web.favicon` | 196×196, full bleed. |
+| `brand-mark.png` | Generation master | 1254×1254 opaque PNG |
+| `icon.png` | App icon | 1024×1024 opaque square |
+| `adaptive-icon.png` | Android adaptive foreground | 1024×1024, artwork scaled to 720×720 for mask safety |
+| `splash-icon.png` | Light and dark splash | 800×800 rounded tile with transparent corners |
+| `cork_and_note_logo.png` | Authentication | 600×600 rounded tile with transparent corners |
+| `favicon.png` | Web favicon | 196×196 opaque PNG |
 
-The same master supplies `site/assets/logo.jpg` (512×512),
-`site/assets/favicon.png` (64×64), and `site/assets/og-image.jpg` (1024×1024).
+One consistent purple-and-gold brand tile serves both modes. Native splash
+backgrounds are ivory `#FAF8F4` and midnight `#191321`; the Android adaptive
+backdrop is purple `#54258A`. Scaling and padding keep the ring in the safe circle.
 
-## Regenerating
+Run `bash scripts/generate-icons.sh` to package derivatives from the master.
+The script also updates the shared site logo, favicon and social image; it does
+not redraw the symbol or recolor the master. The retired Spritz master is at
+`archive/spritz-2026-09-09/brand-mark.png`.
 
-With ImageMagick installed, run from the repository root:
-
-```sh
-bash scripts/generate-icons.sh
-```
-
-This resizes and packages the approved PNG; it does not generate new artwork.
-The script retains RGB color detail and strips derivative metadata. The master
-remains unchanged.
-
-## Android safe zone
-
-Android launchers apply different masks. The master is scaled to 720×720 inside
-a 1024×1024 canvas, keeping the glass within the central safe circle. The 152px
-margin replicates source edge pixels to avoid a visible seam against the render's
-subtle coral variation. The adaptive background in `app.json` uses Spritz coral
-`#E4573D`.
-
-Splash and authentication tiles retain corner radii of approximately 22.4%.
-`archive/` holds retired images; see its own README.
+See [the design record](../../docs/design/royal-velvet-appearance.md) for the prompt
+and theme implementation. Native icon and splash changes require a native rebuild.

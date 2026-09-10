@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "corkandnote",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.nicholashorton.corkandnote",
@@ -21,7 +21,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#E4573D"
+        "backgroundColor": "#54258A"
       },
       "package": "com.nicholashorton.corkandnote",
       "edgeToEdgeEnabled": true,
@@ -29,11 +29,7 @@
         "CAMERA",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
-      ],
-      "statusBar": {
-        "style": "dark",
-        "translucent": false
-      }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -48,7 +44,11 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 220,
           "resizeMode": "contain",
-          "backgroundColor": "#FFF8F0"
+          "backgroundColor": "#FAF8F4",
+          "dark": {
+            "backgroundColor": "#191321",
+            "image": "./assets/images/splash-icon.png"
+          }
         }
       ],
       [
@@ -83,6 +83,7 @@
       "eas": {
         "projectId": "3338eff4-c93e-49be-b32c-e802c16d122c"
       }
-    }
+    },
+    "backgroundColor": "#FAF8F4"
   }
 }

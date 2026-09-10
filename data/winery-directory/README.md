@@ -167,6 +167,55 @@ migration, the loader, and this CSV) to something source-neutral like
 `external_place_id`, plus record which source produced each row if we ever
 blend sources.
 
+## Quarterly re-ingest procedure (#225)
+
+Overture publishes a new `places` release roughly monthly; re-running this
+extract about once a quarter keeps the directory from fossilizing. The
+freshness columns involved (`updated_at`, `source_release`,
+`operating_status`) come from
+`supabase/migrations/20260910120000_directory_freshness.sql`.
+
+1. **Find the latest release.** List
+   `s3://overturemaps-us-west-2/release/` (anonymous access, `us-west-2`)
+   and note the newest version, e.g. `2026-11-18.0`.
+2. **Re-run the DuckDB extract** from "Exact query" above, changing only the
+   release in the `read_parquet` path. Re-verify that
+   `categories.primary = 'winery'` is still the right taxonomy value for the
+   new release (Overture has changed category schemas before).
+3. **Rename the header + compress** exactly as before: the `gers_id` column
+   header becomes `fsq_place_id`, then `gzip -9 us-wineries.csv`.
+4. **Commit the new CSV** to this directory (replacing the old one) with the
+   release noted in the commit message, and update the row counts in this
+   README if they moved meaningfully.
+5. **Load with the release stamp** (owner-run, service role — never in CI):
+
+   ```bash
+   SUPABASE_URL=https://<project-ref>.supabase.co \
+   SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
+   node scripts/load-winery-directory.mjs --release <release> \
+     data/winery-directory/us-wineries.csv.gz
+   ```
+
+What the loader now does on a re-run:
+
+- **Upserts** every CSV row on `fsq_place_id`, stamping
+  `source_release = <release>` and `updated_at = now`. The upsert does NOT
+  touch `operating_status`, so a Google-confirmed `permanently_closed` (set
+  by the `places` Edge Function from `businessStatus`) survives re-ingest
+  even if Overture still lists the place.
+- **Flags rows that vanished** from the new extract as
+  `operating_status = 'possibly_closed'` — never hard-deletes them (users
+  may have promoted them into their own wineries, and Overture churn is not
+  proof of closure). Rows already `permanently_closed` keep that stronger
+  flag.
+- **Heals `possibly_closed` rows that reappear** in the new extract back to
+  `NULL` (unknown/assumed open).
+
+Client behavior: discovery queries (`lib/wineryDirectory.js`) exclude only
+`permanently_closed` rows; `possibly_closed` rows still show, and a Google
+`details` call (Pro winery page open) or a user report
+(`public.winery_reports`) settles their fate later.
+
 ## License / attribution
 
 This data is licensed under **CDLA-Permissive-2.0** (Community Data License
@@ -211,8 +260,13 @@ supabase db push   # or: apply supabase/migrations/20260910000000_winery_directo
 npm install @supabase/supabase-js   # if not already a project dependency
 SUPABASE_URL=https://<project-ref>.supabase.co \
 SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
-node scripts/load-winery-directory.mjs data/winery-directory/us-wineries.csv.gz
+node scripts/load-winery-directory.mjs --release 2026-08-19.0 \
+  data/winery-directory/us-wineries.csv.gz
 ```
+
+`--release` is required (#225): it stamps `winery_directory.source_release`
+so re-ingests are auditable per row. Use the Overture release the CSV was
+extracted from.
 
 ## Files in this PR
 

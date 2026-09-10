@@ -25,9 +25,9 @@ import {
   View,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
+
 const SERIF = Platform.OS === 'ios' ? 'Georgia' : 'serif';
 
 // Pull recovery credentials out of the deep link. Implicit-flow links carry
@@ -51,6 +51,8 @@ function parseRecoveryParams(url) {
 }
 
 export default function ResetPasswordScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const url = Linking.useURL();
 
@@ -129,7 +131,7 @@ export default function ResetPasswordScreen() {
   if (status === 'checking') {
     return (
       <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.primary.base} />
+        <ActivityIndicator size="large" color={colors.primary.ink} />
         <Text style={styles.checkingText}>Opening your reset link…</Text>
       </View>
     );
@@ -138,7 +140,7 @@ export default function ResetPasswordScreen() {
   if (status === 'invalid') {
     return (
       <View style={[styles.container, styles.center]}>
-        <Ionicons name="time-outline" size={48} color={colors.primary.base} />
+        <Ionicons name="time-outline" size={48} color={colors.primary.ink} />
         <Text style={styles.title}>Link expired</Text>
         <Text style={styles.subtitle}>
           This reset link is invalid or has expired. Request a new one and try again.
@@ -165,7 +167,7 @@ export default function ResetPasswordScreen() {
         </Text>
 
         <View style={styles.inputRow}>
-          <Ionicons name="lock-closed-outline" size={20} color={colors.primary.base} />
+          <Ionicons name="lock-closed-outline" size={20} color={colors.primary.ink} />
           <TextInput
             style={styles.input}
             placeholder="New password"
@@ -184,13 +186,13 @@ export default function ResetPasswordScreen() {
             <Ionicons
               name={showPassword ? 'eye-off-outline' : 'eye-outline'}
               size={20}
-              color={colors.primary.base}
+              color={colors.primary.ink}
             />
           </TouchableOpacity>
         </View>
 
         <View style={styles.inputRow}>
-          <Ionicons name="lock-closed-outline" size={20} color={colors.primary.base} />
+          <Ionicons name="lock-closed-outline" size={20} color={colors.primary.ink} />
           <TextInput
             style={styles.input}
             placeholder="Confirm new password"
@@ -210,7 +212,7 @@ export default function ResetPasswordScreen() {
           disabled={saving || status === 'done'}
         >
           {saving ? (
-            <ActivityIndicator color={colors.neutral.bg} />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <Text style={styles.buttonText}>Update password</Text>
           )}
@@ -219,6 +221,12 @@ export default function ResetPasswordScreen() {
     </KeyboardAvoidingView>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -292,6 +300,8 @@ const styles = StyleSheet.create({
   buttonText: {
     ...typography.body.regular,
     fontWeight: '600',
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
   },
+});
+return { colors, styles };
 });

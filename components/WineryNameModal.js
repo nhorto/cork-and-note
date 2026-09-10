@@ -14,17 +14,17 @@ import {
   View
 } from 'react-native';
 import Button from './Button';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const WineryNameModal = ({
   visible,
   onClose,
   onSave,
   coordinate
 }) => {
+  const { colors, styles } = useScreenTheme();
+
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -75,7 +75,7 @@ const WineryNameModal = ({
               {/* Header */}
               <View style={styles.header}>
                 <View style={styles.headerIcon}>
-                  <Ionicons name="location" size={22} color={colors.primary.base} />
+                  <Ionicons name="location" size={22} color={colors.primary.ink} />
                 </View>
                 <View style={styles.headerText}>
                   <Text style={styles.title}>Drop a pin</Text>
@@ -102,7 +102,7 @@ const WineryNameModal = ({
                   autoFocus={true}
                   returnKeyType="done"
                   onSubmitEditing={handleSave}
-                  selectionColor={colors.primary.base}
+                  selectionColor={colors.primary.ink}
                 />
               </View>
 
@@ -140,6 +140,15 @@ const WineryNameModal = ({
     </Modal>
   );
 };
+
+
+export default WineryNameModal;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   overlay: {
@@ -246,5 +255,5 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
 });
-
-export default WineryNameModal;
+return { colors, styles };
+});

@@ -7,6 +7,9 @@
 // here because this test is about the form's own structure, not theirs.
 jest.mock('../components/LabelScanner', () => () => null);
 jest.mock('../components/WineChatModal', () => () => null);
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+);
 
 import { act, create } from 'react-test-renderer';
 import WineEntryForm from '../components/WineEntryForm';

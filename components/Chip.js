@@ -7,7 +7,7 @@
 // Pass onPress to make it selectable; pass onRemove to show a trailing ×.
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { borderRadius, colors, spacing } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
 export default function Chip({
   label,
@@ -18,6 +18,8 @@ export default function Chip({
   disabled = false,
   style,
 }) {
+  const { colors, styles } = useScreenTheme();
+
   const body = (
     <>
       <Text style={[styles.label, selected && styles.labelSelected]} numberOfLines={1}>
@@ -38,7 +40,7 @@ export default function Chip({
           <Ionicons
             name="close"
             size={14}
-            color={selected ? colors.neutral.bg : colors.neutral.inkTertiary}
+            color={selected ? colors.onPrimary : colors.neutral.inkTertiary}
           />
         </TouchableOpacity>
       ) : null}
@@ -71,6 +73,11 @@ export default function Chip({
   return <View style={containerStyle}>{body}</View>;
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { borderRadius, colors, spacing } = theme;
 const styles = StyleSheet.create({
   chip: {
     flexDirection: 'row',
@@ -94,7 +101,7 @@ const styles = StyleSheet.create({
     color: colors.neutral.ink,
   },
   labelSelected: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
   },
   hint: {
     fontSize: 10,
@@ -110,4 +117,6 @@ const styles = StyleSheet.create({
   disabled: {
     opacity: 0.5,
   },
+});
+return { colors, styles };
 });

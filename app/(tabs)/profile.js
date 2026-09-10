@@ -13,13 +13,13 @@ import {
   View
 } from 'react-native';
 import VisitStatsCard from '../../components/VisitStatsCard';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function ProfileScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const { signOut, user } = useContext(AuthContext);
   const router = useRouter();
 
@@ -65,7 +65,7 @@ export default function ProfileScreen() {
             accessibilityLabel="Go back"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="chevron-back" size={24} color={colors.primary.base} />
+            <Ionicons name="chevron-back" size={24} color={colors.primary.ink} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Profile</Text>
           <TouchableOpacity
@@ -126,7 +126,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="wine" size={20} color={colors.primary.base} />
+                <Ionicons name="wine" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Your tastings</Text>
@@ -141,7 +141,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="location-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="location-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Your places</Text>
@@ -156,7 +156,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="bookmark-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="bookmark-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Wishlist</Text>
@@ -171,7 +171,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="file-tray-stacked-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Cellar</Text>
@@ -195,7 +195,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="sparkles" size={20} color={colors.primary.base} />
+                <Ionicons name="sparkles" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Ask the sommelier</Text>
@@ -219,7 +219,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="settings-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="settings-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Account settings</Text>
@@ -234,7 +234,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="notifications-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="notifications-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Cellar reminders</Text>
@@ -249,7 +249,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="help-circle-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="help-circle-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Help & support</Text>
@@ -264,7 +264,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="chatbubble-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="chatbubble-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Feedback</Text>
@@ -279,7 +279,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="shield-checkmark-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Privacy policy</Text>
@@ -294,7 +294,7 @@ export default function ProfileScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.menuIconContainer}>
-                <Ionicons name="document-text-outline" size={20} color={colors.primary.base} />
+                <Ionicons name="document-text-outline" size={20} color={colors.primary.ink} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Terms of use</Text>
@@ -332,6 +332,14 @@ export default function ProfileScreen() {
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -417,7 +425,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 32,
     fontWeight: '300',
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontFamily: SERIF,
     letterSpacing: 2,
   },
@@ -550,4 +558,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkTertiary,
     marginTop: spacing.xs,
   },
+});
+return { colors, styles };
 });

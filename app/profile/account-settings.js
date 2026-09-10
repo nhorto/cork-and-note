@@ -13,15 +13,17 @@ import {
   View
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
+import AppearanceSettings from '../../components/AppearanceSettings';
 import { usePro } from '../../hooks/usePro';
 import { accountService } from '../../lib/account';
 import { shareTastingsCsv } from '../../lib/exportTastings';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
-const { colors, typography } = theme;
-const SERIF = typography.fonts.serif;
+
 export default function AccountSettingsScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const { user, signOut } = useContext(AuthContext);
   const { isPro, purchasesAvailable, restore, presentPaywall } = usePro();
@@ -146,6 +148,7 @@ export default function AccountSettingsScreen() {
       <ScreenHeader title="Account settings" />
 
       <ScrollView style={styles.content}>
+        <AppearanceSettings />
         {/* Privacy & Permissions Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Privacy & permissions</Text>
@@ -169,7 +172,7 @@ export default function AccountSettingsScreen() {
               value={locationEnabled}
               onValueChange={handleLocationToggle}
               trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
-              thumbColor={colors.neutral.bg}
+              thumbColor={colors.onPrimary}
             />
           </View>
         </View>
@@ -189,7 +192,7 @@ export default function AccountSettingsScreen() {
               onPress={() => presentPaywall('settings')}
               accessibilityRole="button"
             >
-              <Ionicons name="sparkles" size={20} color={colors.primary.base} />
+              <Ionicons name="sparkles" size={20} color={colors.primary.ink} />
               <Text style={styles.actionButtonText}>Upgrade to Pro</Text>
               <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
             </TouchableOpacity>
@@ -201,7 +204,7 @@ export default function AccountSettingsScreen() {
             onPress={handleRestore}
             accessibilityRole="button"
           >
-            <Ionicons name="refresh" size={20} color={colors.primary.base} />
+            <Ionicons name="refresh" size={20} color={colors.primary.ink} />
             <Text style={styles.actionButtonText}>
               {restoring ? 'Restoring…' : 'Restore purchases'}
             </Text>
@@ -223,7 +226,7 @@ export default function AccountSettingsScreen() {
             onPress={handleExport}
             accessibilityRole="button"
           >
-            <Ionicons name="download" size={20} color={colors.primary.base} />
+            <Ionicons name="download" size={20} color={colors.primary.ink} />
             <Text style={styles.actionButtonText}>
               {exporting ? 'Preparing export…' : 'Export tastings (CSV)'}
             </Text>
@@ -247,7 +250,7 @@ export default function AccountSettingsScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/profile/change-password')}
           >
-            <Ionicons name="key" size={20} color={colors.primary.base} />
+            <Ionicons name="key" size={20} color={colors.primary.ink} />
             <Text style={styles.actionButtonText}>Change password</Text>
             <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
           </TouchableOpacity>
@@ -297,6 +300,13 @@ export default function AccountSettingsScreen() {
     </View>
   );
 }
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
@@ -371,7 +381,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.5,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     borderWidth: 1,
     borderColor: colors.primary.base,
     borderRadius: 4,
@@ -405,4 +415,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     lineHeight: 16,
   },
+});
+return { colors, styles };
 });

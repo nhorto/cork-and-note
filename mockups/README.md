@@ -1,5 +1,18 @@
 # Design mockups
 
+## Purple & gold palette studio
+
+Open [purple-gold-studio.html](purple-gold-studio.html) directly in a browser for six
+purple-and-gold directions based on the current Journey / Ask Sommelier / Cellar
+home layout. Compare a live mix with a pinned palette, edit eight color roles by
+picker or hex value, and switch between bold-purple and soft-tinted Journey cards.
+The glass symbol is a provisional color study for the later logo work.
+
+Favorites, notes, and edits persist per file in browser storage when available.
+Download the palette as text (including exact hex colors and derived values), or
+download a standalone HTML copy with the current mix, comparison, and favorites
+embedded. Everything works offline. Production theme and logo assets are unchanged.
+
 ## Advertising concepts
 
 Open [ad-campaigns/index.html](ad-campaigns/index.html) for six Facebook and

@@ -10,9 +10,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { drinkWindowMeta, drinkWindowStatus, peakYear } from '../lib/cellar';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 // Clamp a 0–1 fraction so the marker never escapes the track.
 const clamp01 = (n) => Math.max(0, Math.min(1, n));
@@ -40,6 +39,8 @@ function buildCaption(now, from, by, peak) {
 }
 
 export default function MaturityTimeline({ drinkFrom, drinkBy, onAddWindow }) {
+  const { colors, styles } = useScreenTheme();
+
   const from = drinkFrom != null && drinkFrom !== '' ? Number(drinkFrom) : null;
   const by = drinkBy != null && drinkBy !== '' ? Number(drinkBy) : null;
   const hasWindow = Number.isFinite(from) && Number.isFinite(by) && by >= from;
@@ -74,7 +75,7 @@ export default function MaturityTimeline({ drinkFrom, drinkBy, onAddWindow }) {
   const nowInWindow = now >= from && now <= by;
 
   const status = drinkWindowStatus(from, by, now);
-  const meta = drinkWindowMeta(status);
+  const meta = drinkWindowMeta(status, colors);
   const caption = buildCaption(now, from, by, peak);
 
   return (
@@ -124,6 +125,12 @@ export default function MaturityTimeline({ drinkFrom, drinkBy, onAddWindow }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.neutral.surface,
@@ -146,7 +153,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     borderRadius: borderRadius.sm,
   },
-  statusBadgeText: { ...typography.body.caption, color: colors.neutral.bg },
+  statusBadgeText: { ...typography.body.caption, color: colors.onStatus },
 
   // Track
   track: {
@@ -222,8 +229,10 @@ const styles = StyleSheet.create({
   emptyText: { ...typography.body.small, color: colors.neutral.inkTertiary, flex: 1, lineHeight: 18 },
   addLink: {
     ...typography.body.small,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     fontWeight: '600',
     marginTop: spacing.sm,
   },
+});
+return { colors, styles };
 });

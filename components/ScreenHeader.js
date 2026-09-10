@@ -8,9 +8,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, spacing, typography } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const SERIF = typography.fonts.serif;
+
 const HIT = 44; // Apple HIG minimum touch target
 
 export default function ScreenHeader({
@@ -21,6 +21,8 @@ export default function ScreenHeader({
   right = null,
   backAccessibilityLabel = 'Go back',
 }) {
+  const { colors, spacing, styles } = useScreenTheme();
+
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const handleBack = onBack || (() => router.back());
@@ -36,7 +38,7 @@ export default function ScreenHeader({
             accessibilityLabel={backAccessibilityLabel}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="chevron-back" size={26} color={colors.primary.base} />
+            <Ionicons name="chevron-back" size={26} color={colors.primary.ink} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -56,6 +58,13 @@ export default function ScreenHeader({
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, spacing, typography } = theme;
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   header: {
@@ -101,4 +110,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textAlign: 'center',
   },
+});
+return { colors, spacing, styles };
 });

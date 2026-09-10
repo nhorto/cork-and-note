@@ -7,7 +7,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { createContext, useEffect, useRef, useState } from 'react';
-import { AppState, useColorScheme } from 'react-native';
+import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import { ProProvider } from '../components/ProProvider';
 import { checkAndReschedule, setNotificationHandler } from '../lib/notifications';
 import { supabase } from '../lib/supabase';
 import { startUpdateWatcher } from '../lib/updates';
+import { AppThemeProvider, useAppearance } from '../styles/ThemeProvider';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -39,7 +40,24 @@ export const AuthContext = createContext({
 });
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  return <AppThemeProvider><AppRoot /></AppThemeProvider>;
+}
+
+function AppRoot() {
+  const { theme, ready: themeReady } = useAppearance();
+  const { colors, isDark } = theme;
+  const navigationTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme : DefaultTheme).colors,
+      primary: colors.primary.ink,
+      background: colors.neutral.bg,
+      card: colors.neutral.surface,
+      text: colors.neutral.ink,
+      border: colors.neutral.border,
+      notification: colors.accent.base,
+    },
+  };
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -112,7 +130,7 @@ export default function RootLayout() {
   // Navigation guard: keep unauthenticated users in the auth flow and move
   // authenticated users out of it.
   useEffect(() => {
-    if (!isInitialized || isLoading) return;
+    if (!loaded || !themeReady || !isInitialized || isLoading) return;
 
     // The password-recovery deep link manages its own navigation: the user
     // arrives unauthenticated (tokens still in the URL) and becomes
@@ -130,7 +148,7 @@ export default function RootLayout() {
       // Not authenticated and outside the auth flow (incl. index) → login.
       router.replace('/login');
     }
-  }, [isAuthenticated, isInitialized, isLoading, segments]);
+  }, [isAuthenticated, isInitialized, isLoading, segments, loaded, themeReady, router]);
 
   // SCREENSHOT AUTOMATION — App Store listing capture.
   //
@@ -326,12 +344,12 @@ export default function RootLayout() {
 
   // Show splash screen until everything is loaded
   useEffect(() => {
-    if (loaded && !isLoading) {
+    if (loaded && themeReady && !isLoading) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, isLoading]);
+  }, [loaded, themeReady, isLoading]);
 
-  if (!loaded) {
+  if (!loaded || !themeReady) {
     return null;
   }
 
@@ -341,12 +359,12 @@ export default function RootLayout() {
           identifies them to RevenueCat on sign-in and logs out on sign-out, so
           one account's Pro cannot leak to the next person on this device. */}
       <ProProvider userId={user?.id ?? null}>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+        <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.neutral.bg }}>
           <SafeAreaProvider>
             {/* Pinned above the navigator so it shows on every screen (§2.3). */}
             <OfflineBanner />
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-              <Stack screenOptions={{ headerShown: false }}>
+            <ThemeProvider value={navigationTheme}>
+              <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.neutral.bg } }}>
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="login" />
                 <Stack.Screen name="register" />
@@ -360,7 +378,7 @@ export default function RootLayout() {
                 <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="+not-found" />
               </Stack>
-              <StatusBar style="auto" />
+              <StatusBar style={isDark ? 'light' : 'dark'} />
             </ThemeProvider>
           </SafeAreaProvider>
         </GestureHandlerRootView>

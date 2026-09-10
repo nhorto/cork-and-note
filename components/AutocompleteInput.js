@@ -17,9 +17,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
 export default function AutocompleteInput({
   label,
@@ -37,6 +36,8 @@ export default function AutocompleteInput({
   debounceMs = 200,
   autoCapitalize = 'words',
 }) {
+  const { colors, styles } = useScreenTheme();
+
   const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState(value || '');
   const [dismissed, setDismissed] = useState(false); // suppress dropdown right after a pick
@@ -96,7 +97,7 @@ export default function AutocompleteInput({
           </Text>
           {linked ? (
             <View style={styles.linkedPill}>
-              <Ionicons name="link" size={11} color={colors.primary.base} />
+              <Ionicons name="link" size={11} color={colors.primary.ink} />
               <Text style={styles.linkedText}>Linked</Text>
             </View>
           ) : null}
@@ -117,7 +118,7 @@ export default function AutocompleteInput({
           onBlur={() => setIsFocused(false)}
           placeholder={placeholder}
           placeholderTextColor={colors.neutral.placeholder}
-          selectionColor={colors.primary.base}
+          selectionColor={colors.primary.ink}
           autoCapitalize={autoCapitalize}
           autoCorrect={false}
         />
@@ -164,7 +165,7 @@ export default function AutocompleteInput({
                       </Text>
                     ) : null}
                   </View>
-                  <Ionicons name="return-down-back" size={16} color={colors.primary.base} />
+                  <Ionicons name="return-down-back" size={16} color={colors.primary.ink} />
                 </TouchableOpacity>
               );
             })}
@@ -175,6 +176,12 @@ export default function AutocompleteInput({
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
 const styles = StyleSheet.create({
   field: { marginBottom: spacing.md, position: 'relative' },
   labelRow: {
@@ -184,7 +191,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   label: { ...typography.body.caption, color: colors.neutral.inkTertiary },
-  req: { color: colors.primary.deep },
+  req: { color: colors.primary.ink },
   linkedPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -196,7 +203,7 @@ const styles = StyleSheet.create({
   },
   linkedText: {
     ...typography.body.caption,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     textTransform: 'none',
     letterSpacing: 0.3,
   },
@@ -262,4 +269,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkTertiary,
     marginTop: 1,
   },
+});
+return { colors, styles };
 });

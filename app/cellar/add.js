@@ -28,11 +28,12 @@ import { sumQuantity } from '../../lib/cellarBrowse';
 import { knownRegions } from '../../lib/cellarRegion';
 import { notifySuccess } from '../../lib/haptics';
 import { canAddBottle, cellarHint } from '../../lib/pro';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 export default function AddBottleScreen() {
+  const { colors, styles } = useScreenTheme();
+
   const { isPro, presentPaywall } = usePro();
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -224,6 +225,12 @@ export default function AddBottleScreen() {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
 const styles = StyleSheet.create({
   cellarHint: {
     marginBottom: spacing.sm,
@@ -248,4 +255,6 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkSecondary,
     flex: 1,
   },
+});
+return { colors, styles };
 });

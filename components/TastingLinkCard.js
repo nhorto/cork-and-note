@@ -25,11 +25,9 @@ import {
 } from 'react-native';
 import { matchTastingsToBottle } from '../lib/cellarMatch';
 import { wineDisplayName } from '../lib/wineDisplay';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const formatDate = (s) => {
   if (!s) return '';
   const d = new Date(s);
@@ -44,6 +42,8 @@ const ratingText = (w) => {
 
 // One selectable tasting row (used in the picker and for the inline suggestion).
 function TastingRow({ wine, badge, onPress, disabled }) {
+  const { colors, styles } = useScreenTheme();
+
   const rating = ratingText(wine);
   const meta = [formatDate(wine.visitDate), wine.placeName].filter(Boolean).join(' · ');
   return (
@@ -71,6 +71,8 @@ function TastingRow({ wine, badge, onPress, disabled }) {
 }
 
 export default function TastingLinkCard({ bottle, tastedWines = [], onLink, onUnlink, linking = false }) {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -148,7 +150,7 @@ export default function TastingLinkCard({ bottle, tastedWines = [], onLink, onUn
         </>
       ) : (
         <TouchableOpacity style={styles.linkBtn} onPress={openPicker} disabled={linking} activeOpacity={0.85}>
-          <Ionicons name="link-outline" size={16} color={colors.primary.base} />
+          <Ionicons name="link-outline" size={16} color={colors.primary.ink} />
           <Text style={styles.linkBtnText}>Link to a tasting</Text>
         </TouchableOpacity>
       )}
@@ -166,7 +168,7 @@ export default function TastingLinkCard({ bottle, tastedWines = [], onLink, onUn
               onChangeText={setQuery}
               placeholder="Search your tastings…"
               placeholderTextColor={colors.neutral.placeholder}
-              selectionColor={colors.primary.base}
+              selectionColor={colors.primary.ink}
               autoCorrect={false}
             />
 
@@ -197,6 +199,14 @@ export default function TastingLinkCard({ bottle, tastedWines = [], onLink, onUn
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   card: {
@@ -230,10 +240,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.accent.border,
   },
-  matchTagText: { ...typography.body.caption, color: colors.primary.base },
+  matchTagText: { ...typography.body.caption, color: colors.primary.ink },
 
   linkedActions: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.xs },
-  linkAction: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  linkAction: { ...typography.body.small, color: colors.primary.ink, fontWeight: '600' },
   unlink: { color: colors.status.error },
   dot: { color: colors.neutral.placeholder },
   chooseAnother: { marginTop: spacing.sm },
@@ -249,7 +259,7 @@ const styles = StyleSheet.create({
     borderColor: colors.accent.border,
     backgroundColor: colors.accent.surface,
   },
-  linkBtnText: { ...typography.body.small, color: colors.primary.base, fontWeight: '600' },
+  linkBtnText: { ...typography.body.small, color: colors.primary.ink, fontWeight: '600' },
 
   // Picker sheet
   backdrop: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
@@ -285,5 +295,7 @@ const styles = StyleSheet.create({
     borderColor: colors.primary.base,
     alignItems: 'center',
   },
-  sheetCancelText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
+  sheetCancelText: { ...typography.body.regular, color: colors.primary.ink, fontWeight: '600' },
+});
+return { colors, styles };
 });

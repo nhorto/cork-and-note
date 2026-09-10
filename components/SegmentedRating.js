@@ -21,13 +21,14 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 const CELLS = 10; // 0.5 … 5.0
 
 export default function SegmentedRating({ label, value = 0, onValueChange }) {
+  const { styles } = useScreenTheme();
+
   const widthRef = useRef(0);
   const valueRef = useRef(value);
   valueRef.current = value;
@@ -122,6 +123,12 @@ export default function SegmentedRating({ label, value = 0, onValueChange }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
 const styles = StyleSheet.create({
   container: {
     marginVertical: spacing.sm,
@@ -140,7 +147,7 @@ const styles = StyleSheet.create({
   value: {
     ...typography.body.regular,
     fontWeight: '700',
-    color: colors.primary.deep,
+    color: colors.primary.ink,
     fontVariant: ['tabular-nums'],
   },
   valueEmpty: {
@@ -181,4 +188,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: colors.neutral.placeholder,
   },
+});
+return { styles };
 });

@@ -5,12 +5,12 @@
 // bottom sheet with a radio-style list of { key, label } options.
 import { Ionicons } from '@expo/vector-icons';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 export default function CellarOptionSheet({ visible, title, options = [], selected, onSelect, onClose }) {
+  const { colors, styles } = useScreenTheme();
+
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
@@ -29,7 +29,7 @@ export default function CellarOptionSheet({ visible, title, options = [], select
                 >
                   <Text style={[styles.rowLabel, active && styles.rowLabelActive]}>{opt.label}</Text>
                   {active && (
-                    <Ionicons name="checkmark" size={20} color={colors.primary.base} />
+                    <Ionicons name="checkmark" size={20} color={colors.primary.ink} />
                   )}
                 </TouchableOpacity>
               );
@@ -40,6 +40,14 @@ export default function CellarOptionSheet({ visible, title, options = [], select
     </Modal>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: colors.overlay.scrim, justifyContent: 'flex-end' },
@@ -75,5 +83,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.neutral.divider,
   },
   rowLabel: { ...typography.body.regular, color: colors.neutral.inkSecondary },
-  rowLabelActive: { color: colors.primary.base, fontWeight: '600' },
+  rowLabelActive: { color: colors.primary.ink, fontWeight: '600' },
+});
+return { colors, styles };
 });

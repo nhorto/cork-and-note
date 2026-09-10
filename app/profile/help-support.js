@@ -11,11 +11,12 @@ import {
   View
 } from 'react-native';
 import ScreenHeader from '../../components/ScreenHeader';
-import theme from '../../styles/theme';
+import { createThemedStyles } from '../../styles/ThemeProvider';
 
-const { colors } = theme;
 
 const HelpSupportModal = () => {
+  const { colors, styles } = useScreenTheme();
+
   const router = useRouter();
   const [activeGuide, setActiveGuide] = useState(null);
 
@@ -424,7 +425,7 @@ const HelpSupportModal = () => {
                 onPress={() => setActiveGuide(guide.id)}
               >
                 <View style={styles.guideIcon}>
-                  <Ionicons name={guide.icon} size={24} color={colors.primary.base} />
+                  <Ionicons name={guide.icon} size={24} color={colors.primary.ink} />
                 </View>
                 <View style={styles.guideInfo}>
                   <Text style={styles.guideTitle}>{guide.title}</Text>
@@ -447,6 +448,12 @@ const HelpSupportModal = () => {
     </View>
   );
 };
+
+
+export default HelpSupportModal;
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -521,7 +528,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   stepNumberText: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: 'bold',
     fontSize: 14,
   },
@@ -540,7 +547,7 @@ const styles = StyleSheet.create({
   },
   bulletPoint: {
     fontSize: 18,
-    color: colors.primary.base,
+    color: colors.primary.ink,
     marginRight: 10,
     marginTop: -2,
   },
@@ -564,7 +571,7 @@ const styles = StyleSheet.create({
   attributeName: {
     fontSize: 15,
     fontWeight: '600',
-    color: colors.primary.base,
+    color: colors.primary.ink,
     marginBottom: 4,
   },
   attributeDescription: {
@@ -606,5 +613,5 @@ const styles = StyleSheet.create({
     color: colors.neutral.inkTertiary,
   },
 });
-
-export default HelpSupportModal;
+return { colors, styles };
+});

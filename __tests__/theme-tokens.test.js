@@ -1,3 +1,4 @@
+/* global __dirname */
 // Guards against references to theme tokens that no longer exist. A stale
 // token (e.g. `colors.gold.muted` after the role-based rename) evaluates to
 // `undefined.muted` inside StyleSheet.create, which throws at module load and
@@ -5,7 +6,7 @@
 // production-build crashes. Scans every source file that imports the theme.
 const fs = require('fs');
 const path = require('path');
-const { colors, typography, spacing } = require('../styles/theme');
+const { lightTheme, darkTheme } = require('../styles/theme');
 
 const ROOT = path.join(__dirname, '..');
 const SCAN_DIRS = ['app', 'components', 'lib', 'contexts', 'hooks'];
@@ -15,22 +16,23 @@ function walk(dir, files = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, files);
-    else if (/\.jsx?$/.test(entry.name)) files.push(full);
+    else if (/\.(jsx?|tsx?)$/.test(entry.name)) files.push(full);
   }
   return files;
 }
 
 const themeFiles = SCAN_DIRS.flatMap((d) => walk(path.join(ROOT, d))).filter((f) =>
-  /from\s+['"][^'"]*styles\/theme['"]/.test(fs.readFileSync(f, 'utf8'))
+  /from\s+['"][^'"]*styles\/(theme|ThemeProvider)['"]/.test(fs.readFileSync(f, 'utf8'))
 );
 
 test('theme is imported somewhere (scan is not vacuous)', () => {
   expect(themeFiles.length).toBeGreaterThan(0);
 });
 
-test.each(themeFiles.map((f) => [path.relative(ROOT, f)]))(
-  '%s only references theme tokens that exist',
-  (rel) => {
+test.each(themeFiles.flatMap((f) => ['light', 'dark'].map((mode) => [path.relative(ROOT, f), mode])))(
+  '%s only references theme tokens that exist in %s mode',
+  (rel, mode) => {
+    const { colors, typography, spacing } = mode === 'dark' ? darkTheme : lightTheme;
     const src = fs.readFileSync(path.join(ROOT, rel), 'utf8');
     const bad = [];
     for (const [name, obj] of [
@@ -50,3 +52,18 @@ test.each(themeFiles.map((f) => [path.relative(ROOT, f)]))(
     expect(bad).toEqual([]);
   }
 );
+
+test('every themed screen subscribes to appearance instead of capturing static colors', () => {
+  for (const file of themeFiles) {
+    const src = fs.readFileSync(file, 'utf8');
+    expect(src).not.toMatch(/import\s+(?:theme\b|\{[^}]*\bcolors\b[^}]*\})\s+from\s+['"][^'"]*styles\/theme['"]/);
+  }
+});
+
+test('screen and component colors come from palette roles', () => {
+  const files = ['app', 'components'].flatMap((dir) => walk(path.join(ROOT, dir)));
+  for (const file of files) {
+    const src = fs.readFileSync(file, 'utf8');
+    expect(src).not.toMatch(/['"]#[0-9a-fA-F]{3,8}['"]|['"]rgba?\(/);
+  }
+});

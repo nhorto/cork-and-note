@@ -11,21 +11,13 @@
 //
 // Both degrade gracefully (empty rows / all-zero series render a gentle line).
 import { StyleSheet, Text, View } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 // A small, on-theme palette cycled across bars so a breakdown reads at a glance
 // without shouting. Burgundy leads (the most-common bucket), then warm golds and
 // muted neutrals — calm, not a rainbow.
-const BAR_COLORS = [
-  colors.primary.base,
-  colors.accent.base,
-  colors.primary.deep,
-  colors.accent.strong,
-  colors.status.wishlist,
-  colors.neutral.placeholder,
-];
+
 
 // Round a 0–100 pct for display without ever showing a misleading "0%" for a
 // non-empty bucket.
@@ -38,6 +30,8 @@ function pctLabel(pct) {
 // Ranked horizontal bars. `max` caps how many rows show before the rest collapse
 // into a single "+N more" line so a sprawling dimension stays glanceable.
 export function CompositionBars({ rows, max = 5 }) {
+  const { BAR_COLORS, styles } = useScreenTheme();
+
   const list = Array.isArray(rows) ? rows : [];
   if (list.length === 0) {
     return <Text style={styles.emptyLine}>Nothing to show yet.</Text>;
@@ -86,6 +80,8 @@ export function CompositionBars({ rows, max = 5 }) {
 // Vertical mini-bars for the consumption trend. Heights scale to `max`; a zero
 // month shows a faint baseline tick so the month still registers on the axis.
 export function TrendBars({ series, max }) {
+  const { styles } = useScreenTheme();
+
   const list = Array.isArray(series) ? series : [];
   if (list.length === 0) {
     return <Text style={styles.emptyLine}>No consumption history yet.</Text>;
@@ -118,6 +114,22 @@ export function TrendBars({ series, max }) {
     </View>
   );
 }
+
+
+export default CompositionBars;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
+
+const BAR_COLORS = [
+  colors.primary.base,
+  colors.accent.base,
+  colors.primary.deep,
+  colors.accent.strong,
+  colors.status.wishlist,
+  colors.neutral.placeholder,
+];
 
 const styles = StyleSheet.create({
   // Composition bars
@@ -192,5 +204,5 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
 });
-
-export default CompositionBars;
+return { BAR_COLORS, styles };
+});

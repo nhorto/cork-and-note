@@ -9,9 +9,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { usePro } from '../hooks/usePro';
 import { meterHint } from '../lib/pro';
-import { colors, spacing } from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
 export default function MeterHint({ task, text, source, style }) {
+  const { colors, styles } = useScreenTheme();
+
   const { isPro, remaining, presentPaywall } = usePro();
 
   const label = text ?? meterHint({ isPro, task, remaining: remaining(task) });
@@ -32,6 +34,11 @@ export default function MeterHint({ task, text, source, style }) {
   );
 }
 
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, spacing } = theme;
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
@@ -44,4 +51,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.neutral.inkTertiary,
   },
+});
+return { colors, styles };
 });

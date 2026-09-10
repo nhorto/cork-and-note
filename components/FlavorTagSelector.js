@@ -24,10 +24,9 @@ import {
   flavorCategoryOf,
   searchFlavorNotes,
 } from '../lib/flavorNotes';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Chip from './Chip';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 const POPULAR_TAB = 'Popular';
 const TABS = [POPULAR_TAB, ...Object.keys(FLAVOR_CATEGORIES)];
@@ -42,6 +41,8 @@ const HINT_LABEL = {
 };
 
 const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
+  const { colors, styles } = useScreenTheme();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(POPULAR_TAB);
 
@@ -104,7 +105,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
 
       {/* One input: search the library, or add a custom note */}
       <View style={styles.searchInputContainer}>
-        <Ionicons name="search" size={18} color={colors.primary.base} style={styles.searchIcon} />
+        <Ionicons name="search" size={18} color={colors.primary.ink} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search or add a note…"
@@ -113,7 +114,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
           onSubmitEditing={submitSearch}
           returnKeyType="done"
           placeholderTextColor={colors.neutral.placeholder}
-          selectionColor={colors.primary.base}
+          selectionColor={colors.primary.ink}
         />
         {searchQuery !== '' && (
           <TouchableOpacity
@@ -122,7 +123,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
             accessibilityLabel="Clear"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="close-circle" size={18} color={colors.primary.base} />
+            <Ionicons name="close-circle" size={18} color={colors.primary.ink} />
           </TouchableOpacity>
         )}
       </View>
@@ -183,7 +184,7 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
                     <Ionicons
                       name="star"
                       size={11}
-                      color={active ? colors.neutral.bg : colors.accent.base}
+                      color={active ? colors.onPrimary : colors.accent.base}
                       style={styles.popularStar}
                     />
                   )}
@@ -210,6 +211,13 @@ const FlavorTagSelector = ({ selectedTags = [], onTagsChange }) => {
     </View>
   );
 };
+
+
+export default FlavorTagSelector;
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -283,7 +291,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   activeCategoryTabText: {
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
   },
   pillsWrap: {
     flexDirection: 'row',
@@ -312,5 +320,5 @@ const styles = StyleSheet.create({
     color: colors.accent.ink,
   },
 });
-
-export default FlavorTagSelector;
+return { colors, styles };
+});

@@ -11,12 +11,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { tapMedium } from '../lib/haptics';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import HubMenu from './HubMenu';
 
-const { colors, typography, spacing, shadows } = theme;
 
 export default function LogFab() {
+  const { colors, styles } = useScreenTheme();
+
   const [hubOpen, setHubOpen] = useState(false);
 
   return (
@@ -31,13 +32,19 @@ export default function LogFab() {
           setHubOpen(true);
         }}
       >
-        <Ionicons name="add" size={22} color={colors.neutral.bg} />
+        <Ionicons name="add" size={22} color={colors.onPrimary} />
         <Text style={styles.label}>Log</Text>
       </TouchableOpacity>
       <HubMenu visible={hubOpen} onClose={() => setHubOpen(false)} />
     </>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows } = theme;
 
 const styles = StyleSheet.create({
   fab: {
@@ -56,7 +63,9 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body.regular,
-    color: colors.neutral.bg,
+    color: colors.onPrimary,
     fontWeight: '600',
   },
+});
+return { colors, styles };
 });

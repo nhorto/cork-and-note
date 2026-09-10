@@ -21,12 +21,10 @@ import {
 import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { wineriesService } from '../lib/wineries';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
 
-const { colors, typography, spacing, shadows, borderRadius } = theme;
 
-const SERIF = typography.fonts.serif;
 const PLACE_TYPES = [
   { id: 'winery', label: 'Winery' },
   { id: 'restaurant', label: 'Restaurant' },
@@ -34,6 +32,8 @@ const PLACE_TYPES = [
 ];
 
 export default function PlacePicker({ visible, initialPlace, onSave, onClose }) {
+  const { colors, spacing, styles } = useScreenTheme();
+
   const [placeType, setPlaceType] = useState('winery');
   const [placeName, setPlaceName] = useState('');
   const [wineryId, setWineryId] = useState(null);
@@ -190,7 +190,7 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                 onChangeText={onChangePlaceName}
                 placeholder={placeType === 'winery' ? 'Search or type a winery' : 'Restaurant name'}
                 placeholderTextColor={colors.neutral.placeholder}
-                selectionColor={colors.primary.base}
+                selectionColor={colors.primary.ink}
               />
               {wineryId && (
                 <Text style={styles.matchedHint}>
@@ -207,7 +207,7 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                       onPress={() => selectKnownWinery(w)}
                       activeOpacity={0.7}
                     >
-                      <Ionicons name="location-outline" size={16} color={colors.primary.base} />
+                      <Ionicons name="location-outline" size={16} color={colors.primary.ink} />
                       <Text style={styles.suggestionText} numberOfLines={1}>{w.name}</Text>
                     </TouchableOpacity>
                   ))}
@@ -252,7 +252,7 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                     accessibilityLabel="Remove pin"
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Ionicons name="close" size={16} color={colors.neutral.bg} />
+                    <Ionicons name="close" size={16} color={colors.onPrimary} />
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -263,9 +263,9 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
                   disabled={locating}
                 >
                   {locating ? (
-                    <ActivityIndicator size="small" color={colors.primary.base} />
+                    <ActivityIndicator size="small" color={colors.primary.ink} />
                   ) : (
-                    <Ionicons name="navigate" size={18} color={colors.primary.base} />
+                    <Ionicons name="navigate" size={18} color={colors.primary.ink} />
                   )}
                   <Text style={styles.locButtonText}>
                     {locating ? 'Locating…' : 'Use my current location'}
@@ -290,6 +290,14 @@ export default function PlacePicker({ visible, initialPlace, onSave, onClose }) 
     </Modal>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, shadows, borderRadius } = theme;
+
+const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.neutral.bg },
@@ -359,7 +367,7 @@ const styles = StyleSheet.create({
   },
   segItemOn: { backgroundColor: colors.primary.base, borderColor: colors.primary.base },
   segText: { ...typography.body.regular, color: colors.neutral.inkSecondary, fontWeight: '500' },
-  segTextOn: { color: colors.neutral.bg, fontWeight: '600' },
+  segTextOn: { color: colors.onPrimary, fontWeight: '600' },
 
   input: {
     backgroundColor: colors.neutral.surface,
@@ -426,7 +434,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     backgroundColor: colors.neutral.surface,
   },
-  locButtonText: { ...typography.body.regular, color: colors.primary.base, fontWeight: '600' },
+  locButtonText: { ...typography.body.regular, color: colors.primary.ink, fontWeight: '600' },
 
   footer: {
     padding: spacing.lg,
@@ -434,4 +442,6 @@ const styles = StyleSheet.create({
     borderTopColor: colors.neutral.divider,
     backgroundColor: colors.neutral.bg,
   },
+});
+return { colors, spacing, styles };
 });

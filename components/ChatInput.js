@@ -13,15 +13,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import theme from '../styles/theme';
+import { createThemedStyles } from '../styles/ThemeProvider';
 
-const { colors, typography, spacing, borderRadius } = theme;
 
 // `photosLocked` keeps the camera button visible but routes a tap to
 // `onLockedPhotoPress` (the paywall) instead of the picker: free chat is
 // text-only, because a photo in chat is a label scan by the back door. The
 // server refuses it too — this prop is the courtesy, not the enforcement.
 export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhotoPress }) {
+  const { colors, styles } = useScreenTheme();
+
   const [text, setText] = useState('');
   const [photos, setPhotos] = useState([]);
   const [sending, setSending] = useState(false);
@@ -137,7 +138,7 @@ export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhot
           <Ionicons
             name="camera"
             size={22}
-            color={disabled ? colors.neutral.placeholder : colors.primary.base}
+            color={disabled ? colors.neutral.placeholder : colors.primary.ink}
           />
         </TouchableOpacity>
 
@@ -162,13 +163,19 @@ export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhot
           <Ionicons
             name="send"
             size={18}
-            color={hasContent && !disabled && !sending ? colors.neutral.bg : colors.neutral.placeholder}
+            color={hasContent && !disabled && !sending ? colors.onPrimary : colors.neutral.placeholder}
           />
         </TouchableOpacity>
       </View>
     </View>
   );
 }
+
+
+
+
+const useScreenTheme = createThemedStyles((theme) => {
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   container: {
@@ -237,4 +244,6 @@ const styles = StyleSheet.create({
   sendButtonActive: {
     backgroundColor: colors.primary.base,
   },
+});
+return { colors, styles };
 });
