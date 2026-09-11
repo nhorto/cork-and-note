@@ -84,7 +84,13 @@ export default function Wines() {
         cellarService.getCellar(),
       ]);
       const cellarBottles = cellarRes?.success ? cellarRes.bottles : [];
-      if (success && visits) {
+      // The service resolves { success: false } on a handled failure instead
+      // of throwing; that is still a failure, not an empty journal.
+      if (!success) {
+        setError(true);
+        return;
+      }
+      if (visits) {
         const allWines = [];
         visits.forEach((visit) => {
           if (visit.wines) {
