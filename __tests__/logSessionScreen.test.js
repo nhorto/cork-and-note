@@ -47,12 +47,17 @@ afterEach(() => Alert.alert.mockRestore());
 describe('seeding the form from the route', () => {
   test('a winery handed over from its detail page is pre-filled with numeric coordinates', async () => {
     await mount({ mode: 'winery', wineryId: '7', wineryName: 'Barboursville', lat: '38.17', lng: '-78.28' });
-    expect(mockForm.winery).toEqual({ id: '7', name: 'Barboursville', latitude: 38.17, longitude: -78.28 });
+    expect(mockForm.winery).toEqual({ id: '7', directoryId: null, name: 'Barboursville', latitude: 38.17, longitude: -78.28 });
+  });
+
+  test('a directory preview hands over its directory id with no winery id (#270)', async () => {
+    await mount({ mode: 'winery', directoryId: '7', wineryName: 'Barboursville', lat: '38.17', lng: '-78.28' });
+    expect(mockForm.winery).toEqual({ id: null, directoryId: 7, name: 'Barboursville', latitude: 38.17, longitude: -78.28 });
   });
 
   test('a winery without coordinates keeps them null rather than NaN', async () => {
     await mount({ mode: 'winery', wineryId: '7', wineryName: 'Somewhere' });
-    expect(mockForm.winery).toEqual({ id: '7', name: 'Somewhere', latitude: null, longitude: null });
+    expect(mockForm.winery).toEqual({ id: '7', directoryId: null, name: 'Somewhere', latitude: null, longitude: null });
   });
 
   test('a prefill from a guided tool honours only the three identity fields, trimmed and capped', async () => {

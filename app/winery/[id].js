@@ -1,8 +1,8 @@
 // app/winery/[id].js
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   Alert,
   Linking,
@@ -27,17 +27,37 @@ import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
 
+// A directory preview route: /winery/dir-<winery_directory.id>.
+const PREVIEW_ROUTE = /^dir-(\d+)$/;
+
+// Shape a winery_directory row like a wineries row so the page renders either.
+const previewFromDirectory = (row) => ({
+  id: null,
+  directory_id: row.id,
+  name: row.name,
+  address: [row.city, row.state].filter(Boolean).join(', ') || row.address || null,
+  latitude: row.latitude,
+  longitude: row.longitude,
+  website: row.website ?? null,
+  google_place_id: row.google_place_id ?? null,
+  operatingStatus: row.operating_status ?? null,
+});
+
 export default function WineryDetail() {
   const { colors, styles } = useScreenTheme();
 
-  // directoryId rides along only when this page was opened from a directory
-  // discovery pin (map / Near You) — promotion via findOrCreateWinery doesn't
-  // persist the link on the wineries row, so this param is the one moment we
-  // still know which winery_directory row the page describes (#225).
-  const { id, directoryId: directoryIdParam } = useLocalSearchParams();
-  const directoryId = /^\d+$/.test(String(directoryIdParam ?? ''))
-    ? Number(directoryIdParam)
-    : null;
+  // Two kinds of page (#270):
+  //   /winery/<id>       one of YOUR wineries: badges, wishlist, past visits;
+  //   /winery/dir-<id>   a PREVIEW of a directory winery you haven't saved.
+  // Browsing never creates a wineries row any more; Log visit and Add to
+  // wishlist are the actions that do, and they carry the directory link.
+  // The legacy ?directoryId= param is still honoured for saved pages opened
+  // by older code paths.
+  const { id: rawId, directoryId: directoryIdParam } = useLocalSearchParams();
+  const previewMatch = PREVIEW_ROUTE.exec(String(rawId ?? ''));
+  const previewDirectoryId = previewMatch ? Number(previewMatch[1]) : null;
+  const isPreview = previewDirectoryId != null;
+  const id = isPreview ? null : rawId;
   const router = useRouter();
   const navigation = useNavigation();
   const { user } = useContext(AuthContext);
@@ -49,39 +69,71 @@ export default function WineryDetail() {
   const [reportVisible, setReportVisible] = useState(false);
   const [website, setWebsite] = useState(null);
 
+  const directoryId =
+    previewDirectoryId
+    ?? winery?.directory_id
+    ?? (/^\d+$/.test(String(directoryIdParam ?? '')) ? Number(directoryIdParam) : null);
+
   useEffect(() => {
     let active = true;
     setWebsite(null);
-    if (winery?.id != null && String(winery.id) === String(id)) {
+    if (winery && (isPreview || String(winery.id) === String(id))) {
       wineryDirectoryService.getWebsite({ ...winery, directoryId }).then((url) => {
         if (active) setWebsite(url);
       });
     }
     return () => { active = false; };
-  }, [id, winery, directoryId]);
+  }, [id, winery, directoryId, isPreview]);
 
   useEffect(() => {
+    let active = true;
     const fetchWinery = async () => {
       try {
         setWineryLoading(true);
+        if (isPreview) {
+          // Already one of yours? Show your page (notes, visits) instead.
+          const linked = await wineriesService.getWineryByDirectoryId(previewDirectoryId);
+          if (!active) return;
+          if (linked.winery) {
+            router.replace(`/winery/${linked.winery.id}`);
+            return;
+          }
+          const { success, winery: row } = await wineryDirectoryService.getById(previewDirectoryId);
+          if (active && success && row) setWinery(previewFromDirectory(row));
+          return;
+        }
         const { success, winery: data } = await wineriesService.getWinery(id);
-        if (success && data) {
+        if (active && success && data) {
           setWinery(data);
         }
       } catch (error) {
         console.error('Error fetching winery:', error);
       } finally {
-        setWineryLoading(false);
+        if (active) setWineryLoading(false);
       }
     };
 
-    if (id) {
+    if (isPreview || id) {
       fetchWinery();
     }
-  }, [id]);
+    return () => { active = false; };
+  }, [id, isPreview, previewDirectoryId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Coming back to a preview after logging a visit: the save created your
+  // winery row (linked to this directory id), so swap to your page.
+  useFocusEffect(
+    useCallback(() => {
+      if (!isPreview || !winery) return undefined;
+      let active = true;
+      wineriesService.getWineryByDirectoryId(previewDirectoryId).then((res) => {
+        if (active && res.winery) router.replace(`/winery/${res.winery.id}`);
+      });
+      return () => { active = false; };
+    }, [isPreview, previewDirectoryId, winery]) // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   useEffect(() => {
-    if (user && winery) {
+    if (user && winery?.id != null) {
       loadWineryStatus();
     } else {
       setStatusLoading(false);
@@ -103,13 +155,17 @@ export default function WineryDetail() {
   };
 
   // "Log Visit" now routes into the shared location-optional session flow
-  // (#21), pre-filled with this winery so its place/pin seeds the session.
+  // (#21), pre-filled with this winery so its place/pin seeds the session. A
+  // preview passes the directory id instead of a winery id: the row is
+  // created (and linked) only when the visit is actually saved, so backing
+  // out of the form leaves nothing behind.
   const handleLogVisit = () => {
     router.push({
       pathname: '/log-session',
       params: {
         mode: 'winery',
-        wineryId: winery.id,
+        ...(winery.id != null ? { wineryId: winery.id } : {}),
+        ...(directoryId != null ? { directoryId: String(directoryId) } : {}),
         wineryName: winery.name,
         ...(winery.latitude != null && winery.longitude != null
           ? { lat: String(winery.latitude), lng: String(winery.longitude) }
@@ -117,6 +173,31 @@ export default function WineryDetail() {
       },
     });
   };
+
+  // Wishlist on a preview: saving is the explicit action that creates your
+  // winery row (linked to the directory), then the page becomes yours.
+  const resolveWineryId = async () => {
+    if (winery.id != null) return winery.id;
+    const res = await wineriesService.findOrCreateWinery({
+      name: winery.name,
+      latitude: winery.latitude,
+      longitude: winery.longitude,
+      address: winery.address,
+      directoryId,
+    });
+    if (!res.success || !res.winery) throw new Error(res.error || 'Could not save this winery');
+    return res.winery.id;
+  };
+  const handleSavedToWishlist = (newId) => {
+    if (winery.id == null && newId != null) router.replace(`/winery/${newId}`);
+  };
+
+  const closedLabel =
+    winery?.operatingStatus === 'permanently_closed'
+      ? 'Permanently closed'
+      : winery?.operatingStatus === 'temporarily_closed'
+        ? 'Temporarily closed'
+        : null;
 
   const handleStatusChange = (newStatus) => {
     setWineryStatus(prev => ({ ...prev, ...newStatus }));
@@ -179,11 +260,27 @@ export default function WineryDetail() {
             <Text style={styles.wineryAddress}>{winery.address}</Text>
           )}
 
+          {/* Closed (#273): known from the directory, so every plan sees it. */}
+          {closedLabel && (
+            <View
+              style={[styles.closedBadge, winery.operatingStatus === 'temporarily_closed' && styles.closedBadgeTemporary]}
+              accessibilityRole="text"
+            >
+              <Ionicons name="close-circle" size={14} color={colors.onStatus} />
+              <Text style={styles.closedBadgeText}>{closedLabel}</Text>
+            </View>
+          )}
+
           {/* Status badges */}
           {user && wineryStatus && !statusLoading && (
             <View style={styles.badgesContainer}>
               <WineryStatusBadges status={wineryStatus} />
             </View>
+          )}
+          {isPreview && (
+            <Text style={styles.previewCaption}>
+              Not in your places yet. Log a visit or save it to keep it.
+            </Text>
           )}
         </View>
 
@@ -193,8 +290,11 @@ export default function WineryDetail() {
           {user && (
             <WineryActionButtons
               winery={winery}
-              initialStatus={wineryStatus}
+              initialStatus={isPreview ? { isWantToVisit: false } : wineryStatus}
               onStatusChange={handleStatusChange}
+              resolveWineryId={resolveWineryId}
+              onSaved={handleSavedToWishlist}
+              closed={winery.operatingStatus === 'permanently_closed'}
             />
           )}
 
@@ -276,8 +376,8 @@ export default function WineryDetail() {
           )}
         </View>
 
-        {/* Past Visits Section */}
-        {user && (
+        {/* Past Visits Section (saved wineries only; a preview has none) */}
+        {user && !isPreview && (
           <View style={styles.pastVisitsContainer}>
             <PastVisitsSection wineryId={id} wineryName={winery?.name} />
           </View>
@@ -401,6 +501,32 @@ const styles = StyleSheet.create({
   },
   badgesContainer: {
     marginTop: spacing.md,
+  },
+  closedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'center',
+    backgroundColor: colors.status.error,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    borderRadius: borderRadius.full,
+    marginTop: spacing.sm,
+  },
+  closedBadgeTemporary: {
+    backgroundColor: colors.neutral.inkTertiary,
+  },
+  closedBadgeText: {
+    ...typography.body.small,
+    fontWeight: '600',
+    color: colors.onStatus,
+  },
+  previewCaption: {
+    ...typography.body.small,
+    color: colors.neutral.inkTertiary,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
 
   // Content Card

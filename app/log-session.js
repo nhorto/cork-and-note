@@ -6,6 +6,9 @@
 // Also reached from a winery detail page's "Log Visit" action (#21), which
 // passes the winery so the place pre-fills:
 //   /log-session?mode=winery&wineryId=<id>&wineryName=<name>&lat=<n>&lng=<n>
+//   /log-session?mode=winery&directoryId=<id>&wineryName=<name>&lat=<n>&lng=<n>
+//     (a directory preview, #270: the winery row is created, linked to the
+//     directory, only when the visit is saved)
 // And, for editing a saved log (#42):
 //   /log-session?editVisitId=<id>
 // Mirrors the app/winery/[id].js pattern (a route outside (tabs) so it
@@ -41,7 +44,7 @@ export default function LogSessionScreen() {
   const { colors, styles } = useScreenTheme();
 
   const router = useRouter();
-  const { mode, wineryId, wineryName, lat, lng, editVisitId, prefill } = useLocalSearchParams();
+  const { mode, wineryId, directoryId, wineryName, lat, lng, editVisitId, prefill } = useLocalSearchParams();
   const [submitting, setSubmitting] = useState(false);
 
   // Edit mode: load the saved session to hydrate the form.
@@ -74,14 +77,15 @@ export default function LogSessionScreen() {
   // `winery` prop so the place is pre-filled as that winery. Shape matches what
   // LogSessionForm expects: { id, name, latitude, longitude }.
   const winery = useMemo(() => {
-    if (!wineryId) return null;
+    if (!wineryId && !directoryId) return null;
     return {
-      id: wineryId,
+      id: wineryId ?? null,
+      directoryId: /^\d+$/.test(String(directoryId ?? '')) ? Number(directoryId) : null,
       name: wineryName ?? null,
       latitude: lat != null ? Number(lat) : null,
       longitude: lng != null ? Number(lng) : null,
     };
-  }, [wineryId, wineryName, lat, lng]);
+  }, [wineryId, directoryId, wineryName, lat, lng]);
 
   // A guided tool (the wine-list picks, 2026-09-11) can hand over a draft wine
   // via ?prefill=<JSON>. Only the three identity fields are honoured; anything

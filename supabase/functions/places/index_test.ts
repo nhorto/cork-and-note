@@ -141,7 +141,11 @@ Deno.test("details write-back: operating status is stamped on the directory row 
   const [q] = admin.queriesTo("winery_directory");
   assertEquals(q.op, "update");
   assertEquals(q.payload, { operating_status: "permanently_closed", updated_at: new Date(now).toISOString() });
-  assertEquals(q.filters, [{ op: "eq", column: "google_place_id", value: PLACE_ID }]);
+  assertEquals(q.filters, [
+    { op: "eq", column: "google_place_id", value: PLACE_ID },
+    // A row flagged as a duplicate (#271) is never revived by a stamp.
+    { op: "or", column: "", value: "operating_status.is.null,operating_status.neq.duplicate" },
+  ]);
   assertEquals(db.queriesTo("winery_directory").length, 0, "never through the caller's client");
 });
 
@@ -154,6 +158,8 @@ Deno.test("details write-back with a directory id attaches the place id only to 
   assertEquals(q.filters[0], { op: "eq", column: "id", value: 4242 });
   // The guard clause: the row must have no place id yet, or the same one.
   assertEquals(q.filters[1], { op: "or", column: "", value: `google_place_id.is.null,google_place_id.eq.${PLACE_ID}` });
+  // And never a duplicate row (#271).
+  assertEquals(q.filters[2], { op: "or", column: "", value: "operating_status.is.null,operating_status.neq.duplicate" });
 });
 
 Deno.test("details write-back: a bogus directory id falls back to the place-id stamp; an unknown status writes nothing", async () => {

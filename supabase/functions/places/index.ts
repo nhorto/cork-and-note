@@ -226,13 +226,17 @@ export function createHandler(overrides: Partial<HandlerDeps> = {}) {
                 .from("winery_directory")
                 .update({ ...stamp, google_place_id: placeId })
                 .eq("id", directoryId)
-                .or(`google_place_id.is.null,google_place_id.eq.${placeId}`);
+                .or(`google_place_id.is.null,google_place_id.eq.${placeId}`)
+                // Never revive a row flagged as a duplicate (#271): the kept
+                // row is the one that should carry the status.
+                .or("operating_status.is.null,operating_status.neq.duplicate");
               if (error) console.error("Directory status write-back error:", error);
             } else {
               const { error } = await admin
                 .from("winery_directory")
                 .update(stamp)
-                .eq("google_place_id", placeId);
+                .eq("google_place_id", placeId)
+                .or("operating_status.is.null,operating_status.neq.duplicate");
               if (error) console.error("Directory status write-back error:", error);
             }
           } catch (writeBackError) {

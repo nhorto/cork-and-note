@@ -18,7 +18,7 @@ jest.mock('../components/PinActionModal', () => () => null);
 jest.mock('../components/WineryNameModal', () => () => null);
 jest.mock('../hooks/usePro', () => ({ usePro: jest.fn() }));
 jest.mock('../lib/wineries', () => ({ wineriesService: {
-  getUserWineries: async () => ({ success: true, wineries: [] }),
+  getUserWineries: jest.fn(async () => ({ success: true, wineries: [] })),
   findOrCreateWinery: jest.fn(),
 } }));
 jest.mock('../lib/wineryDirectory', () => ({ wineryDirectoryService: { getInBounds: jest.fn(), searchByName: jest.fn() } }));
@@ -37,7 +37,6 @@ test('a free profile can discover and open a winery without GPS or a paywall', a
   const winery = { id: 7, name: 'Test Estate', latitude: 37.4, longitude: -78.6 };
   wineryDirectoryService.getInBounds.mockResolvedValue({ success: true, wineries: [winery] });
   wineryDirectoryService.searchByName.mockResolvedValue({ success: true, wineries: [winery] });
-  wineriesService.findOrCreateWinery.mockResolvedValue({ success: true, winery: { ...winery, id: 99 } });
   let tree;
   await act(async () => { tree = create(<MapScreen />); });
   await act(async () => { await jest.advanceTimersByTimeAsync(500); });
@@ -59,7 +58,9 @@ test('a free profile can discover and open a winery without GPS or a paywall', a
   const result = tree.root.findAllByType(TouchableOpacity).find((node) =>
     node.findAllByType(Text).some((text) => text.props.children === winery.name));
   await act(async () => result.props.onPress());
-  expect(mockPush).toHaveBeenCalledWith({ pathname: '/winery/99', params: { directoryId: '7' } });
+  // Browsing opens a PREVIEW (#270); nothing is saved until the user acts.
+  expect(mockPush).toHaveBeenCalledWith('/winery/dir-7');
+  expect(wineriesService.findOrCreateWinery).not.toHaveBeenCalled();
   expect(presentPaywall).not.toHaveBeenCalled();
   await act(async () => tree.unmount());
 });
@@ -184,5 +185,31 @@ test('the places sheet avoids the keyboard, dismisses it on drag, and titles the
     node.findAllByType(Text).some((text) => Array.isArray(text.props.children) && text.props.children[0] === 'Visited ('));
   await act(async () => visitedTab.props.onPress());
   expect(titles()).toContain('Your places');
+  await act(async () => tree.unmount());
+});
+
+// #270: a directory pin you already have (linked by directory_id) is hidden
+// from the discovery layer, and tapping its match in Find opens YOUR page.
+test('a directory winery you already saved opens your own page, and its pin is not duplicated', async () => {
+  usePro.mockReturnValue({ isPro: false, presentPaywall: jest.fn() });
+  const mine = { id: 42, name: 'Test Estate', latitude: 37.4, longitude: -78.6, directory_id: 7, hasVisit: true, inWishlist: false };
+  wineriesService.getUserWineries.mockResolvedValueOnce({ success: true, wineries: [mine] });
+  const row = { id: 7, name: 'Test Estate', latitude: 37.9, longitude: -78.1 }; // far from the pin, so only the link hides it
+  wineryDirectoryService.getInBounds.mockResolvedValue({ success: true, wineries: [row] });
+  wineryDirectoryService.searchByName.mockResolvedValue({ success: true, wineries: [row] });
+  let tree;
+  await act(async () => { tree = create(<MapScreen />); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(500); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(50); });
+  expect(tree.root.findAllByType('Marker')).toHaveLength(1); // your pin only
+  const search = tree.root.findAllByType(TouchableOpacity).find((node) =>
+    node.findAllByType(Text).some((text) => text.props.children === 'Search wineries & your places'));
+  await act(async () => search.props.onPress());
+  await act(async () => tree.root.findByType(TextInput).props.onChangeText('Test'));
+  await act(async () => { await jest.advanceTimersByTimeAsync(400); });
+  const result = tree.root.findAllByType(TouchableOpacity).find((node) =>
+    node.findAllByType(Text).some((text) => text.props.children === row.name));
+  await act(async () => result.props.onPress());
+  expect(mockPush).toHaveBeenCalledWith('/winery/42');
   await act(async () => tree.unmount());
 });
