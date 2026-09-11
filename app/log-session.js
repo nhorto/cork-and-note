@@ -41,7 +41,7 @@ export default function LogSessionScreen() {
   const { colors, styles } = useScreenTheme();
 
   const router = useRouter();
-  const { mode, wineryId, wineryName, lat, lng, editVisitId } = useLocalSearchParams();
+  const { mode, wineryId, wineryName, lat, lng, editVisitId, prefill } = useLocalSearchParams();
   const [submitting, setSubmitting] = useState(false);
 
   // Edit mode: load the saved session to hydrate the form.
@@ -82,6 +82,21 @@ export default function LogSessionScreen() {
       longitude: lng != null ? Number(lng) : null,
     };
   }, [wineryId, wineryName, lat, lng]);
+
+  // A guided tool (the wine-list picks, 2026-09-11) can hand over a draft wine
+  // via ?prefill=<JSON>. Only the three identity fields are honoured; anything
+  // else in the param is ignored, and a malformed param is simply no prefill.
+  const prefillWine = useMemo(() => {
+    if (typeof prefill !== 'string' || !prefill) return null;
+    try {
+      const parsed = JSON.parse(prefill);
+      const pick = (v) => (typeof v === 'string' ? v.trim().slice(0, 120) : '');
+      const draft = { winemaker: pick(parsed?.winemaker), name: pick(parsed?.name), year: pick(parsed?.year) };
+      return draft.winemaker || draft.name || draft.year ? draft : null;
+    } catch {
+      return null;
+    }
+  }, [prefill]);
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -168,6 +183,7 @@ export default function LogSessionScreen() {
       mode={mode === 'winery' ? 'winery' : 'wine'}
       winery={winery}
       initialSession={isEditing ? initialSession : null}
+      prefillWine={isEditing ? null : prefillWine}
       onSave={handleSave}
       onCancel={goBack}
     />

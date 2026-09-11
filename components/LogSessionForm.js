@@ -104,6 +104,10 @@ export default function LogSessionForm({
   mode = 'wine',
   winery = null,
   initialSession = null,
+  // Optional draft for the FIRST wine ({ winemaker, name, year }); the wine
+  // form that opens on mount starts from it. Consumed once: adding a second
+  // wine later starts blank, as before.
+  prefillWine = null,
   onSave,
   onCancel,
 }) {
@@ -143,6 +147,9 @@ export default function LogSessionForm({
   const [showWineForm, setShowWineForm] = useState(false);
   const [currentWineIndex, setCurrentWineIndex] = useState(null);
   const [showPlacePicker, setShowPlacePicker] = useState(false);
+  const [pendingPrefill, setPendingPrefill] = useState(() =>
+    !initialSession && prefillWine ? { ...prefillWine } : null
+  );
 
   // B-first: "Log a wine" drops you straight into the wine form.
   // Skip this when editing an existing log — we land on the session overview.
@@ -257,6 +264,7 @@ export default function LogSessionForm({
     });
     setShowWineForm(false);
     setCurrentWineIndex(null);
+    setPendingPrefill(null);
   };
 
   // Append wines read from a tasting card (#139). Each scanned field-set becomes
@@ -287,6 +295,7 @@ export default function LogSessionForm({
   const handleExitWineForm = () => {
     setShowWineForm(false);
     setCurrentWineIndex(null);
+    setPendingPrefill(null);
   };
 
   const handlePlaceSaved = (placeData) => {
@@ -664,7 +673,7 @@ export default function LogSessionForm({
           <WineEntryForm
             onSave={handleSaveWine}
             onCancel={handleExitWineForm}
-            initialData={currentWineIndex !== null ? wines[currentWineIndex] : null}
+            initialData={currentWineIndex !== null ? wines[currentWineIndex] : pendingPrefill}
             defaultWinemaker={winemakerDefault}
             priorTastings={priorTastings}
             sessionWines={sessionWines}
