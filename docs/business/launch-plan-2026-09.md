@@ -130,6 +130,8 @@ Apple Guideline 3.1.1 requires **in-app purchase** for anything that unlocks fea
 **Recommendation, now shipped:** Apple IAP through **RevenueCat** (`react-native-purchases` + `react-native-purchases-ui`), free under $2,500/month tracked revenue, then 1%. Stripe can come later for a web checkout, honored in-app under 3.1.3(b). The **15% Small Business rate is confirmed** — enrolled 2026-09-08 — so $9.99 nets **$8.49** and $59.99/yr nets **$50.99** (about $4.25/mo). Every net figure below uses those numbers, not the 30% ones.
 
 ### 4.2 Tiers: one paid tier at launch
+
+**Owner revision, 2026-09-11:** winery discovery is free: map pins, Nearby, Find, Home's Near You, winery pages, directory websites where available, and directions. Google enrichment remains Pro-only and server-gated. This supersedes older discovery-as-Pro copy; prices, scan/chat allowances, cellar limit, and export access are unchanged. Sommelier photo questions and web search already exist for Pro. See [the September 11 product follow-up](pro-product-direction-2026-09-11.md) for proposed additions and the future optional winery-insights policy.
 Two paid tiers before you have any conversion data is premature. Launch with Free + Pro and add a higher tier only if usage shows a heavy-AI segment.
 
 **Revised 2026-09-09** after the owner reopened monetization: free scans went from 3/month to **3 lifetime**, free chat became **text-only**, and Pro's "unlimited" gained explicit fair-use caps. Weekly pass and a third tier were considered and deferred (see the decision log below the table).

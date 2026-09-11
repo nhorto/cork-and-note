@@ -28,7 +28,8 @@ import { createThemedStyles } from '../styles/ThemeProvider';
 // Keep in step with site/build.mjs COMPARE and launch plan §4.2.
 const COMPARE = [
   { label: 'Tastings, notes & photos', free: 'Unlimited', pro: 'Unlimited' },
-  { label: 'Winery map, visits & wishlist', free: 'Unlimited', pro: 'Unlimited' },
+  { label: 'Winery discovery, visits & wishlist', free: 'Unlimited', pro: 'Unlimited' },
+  { label: 'Directory websites & directions', free: 'Included', pro: 'Included' },
   { label: 'Cellar bottles', free: 'Up to 25', pro: 'Unlimited' },
   { label: 'Drink windows & Tonight’s Pick', free: null, pro: 'Included' },
   { label: 'Sommelier messages', free: '5 a month', pro: 'Unlimited + photos' },

@@ -46,7 +46,7 @@ import { SUPPORT_EMAIL } from '../lib/legalContent';
 const BENEFITS = [
   { icon: 'sparkles', text: 'Unlimited AI sommelier — ask anything, any time' },
   { icon: 'globe', text: 'It looks specific wines up on the web instead of guessing' },
-  { icon: 'star', text: 'Live winery ratings, hours & websites on every winery page' },
+  { icon: 'star', text: 'Check Google ratings & opening hours before your next visit, where available' },
   { icon: 'scan', text: 'Unlimited label and tasting-card scans' },
   { icon: 'wine', text: 'An unlimited cellar with drink windows and Tonight’s Pick' },
   { icon: 'download', text: 'Export your tastings to CSV' },
@@ -178,7 +178,7 @@ export default function PaywallScreen() {
                 : source === 'export'
                   ? 'Exporting your tastings to CSV is part of Pro.'
                   : source === 'places'
-                    ? 'Live winery ratings, hours and websites are part of Pro.'
+                    ? 'Find wineries and save your favorites for free. Pro adds Google ratings and opening hours to help plan your visit, where available.'
                     : source === 'tonights_pick'
                       ? "Tonight's Pick — a bottle from your own cellar, chosen by your sommelier — is part of Pro."
                       : source === 'onboarding'

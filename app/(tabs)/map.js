@@ -9,7 +9,6 @@ import MapView, { Marker } from 'react-native-maps';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import PinActionModal from '../../components/PinActionModal';
 import WineryNameModal from '../../components/WineryNameModal';
-import { usePro } from '../../hooks/usePro';
 import { getMapLocation } from '../../lib/mapLocation';
 import { haversineKm } from '../../lib/geo';
 import { wineriesService } from '../../lib/wineries';
@@ -64,11 +63,10 @@ export default function MapScreen() {
   const [showManualModal, setShowManualModal] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
 
-  // Winery discovery (Pro, #203 P2 + owner feedback 2026-09-09): nearby
+  // Winery discovery (all plans): nearby
   // wineries from OUR directory table shown by default, in their own color,
   // with filter chips to narrow the map. Zero Google cost — the directory is
   // our own table (Overture seed).
-  const { isPro, presentPaywall } = usePro();
   const [discoverPins, setDiscoverPins] = useState([]);
   const [discoveryStatus, setDiscoveryStatus] = useState('loading');
   const [discoveryRetry, setDiscoveryRetry] = useState(0);
@@ -78,7 +76,7 @@ export default function MapScreen() {
   // Searchable list of places you've visited (#101).
   const [showPlacesList, setShowPlacesList] = useState(false);
   const [placeSearch, setPlaceSearch] = useState('');
-  // "Find" tab (Pro, owner feedback 2026-09-09): search the whole winery
+  // "Find" tab (all plans): search the whole winery
   // directory by name, nearest first. Debounced; our own table, zero API cost.
   const [directoryResults, setDirectoryResults] = useState([]);
   const [searchStatus, setSearchStatus] = useState('idle');
@@ -238,7 +236,6 @@ export default function MapScreen() {
   // sit on top of a place the user already has (same-ish spot) are dropped so
   // a visited winery never shows twice in two colors.
   useEffect(() => {
-    if (!isPro) return;
     let active = true;
     setDiscoveryStatus('loading');
     const t = setTimeout(async () => {
@@ -268,7 +265,7 @@ export default function MapScreen() {
     };
     // userPins in deps so a newly-saved winery immediately swallows its
     // duplicate discovery pin.
-  }, [isPro, region, userPins, discoveryRetry]);
+  }, [region, userPins, discoveryRetry]);
 
   // Clustering (#224): all visible pins go through one supercluster index so
   // a zoomed-out region shows count bubbles instead of a wall of overlapping
@@ -311,8 +308,8 @@ export default function MapScreen() {
   );
 
   const visibleDiscoverPins = useMemo(
-    () => (isPro && (pinFilter === 'all' || pinFilter === 'nearby') ? discoverPins : []),
-    [isPro, pinFilter, discoverPins]
+    () => ((pinFilter === 'all' || pinFilter === 'nearby') ? discoverPins : []),
+    [pinFilter, discoverPins]
   );
 
   const clusterIndex = useMemo(
@@ -377,7 +374,7 @@ export default function MapScreen() {
 
   // Debounced directory search for the Find tab.
   useEffect(() => {
-    if (listTab !== 'find' || !isPro) return;
+    if (listTab !== 'find') return;
     const q = placeSearch.trim();
     if (q.length < 2) {
       setDirectoryResults([]);
@@ -398,7 +395,7 @@ export default function MapScreen() {
       if (res.success) setDirectoryResults(res.wineries);
     }, 300);
     return () => { active = false; clearTimeout(t); };
-  }, [listTab, placeSearch, isPro, userLocation]);
+  }, [listTab, placeSearch, userLocation]);
 
   // Tapping a discovery pin promotes it to a real winery record and opens its
   // page (same flow as Home's Near You row) — where the Google card enriches it.
@@ -646,7 +643,7 @@ export default function MapScreen() {
     );
   };
 
-  // Discovery pins (Pro): nearby directory wineries in the accent color,
+  // Discovery pins (all plans): nearby directory wineries in the accent color,
   // visually apart from visited (sage) and wishlist (slate).
   const renderDiscoverMarker = (w) =>
     Platform.OS === 'android' ? (
@@ -750,8 +747,8 @@ export default function MapScreen() {
           style={styles.searchPill}
           activeOpacity={0.85}
           onPress={() => {
-            // Open to whichever list has something to show.
-            setListTab(isPro ? 'find' : wishlistPlaces.length > 0 && visitedPlaces.length === 0 ? 'wishlist' : 'visited');
+            // Directory search is available even before saving a first place.
+            setListTab('find');
             setWelcomeDismissed(true);
             setShowHelpHint(false);
             setShowPlacesList(true);
@@ -765,9 +762,7 @@ export default function MapScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Pin filter chips: All · Visited · Wishlist · Nearby (owner feedback
-          2026-09-09). "Nearby" is the Pro discovery layer; free users get the
-          paywall from its chip rather than a silent no-op. */}
+      {/* Pin filter chips: All · Visited · Wishlist · Nearby, on every plan. */}
       <View
         style={[
           styles.filterChips,
@@ -795,10 +790,6 @@ export default function MapScreen() {
               style={[styles.filterChip, active && styles.filterChipActive]}
               activeOpacity={0.85}
               onPress={() => {
-                if (key === 'nearby' && !isPro) {
-                  presentPaywall('places');
-                  return;
-                }
                 setPinFilter(key);
               }}
               accessibilityRole="button"
@@ -809,7 +800,6 @@ export default function MapScreen() {
               <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
                 {label}
               </Text>
-              {key === 'nearby' && !isPro && <Text style={styles.filterChipPro}>PRO</Text>}
             </TouchableOpacity>
           );
         })}
@@ -972,12 +962,7 @@ export default function MapScreen() {
             <Text style={styles.mapStatus}>Couldn’t load your places. Tap to retry.</Text>
           </TouchableOpacity>
         )}
-        {!isPro && (pinFilter === 'all' || pinFilter === 'nearby') && (
-          <TouchableOpacity onPress={() => presentPaywall('places')} accessibilityRole="button">
-            <Text style={styles.mapStatus}>Winery discovery is included with Pro. Tap to explore Pro. Your saved places appear here for free.</Text>
-          </TouchableOpacity>
-        )}
-        {isPro && (pinFilter === 'all' || pinFilter === 'nearby') && discoveryStatus !== 'ready' && (
+        {(pinFilter === 'all' || pinFilter === 'nearby') && discoveryStatus !== 'ready' && (
           <TouchableOpacity
             disabled={discoveryStatus !== 'error'}
             onPress={() => setDiscoveryRetry((value) => value + 1)}
@@ -1077,15 +1062,11 @@ export default function MapScreen() {
                 style={[styles.segmentBtn, listTab === 'find' && styles.segmentBtnActive]}
                 activeOpacity={0.8}
                 onPress={() => {
-                  if (!isPro) {
-                    presentPaywall('places');
-                    return;
-                  }
                   setListTab('find');
                 }}
               >
                 <Text style={[styles.segmentText, listTab === 'find' && styles.segmentTextActive]}>
-                  Find{!isPro ? ' ·PRO' : ''}
+                  Find
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1432,12 +1413,6 @@ const styles = StyleSheet.create({
   filterChipText: { ...typography.body.small, color: colors.neutral.ink, fontWeight: '600' },
   filterChipTextActive: { color: colors.onPrimary },
   filterDot: { width: 8, height: 8, borderRadius: 4 },
-  filterChipPro: {
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-    color: colors.accent.ink,
-  },
   discoverMarker: {
     backgroundColor: colors.accent.base,
     borderColor: colors.neutral.bg,

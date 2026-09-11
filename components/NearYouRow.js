@@ -1,25 +1,12 @@
-// components/NearYouRow.js — "Near You" winery discovery on Home (Pro).
-// Epic #203 Phase 2, Home A "Passport" mockup. Discovery reads OUR
-// winery_directory table (lib/wineryDirectory.js) — no Google API cost.
-//
-// Tier behavior:
-//   Free → section with a PRO badge and one teaser card → paywall. Visible on
-//          purpose: this row is part of the Pro price story.
-//   Pro  → asks for foreground location ONLY when the user taps the enable
-//          card (never automatically on Home mount), then shows the three
-//          nearest wineries. Tapping one finds-or-creates the winery record
-//          (the same row a logged visit would create — it appears as a
-//          neutral pin on the map) and opens its page, where the Google
-//          enrichment card takes over.
-//
-// Renders nothing when location is denied or no winery is within ~40 km —
-// Home should never show an empty shell.
+// components/NearYouRow.js — winery discovery on Home, available on every plan.
+// Reads our directory, without Google Places calls. Location permission is
+// requested only when the user taps the enable card. Opening a winery leads
+// to its free page, where live Google enrichment remains a separate Pro feature.
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { usePro } from '../hooks/usePro';
 import { wineriesService } from '../lib/wineries';
 import { wineryDirectoryService } from '../lib/wineryDirectory';
 import { createThemedStyles } from '../styles/ThemeProvider';
@@ -30,7 +17,6 @@ const KM_TO_MI = 0.621371;
 export default function NearYouRow() {
   const { colors, styles } = useScreenTheme();
 
-  const { isPro, presentPaywall } = usePro();
   const router = useRouter();
 
   // 'unknown' until checked; permission drives which card renders.
@@ -56,7 +42,6 @@ export default function NearYouRow() {
   }, []);
 
   useEffect(() => {
-    if (!isPro) return;
     let active = true;
     (async () => {
       try {
@@ -71,7 +56,7 @@ export default function NearYouRow() {
     return () => {
       active = false;
     };
-  }, [isPro, loadNearby]);
+  }, [loadNearby]);
 
   const requestLocation = async () => {
     try {
@@ -109,32 +94,8 @@ export default function NearYouRow() {
   const header = (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionLabel}>NEAR YOU</Text>
-      {!isPro && (
-        <View style={styles.proBadge}>
-          <Text style={styles.proBadgeText}>PRO</Text>
-        </View>
-      )}
     </View>
   );
-
-  if (!isPro) {
-    return (
-      <>
-        {header}
-        <TouchableOpacity
-          style={styles.teaser}
-          activeOpacity={0.85}
-          onPress={() => presentPaywall('places')}
-          accessibilityRole="button"
-          accessibilityLabel="Wineries near you — Pro feature"
-        >
-          <Ionicons name="location" size={18} color={colors.accent.base} />
-          <Text style={styles.teaserText}>Find wineries near you</Text>
-          <Ionicons name="chevron-forward" size={16} color={colors.neutral.placeholder} />
-        </TouchableOpacity>
-      </>
-    );
-  }
 
   if (permission === 'unknown') return null;
 
@@ -209,18 +170,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   sectionLabel: { ...typography.body.caption, color: colors.accent.ink },
-  proBadge: {
-    backgroundColor: colors.accent.base,
-    borderRadius: borderRadius.sm,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  proBadgeText: {
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.6,
-    color: colors.onAccent,
-  },
   teaser: {
     flexDirection: 'row',
     alignItems: 'center',

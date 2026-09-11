@@ -52,7 +52,7 @@ ASK A SOMMELIER
 An AI wine companion grounded in your own ratings, not crowd scores. Ask what to open with dinner, how to describe a wine you like, or what the wines you've loved have in common. Beginner questions are its favourite kind.
 
 KEEP EVERY WINERY
-Each place you visit gets its own page — your visits, the wines you poured, your notes and photos — on a map that fills in as you travel. With Pro, winery pages add live ratings, opening hours and websites, so the record of your last visit helps you plan the next one.
+Each place you visit gets its own page — your visits, the wines you poured, your notes and photos — on a map that fills in as you travel. Discover wineries, search the directory, and open winery pages for free. Pro adds Google ratings and opening hours where available, so the record of your last visit helps you plan the next one.
 
 SCAN THE LABEL
 Point your camera at a bottle or a tasting-room card and let Cork & Note fill in the producer, the vintage and the grapes, so you can get back to drinking.
