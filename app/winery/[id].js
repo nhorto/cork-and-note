@@ -6,7 +6,6 @@ import { useContext, useEffect, useState } from 'react';
 import {
   Alert,
   Linking,
-  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -20,6 +19,7 @@ import ScreenHeader from '../../components/ScreenHeader';
 import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryGoogleCard from '../../components/WineryGoogleCard';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
+import { hasDirections, openDirections } from '../../lib/directions';
 import { wineriesService } from '../../lib/wineries';
 import { wineryDirectoryService } from '../../lib/wineryDirectory';
 import { wineryStatusService } from '../../lib/wineryStatus';
@@ -122,23 +122,9 @@ export default function WineryDetail() {
     setWineryStatus(prev => ({ ...prev, ...newStatus }));
   };
 
-  const openDirections = () => {
-    const lat = winery.latitude;
-    const lng = winery.longitude;
-    const label = encodeURIComponent(winery.name || "Destination");
-
-    if (Platform.OS === 'ios') {
-      const appleMapsUrl = `http://maps.apple.com/?ll=${lat},${lng}&q=${label}`;
-      Linking.openURL(appleMapsUrl).catch(() => {
-        Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`);
-      });
-    } else {
-      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-      Linking.openURL(googleMapsUrl).catch(() => {
-        Linking.openURL(`https://maps.google.com/?q=${lat},${lng}`);
-      });
-    }
-  };
+  // Directions are only offered when the winery actually has coordinates; a
+  // hand-added winery saved without a pin used to open Apple Maps at null,null.
+  const canNavigate = hasDirections(winery);
 
   // Loading state
   if (wineryLoading) {
@@ -225,16 +211,18 @@ export default function WineryDetail() {
               <Text style={styles.actionLabel}>Log visit</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={openDirections}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: colors.status.visited }]}>
-                <Ionicons name="navigate" size={22} color={colors.onStatus} />
-              </View>
-              <Text style={styles.actionLabel}>Directions</Text>
-            </TouchableOpacity>
+            {canNavigate && (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => openDirections(winery)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.actionIcon, { backgroundColor: colors.status.visited }]}>
+                  <Ionicons name="navigate" size={22} color={colors.onStatus} />
+                </View>
+                <Text style={styles.actionLabel}>Directions</Text>
+              </TouchableOpacity>
+            )}
             {website && (
               <TouchableOpacity
                 style={styles.actionButton}
