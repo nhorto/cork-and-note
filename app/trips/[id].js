@@ -10,6 +10,7 @@
 // notes are fetched on demand so a saved day opens instantly.
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeBack } from '../../hooks/useSafeBack';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -48,6 +49,7 @@ import { createThemedStyles } from '../../styles/ThemeProvider';
 export default function TripDetailScreen() {
   const { colors, spacing, styles } = useScreenTheme();
   const router = useRouter();
+  const goBack = useSafeBack('/(tabs)/sommelier');
   const { id } = useLocalSearchParams();
   const { isPro, presentPaywall } = usePro();
 
@@ -138,7 +140,7 @@ export default function TripDetailScreen() {
     if (!plan) return;
     if (stops.length === 0) {
       const gone = await tripsService.remove(plan.id);
-      if (gone.success) router.back();
+      if (gone.success) goBack();
       else Alert.alert('Could not delete this day', gone.error || 'Please try again.');
       return;
     }
@@ -265,7 +267,7 @@ export default function TripDetailScreen() {
         style: 'destructive',
         onPress: async () => {
           const res = await tripsService.remove(plan.id);
-          if (res.success) router.back();
+          if (res.success) goBack();
           else Alert.alert('Could not delete', res.error || 'Please try again.');
         },
       },
@@ -276,7 +278,7 @@ export default function TripDetailScreen() {
   if (loading) {
     return (
       <View style={styles.safeArea}>
-        <ScreenHeader title="Your wine day" onBack={() => router.back()} />
+        <ScreenHeader title="Your wine day" onBack={goBack} />
         <View style={styles.centered}>
           <ActivityIndicator color={colors.primary.ink} />
         </View>
@@ -286,7 +288,7 @@ export default function TripDetailScreen() {
   if (!plan) {
     return (
       <View style={styles.safeArea}>
-        <ScreenHeader title="Your wine day" onBack={() => router.back()} />
+        <ScreenHeader title="Your wine day" onBack={goBack} />
         <View style={styles.centered}>
           <Text style={styles.body}>{loadError || 'This day could not be found.'}</Text>
         </View>
@@ -361,7 +363,7 @@ export default function TripDetailScreen() {
       <ScreenHeader
         title={plan.title || 'Your wine day'}
         subtitle={formatTripDate(plan.trip_date)}
-        onBack={() => router.back()}
+        onBack={goBack}
         right={busy ? <ActivityIndicator size="small" color={colors.primary.ink} /> : null}
       />
       <ScrollView contentContainerStyle={styles.scroll}>

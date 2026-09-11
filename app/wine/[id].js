@@ -2,6 +2,7 @@
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { useSafeBack } from '../../hooks/useSafeBack';
 import { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
@@ -37,6 +38,7 @@ export default function WineDetail() {
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
   const router = useRouter();
+  const goBack = useSafeBack('/(tabs)/wines');
   const [wine, setWine] = useState(null);
   const [visit, setVisit] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -200,7 +202,7 @@ export default function WineDetail() {
     return (
       <SafeAreaView style={[styles.container, styles.center]}>
         <Text style={styles.errorText}>Wine not found</Text>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => goBack()}>
           <Text style={styles.backButtonText}>Go back</Text>
         </TouchableOpacity>
       </SafeAreaView>
