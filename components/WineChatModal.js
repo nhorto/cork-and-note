@@ -33,6 +33,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
   const [conversation, setConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [sending, setSending] = useState(false);
+  const [receiving, setReceiving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(null);
   const flatListRef = useRef(null);
@@ -119,6 +120,9 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
     if (!gate('chat')) return;
     sendingRef.current = true;
     setSending(true);
+    setReceiving(false);
+    const streamMessageId = `stream-${Date.now()}`;
+    let streamStarted = false;
     try {
       // Create conversation on first message (lazy creation)
       let activeConv = conversation;
@@ -170,8 +174,32 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
         }));
       const aiMessages = [...previousMsgs, currentMsg];
 
-      // Call AI
-      const aiResponse = await aiService.sendMessage(aiMessages, systemPrompt);
+      // Use the same real streaming transport as the main Sommelier chat. The
+      // structured suggestions are still parsed and made actionable only after
+      // the complete response arrives.
+      const aiResponse = await aiService.sendMessageStream(aiMessages, systemPrompt, {
+        onDelta: (textSoFar) => {
+          setReceiving(true);
+          setMessages((previous) => {
+            const streamingMessage = {
+              id: streamMessageId,
+              role: 'assistant',
+              content: textSoFar,
+              displayText: textSoFar,
+              image_urls: [],
+              created_at: new Date().toISOString(),
+              isStreaming: true,
+            };
+            if (!streamStarted) {
+              streamStarted = true;
+              return [...previous, streamingMessage];
+            }
+            return previous.map((message) =>
+              message.id === streamMessageId ? streamingMessage : message
+            );
+          });
+        },
+      });
       const responseText = aiResponse.response;
       const suggestions = protectWineEntrySuggestions(
         aiService.parseSuggestions(responseText),
@@ -186,17 +214,26 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
         activeConv.id, 'assistant', responseText, [], suggestions, aiResponse.sources || []
       );
 
-      setMessages(prev => [...prev, {
+      const savedMessage = {
         ...aiMsg,
         // Use the locally protected value even if a database mock/older schema
         // returns the inserted row without ai_suggestions.
         ai_suggestions: suggestions,
         displayText,
         sources: aiResponse.sources || [],
-      }]);
+      };
+      setMessages((previous) =>
+        streamStarted
+          ? previous.map((message) => message.id === streamMessageId ? savedMessage : message)
+          : [...previous, savedMessage]
+      );
     } catch (err) {
       console.error('WineChatModal send error:', err);
-      setMessages(prev => [...prev, {
+      setMessages((previous) => [...(
+        streamStarted
+          ? previous.filter((message) => message.id !== streamMessageId)
+          : previous
+      ), {
         id: `error-${Date.now()}`,
         role: 'assistant',
         // Synthetic, client-only bubble — flagged so it's filtered out of the
@@ -209,6 +246,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
       }]);
     } finally {
       sendingRef.current = false;
+      setReceiving(false);
       setSending(false);
     }
   }, [conversation, messages, systemPrompt, currentWineData, onConversationStarted, gate]);
@@ -292,7 +330,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           )}
 
           {/* Typing indicator */}
-          {sending && (
+          {sending && !receiving && (
             <View style={styles.typingContainer}>
               <View style={styles.typingBubble}>
                 <TypingDots />
