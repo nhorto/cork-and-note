@@ -50,8 +50,13 @@ export default function ChoosePlanScreen() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const offering = await fetchOffering();
-      if (cancelled) return;
+      // fetchOffering throws when the store has no plans to offer (no key in
+      // this build, store outage, or a store whose products aren't live yet).
+      // Here that is not an error state: the comparison stands on its own and
+      // the price line is simply omitted — the paywall remains the surface
+      // that explains store problems.
+      const offering = await fetchOffering().catch(() => null);
+      if (cancelled || !offering) return;
       const packages = offering?.availablePackages ?? [];
       const monthly = packages.find((p) => packagePeriod(p) === 'month');
       const annual = packages.find((p) => packagePeriod(p) === 'year');

@@ -1,7 +1,10 @@
 // app/profile/terms-of-use.js
+import { Platform } from 'react-native';
 import LegalDocScreen from '../../components/LegalDocScreen';
-import { TERMS_OF_USE } from '../../lib/legalContent';
+import { legalDocsFor } from '../../lib/legalContent';
 
 export default function TermsOfUseScreen() {
-  return <LegalDocScreen doc={TERMS_OF_USE} />;
+  // Platform-specific copy: billing sentences name the store this device
+  // actually uses (Apple Account on iOS, Google Play on Android).
+  return <LegalDocScreen doc={legalDocsFor(Platform.OS).termsOfUse} />;
 }
