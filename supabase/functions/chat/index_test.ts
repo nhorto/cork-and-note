@@ -152,7 +152,7 @@ Deno.test("streaming chat forwards deltas before a final result and records usag
   ]);
   assertEquals(events.at(-1).response, "Try Muscadet.");
   assertEquals(events.at(-1).meter.remaining, 2);
-  assertEquals(fetch.calls[0].body.stream, true);
+  assertEquals((fetch.calls[0].body as Record<string, unknown>).stream, true);
   assertEquals(db.queriesTo("chat_usage").filter((q) => q.op === "insert").length, 1);
 });
 
