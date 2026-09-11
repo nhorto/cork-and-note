@@ -16,11 +16,13 @@ import {
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import AskSommelierBox from '../../components/AskSommelierBox';
 import ChatBubble from '../../components/ChatBubble';
 import ChatInput from '../../components/ChatInput';
 import MeterHint from '../../components/MeterHint';
 import ProUpsellCard from '../../components/ProUpsellCard';
 import ScreenHeader from '../../components/ScreenHeader';
+import SommelierToolCard from '../../components/SommelierToolCard';
 import TonightsPickCard from '../../components/TonightsPickCard';
 import TypingDots from '../../components/TypingDots';
 import UpgradePill from '../../components/UpgradePill';
@@ -193,6 +195,15 @@ export default function SommelierScreen() {
     handleSend(question);
   }, [pendingAsk, view, activeConversation]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The tab's own ask box (2026-09-11) rides the same two-step path as Home's.
+  const askFromHub = useCallback(
+    (question) => {
+      setPendingAsk(question);
+      startNewChat();
+    },
+    [] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
   const handleDeleteConversation = useCallback(async (id) => {
     try {
       await chatService.deleteConversation(id);
@@ -325,14 +336,50 @@ export default function SommelierScreen() {
             <ActivityIndicator size="large" color={colors.primary.ink} />
           </View>
         ) : (
-          // Single scroll surface: the cellar-grounded "Tonight's pick" hero on
-          // top, then past conversations. (#51 compact entry point.)
+          // Single scroll surface (owner direction 2026-09-11): the ask box is
+          // the hero because asking is what most people do here; the three
+          // guided tools sit under it; Tonight's Pick shrinks to a compact row;
+          // then past conversations.
           <ScrollView
             contentContainerStyle={styles.listScroll}
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
+            <View style={styles.askWrap}>
+              <AskSommelierBox onAsk={askFromHub} onOpen={startNewChat} />
+            </View>
+
+            <Text style={styles.sectionLabel}>WHAT WOULD YOU LIKE HELP WITH?</Text>
+            <View style={styles.toolGrid}>
+              <SommelierToolCard
+                icon="list-outline"
+                title="Choose from a list"
+                subtitle="Picks in your budget"
+                pro
+                onPress={() => router.push('/sommelier/wine-list')}
+                testID="tool-wine-list"
+              />
+              <SommelierToolCard
+                icon="analytics-outline"
+                title="My taste"
+                subtitle="What your journal says"
+                pro
+                onPress={() => router.push('/sommelier/taste')}
+                testID="tool-taste"
+              />
+              <SommelierToolCard
+                icon="car-outline"
+                title="Plan a wine day"
+                subtitle="Stops, times, drives"
+                pro
+                onPress={() => router.push('/trips/new')}
+                testID="tool-trip"
+              />
+            </View>
+
             <View style={styles.pickWrap}>
               <TonightsPickCard
+                compact
                 onRequireCellar={() => router.push('/cellar/add')}
               />
             </View>
@@ -350,12 +397,6 @@ export default function SommelierScreen() {
               style={styles.upsell}
             />
 
-            {/* New conversation */}
-            <TouchableOpacity style={styles.newChatButton} onPress={startNewChat}>
-              <Ionicons name="add-circle" size={20} color={colors.onPrimary} />
-              <Text style={styles.newChatText}>New conversation</Text>
-            </TouchableOpacity>
-
             {conversations.length === 0 ? (
               <View style={styles.listEmptyState}>
                 <Ionicons
@@ -365,7 +406,8 @@ export default function SommelierScreen() {
                 />
                 <Text style={styles.listEmptyTitle}>No conversations yet</Text>
                 <Text style={styles.listEmptySubtitle}>
-                  Ask your sommelier anything, or let it pick tonight&apos;s bottle above.
+                  Ask your sommelier anything above. Pairings, plain-words wine
+                  questions, or what to open tonight.
                 </Text>
               </View>
             ) : (
@@ -477,7 +519,7 @@ export default function SommelierScreen() {
 
 
 const useScreenTheme = createThemedStyles((theme) => {
-const { colors, typography, spacing, borderRadius, shadows } = theme;
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   meterHint: {
@@ -498,26 +540,27 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
   },
+  askWrap: {
+    // AskSommelierBox carries its own top margin for Home; the header already
+    // spaces this tab, so pull it back up.
+    marginTop: -spacing.lg,
+    marginBottom: spacing.md,
+  },
+  sectionLabel: {
+    ...typography.body.caption,
+    color: colors.accent.ink,
+    marginBottom: spacing.sm,
+  },
+  toolGrid: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
   pickWrap: {
     marginBottom: spacing.md,
   },
   upsell: {
     marginBottom: spacing.md,
-  },
-  newChatButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.primary.base,
-    borderRadius: borderRadius.md,
-    ...shadows.soft,
-  },
-  newChatText: {
-    ...typography.body.regular,
-    color: colors.onPrimary,
-    fontWeight: '600',
   },
   recentLabel: {
     ...typography.body.caption,

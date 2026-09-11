@@ -65,8 +65,13 @@ function PickerRow({ label, options, value, onChange }) {
   );
 }
 
-export default function TonightsPickCard({ onRequireCellar }) {
+// `compact` (the Somm tab, 2026-09-11): the ask box is that tab's hero and the
+// guided tools sit under it, so Tonight's Pick starts collapsed there and
+// remembers its own state separately from Home. An empty cellar becomes a
+// one-line row rather than the full "add a bottle" card.
+export default function TonightsPickCard({ onRequireCellar, compact = false }) {
   const { colors, spacing, styles } = useScreenTheme();
+  const collapseKey = compact ? `${COLLAPSE_KEY}.compact` : COLLAPSE_KEY;
 
   const { isPro, presentPaywall } = usePro();
   const router = useRouter();
@@ -79,7 +84,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
   const [mood, setMood] = useState(null);
   const [freeText, setFreeText] = useState('');
   const [showPickers, setShowPickers] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(compact);
 
   const [thinking, setThinking] = useState(false);
   const [recommendation, setRecommendation] = useState(null);
@@ -104,7 +109,7 @@ export default function TonightsPickCard({ onRequireCellar }) {
   // Restore the saved collapse preference once on mount (fails soft → expanded).
   useEffect(() => {
     let active = true;
-    AsyncStorage.getItem(COLLAPSE_KEY)
+    AsyncStorage.getItem(collapseKey)
       .then((v) => {
         if (active && v != null) setCollapsed(v === '1');
       })
@@ -112,15 +117,15 @@ export default function TonightsPickCard({ onRequireCellar }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [collapseKey]);
 
   const toggleCollapsed = useCallback(() => {
     setCollapsed((c) => {
       const next = !c;
-      AsyncStorage.setItem(COLLAPSE_KEY, next ? '1' : '0').catch(() => {});
+      AsyncStorage.setItem(collapseKey, next ? '1' : '0').catch(() => {});
       return next;
     });
-  }, []);
+  }, [collapseKey]);
 
   const hasCellar = Array.isArray(bottles) && bottles.length > 0;
 
@@ -169,6 +174,25 @@ export default function TonightsPickCard({ onRequireCellar }) {
   }
 
   // ── Empty cellar: prompt to add bottles ──────────────────
+  if (!hasCellar && compact) {
+    return (
+      <TouchableOpacity
+        style={[styles.card, styles.headerRow]}
+        activeOpacity={0.7}
+        onPress={() => (onRequireCellar ? onRequireCellar() : router.push('/cellar/add'))}
+        accessibilityRole="button"
+        accessibilityLabel="Tonight's Pick. Add bottles to your cellar to use it."
+      >
+        <Ionicons name="sparkles" size={18} color={colors.accent.base} />
+        <Text style={styles.eyebrow}>TONIGHT&apos;S PICK</Text>
+        <Text style={styles.collapsedTeaser} numberOfLines={1}>
+          Add bottles to your cellar to use it
+        </Text>
+        <View style={styles.flexSpacer} />
+        <Ionicons name="chevron-forward" size={18} color={colors.primary.ink} />
+      </TouchableOpacity>
+    );
+  }
   if (!hasCellar) {
     return (
       <View style={styles.card}>

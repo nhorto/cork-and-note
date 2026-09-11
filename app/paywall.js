@@ -44,11 +44,14 @@ import { SUPPORT_EMAIL } from '../lib/legalContent';
 // Lead with the sommelier and unlimited scans, not "more journaling" — at $9.99
 // this sits with the AI/collector tools, not with the $5 journal apps (§4.2).
 const BENEFITS = [
-  { icon: 'sparkles', text: 'Unlimited AI sommelier — ask anything, any time' },
-  { icon: 'globe', text: 'It looks specific wines up on the web instead of guessing' },
-  { icon: 'star', text: 'Check Google ratings & opening hours before your next visit, where available' },
+  { icon: 'sparkles', text: 'Unlimited AI sommelier: ask anything, any time' },
+  { icon: 'list', text: 'Photograph a wine list and get picks in your budget, based on your ratings' },
+  { icon: 'analytics', text: 'A taste report that reads your whole journal and tells you what to try next' },
+  { icon: 'car', text: 'Plan a wine day: two or three stops, drive times and a schedule' },
+  { icon: 'map', text: 'US wine regions on your map, with the wineries inside each one' },
   { icon: 'scan', text: 'Unlimited label and tasting-card scans' },
   { icon: 'wine', text: 'An unlimited cellar with drink windows and Tonight’s Pick' },
+  { icon: 'star', text: 'Google ratings and opening hours on winery pages, where available' },
   { icon: 'download', text: 'Export your tastings to CSV' },
 ];
 

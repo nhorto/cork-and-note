@@ -266,11 +266,30 @@ Deno.serve(async (req: Request) => {
     const MODELS: Record<string, string> = {
       chat: "claude-sonnet-4-6", // sommelier conversation (migrated off the deprecated claude-sonnet-4)
       label_scan: "claude-haiku-4-5", // cheap, fast label read/prefill (#59)
+      // Guided Pro tools (2026-09-11). Extraction is a vision read → Haiku;
+      // anything that has to reason about the user's journal → Sonnet.
+      wine_list_scan: "claude-haiku-4-5",
+      wine_list_pick: "claude-sonnet-4-6",
+      taste_report: "claude-sonnet-4-6",
+      trip_plan: "claude-sonnet-4-6",
     };
     const model =
       typeof task === "string" && Object.prototype.hasOwnProperty.call(MODELS, task)
         ? MODELS[task]
         : MODELS.chat;
+
+    // Output ceilings by task. Chat gets room for a cited answer; a wine-list
+    // scan returns one JSON row per entry and a 40-entry list is ~3k tokens,
+    // so it needs far more than a chat reply — a truncated JSON block is a
+    // failed scan, not a shorter one. Ceilings, not spend: unused headroom
+    // costs nothing.
+    const MAX_OUTPUT_TOKENS: Record<string, number> = {
+      wine_list_scan: 4096,
+      wine_list_pick: 1536,
+      taste_report: 1536,
+      trip_plan: 1536,
+    };
+
 
     // ── Server tools ──────────────────────────────────────────────────
     // Pro-only web search, so the sommelier can look a wine up instead of
@@ -282,6 +301,12 @@ Deno.serve(async (req: Request) => {
     // (they are different requests), just worth knowing when reading cache stats.
     const tools = webSearchToolsFor({ isPro, task: meteredTask });
     const canSearch = tools.length > 0;
+    const maxTokens =
+      typeof task === "string" && Object.prototype.hasOwnProperty.call(MAX_OUTPUT_TOKENS, task)
+        ? MAX_OUTPUT_TOKENS[task]
+        : canSearch
+        ? 2048
+        : 1024;
 
     // ── Call Claude ───────────────────────────────────────────────────
     // A searched reply is a MIXED content list (server_tool_use +
@@ -311,7 +336,7 @@ Deno.serve(async (req: Request) => {
           model,
           // Room for a cited answer without truncating mid-sentence. max_tokens
           // is a ceiling, not a spend — unused headroom costs nothing.
-          max_tokens: canSearch ? 2048 : 1024,
+          max_tokens: maxTokens,
           // Prompt caching (launch plan §4.3): the system prompt is stable across
           // the turns of a sommelier conversation (and byte-identical across all
           // label scans), so mark it as a cache breakpoint — cached reads bill at
