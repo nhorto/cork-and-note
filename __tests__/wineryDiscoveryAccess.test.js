@@ -34,14 +34,15 @@ test('a free Home user can enable location, discover a winery, and open its page
   wineryDirectoryService.getNearby.mockResolvedValue({ success: true, wineries: [
     { id: 7, name: 'Test Estate', distanceKm: 1, latitude: 38, longitude: -78 },
   ] });
-  wineriesService.findOrCreateWinery.mockResolvedValue({ success: true, winery: { id: 99 } });
   let tree;
   await act(async () => { tree = create(<NearYouRow />); });
   expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
   await act(async () => tree.root.findByProps({ accessibilityLabel: 'Show wineries near you' }).props.onPress());
   expect(wineryDirectoryService.getNearby).toHaveBeenCalledWith({ latitude: 38, longitude: -78, limitCount: 3 });
   await act(async () => tree.root.findByProps({ accessibilityLabel: 'Test Estate, 0.6 mi away' }).props.onPress());
-  expect(mockPush).toHaveBeenCalledWith({ pathname: '/winery/99', params: { directoryId: '7' } });
+  // A preview, not a saved winery (#270).
+  expect(mockPush).toHaveBeenCalledWith('/winery/dir-7');
+  expect(wineriesService.findOrCreateWinery).not.toHaveBeenCalled();
   expect(placesService.getDetails).not.toHaveBeenCalled();
   await act(async () => tree.unmount());
 });

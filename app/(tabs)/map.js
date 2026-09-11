@@ -68,6 +68,10 @@ const WINE_REGIONS_MIN_ZOOM = 6;
 // Region names sit at the polygon centroid from here in; further out the
 // outlines alone are the story and 60 labels would be clutter.
 const WINE_REGION_LABEL_ZOOM = 9;
+// Pin legend: number of map sessions it stays visible before retreating
+// behind the ? button.
+const LEGEND_SEEN_KEY = 'map.legend.seen';
+const LEGEND_SESSIONS = 3;
 // How long a directory fetch may run before the search pill shows a spinner
 // (#277). Most viewport queries settle faster than this, so a quick pan never
 // flashes any loading state.
@@ -123,7 +127,9 @@ export default function MapScreen() {
   const coveredBox = useRef(null);
   const [discoveryBusy, setDiscoveryBusy] = useState(false);
   const [pinFilter, setPinFilter] = useState('all'); // 'all' | 'visited' | 'wishlist' | 'nearby'
-  const [openingDiscoverId, setOpeningDiscoverId] = useState(null);
+  // Pin legend (#274): shown under the chips for the first few sessions, and
+  // whenever the help hint is open after that.
+  const [legendSeen, setLegendSeen] = useState(null);
 
   // Searchable list of places you've visited (#101).
   const [showPlacesList, setShowPlacesList] = useState(false);
@@ -325,21 +331,22 @@ export default function MapScreen() {
     return () => clearTimeout(t);
   }, [discoveryStatus]);
 
-  // Pins that sit on top of a place the user already has (same-ish spot) are
-  // dropped so a visited winery never shows twice in two colors. Derived, so
-  // a newly-saved winery swallows its duplicate without a refetch.
-  const discoverPins = useMemo(
-    () =>
-      directoryRows.filter(
-        (w) =>
-          !userPins.some(
-            (p) =>
-              p.latitude != null &&
-              haversineKm(p.latitude, p.longitude, w.latitude, w.longitude) < 0.15
-          )
-      ),
-    [directoryRows, userPins]
-  );
+  // A directory winery the user already has (linked by directory_id, or an
+  // unlinked pin on the same-ish spot) is dropped so a visited winery never
+  // shows twice in two colors. Derived, so a newly-saved winery swallows its
+  // duplicate without a refetch.
+  const discoverPins = useMemo(() => {
+    const linked = new Set(userPins.map((p) => p.directory_id).filter((id) => id != null));
+    return directoryRows.filter(
+      (w) =>
+        !linked.has(w.id) &&
+        !userPins.some(
+          (p) =>
+            p.latitude != null &&
+            haversineKm(p.latitude, p.longitude, w.latitude, w.longitude) < 0.15
+        )
+    );
+  }, [directoryRows, userPins]);
 
   // Clustering (#224): all visible pins go through one supercluster index so
   // a zoomed-out region shows count bubbles instead of a wall of overlapping
@@ -486,31 +493,13 @@ export default function MapScreen() {
     return () => { active = false; clearTimeout(t); };
   }, [listTab, placeSearch, userLocation]);
 
-  // Tapping a discovery pin promotes it to a real winery record and opens its
-  // page (same flow as Home's Near You row) — where the Google card enriches it.
-  const handleDiscoverPinPress = async (w) => {
-    if (openingDiscoverId) return;
-    setOpeningDiscoverId(w.id);
-    try {
-      const res = await wineriesService.findOrCreateWinery({
-        name: w.name,
-        latitude: w.latitude,
-        longitude: w.longitude,
-        address: [w.city, w.state].filter(Boolean).join(', ') || null,
-      });
-      const id = res?.winery?.id;
-      if (id != null) {
-        setUserPins((prev) =>
-          prev.some((p) => p.id === id) ? prev : [...prev, res.winery]
-        );
-        // directoryId: promotion doesn't persist the directory link on the
-        // wineries row, so hand it to the page — the Google card uses it to
-        // write businessStatus back to the exact directory row (#225).
-        router.push({ pathname: `/winery/${id}`, params: { directoryId: String(w.id) } });
-      }
-    } finally {
-      setOpeningDiscoverId(null);
-    }
+  // Tapping a discovery pin opens a PREVIEW of that directory winery (#270).
+  // Nothing is saved: the page's Log visit / Add to wishlist are what create
+  // your winery row, linked to the directory. If you already have that
+  // winery, open yours (your notes) instead.
+  const handleDiscoverPinPress = (w) => {
+    const linked = userPins.find((p) => p.directory_id === w.id);
+    router.push(linked ? `/winery/${linked.id}` : `/winery/dir-${w.id}`);
   };
 
   // Wine regions layer (Pro). The toggle is visible to everyone; flipping it on
@@ -532,6 +521,20 @@ export default function MapScreen() {
       .catch(() => {});
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    AsyncStorage.getItem(LEGEND_SEEN_KEY)
+      .then((value) => {
+        if (!active) return;
+        const seen = Number(value) || 0;
+        setLegendSeen(seen);
+        if (seen < LEGEND_SESSIONS) AsyncStorage.setItem(LEGEND_SEEN_KEY, String(seen + 1)).catch(() => {});
+      })
+      .catch(() => { if (active) setLegendSeen(LEGEND_SESSIONS); });
+    return () => { active = false; };
+  }, []);
+  const showLegend = showHelpHint || (legendSeen != null && legendSeen < LEGEND_SESSIONS);
 
   const handleToggleWineRegions = (next) => {
     if (!isPro) {
@@ -771,7 +774,13 @@ export default function MapScreen() {
     setRegion(newRegion);
   };
 
+  // Pin vocabulary (#274): state is carried by glyph and shape, not fill
+  // alone. Visited = sage with a check badge; wishlist = slate with a
+  // bookmark; a dropped pin = purple wine glass; directory = hollow gold
+  // ring with an outline glass; permanently closed = grey.
+  const pinClosed = (pin) => pin.operatingStatus === 'permanently_closed';
   const getMarkerColor = (pin) => {
+    if (pinClosed(pin)) return colors.neutral.inkTertiary;
     if (pin.hasVisit) return colors.status.visited;
     if (pin.inWishlist) return colors.status.wishlist;
     return colors.primary.base;
@@ -815,9 +824,19 @@ export default function MapScreen() {
           <View style={[
             styles.wineryMarker,
             pin.hasVisit && styles.visitedMarker,
-            pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
+            pin.inWishlist && !pin.hasVisit && styles.wishlistMarker,
+            pinClosed(pin) && styles.closedMarker,
           ]}>
-            <Ionicons name="wine" size={16} color={pin.hasVisit || pin.inWishlist ? colors.onStatus : colors.onPrimary} />
+            <Ionicons
+              name={pin.inWishlist && !pin.hasVisit ? 'bookmark' : 'wine'}
+              size={16}
+              color={pin.hasVisit || pin.inWishlist ? colors.onStatus : colors.onPrimary}
+            />
+            {pin.hasVisit && !pinClosed(pin) && (
+              <View style={styles.visitedBadge}>
+                <Ionicons name="checkmark" size={9} color={colors.status.visited} />
+              </View>
+            )}
           </View>
         </View>
       </Marker>
@@ -852,7 +871,7 @@ export default function MapScreen() {
             </View>
           )}
           <View style={[styles.wineryMarker, styles.discoverMarker]}>
-            <Ionicons name="wine-outline" size={16} color={colors.neutral.ink} />
+            <Ionicons name="wine-outline" size={16} color={colors.accent.strong} />
           </View>
         </View>
       </Marker>
@@ -1051,6 +1070,31 @@ export default function MapScreen() {
           />
         </TouchableOpacity>
       </View>
+
+      {/* Pin legend (#274) */}
+      {showLegend && (
+        <View style={styles.legend} accessibilityRole="text" accessibilityLabel="Pin legend">
+          {[
+            ['visited', 'Visited'],
+            ['wishlist', 'Wishlist'],
+            ['pin', 'Your pin'],
+            ['nearby', 'Nearby'],
+          ].map(([key, label]) => (
+            <View key={key} style={styles.legendItem}>
+              <View
+                style={[
+                  styles.legendDot,
+                  key === 'visited' && { backgroundColor: colors.status.visited },
+                  key === 'wishlist' && { backgroundColor: colors.status.wishlist },
+                  key === 'pin' && { backgroundColor: colors.primary.base },
+                  key === 'nearby' && styles.legendDotHollow,
+                ]}
+              />
+              <Text style={styles.legendText}>{label}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* FAB Button */}
       <TouchableOpacity
@@ -1563,6 +1607,56 @@ const styles = StyleSheet.create({
   wishlistMarker: {
     backgroundColor: colors.status.wishlist,
   },
+  closedMarker: {
+    backgroundColor: colors.neutral.inkTertiary,
+  },
+  // Small white check at the top-right of a visited pin (#274).
+  visitedBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: colors.neutral.bg,
+    borderWidth: 1,
+    borderColor: colors.status.visited,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Legend under the filter chips (#274).
+  legend: {
+    position: 'absolute',
+    top: 156,
+    left: spacing.lg,
+    flexDirection: 'row',
+    gap: spacing.md,
+    backgroundColor: withAlpha(colors.neutral.bg, 0.92),
+    borderRadius: borderRadius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    ...shadows.soft,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  legendDotHollow: {
+    borderWidth: 2,
+    borderColor: colors.accent.base,
+    backgroundColor: 'transparent',
+  },
+  legendText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: colors.neutral.inkSecondary,
+  },
 
   // FAB Button
   //
@@ -1733,9 +1827,11 @@ const styles = StyleSheet.create({
   filterDot: { width: 8, height: 8, borderRadius: 4 },
   layersChip: { marginLeft: 'auto', paddingHorizontal: spacing.sm, width: 34, justifyContent: 'center' },
   zoomHint: { alignSelf: 'center', overflow: 'hidden', ...shadows.soft },
+  // Hollow ring: a place from the directory, not (yet) one of yours (#274).
   discoverMarker: {
-    backgroundColor: colors.accent.base,
-    borderColor: colors.neutral.bg,
+    backgroundColor: withAlpha(colors.neutral.bg, 0.85),
+    borderColor: colors.accent.base,
+    borderWidth: 2.5,
   },
   // Cluster count bubbles (#224); width/height/radius are set inline since
   // they scale with the count.

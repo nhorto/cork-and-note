@@ -7,7 +7,6 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { wineriesService } from '../lib/wineries';
 import { wineryDirectoryService } from '../lib/wineryDirectory';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
@@ -22,7 +21,6 @@ export default function NearYouRow() {
   // 'unknown' until checked; permission drives which card renders.
   const [permission, setPermission] = useState('unknown');
   const [wineries, setWineries] = useState(null);
-  const [opening, setOpening] = useState(null); // directory id being opened
 
   const loadNearby = useCallback(async () => {
     try {
@@ -68,27 +66,11 @@ export default function NearYouRow() {
     }
   };
 
-  // Tap-through: find-or-create our winery record, then open its page (the
-  // Google card there does the live enrichment).
-  const openWinery = async (w) => {
-    if (opening) return;
-    setOpening(w.id);
-    try {
-      const res = await wineriesService.findOrCreateWinery({
-        name: w.name,
-        latitude: w.latitude,
-        longitude: w.longitude,
-        address: [w.city, w.state].filter(Boolean).join(', ') || null,
-      });
-      const id = res?.winery?.id;
-      // directoryId: the page's Google card uses it to write businessStatus
-      // back to the exact winery_directory row (#225).
-      if (id != null) {
-        router.push({ pathname: `/winery/${id}`, params: { directoryId: String(w.id) } });
-      }
-    } finally {
-      setOpening(null);
-    }
+  // Tap-through opens a preview of the directory winery (#270); nothing is
+  // saved until the user logs a visit or adds it to the wishlist. The page
+  // swaps to your own winery if you already have one linked.
+  const openWinery = (w) => {
+    router.push(`/winery/dir-${w.id}`);
   };
 
   const header = (
@@ -135,7 +117,6 @@ export default function NearYouRow() {
               key={w.id}
               style={styles.card}
               activeOpacity={0.85}
-              disabled={opening != null}
               onPress={() => openWinery(w)}
               accessibilityRole="button"
               accessibilityLabel={`${w.name}, ${distance} away`}

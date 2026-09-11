@@ -126,7 +126,8 @@ export default function LogSessionForm({
       ? {
           placeType: 'winery',
           placeName: winery.name,
-          wineryId: winery.id,
+          wineryId: winery.id ?? null,
+          directoryId: winery.directoryId ?? null,
           latitude: winery.latitude != null ? Number(winery.latitude) : null,
           longitude: winery.longitude != null ? Number(winery.longitude) : null,
         }
@@ -378,6 +379,7 @@ export default function LogSessionForm({
     try {
       await onSave({
         wineryId: place?.wineryId ?? null,
+        directoryId: place?.directoryId ?? null,
         placeType: place?.placeType ?? null,
         placeName: place?.placeName ?? null,
         latitude: place?.latitude ?? null,
