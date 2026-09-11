@@ -197,6 +197,10 @@ function AppRoot() {
     (async () => {
       try {
         const route = await AsyncStorage.getItem('__screenshot_route__');
+        // One shot: the capture script rewrites it before every launch, and
+        // leaving it behind would keep replacing the stack with a screen that
+        // has nothing to go back to (owner hit exactly that on 2026-09-11).
+        if (route) await AsyncStorage.removeItem('__screenshot_route__');
         if (route && !cancelled) {
           // Let the auth redirect to /(tabs)/home settle first.
           setTimeout(() => {

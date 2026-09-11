@@ -1,6 +1,7 @@
 // app/cellar/[id].js - Bottle detail / edit / open (Epic #6 / #25 / #26)
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeBack } from '../../hooks/useSafeBack';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -45,6 +46,7 @@ export default function BottleDetailScreen() {
 
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const goBack = useSafeBack('/(tabs)/cellar');
 
   const [bottle, setBottle] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -137,7 +139,7 @@ export default function BottleDetailScreen() {
         style: 'destructive',
         onPress: async () => {
           const res = await cellarService.deleteBottle(id);
-          if (res.success) router.back();
+          if (res.success) goBack();
           else Alert.alert('Could not delete', res.error || 'Please try again.');
         },
       },
@@ -184,7 +186,7 @@ export default function BottleDetailScreen() {
     } else if (res.bottle.quantity <= 0) {
       Alert.alert('Bottle removed', `That was your last one.${loggedNote}`, [
         ...detailAction,
-        { text: 'OK', style: 'cancel', onPress: () => router.back() },
+        { text: 'OK', style: 'cancel', onPress: () => goBack() },
       ]);
     } else if (wroteTasting) {
       Alert.alert('Logged', 'A tasting was added to your journal.', [
@@ -211,7 +213,7 @@ export default function BottleDetailScreen() {
     await load();
     if (res.bottle.quantity <= 0) {
       Alert.alert('Lot emptied', 'This lot now shows zero bottles.', [
-        { text: 'OK', onPress: () => router.back() },
+        { text: 'OK', onPress: () => goBack() },
       ]);
     }
   };
@@ -228,7 +230,7 @@ export default function BottleDetailScreen() {
     return (
       <View style={[styles.container, styles.center]}>
         <Text style={styles.missing}>This bottle could not be found.</Text>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => goBack()}>
           <Text style={styles.link}>Go back</Text>
         </TouchableOpacity>
       </View>
@@ -247,7 +249,7 @@ export default function BottleDetailScreen() {
     <View style={styles.container}>
       <ScreenHeader
         title={editing ? 'Edit bottle' : 'Bottle'}
-        onBack={() => (editing ? setEditing(false) : router.back())}
+        onBack={() => (editing ? setEditing(false) : goBack())}
         right={
           !editing && !removed ? (
             <TouchableOpacity

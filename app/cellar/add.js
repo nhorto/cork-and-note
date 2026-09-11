@@ -6,6 +6,7 @@
 // form pre-filled with the entry just saved (quantity reset to 1).
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useSafeBack } from '../../hooks/useSafeBack';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -36,6 +37,7 @@ export default function AddBottleScreen() {
 
   const { isPro, presentPaywall } = usePro();
   const router = useRouter();
+  const goBack = useSafeBack('/(tabs)/cellar');
   const [saving, setSaving] = useState(false);
 
   // Autocomplete data — loaded once; failures degrade gracefully to free-text entry.
@@ -159,7 +161,7 @@ export default function AddBottleScreen() {
       'Added to cellar',
       `${payload.wine_name} saved.${linkedNote} Add another like it?`,
       [
-        { text: 'Done', style: 'cancel', onPress: () => router.back() },
+        { text: 'Done', style: 'cancel', onPress: () => goBack() },
         {
           text: 'Add another',
           onPress: () => {

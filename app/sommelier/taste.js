@@ -9,6 +9,7 @@
 // gated. All numbers come from lib/tasteProfile.js; the model only writes prose.
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useSafeBack } from '../../hooks/useSafeBack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -54,6 +55,7 @@ const formatDate = (iso) =>
 export default function TasteScreen() {
   const { colors, styles } = useScreenTheme();
   const router = useRouter();
+  const goBack = useSafeBack('/(tabs)/sommelier');
   const { isPro, presentPaywall } = usePro();
 
   const [loaded, setLoaded] = useState(false);
@@ -188,7 +190,7 @@ export default function TasteScreen() {
 
   return (
     <View style={styles.safeArea}>
-      <ScreenHeader title="My taste" onBack={() => router.back()} />
+      <ScreenHeader title="My taste" onBack={goBack} />
       {content}
     </View>
   );

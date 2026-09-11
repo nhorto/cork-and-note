@@ -12,6 +12,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeBack } from '../../hooks/useSafeBack';
 import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -64,6 +65,7 @@ function readNumberParam(value) {
 export default function NewTripScreen() {
   const { colors, spacing, styles } = useScreenTheme();
   const router = useRouter();
+  const goBack = useSafeBack('/(tabs)/sommelier');
   const params = useLocalSearchParams();
   const { isPro, presentPaywall } = usePro();
 
@@ -329,7 +331,7 @@ export default function NewTripScreen() {
   if (!isPro) {
     return (
       <View style={styles.safeArea}>
-        <ScreenHeader title="Plan a wine day" onBack={() => router.back()} />
+        <ScreenHeader title="Plan a wine day" onBack={goBack} />
         <ProFeaturePreview
           source="trip_plan"
           title="A day in wine country, planned"
@@ -353,7 +355,7 @@ export default function NewTripScreen() {
       <ScreenHeader
         title="Plan a wine day"
         subtitle={area ? `A day around ${area.label}` : undefined}
-        onBack={() => (step === 'candidates' ? setStep('form') : router.back())}
+        onBack={() => (step === 'candidates' ? setStep('form') : goBack())}
       />
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         {step === 'form' ? (

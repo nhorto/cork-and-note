@@ -12,6 +12,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
+import { useSafeBack } from '../../hooks/useSafeBack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -124,6 +125,7 @@ const sessionTitle = (session) => {
 export default function WineListScreen() {
   const { colors, styles } = useScreenTheme();
   const router = useRouter();
+  const goBack = useSafeBack('/(tabs)/sommelier');
   const { isPro, isLoading, presentPaywall } = usePro();
 
   const [step, setStep] = useState('capture');
@@ -446,7 +448,7 @@ export default function WineListScreen() {
   if (isLoading) {
     return (
       <View style={styles.safeArea}>
-        <ScreenHeader title="Choose from a list" onBack={() => router.back()} />
+        <ScreenHeader title="Choose from a list" onBack={goBack} />
         <View style={styles.centered}>
           <ActivityIndicator color={colors.primary.ink} />
         </View>
@@ -458,7 +460,7 @@ export default function WineListScreen() {
   if (!isPro && !(readOnly && step === 'picks')) {
     return (
       <View style={styles.safeArea}>
-        <ScreenHeader title="Choose from a list" onBack={() => router.back()} />
+        <ScreenHeader title="Choose from a list" onBack={goBack} />
         <ProFeaturePreview
           source="wine_list_pick"
           title="A few good picks from the list in front of you"
@@ -484,7 +486,7 @@ export default function WineListScreen() {
 
   return (
     <View style={styles.safeArea}>
-      <ScreenHeader title="Choose from a list" onBack={() => router.back()} />
+      <ScreenHeader title="Choose from a list" onBack={goBack} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <StepIndicator
