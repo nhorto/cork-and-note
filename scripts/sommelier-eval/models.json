@@ -1,0 +1,33 @@
+{
+  "_about": "Candidate matrix for the sommelier chat eval. `baseline` is what production runs today. Every candidate runs at LOW reasoning effort first (chat is not a reasoning-ceiling workload; sweep effort on the winner afterwards). Prices per MTok are duplicated from cost-model.mjs so a report can be priced without it; keep them in sync. Judges are excluded from judging pairs that contain their own model.",
+  "variants": {
+    "baseline": { "provider": "anthropic", "model": "claude-sonnet-4-6", "effort": "off", "label": "Sonnet 4.6 (current)" },
+    "v1":  { "provider": "anthropic", "model": "claude-sonnet-5",  "effort": "low", "label": "Sonnet 5 low" },
+    "v2":  { "provider": "anthropic", "model": "claude-opus-5",    "effort": "low", "label": "Opus 5 low" },
+    "v3":  { "provider": "anthropic", "model": "claude-haiku-4-5", "effort": "off", "label": "Haiku 4.5" },
+    "v4":  { "provider": "openai",    "model": "gpt-5.6-luna",     "effort": "low", "label": "GPT-5.6 Luna low" },
+    "v5":  { "provider": "openai",    "model": "gpt-5.6-terra",    "effort": "low", "label": "GPT-5.6 Terra low" },
+    "v6":  { "provider": "openai",    "model": "gpt-5.6-sol",      "effort": "low", "label": "GPT-5.6 Sol low" },
+    "v7":  { "provider": "google",    "model": "gemini-3.8-flash", "effort": "low", "label": "Gemini 3.8 Flash low" },
+    "v8":  { "provider": "google",    "model": "gemini-3.1-pro-preview", "effort": "low", "label": "Gemini 3.1 Pro low" },
+    "v9":  { "provider": "anthropic", "model": "claude-fable-5-1", "effort": "low", "label": "Fable 5.1 low" },
+    "v10": { "provider": "openai",    "model": "gpt-6-astra",      "effort": "low", "label": "GPT-6 Astra low" }
+  },
+  "judges": {
+    "fable": { "provider": "anthropic", "model": "claude-fable-5-1" },
+    "astra": { "provider": "openai", "model": "gpt-6-astra" }
+  },
+  "prices": {
+    "claude-sonnet-4-6": { "in": 3, "out": 15, "cache_read": 0.3, "search": 0.01 },
+    "claude-sonnet-5":   { "in": 2, "out": 10, "cache_read": 0.2, "search": 0.01 },
+    "claude-opus-5":     { "in": 5, "out": 25, "cache_read": 0.5, "search": 0.01 },
+    "claude-fable-5-1":  { "in": 10, "out": 50, "cache_read": 0.25, "search": 0.01 },
+    "claude-haiku-4-5":  { "in": 1, "out": 5, "cache_read": 0.1, "search": 0.01 },
+    "gpt-5.6-luna":      { "in": 0.2, "out": 1.2, "cache_read": 0.02, "search": 0.01 },
+    "gpt-5.6-terra":     { "in": 2, "out": 12, "cache_read": 0.2, "search": 0.01 },
+    "gpt-5.6-sol":       { "in": 4, "out": 20, "cache_read": 0.4, "search": 0.01 },
+    "gpt-6-astra":       { "in": 10, "out": 50, "cache_read": 1.0, "search": 0.01 },
+    "gemini-3.8-flash":  { "in": 0.75, "out": 3.75, "cache_read": 0.075, "search": 0.014 },
+    "gemini-3.1-pro-preview": { "in": 2, "out": 12, "cache_read": 0.2, "search": 0.014 }
+  }
+}
