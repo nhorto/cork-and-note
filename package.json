@@ -15,7 +15,8 @@
     "build": "expo export --platform web",
     "build:dev": "eas build --profile development",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "build:avas": "node scripts/build-ava-regions.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",

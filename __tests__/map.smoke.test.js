@@ -12,7 +12,7 @@ jest.mock('expo-router', () => ({
   useFocusEffect: (callback) => require('react').useEffect(callback, []),
 }));
 jest.mock('expo-location', () => ({ requestForegroundPermissionsAsync: async () => ({ status: 'denied' }) }));
-jest.mock('react-native-maps', () => ({ __esModule: true, default: 'MapView', Marker: 'Marker' }));
+jest.mock('react-native-maps', () => ({ __esModule: true, default: 'MapView', Marker: 'Marker', Polygon: 'Polygon' }));
 jest.mock('../components/ManualWineryEntryModal', () => () => null);
 jest.mock('../components/PinActionModal', () => () => null);
 jest.mock('../components/WineryNameModal', () => () => null);
