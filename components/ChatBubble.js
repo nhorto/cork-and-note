@@ -36,8 +36,8 @@ export default function ChatBubble({ message, onUseSuggestions, reportContext = 
   const reportable =
     !isUser && !message.isLocalError && !String(message.id ?? '').startsWith('error-');
   const [reportOpen, setReportOpen] = useState(false);
-  // Pages the Pro web search leaned on. Present only on a live reply — they are
-  // not persisted with the message, so reopening an old chat shows none.
+  // Pages the Pro web search leaned on. New replies persist these with the
+  // message; older rows simply carry the migration's empty-array default.
   const sources = Array.isArray(message.sources) ? message.sources : [];
 
   // chat-photos is a private bucket — resolve stored paths to short-lived signed

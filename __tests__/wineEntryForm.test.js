@@ -7,8 +7,9 @@ import Button from '../components/Button';
 import StarRatingInput from '../components/StarRatingInput';
 import WineEntryForm from '../components/WineEntryForm';
 
+const mockWineChat = jest.fn(() => null);
 jest.mock('../components/LabelScanner', () => (props) => { global.__scanned = props.onScanned; return null; });
-jest.mock('../components/WineChatModal', () => () => null);
+jest.mock('../components/WineChatModal', () => (props) => mockWineChat(props));
 jest.mock('expo-haptics', () => ({ impactAsync: jest.fn(async () => {}), ImpactFeedbackStyle: { Light: 'light' } }));
 jest.mock('../lib/supabase', () => ({ supabase: require('../test-utils/fakeSupabase').currentFake() }));
 
@@ -29,6 +30,7 @@ const addGrape = async (tree, grape) => {
 const setWinemaker = (tree, value) => act(async () => inputByPlaceholder(tree, 'Winery or producer').props.onChangeText(value));
 
 beforeEach(() => {
+  mockWineChat.mockClear();
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 });
 afterEach(async () => {
@@ -102,6 +104,20 @@ describe('the half-star tap cycle', () => {
 });
 
 describe('varietal to type inference', () => {
+  test('an in-flow autocomplete suggestion can be selected inside the form scroll', async () => {
+    const onSave = jest.fn();
+    const tree = await mount({ onSave });
+    const input = inputByPlaceholder(tree, 'Add a grape');
+    await act(async () => input.props.onFocus());
+    await act(async () => input.props.onChangeText('Cab'));
+    await act(async () => tree.root.findByProps({ accessibilityLabel: 'Select Cabernet Sauvignon' }).props.onPress());
+    await setWinemaker(tree, 'Test Winery');
+    await save(tree);
+    expect(onSave.mock.calls[0][0].varietal).toEqual(['Cabernet Sauvignon']);
+    expect(onSave.mock.calls[0][0].type).toBe('Red');
+    expect(tree.root.findAllByType(require('react-native').ScrollView)[0].props.keyboardShouldPersistTaps).toBe('handled');
+  });
+
   test('one red grape infers Red; a second red grape upgrades to Red Blend; removing them clears the guess', async () => {
     const tree = await mount();
     expect(typeValue(tree)).toBe('not set');
@@ -165,5 +181,89 @@ describe('varietal to type inference', () => {
     await setWinemaker(tree, 'X');
     await save(tree);
     expect(onSave.mock.calls[0][0].varietal).toEqual(['Viognier']);
+  });
+});
+
+describe('sommelier form actions', () => {
+  test('reviewing AI suggestions applies the selected values to the tasting form', async () => {
+    const onSave = jest.fn();
+    const tree = await mount({ onSave });
+    const ask = tree.root.findAll((node) =>
+      node.props.onPress && node.findAllByType(require('react-native').Text)
+        .some((text) => text.props.children === 'Ask the sommelier')
+    ).at(-1);
+    await act(async () => ask.props.onPress());
+
+    const chat = mockWineChat.mock.calls.at(-1)[0];
+    await act(async () => chat.onUseSuggestions({
+      winemaker: 'Paradise Springs',
+      wine_name: 'Cabernet Franc',
+      wine_type: 'Red',
+      varietal: 'Cabernet Franc',
+      year: '2022',
+      flavor_tags: ['raspberry', 'pepper'],
+      characteristics: { sweetness: 0.5, tannins: 3.5, acidity: 3, body: 3, alcohol: 2.5 },
+      overall_rating: 4,
+      additional_notes: 'Bright red fruit with a savory finish.',
+    }));
+    // iOS opens the review only after the full-screen chat finishes dismissing.
+    await act(async () => mockWineChat.mock.calls.at(-1)[0].onDismiss());
+
+    const apply = tree.root.findAll((node) => node.type === Button && node.props.title === 'Apply selected')[0];
+    await act(async () => apply.props.onPress());
+    await save(tree);
+
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({
+      winemaker: 'Paradise Springs',
+      name: 'Cabernet Franc',
+      type: 'Red',
+      varietal: ['Cabernet Franc'],
+      year: '2022',
+      flavorNotes: ['raspberry', 'pepper'],
+      overallRating: 4,
+      additionalNotes: 'Bright red fruit with a savory finish.',
+      ratings: { sweetness: 0.5, tannins: 3.5, acidity: 3, body: 3, alcohol: 2.5 },
+    }));
+  });
+
+  test('a stale or malformed suggestion cannot rewrite identity the user entered', async () => {
+    const onSave = jest.fn();
+    const tree = await mount({
+      onSave,
+      initialData: {
+        winemaker: 'Paradise Springs',
+        name: 'Cabernet Sauvignon',
+        type: 'Red',
+        varietal: ['Cabernet Sauvignon'],
+        year: '2020',
+      },
+    });
+    await act(async () => mockWineChat.mock.calls.at(-1)[0].onUseSuggestions({
+      winemaker: 'Another Winery',
+      wine_name: 'Petit Verdot Reserve',
+      wine_type: 'Red Blend',
+      varietal: 'Petit Verdot',
+      year: '2021',
+      flavor_tags: ['blackberry'],
+    }));
+    await act(async () => mockWineChat.mock.calls.at(-1)[0].onDismiss());
+
+    const reviewText = JSON.stringify(tree.toJSON());
+    expect(reviewText).toContain('Flavor notes');
+    expect(reviewText).not.toContain('Another Winery');
+    expect(reviewText).not.toContain('Petit Verdot Reserve');
+    expect(reviewText).not.toContain('Red Blend');
+    expect(reviewText).not.toContain('2021');
+
+    await act(async () => tree.root.findAll((node) => node.type === Button && node.props.title === 'Apply selected')[0].props.onPress());
+    await save(tree);
+    expect(onSave.mock.calls[0][0]).toEqual(expect.objectContaining({
+      winemaker: 'Paradise Springs',
+      name: 'Cabernet Sauvignon',
+      type: 'Red',
+      varietal: ['Cabernet Sauvignon'],
+      year: '2020',
+      flavorNotes: ['blackberry'],
+    }));
   });
 });

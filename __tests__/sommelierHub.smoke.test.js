@@ -28,7 +28,11 @@ jest.mock('../components/UpgradePill', () => () => null);
 jest.mock('../lib/ai', () => ({
   aiService: {
     buildSystemPrompt: jest.fn().mockResolvedValue('system'),
-    sendMessage: jest.fn().mockResolvedValue({ response: 'Try a Cab Franc.', sources: [] }),
+    sendMessageStream: jest.fn().mockImplementation(async (_messages, _prompt, { onDelta }) => {
+      onDelta('Try a Cab');
+      onDelta('Try a Cab Franc.');
+      return { response: 'Try a Cab Franc.', sources: [] };
+    }),
     parseSuggestions: jest.fn().mockReturnValue([]),
     getDisplayText: (t) => t,
     photoToBase64: jest.fn(),
@@ -39,7 +43,9 @@ jest.mock('../lib/chat', () => ({
     getConversations: jest.fn().mockResolvedValue([]),
     createConversation: jest.fn().mockResolvedValue({ id: 'conv-1', title: 'New' }),
     getMessages: jest.fn().mockResolvedValue([]),
-    addMessage: jest.fn().mockResolvedValue({ id: 'm1' }),
+    addMessage: jest.fn().mockImplementation(async (_id, role, content) => ({
+      id: role === 'user' ? 'user-1' : 'assistant-1', role, content,
+    })),
     generateTitle: (t) => t.slice(0, 20),
     updateConversationTitle: jest.fn().mockResolvedValue(undefined),
     uploadChatPhoto: jest.fn(),
@@ -80,6 +86,10 @@ describe('Sommelier hub', () => {
     await flush();
 
     expect(tree.root.findByProps({ accessibilityLabel: 'Ask your sommelier a question' })).toBeTruthy();
+    expect(tree.root.findByProps({ accessibilityLabel: 'Start a new sommelier chat' })).toBeTruthy();
+    expect(tile(tree, 'tool-wine-list').props.accessibilityLabel).toBe(
+      'Photograph a wine list. Part of Pro.'
+    );
 
     const expectRoute = (testID, route) => {
       act(() => tile(tree, testID).props.onPress());
@@ -135,7 +145,7 @@ describe('Sommelier hub', () => {
       'What pairs with roast chicken?',
       expect.anything()
     );
-    expect(aiService.sendMessage).toHaveBeenCalled();
+    expect(aiService.sendMessageStream).toHaveBeenCalled();
     // Let the chat view's scroll-to-end timer fire inside the test environment.
     await act(async () => {
       await new Promise((r) => setTimeout(r, 150));
