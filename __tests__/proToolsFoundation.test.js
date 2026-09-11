@@ -102,3 +102,12 @@ describe('aiService.parseFencedJson', () => {
     expect(aiService.getDisplayText(text)).toBe('Intro\n\nOutro');
   });
 });
+
+describe('softenDashes', () => {
+  const { softenDashes } = require('../lib/text');
+  it('turns spaced em and en dashes into commas and keeps ranges readable', () => {
+    expect(softenDashes('Bright acidity — and a soft finish')).toBe('Bright acidity, and a soft finish');
+    expect(softenDashes('2019–2021 vintages')).toBe('2019-2021 vintages');
+    expect(softenDashes(null)).toBeNull();
+  });
+});
