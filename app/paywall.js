@@ -184,9 +184,11 @@ export default function PaywallScreen() {
                     ? 'Find wineries and save your favorites for free. Pro adds Google ratings and opening hours to help plan your visit, where available.'
                     : source === 'tonights_pick'
                       ? "Tonight's Pick — a bottle from your own cellar, chosen by your sommelier — is part of Pro."
-                      : source === 'onboarding'
-                        ? 'Start with the sommelier on call. Your journal itself stays free, forever.'
-                        : 'Your journal stays free, forever. Pro unlocks the parts that think.'}
+                      : source === 'trip_plan'
+                        ? 'Planning a wine day is part of Pro: drive times, a schedule with room for lunch, and directions to each stop.'
+                        : source === 'onboarding'
+                          ? 'Start with the sommelier on call. Your journal itself stays free, forever.'
+                          : 'Your journal stays free, forever. Pro unlocks the parts that think.'}
         </Text>
 
         <View style={styles.benefits}>

@@ -43,4 +43,4 @@ jobs:
 
       - name: Type check
         working-directory: supabase/functions
-        run: deno check chat/index.ts delete-account/index.ts revenuecat-webhook/index.ts places/index.ts _shared/*.ts
+        run: deno check chat/index.ts delete-account/index.ts revenuecat-webhook/index.ts places/index.ts routes/index.ts _shared/*.ts
