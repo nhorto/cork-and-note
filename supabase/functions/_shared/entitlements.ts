@@ -15,6 +15,14 @@ export const FREE_TIER_LIMITS = {
   label_scan: 3,
   chat: 5,
   tonights_pick: 0,
+  // The guided Pro tools (owner decision 2026-09-11): all Pro-only. Free users
+  // see a labelled sample in the app and an upgrade button, never a metered
+  // taste of the real thing — a free wine-list pick is a Sonnet call we would
+  // be paying for on behalf of someone who has not yet decided to pay us.
+  wine_list_scan: 0,
+  wine_list_pick: 0,
+  taste_report: 0,
+  trip_plan: 0,
 } as const;
 
 /** Every AI call is metered as exactly one of these. */
@@ -42,6 +50,11 @@ export const FREE_METER_WINDOWS: Record<MeteredTask, MeterWindow> = {
   // Free users get zero Tonight's Picks, so the window never decides anything —
   // "lifetime" is the honest description of an allowance of 0 forever.
   tonights_pick: "lifetime",
+  // Same reasoning for the four guided tools: an allowance of 0 forever.
+  wine_list_scan: "lifetime",
+  wine_list_pick: "lifetime",
+  taste_report: "lifetime",
+  trip_plan: "lifetime",
 };
 
 /** Free-tier cellar size. Enforced client-side; bottles cost us nothing to store. */
@@ -68,6 +81,15 @@ export const FAIR_USE_DAILY_CAPS: Record<MeteredTask, number> = {
   // the whole cellar to Sonnet (~1-2c). Twenty is far past any human evening
   // and still bounds a scripted grind at a few dollars a month.
   tonights_pick: 20,
+  // Guided tools. A list scan is a Haiku vision call on up to three photos
+  // (~1c); a pick, a taste report and a trip plan are each one Sonnet call
+  // with a few thousand tokens of context (~3c). Nobody photographs fifteen
+  // wine lists in a day; five taste reports is "refresh, edit, refresh" with
+  // room to spare; ten trip builds covers a family arguing about a weekend.
+  wine_list_scan: 15,
+  wine_list_pick: 15,
+  taste_report: 5,
+  trip_plan: 10,
 };
 export const FAIR_USE_MONTHLY_CHAT_CAP = 1_000;
 
@@ -85,9 +107,12 @@ export const PRO_ENTITLEMENT_ID = "pro";
  * meter — an unrecognised task must never buy a cheaper allowance.
  */
 export function normalizeTask(task: unknown): MeteredTask {
-  if (task === "label_scan") return "label_scan";
-  if (task === "tonights_pick") return "tonights_pick";
+  if (typeof task === "string" && task !== "chat" && isKnownTask(task)) return task;
   return "chat";
+}
+
+function isKnownTask(task: string): task is MeteredTask {
+  return Object.prototype.hasOwnProperty.call(FREE_TIER_LIMITS, task);
 }
 
 export type EntitlementRow = {
@@ -178,6 +203,15 @@ export function limitReachedMessage(task: MeteredTask): string {
   }
   if (task === "tonights_pick") {
     return "Tonight's Pick is part of Pro — upgrade and the sommelier will choose from your own cellar.";
+  }
+  if (task === "wine_list_scan" || task === "wine_list_pick") {
+    return "Choosing from a wine list is part of Pro. Upgrade and the sommelier will pick from the list in front of you.";
+  }
+  if (task === "taste_report") {
+    return "Your taste report is part of Pro. Upgrade and the sommelier will read your whole journal.";
+  }
+  if (task === "trip_plan") {
+    return "Planning a wine day is part of Pro. Upgrade to build a day around the wineries you want to visit.";
   }
   return `You've used all ${FREE_TIER_LIMITS.chat} free sommelier messages this month. Upgrade to Pro for unlimited chat.`;
 }
