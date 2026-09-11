@@ -1,0 +1,709 @@
+[
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 93,
+"web_searches": null,
+"created_at": "2026-06-16 00:09:54.486766+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 94,
+"web_searches": null,
+"created_at": "2026-06-16 00:11:24.027209+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 89,
+"web_searches": null,
+"created_at": "2026-06-16 00:16:22.062477+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 110,
+"web_searches": null,
+"created_at": "2026-06-16 00:17:39.247686+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 100,
+"web_searches": null,
+"created_at": "2026-06-16 00:19:15.869097+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 106,
+"web_searches": null,
+"created_at": "2026-06-16 00:19:49.751255+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 98,
+"web_searches": null,
+"created_at": "2026-06-16 00:20:20.758874+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 96,
+"web_searches": null,
+"created_at": "2026-06-16 00:20:49.060009+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 119,
+"web_searches": null,
+"created_at": "2026-06-16 00:21:34.534225+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 96,
+"web_searches": null,
+"created_at": "2026-06-16 00:22:02.70759+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 100,
+"web_searches": null,
+"created_at": "2026-06-16 00:22:39.669019+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 91,
+"web_searches": null,
+"created_at": "2026-06-16 00:23:21.17354+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1022,
+"output_tokens": 387,
+"web_searches": null,
+"created_at": "2026-06-16 00:24:48.633907+00"
+},
+{
+"task": "legacy",
+"input_tokens": 650,
+"output_tokens": 520,
+"web_searches": null,
+"created_at": "2026-06-16 00:30:04.653994+00"
+},
+{
+"task": "legacy",
+"input_tokens": 661,
+"output_tokens": 547,
+"web_searches": null,
+"created_at": "2026-06-16 00:31:09.051584+00"
+},
+{
+"task": "legacy",
+"input_tokens": 643,
+"output_tokens": 569,
+"web_searches": null,
+"created_at": "2026-06-16 00:31:49.310195+00"
+},
+{
+"task": "legacy",
+"input_tokens": 657,
+"output_tokens": 528,
+"web_searches": null,
+"created_at": "2026-06-16 00:32:57.819902+00"
+},
+{
+"task": "legacy",
+"input_tokens": 721,
+"output_tokens": 120,
+"web_searches": null,
+"created_at": "2026-06-16 00:45:51.623071+00"
+},
+{
+"task": "legacy",
+"input_tokens": 728,
+"output_tokens": 122,
+"web_searches": null,
+"created_at": "2026-06-16 00:46:38.130042+00"
+},
+{
+"task": "legacy",
+"input_tokens": 789,
+"output_tokens": 673,
+"web_searches": null,
+"created_at": "2026-06-16 00:51:13.797724+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2192,
+"output_tokens": 93,
+"web_searches": null,
+"created_at": "2026-06-16 19:21:51.233005+00"
+},
+{
+"task": "legacy",
+"input_tokens": 735,
+"output_tokens": 135,
+"web_searches": null,
+"created_at": "2026-06-16 19:22:29.766087+00"
+},
+{
+"task": "legacy",
+"input_tokens": 987,
+"output_tokens": 380,
+"web_searches": null,
+"created_at": "2026-06-17 00:26:40.843018+00"
+},
+{
+"task": "legacy",
+"input_tokens": 958,
+"output_tokens": 455,
+"web_searches": null,
+"created_at": "2026-06-18 23:20:17.480225+00"
+},
+{
+"task": "legacy",
+"input_tokens": 638,
+"output_tokens": 357,
+"web_searches": null,
+"created_at": "2026-06-18 23:20:59.276247+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 94,
+"web_searches": null,
+"created_at": "2026-06-20 01:15:39.746799+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2236,
+"output_tokens": 165,
+"web_searches": null,
+"created_at": "2026-06-27 20:59:08.187732+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2236,
+"output_tokens": 617,
+"web_searches": null,
+"created_at": "2026-06-27 20:59:51.957638+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2236,
+"output_tokens": 149,
+"web_searches": null,
+"created_at": "2026-06-27 21:00:40.854562+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2236,
+"output_tokens": 470,
+"web_searches": null,
+"created_at": "2026-06-27 21:01:06.009513+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2236,
+"output_tokens": 557,
+"web_searches": null,
+"created_at": "2026-06-27 21:22:48.632014+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1512,
+"output_tokens": 472,
+"web_searches": null,
+"created_at": "2026-06-27 21:36:03.337939+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 95,
+"web_searches": null,
+"created_at": "2026-06-27 23:42:56.148735+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 88,
+"web_searches": null,
+"created_at": "2026-06-27 23:43:37.865009+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 101,
+"web_searches": null,
+"created_at": "2026-06-27 23:45:23.81709+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 107,
+"web_searches": null,
+"created_at": "2026-06-27 23:45:52.96766+00"
+},
+{
+"task": "legacy",
+"input_tokens": 754,
+"output_tokens": 134,
+"web_searches": null,
+"created_at": "2026-06-27 23:46:50.914451+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 112,
+"web_searches": null,
+"created_at": "2026-06-27 23:47:24.492693+00"
+},
+{
+"task": "legacy",
+"input_tokens": 733,
+"output_tokens": 124,
+"web_searches": null,
+"created_at": "2026-06-27 23:47:41.711164+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 88,
+"web_searches": null,
+"created_at": "2026-06-27 23:50:47.10398+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 92,
+"web_searches": null,
+"created_at": "2026-06-27 23:51:12.229003+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 96,
+"web_searches": null,
+"created_at": "2026-06-27 23:51:38.458308+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 93,
+"web_searches": null,
+"created_at": "2026-06-27 23:53:49.439788+00"
+},
+{
+"task": "legacy",
+"input_tokens": 688,
+"output_tokens": 559,
+"web_searches": null,
+"created_at": "2026-07-04 19:54:19.93887+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2188,
+"output_tokens": 96,
+"web_searches": null,
+"created_at": "2026-07-05 02:42:19.383025+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2279,
+"output_tokens": 545,
+"web_searches": null,
+"created_at": "2026-07-05 02:42:59.999271+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1016,
+"output_tokens": 376,
+"web_searches": null,
+"created_at": "2026-07-15 16:12:31.81347+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1405,
+"output_tokens": 376,
+"web_searches": null,
+"created_at": "2026-07-15 16:13:23.451935+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2279,
+"output_tokens": 602,
+"web_searches": null,
+"created_at": "2026-07-16 21:30:46.405263+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2236,
+"output_tokens": 532,
+"web_searches": null,
+"created_at": "2026-07-16 21:32:14.457577+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 150,
+"web_searches": null,
+"created_at": "2026-07-16 23:26:29.617424+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1307,
+"output_tokens": 331,
+"web_searches": null,
+"created_at": "2026-07-20 20:14:29.654517+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 111,
+"web_searches": null,
+"created_at": "2026-07-20 22:26:50.6839+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2149,
+"output_tokens": 95,
+"web_searches": null,
+"created_at": "2026-07-20 22:27:45.195732+00"
+},
+{
+"task": "legacy",
+"input_tokens": 725,
+"output_tokens": 128,
+"web_searches": null,
+"created_at": "2026-07-25 19:57:24.950014+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2236,
+"output_tokens": 310,
+"web_searches": null,
+"created_at": "2026-08-01 20:23:31.300531+00"
+},
+{
+"task": "legacy",
+"input_tokens": 992,
+"output_tokens": 341,
+"web_searches": null,
+"created_at": "2026-08-03 14:51:55.931788+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1361,
+"output_tokens": 573,
+"web_searches": null,
+"created_at": "2026-08-14 21:21:10.482894+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1288,
+"output_tokens": 557,
+"web_searches": null,
+"created_at": "2026-08-14 21:23:04.435209+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1332,
+"output_tokens": 535,
+"web_searches": null,
+"created_at": "2026-08-14 21:34:31.431909+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1871,
+"output_tokens": 440,
+"web_searches": null,
+"created_at": "2026-08-14 21:40:39.62329+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2319,
+"output_tokens": 213,
+"web_searches": null,
+"created_at": "2026-08-14 21:41:25.051568+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2557,
+"output_tokens": 374,
+"web_searches": null,
+"created_at": "2026-08-14 21:42:15.082956+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2939,
+"output_tokens": 140,
+"web_searches": null,
+"created_at": "2026-08-14 21:42:45.469426+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1403,
+"output_tokens": 595,
+"web_searches": null,
+"created_at": "2026-08-14 22:00:43.462438+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2019,
+"output_tokens": 391,
+"web_searches": null,
+"created_at": "2026-08-14 22:01:15.924757+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2414,
+"output_tokens": 165,
+"web_searches": null,
+"created_at": "2026-08-14 22:01:27.753034+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1424,
+"output_tokens": 653,
+"web_searches": null,
+"created_at": "2026-08-14 22:03:28.738476+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2281,
+"output_tokens": 86,
+"web_searches": null,
+"created_at": "2026-08-20 21:16:10.318961+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2279,
+"output_tokens": 577,
+"web_searches": null,
+"created_at": "2026-08-21 21:13:54.804626+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2236,
+"output_tokens": 598,
+"web_searches": null,
+"created_at": "2026-08-21 21:17:24.304188+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1507,
+"output_tokens": 508,
+"web_searches": null,
+"created_at": "2026-08-21 21:20:52.686535+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1135,
+"output_tokens": 509,
+"web_searches": null,
+"created_at": "2026-08-21 21:22:05.231227+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1496,
+"output_tokens": 516,
+"web_searches": null,
+"created_at": "2026-08-21 21:25:17.343746+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1501,
+"output_tokens": 499,
+"web_searches": null,
+"created_at": "2026-08-21 21:35:49.063708+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1500,
+"output_tokens": 582,
+"web_searches": null,
+"created_at": "2026-08-21 21:37:37.386932+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2089,
+"output_tokens": 542,
+"web_searches": null,
+"created_at": "2026-08-21 21:38:02.692313+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1507,
+"output_tokens": 510,
+"web_searches": null,
+"created_at": "2026-08-21 21:49:45.291973+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1516,
+"output_tokens": 522,
+"web_searches": null,
+"created_at": "2026-08-21 21:59:18.015241+00"
+},
+{
+"task": "legacy",
+"input_tokens": 1516,
+"output_tokens": 549,
+"web_searches": null,
+"created_at": "2026-08-21 22:01:22.014815+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2104,
+"output_tokens": 492,
+"web_searches": null,
+"created_at": "2026-08-24 22:00:57.595898+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2178,
+"output_tokens": 568,
+"web_searches": null,
+"created_at": "2026-08-24 22:07:00.006479+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2177,
+"output_tokens": 571,
+"web_searches": null,
+"created_at": "2026-08-24 22:46:55.003145+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2290,
+"output_tokens": 512,
+"web_searches": null,
+"created_at": "2026-08-26 22:59:33.708886+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2373,
+"output_tokens": 581,
+"web_searches": null,
+"created_at": "2026-08-26 23:29:24.85878+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2374,
+"output_tokens": 611,
+"web_searches": null,
+"created_at": "2026-08-26 23:31:01.985257+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2526,
+"output_tokens": 456,
+"web_searches": null,
+"created_at": "2026-08-27 23:42:43.735039+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2611,
+"output_tokens": 586,
+"web_searches": null,
+"created_at": "2026-08-27 23:44:46.759297+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2731,
+"output_tokens": 595,
+"web_searches": null,
+"created_at": "2026-08-27 23:54:58.121023+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2751,
+"output_tokens": 527,
+"web_searches": null,
+"created_at": "2026-08-28 00:01:19.359356+00"
+},
+{
+"task": "legacy",
+"input_tokens": 3298,
+"output_tokens": 372,
+"web_searches": null,
+"created_at": "2026-08-28 00:03:36.113189+00"
+},
+{
+"task": "legacy",
+"input_tokens": 2836,
+"output_tokens": 517,
+"web_searches": null,
+"created_at": "2026-08-28 00:11:33.717888+00"
+},
+{
+"task": "chat",
+"input_tokens": 96,
+"output_tokens": 174,
+"web_searches": null,
+"created_at": "2026-09-10 00:25:11.738755+00"
+},
+{
+"task": "chat",
+"input_tokens": 96,
+"output_tokens": 177,
+"web_searches": null,
+"created_at": "2026-09-10 00:25:33.900733+00"
+},
+{
+"task": "chat",
+"input_tokens": 351,
+"output_tokens": 600,
+"web_searches": 2,
+"created_at": "2026-09-10 00:53:22.716567+00"
+},
+{
+"task": "chat",
+"input_tokens": 334,
+"output_tokens": 751,
+"web_searches": 0,
+"created_at": "2026-09-10 16:52:12.710192+00"
+},
+{
+"task": "chat",
+"input_tokens": 855,
+"output_tokens": 135,
+"web_searches": null,
+"created_at": "2026-09-10 19:31:00.576841+00"
+},
+{
+"task": "chat",
+"input_tokens": 1025,
+"output_tokens": 597,
+"web_searches": null,
+"created_at": "2026-09-10 19:33:59.030551+00"
+},
+{
+"task": "chat",
+"input_tokens": 862,
+"output_tokens": 383,
+"web_searches": null,
+"created_at": "2026-09-10 19:35:17.002405+00"
+},
+{
+"task": "chat",
+"input_tokens": 860,
+"output_tokens": 537,
+"web_searches": null,
+"created_at": "2026-09-10 19:36:56.752323+00"
+},
+{
+"task": "chat",
+"input_tokens": 1416,
+"output_tokens": 429,
+"web_searches": null,
+"created_at": "2026-09-10 19:37:52.759586+00"
+}
+]
