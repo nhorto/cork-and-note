@@ -108,10 +108,10 @@ test('the bundled asset loads with every US AVA', () => {
   expect(meta.license).toBe('US Government work (public domain)');
   expect(meta.count).toBe(280);
   expect(features).toHaveLength(280);
-  const names = features.map((f) => f.name);
-  expect(names).toEqual(expect.arrayContaining(['Tryon Foothills', 'Nashoba Valley', 'Nine Lakes of East Tennessee', 'Columbia Hills']));
-  expect(names).not.toContain('Mendocino Ridge (Outline)');
-  expect(new Set(names).size).toBe(280);
+  const allNames = features.map((f) => f.name);
+  expect(allNames).toEqual(expect.arrayContaining(['Tryon Foothills', 'Nashoba Valley', 'Nine Lakes of East Tennessee', 'Columbia Hills']));
+  expect(allNames).not.toContain('Mendocino Ridge (Outline)');
+  expect(new Set(allNames).size).toBe(280);
   for (const f of features) {
     expect(typeof f.id).toBe('string');
     expect(f.bbox).toHaveLength(4);
