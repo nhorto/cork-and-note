@@ -5,10 +5,23 @@ import * as Location from 'expo-location';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, AppState, FlatList, Linking, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import MapView, { Marker, Polygon } from 'react-native-maps';
+import CellarOptionSheet from '../../components/CellarOptionSheet';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
+import MapLayersSheet from '../../components/MapLayersSheet';
 import PinActionModal from '../../components/PinActionModal';
+import WineRegionSheet from '../../components/WineRegionSheet';
 import WineryNameModal from '../../components/WineryNameModal';
+import { usePro } from '../../hooks/usePro';
+import {
+  regionCenter,
+  regionRadiusKm,
+  regionsAtPoint,
+  regionsInBounds,
+  regionsMeta,
+  toNativePolygons,
+} from '../../lib/avaRegions';
 import { getMapLocation } from '../../lib/mapLocation';
 import { haversineKm } from '../../lib/geo';
 import { wineriesService } from '../../lib/wineries';
@@ -25,6 +38,19 @@ const featureKey = (f) =>
   f.properties.cluster
     ? `cluster-${f.properties.cluster_id}`
     : `${f.properties.kind}-${f.properties.pin.id}`;
+
+// "Wine regions" layer (US AVA boundaries, Pro). Persisted per device so a Pro
+// subscriber who turned it on finds it on next time.
+const WINE_REGIONS_KEY = 'map.layers.wineRegions';
+// Below this zoom the whole country is on screen and 276 outlines are noise
+// (and a lot of native geometry). The map shows a hint instead.
+const WINE_REGIONS_MIN_ZOOM = 6;
+
+// Theme colours are opaque hex; polygon fills need the same hue with an alpha channel.
+const withAlpha = (hex, alpha) => {
+  const n = parseInt(hex.slice(1, 7), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
+};
 
 export default function MapScreen() {
   const { mode } = useTheme();
@@ -424,6 +450,98 @@ export default function MapScreen() {
     }
   };
 
+  // Wine regions layer (Pro). The toggle is visible to everyone; flipping it on
+  // a free account opens the paywall and the switch stays off.
+  const { isPro, presentPaywall } = usePro();
+  const [showLayersSheet, setShowLayersSheet] = useState(false);
+  const [wineRegionsOn, setWineRegionsOn] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState(null);
+  const [showRegionSheet, setShowRegionSheet] = useState(false);
+  // Overlapping AVAs at a tapped point (Napa Valley sits inside North Coast):
+  // a short chooser instead of guessing.
+  const [regionChoices, setRegionChoices] = useState(null);
+  const showWineRegions = Boolean(isPro && wineRegionsOn);
+
+  useEffect(() => {
+    let active = true;
+    AsyncStorage.getItem(WINE_REGIONS_KEY)
+      .then((value) => { if (active && value === '1') setWineRegionsOn(true); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const handleToggleWineRegions = (next) => {
+    if (!isPro) {
+      // Close our own Modal before the paywall route presents, so the two
+      // native modals never fight over presentation.
+      setShowLayersSheet(false);
+      presentPaywall('wine_regions');
+      return;
+    }
+    setWineRegionsOn(next);
+    if (!next) {
+      setSelectedRegion(null);
+      setShowRegionSheet(false);
+    }
+    AsyncStorage.setItem(WINE_REGIONS_KEY, next ? '1' : '0').catch(() => {});
+  };
+
+  // Only the regions whose bbox touches the (padded) viewport become native
+  // polygons, and none at all when zoomed out past the threshold. Keyed on the
+  // committed `region`, so a pan settles into one recompute, not a stream.
+  const visibleRegions = useMemo(
+    () =>
+      showWineRegions && zoom >= WINE_REGIONS_MIN_ZOOM
+        ? regionsInBounds(regionToBoundingBox(region, 0.25))
+        : [],
+    [showWineRegions, region, zoom]
+  );
+  const regionPolygons = useMemo(
+    () => visibleRegions.flatMap((feature) => toNativePolygons(feature).map((p) => ({ ...p, feature }))),
+    [visibleRegions]
+  );
+
+  const selectRegion = (feature) => {
+    setRegionChoices(null);
+    setSelectedRegion(feature);
+    setShowRegionSheet(true);
+  };
+
+  const handleRegionPress = (event, feature) => {
+    const coordinate = event?.nativeEvent?.coordinate;
+    const hits = coordinate
+      ? regionsAtPoint(coordinate.latitude, coordinate.longitude, visibleRegions)
+      : [];
+    const list = hits.length ? hits : [feature];
+    if (list.length > 1) {
+      setRegionChoices(list);
+      return;
+    }
+    selectRegion(list[0]);
+  };
+
+  const handleChooseRegion = (id) => {
+    const feature = regionChoices?.find((f) => f.id === id);
+    setRegionChoices(null);
+    if (!feature) return;
+    // Let the chooser Modal finish dismissing before the region sheet presents.
+    setTimeout(() => selectRegion(feature), 300);
+  };
+
+  const handlePlanDayInRegion = (feature) => {
+    setShowRegionSheet(false);
+    const center = regionCenter(feature);
+    router.push({
+      pathname: '/trips/new',
+      params: {
+        areaLabel: feature.name,
+        areaLat: String(center.latitude),
+        areaLng: String(center.longitude),
+        areaRadiusKm: String(Math.max(1, Math.round(regionRadiusKm(feature)))),
+      },
+    });
+  };
+
   const zoomToUserLocation = async () => {
     const coordinate = userLocation ?? await getCurrentLocation();
     if (coordinate) centerMapOn(coordinate);
@@ -723,6 +841,26 @@ export default function MapScreen() {
         showsUserLocation={Boolean(userLocation)}
         showsMyLocationButton={false}
       >
+        {/* Wine regions (Pro): AVA outlines under the pins. Rendered first and
+            with a low zIndex so markers stay on top and tappable. Keys are the
+            region id plus part index, stable across pans. */}
+        {regionPolygons.map(({ key, coordinates, holes, feature }) => {
+          const selected = selectedRegion?.id === feature.id;
+          return (
+            <Polygon
+              key={key}
+              coordinates={coordinates}
+              holes={holes.length ? holes : undefined}
+              fillColor={withAlpha(colors.primary.base, selected ? 0.22 : 0.12)}
+              strokeColor={colors.primary.base}
+              strokeWidth={selected ? 2.5 : 1.5}
+              zIndex={selected ? 2 : 1}
+              tappable
+              onPress={(event) => handleRegionPress(event, feature)}
+            />
+          );
+        })}
+
         {/* User + discovery pins, clustered (#224): overlapping pins collapse
             into count bubbles until you zoom in; tap a bubble to expand. */}
         {renderedFeatures.map((f) =>
@@ -803,6 +941,23 @@ export default function MapScreen() {
             </TouchableOpacity>
           );
         })}
+        {/* Layers (wine regions). Icon-only so the row still fits a small phone;
+            it lights up while the layer is on. */}
+        <TouchableOpacity
+          style={[styles.filterChip, styles.layersChip, showWineRegions && styles.filterChipActive]}
+          activeOpacity={0.85}
+          onPress={() => setShowLayersSheet(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Map layers"
+          accessibilityHint="Wine regions"
+          accessibilityState={{ selected: showWineRegions }}
+        >
+          <Ionicons
+            name="layers-outline"
+            size={16}
+            color={showWineRegions ? colors.onPrimary : colors.neutral.ink}
+          />
+        </TouchableOpacity>
       </View>
 
       {/* FAB Button */}
@@ -962,6 +1117,11 @@ export default function MapScreen() {
             <Text style={styles.mapStatus}>Couldn’t load your places. Tap to retry.</Text>
           </TouchableOpacity>
         )}
+        {showWineRegions && zoom < WINE_REGIONS_MIN_ZOOM && (
+          <Text style={[styles.mapStatus, styles.zoomHint]} accessibilityRole="text">
+            Zoom in to see wine regions
+          </Text>
+        )}
         {(pinFilter === 'all' || pinFilter === 'nearby') && discoveryStatus !== 'ready' && (
           <TouchableOpacity
             disabled={discoveryStatus !== 'error'}
@@ -1009,6 +1169,39 @@ export default function MapScreen() {
           setPendingAction(null);
         }}
         onSave={handleManualEntry}
+      />
+
+      <MapLayersSheet
+        visible={showLayersSheet}
+        onClose={() => setShowLayersSheet(false)}
+        wineRegions={wineRegionsOn}
+        onToggleWineRegions={handleToggleWineRegions}
+        isPro={Boolean(isPro)}
+        regionCount={regionsMeta().count}
+      />
+
+      <CellarOptionSheet
+        visible={Boolean(regionChoices)}
+        title="Which wine region?"
+        options={(regionChoices ?? []).map((f) => ({ key: f.id, label: f.name }))}
+        selected={selectedRegion?.id}
+        onSelect={handleChooseRegion}
+        onClose={() => setRegionChoices(null)}
+      />
+
+      <WineRegionSheet
+        visible={showRegionSheet && Boolean(selectedRegion)}
+        region={selectedRegion}
+        onClose={() => setShowRegionSheet(false)}
+        onClear={() => {
+          setShowRegionSheet(false);
+          setSelectedRegion(null);
+        }}
+        onPlanDay={handlePlanDayInRegion}
+        onOpenWinery={(w) => {
+          setShowRegionSheet(false);
+          handleDiscoverPinPress(w);
+        }}
       />
 
       {/* Searchable list of visited places (#101) */}
@@ -1413,6 +1606,8 @@ const styles = StyleSheet.create({
   filterChipText: { ...typography.body.small, color: colors.neutral.ink, fontWeight: '600' },
   filterChipTextActive: { color: colors.onPrimary },
   filterDot: { width: 8, height: 8, borderRadius: 4 },
+  layersChip: { marginLeft: 'auto', paddingHorizontal: spacing.sm, width: 34, justifyContent: 'center' },
+  zoomHint: { alignSelf: 'center', overflow: 'hidden', ...shadows.soft },
   discoverMarker: {
     backgroundColor: colors.accent.base,
     borderColor: colors.neutral.bg,
