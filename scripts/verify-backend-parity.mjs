@@ -100,6 +100,7 @@ const sentinels = [
   ['20260911110000', "select 1 from information_schema.tables where table_name='taste_reports'"],
   ['20260911120000', "select 1 from pg_constraint where conname like 'places_usage_mode%' and pg_get_constraintdef(oid) like '%route%'"],
   ['20260911121000', "select 1 from information_schema.tables where table_name='trip_plans'"],
+  ['20260911200000', "select 1 from pg_policies where schemaname='storage' and policyname='visit-photos owner read'"],
 ];
 for (const [version, probe] of sentinels) {
   if (!repoVersions.includes(version)) continue;
