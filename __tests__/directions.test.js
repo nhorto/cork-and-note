@@ -47,3 +47,9 @@ test('openDirections tries the maps app, falls back to the web map, and refuses 
   expect(open).not.toHaveBeenCalled();
   open.mockRestore();
 });
+
+test('a place that has not loaded yet (null or undefined) has no directions instead of throwing', () => {
+  expect(directionsUrls(null, 'ios')).toBeNull();
+  expect(directionsUrls(undefined, 'ios')).toBeNull();
+  expect(hasDirections(null)).toBe(false);
+});

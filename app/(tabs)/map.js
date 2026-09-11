@@ -4,7 +4,23 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, AppState, FlatList, Linking, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  AppState,
+  FlatList,
+  Keyboard,
+  KeyboardAvoidingView,
+  Linking,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
@@ -28,16 +44,20 @@ import { wineriesService } from '../../lib/wineries';
 import { wineryDirectoryService } from '../../lib/wineryDirectory';
 import { wishlistService } from '../../lib/wishlist';
 import { createThemedStyles, useTheme } from '../../styles/ThemeProvider';
-import { darkMapStyle } from '../../styles/mapTheme';
-import { buildClusterIndex, regionToBoundingBox, regionToZoom } from '../../utils/MapUtils';
+import { darkMapStyle, regionStyle, withAlpha } from '../../styles/mapTheme';
+import {
+  CLUSTER_RADIUS,
+  CLUSTER_RADIUS_LABELLED,
+  LABEL_ZOOM_USER,
+  bboxContains,
+  buildClusterIndex,
+  featureKey,
+  placeLabels,
+  regionToBoundingBox,
+  regionToZoom,
+  spreadStackedFeatures,
+} from '../../utils/MapUtils';
 
-
-// One identity per map feature, shared by the render keys, the stable sort,
-// and the two-phase commit below.
-const featureKey = (f) =>
-  f.properties.cluster
-    ? `cluster-${f.properties.cluster_id}`
-    : `${f.properties.kind}-${f.properties.pin.id}`;
 
 // "Wine regions" layer (US AVA boundaries, Pro). Persisted per device so a Pro
 // subscriber who turned it on finds it on next time.
@@ -45,12 +65,13 @@ const WINE_REGIONS_KEY = 'map.layers.wineRegions';
 // Below this zoom the whole country is on screen and 276 outlines are noise
 // (and a lot of native geometry). The map shows a hint instead.
 const WINE_REGIONS_MIN_ZOOM = 6;
-
-// Theme colours are opaque hex; polygon fills need the same hue with an alpha channel.
-const withAlpha = (hex, alpha) => {
-  const n = parseInt(hex.slice(1, 7), 16);
-  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`;
-};
+// Region names sit at the polygon centroid from here in; further out the
+// outlines alone are the story and 60 labels would be clutter.
+const WINE_REGION_LABEL_ZOOM = 9;
+// How long a directory fetch may run before the search pill shows a spinner
+// (#277). Most viewport queries settle faster than this, so a quick pan never
+// flashes any loading state.
+const DISCOVERY_BUSY_DELAY_MS = 400;
 
 export default function MapScreen() {
   const { mode } = useTheme();
@@ -93,9 +114,14 @@ export default function MapScreen() {
   // wineries from OUR directory table shown by default, in their own color,
   // with filter chips to narrow the map. Zero Google cost — the directory is
   // our own table (Overture seed).
-  const [discoverPins, setDiscoverPins] = useState([]);
+  const [directoryRows, setDirectoryRows] = useState([]);
   const [discoveryStatus, setDiscoveryStatus] = useState('loading');
   const [discoveryRetry, setDiscoveryRetry] = useState(0);
+  // The box the current directoryRows cover, and whether the query hit its
+  // cap. A pan or zoom that stays inside a fully-covered box needs no fetch
+  // and no loading state (#277).
+  const coveredBox = useRef(null);
+  const [discoveryBusy, setDiscoveryBusy] = useState(false);
   const [pinFilter, setPinFilter] = useState('all'); // 'all' | 'visited' | 'wishlist' | 'nearby'
   const [openingDiscoverId, setOpeningDiscoverId] = useState(null);
 
@@ -258,64 +284,72 @@ export default function MapScreen() {
   // Load directory wineries for whatever the map is LOOKING AT (#224), not
   // the phone's physical location — panning to Napa from Virginia shows Napa.
   // Debounced so settling after a fling fires one query, and the box is
-  // padded so pins just past the screen edge already exist mid-pan. Pins that
-  // sit on top of a place the user already has (same-ish spot) are dropped so
-  // a visited winery never shows twice in two colors.
+  // padded so pins just past the screen edge already exist mid-pan. When the
+  // new viewport sits inside a box we already hold in full, nothing is
+  // fetched and nothing flickers (#277).
   useEffect(() => {
+    const box = regionToBoundingBox(region, 0.3);
+    const covered = coveredBox.current;
+    if (covered && !covered.truncated && bboxContains(covered, box) && discoveryRetry === covered.retry) {
+      return undefined;
+    }
     let active = true;
     setDiscoveryStatus('loading');
     const t = setTimeout(async () => {
-      const res = await wineryDirectoryService.getInBounds(
-        regionToBoundingBox(region, 0.3)
-      );
+      const res = await wineryDirectoryService.getInBounds(box);
       if (!active) return;
       if (!res.success) {
-        setDiscoverPins([]);
+        coveredBox.current = null;
+        setDirectoryRows([]);
         setDiscoveryStatus('error');
         return;
       }
+      coveredBox.current = { ...box, truncated: Boolean(res.truncated), retry: discoveryRetry };
       setDiscoveryStatus(res.wineries.length ? 'ready' : 'empty');
-      const fresh = res.wineries.filter(
+      setDirectoryRows(res.wineries);
+    }, 350);
+    return () => {
+      active = false;
+      clearTimeout(t);
+    };
+  }, [region, discoveryRetry]);
+
+  // Only a fetch that is still running after the grace period shows the
+  // spinner in the search pill, so the common fast case stays silent.
+  useEffect(() => {
+    if (discoveryStatus !== 'loading') {
+      setDiscoveryBusy(false);
+      return undefined;
+    }
+    const t = setTimeout(() => setDiscoveryBusy(true), DISCOVERY_BUSY_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [discoveryStatus]);
+
+  // Pins that sit on top of a place the user already has (same-ish spot) are
+  // dropped so a visited winery never shows twice in two colors. Derived, so
+  // a newly-saved winery swallows its duplicate without a refetch.
+  const discoverPins = useMemo(
+    () =>
+      directoryRows.filter(
         (w) =>
           !userPins.some(
             (p) =>
               p.latitude != null &&
               haversineKm(p.latitude, p.longitude, w.latitude, w.longitude) < 0.15
           )
-      );
-      setDiscoverPins(fresh);
-    }, 350);
-    return () => {
-      active = false;
-      clearTimeout(t);
-    };
-    // userPins in deps so a newly-saved winery immediately swallows its
-    // duplicate discovery pin.
-  }, [region, userPins, discoveryRetry]);
+      ),
+    [directoryRows, userPins]
+  );
 
   // Clustering (#224): all visible pins go through one supercluster index so
   // a zoomed-out region shows count bubbles instead of a wall of overlapping
   // markers. Name labels only render when the map is close enough for them to
-  // be readable; the threshold matches the initial centered-on-you view
-  // (longitudeDelta 0.1 ≈ zoom 11.8).
+  // be readable: your own places from a town-level view, directory pins only
+  // once a dense tasting-room block has room for them, and never on top of
+  // each other (placeLabels, #276).
   const zoom = regionToZoom(region);
-  const showLabels = zoom >= 11.5;
+  const showLabels = zoom >= LABEL_ZOOM_USER;
 
-  // Marker keys must stay STABLE across the label threshold. Remounting every
-  // marker at once (key churn) piles remove+insert pairs onto the cluster
-  // expansion mutation and crashes AIRMap's insertReactSubview on the new
-  // architecture (the "clustering crash" of old). Instead, when label
-  // visibility flips, briefly turn tracksViewChanges on so iOS re-snapshots
-  // the existing markers with/without their label, then freeze them again.
-  const [labelPulse, setLabelPulse] = useState(false);
-  const prevShowLabels = useRef(showLabels);
-  useEffect(() => {
-    if (prevShowLabels.current === showLabels) return;
-    prevShowLabels.current = showLabels;
-    setLabelPulse(true);
-    const t = setTimeout(() => setLabelPulse(false), 700);
-    return () => clearTimeout(t);
-  }, [showLabels]);
 
   const visibleUserPins = useMemo(
     () =>
@@ -338,18 +372,27 @@ export default function MapScreen() {
     [pinFilter, discoverPins]
   );
 
+  // A wider radius while labels are on: two pins a marker-width apart are
+  // fine as dots, but their 140 pt labels would sit on top of each other.
+  const clusterRadius = showLabels ? CLUSTER_RADIUS_LABELLED : CLUSTER_RADIUS;
   const clusterIndex = useMemo(
     () =>
-      buildClusterIndex([
-        ...visibleUserPins.map((pin) => ({ kind: 'user', pin })),
-        ...visibleDiscoverPins.map((pin) => ({ kind: 'discover', pin })),
-      ]),
-    [visibleUserPins, visibleDiscoverPins]
+      buildClusterIndex(
+        [
+          ...visibleUserPins.map((pin) => ({ kind: 'user', pin })),
+          ...visibleDiscoverPins.map((pin) => ({ kind: 'discover', pin })),
+        ],
+        { radius: clusterRadius }
+      ),
+    [visibleUserPins, visibleDiscoverPins, clusterRadius]
   );
 
   const mapFeatures = useMemo(() => {
     const { west, south, east, north } = regionToBoundingBox(region, 0.2);
-    const features = clusterIndex.getClusters([west, south, east, north], Math.round(zoom));
+    const features = spreadStackedFeatures(
+      clusterIndex.getClusters([west, south, east, north], Math.round(zoom)),
+      zoom
+    );
     // Deterministic order: supercluster returns features in arbitrary order,
     // and letting React reorder dozens of Marker children stresses the
     // new-arch interop layer's child-index bookkeeping (the AIRMap
@@ -357,6 +400,26 @@ export default function MapScreen() {
     // inserts/removes.
     return features.sort((a, b) => featureKey(a).localeCompare(featureKey(b)));
   }, [clusterIndex, region, zoom]);
+
+  const labelledKeys = useMemo(() => placeLabels(mapFeatures, zoom), [mapFeatures, zoom]);
+
+  // Marker keys must stay STABLE when labels come and go. Remounting every
+  // marker at once (key churn) piles remove+insert pairs onto the cluster
+  // expansion mutation and crashes AIRMap's insertReactSubview on the new
+  // architecture (the "clustering crash" of old). Instead, whenever the set
+  // of labelled pins changes, briefly turn tracksViewChanges on so iOS
+  // re-snapshots the existing markers with/without their label, then freeze
+  // them again.
+  const [labelPulse, setLabelPulse] = useState(false);
+  const labelSignature = [...labelledKeys].join('|');
+  const prevLabelSignature = useRef(labelSignature);
+  useEffect(() => {
+    if (prevLabelSignature.current === labelSignature) return undefined;
+    prevLabelSignature.current = labelSignature;
+    setLabelPulse(true);
+    const t = setTimeout(() => setLabelPulse(false), 700);
+    return () => clearTimeout(t);
+  }, [labelSignature]);
 
   // Two-phase marker commit: a cluster expansion swaps dozens of markers at
   // once, and a single mount transaction that mixes removes with inserts
@@ -714,7 +777,7 @@ export default function MapScreen() {
     return colors.primary.base;
   };
 
-  const renderPinMarker = (pin) => {
+  const renderPinMarker = (pin, labelled) => {
     if (Platform.OS === 'android') {
       return (
         <Marker
@@ -742,7 +805,7 @@ export default function MapScreen() {
         onPress={() => handlePinPress(pin)}
       >
         <View style={styles.markerContainer}>
-          {showLabels && (
+          {labelled && (
             <View style={styles.markerLabelContainer}>
               <Text style={styles.markerLabel} numberOfLines={1}>
                 {pin.name}
@@ -763,14 +826,14 @@ export default function MapScreen() {
 
   // Discovery pins (all plans): nearby directory wineries in the accent color,
   // visually apart from visited (sage) and wishlist (slate).
-  const renderDiscoverMarker = (w) =>
+  const renderDiscoverMarker = (w, labelled) =>
     Platform.OS === 'android' ? (
       <Marker
         key={`dir-${w.id}`}
         coordinate={{ latitude: w.latitude, longitude: w.longitude }}
         pinColor={colors.accent.base}
         title={w.name}
-        description="Nearby winery — tap to view"
+        description="Nearby winery. Tap to view"
         onPress={() => handleDiscoverPinPress(w)}
       />
     ) : (
@@ -781,7 +844,7 @@ export default function MapScreen() {
         onPress={() => handleDiscoverPinPress(w)}
       >
         <View style={styles.markerContainer}>
-          {showLabels && (
+          {labelled && (
             <View style={styles.markerLabelContainer}>
               <Text style={styles.markerLabel} numberOfLines={1}>
                 {w.name}
@@ -851,9 +914,7 @@ export default function MapScreen() {
               key={key}
               coordinates={coordinates}
               holes={holes.length ? holes : undefined}
-              fillColor={withAlpha(colors.primary.base, selected ? 0.22 : 0.12)}
-              strokeColor={colors.primary.base}
-              strokeWidth={selected ? 2.5 : 1.5}
+              {...regionStyle(colors, mode, { selected })}
               zIndex={selected ? 2 : 1}
               tappable
               onPress={(event) => handleRegionPress(event, feature)}
@@ -861,14 +922,35 @@ export default function MapScreen() {
           );
         })}
 
+        {/* Region names at the centroid (#275): answers "which region is
+            this?" without a tap. Static views, so no tracking on iOS; Android
+            needs tracksViewChanges for custom marker views to paint at all. */}
+        {zoom >= WINE_REGION_LABEL_ZOOM &&
+          visibleRegions.map((feature) => (
+            <Marker
+              key={`region-label-${feature.id}`}
+              coordinate={regionCenter(feature)}
+              anchor={{ x: 0.5, y: 0.5 }}
+              tracksViewChanges={Platform.OS === 'android'}
+              zIndex={3}
+              onPress={() => selectRegion(feature)}
+            >
+              <View style={styles.regionLabel} pointerEvents="none">
+                <Text style={styles.regionLabelText} numberOfLines={2}>
+                  {feature.name}
+                </Text>
+              </View>
+            </Marker>
+          ))}
+
         {/* User + discovery pins, clustered (#224): overlapping pins collapse
             into count bubbles until you zoom in; tap a bubble to expand. */}
         {renderedFeatures.map((f) =>
           f.properties.cluster
             ? renderClusterMarker(f)
             : f.properties.kind === 'discover'
-              ? renderDiscoverMarker(f.properties.pin)
-              : renderPinMarker(f.properties.pin)
+              ? renderDiscoverMarker(f.properties.pin, labelledKeys.has(featureKey(f)))
+              : renderPinMarker(f.properties.pin, labelledKeys.has(featureKey(f)))
         )}
 
         {tempPin && (
@@ -896,7 +978,17 @@ export default function MapScreen() {
           <Text style={styles.searchPillText} numberOfLines={1}>
             Search wineries &amp; your places
           </Text>
-          <Ionicons name="list" size={18} color={colors.primary.ink} />
+          {/* Quiet loading state (#277): the list icon becomes a spinner
+              while a directory fetch outlasts the grace period. */}
+          {discoveryBusy ? (
+            <ActivityIndicator
+              size="small"
+              color={colors.primary.ink}
+              accessibilityLabel="Loading wineries"
+            />
+          ) : (
+            <Ionicons name="list" size={18} color={colors.primary.ink} />
+          )}
         </TouchableOpacity>
       )}
 
@@ -1122,16 +1214,17 @@ export default function MapScreen() {
             Zoom in to see wine regions
           </Text>
         )}
-        {(pinFilter === 'all' || pinFilter === 'nearby') && discoveryStatus !== 'ready' && (
+        {(pinFilter === 'all' || pinFilter === 'nearby') &&
+          (discoveryStatus === 'error' || discoveryStatus === 'empty') && (
           <TouchableOpacity
             disabled={discoveryStatus !== 'error'}
             onPress={() => setDiscoveryRetry((value) => value + 1)}
             accessibilityRole={discoveryStatus === 'error' ? 'button' : 'text'}
           >
             <Text style={styles.mapStatus}>
-              {discoveryStatus === 'error' ? 'Couldn’t load wineries. Tap to retry.'
-                : discoveryStatus === 'loading' ? 'Loading wineries…'
-                  : 'No directory wineries in this area. Move the map or search by name.'}
+              {discoveryStatus === 'error'
+                ? 'Couldn’t load wineries. Tap to retry.'
+                : 'No directory wineries in this area. Move the map or search by name.'}
             </Text>
           </TouchableOpacity>
         )}
@@ -1204,23 +1297,34 @@ export default function MapScreen() {
         }}
       />
 
-      {/* Searchable list of visited places (#101) */}
+      {/* Searchable list of visited places (#101). The sheet keeps a fixed
+          height and shrinks above the keyboard (#269): sized-to-content, a
+          short list or the empty state sat entirely behind the keyboard, so
+          typing looked like it made "your places" disappear. Dragging the
+          list, tapping empty sheet space, or the return key puts the keyboard
+          away; the scrim still closes the whole sheet. */}
       <Modal
         visible={showPlacesList}
         transparent
         animationType="slide"
         onRequestClose={() => setShowPlacesList(false)}
       >
-        <View style={styles.listOverlay}>
+        <KeyboardAvoidingView
+          style={styles.listOverlay}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
           <TouchableOpacity
             style={styles.listBackdrop}
             activeOpacity={1}
             onPress={() => setShowPlacesList(false)}
           />
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View style={styles.listSheet}>
             <View style={styles.handle} />
             <View style={styles.listHeader}>
-              <Text style={styles.listTitle}>Your places</Text>
+              <Text style={styles.listTitle}>
+                {listTab === 'find' ? 'Find a winery' : 'Your places'}
+              </Text>
               <TouchableOpacity
                 onPress={() => setShowPlacesList(false)}
                 accessibilityRole="button"
@@ -1280,6 +1384,7 @@ export default function MapScreen() {
                 onChangeText={setPlaceSearch}
                 autoCorrect={false}
                 returnKeyType="search"
+                onSubmitEditing={Keyboard.dismiss}
                 selectionColor={colors.primary.ink}
               />
               {placeSearch.length > 0 && (
@@ -1298,7 +1403,9 @@ export default function MapScreen() {
               data={listTab === 'find' ? directoryResults : filteredPlaces}
               keyExtractor={(item) => (listTab === 'find' ? `dir-${item.id}` : String(item.id))}
               keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
               style={styles.listScroll}
+              contentContainerStyle={styles.listContent}
               ItemSeparatorComponent={() => <View style={styles.listSeparator} />}
               renderItem={({ item }) =>
                 listTab === 'find' ? (
@@ -1362,18 +1469,19 @@ export default function MapScreen() {
                         ? 'Couldn’t search wineries. Edit your search to try again.'
                         : placeSearch.trim().length >= 2
                         ? 'No wineries match that name'
-                        : 'Type a winery name — or browse the apricot pins on the map'
+                        : 'Type a winery name, or browse the gold pins on the map'
                       : placeSearch.trim()
                       ? 'No matches for your search'
                       : listTab === 'wishlist'
-                      ? 'No saved wineries yet — add some from the map or the ＋ menu'
+                      ? 'No saved wineries yet. Add some from the map or the ＋ menu'
                       : 'No visited places yet'}
                   </Text>
                 </View>
               }
             />
           </View>
-        </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );
@@ -1389,7 +1497,7 @@ const MAP_CONTROL_BOTTOM = 32;
 
 
 const useScreenTheme = createThemedStyles((theme) => {
-const { colors, typography, spacing, shadows, borderRadius } = theme;
+const { colors, typography, spacing, shadows, borderRadius, mode } = theme;
 
 const SERIF = typography.fonts.serif;
 
@@ -1419,6 +1527,23 @@ const styles = StyleSheet.create({
     color: colors.neutral.ink,
     textAlign: 'center',
     fontFamily: SERIF,
+  },
+  // Wine-region centroid labels (#275). Translucent so the basemap and the
+  // outline read through; the hue matches the polygon stroke for its mode.
+  regionLabel: {
+    maxWidth: 150,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    backgroundColor: withAlpha(colors.neutral.bg, mode === 'dark' ? 0.72 : 0.82),
+  },
+  regionLabelText: {
+    fontFamily: SERIF,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.2,
+    textAlign: 'center',
+    color: mode === 'dark' ? colors.accent.base : colors.primary.base,
   },
   wineryMarker: {
     backgroundColor: colors.primary.base,
@@ -1648,14 +1773,17 @@ const styles = StyleSheet.create({
   listBackdrop: {
     ...StyleSheet.absoluteFillObject,
   },
+  // flex + maxHeight: the sheet always takes 75% of the window, or whatever
+  // is left above the keyboard, whichever is less (#269).
   listSheet: {
+    flex: 1,
+    maxHeight: '75%',
     backgroundColor: colors.neutral.bg,
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.sm,
     paddingBottom: spacing.xl,
-    maxHeight: '75%',
   },
   handle: {
     width: 40,
@@ -1723,6 +1851,10 @@ const styles = StyleSheet.create({
   },
   listScroll: {
     marginTop: spacing.xs,
+  },
+  // Lets the empty state and short lists catch the tap-to-dismiss.
+  listContent: {
+    flexGrow: 1,
   },
   listSeparator: {
     height: 1,
