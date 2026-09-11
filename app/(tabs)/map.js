@@ -62,7 +62,7 @@ import {
 // "Wine regions" layer (US AVA boundaries, Pro). Persisted per device so a Pro
 // subscriber who turned it on finds it on next time.
 const WINE_REGIONS_KEY = 'map.layers.wineRegions';
-// Below this zoom the whole country is on screen and 276 outlines are noise
+// Below this zoom the whole country is on screen and 280 outlines are noise
 // (and a lot of native geometry). The map shows a hint instead.
 const WINE_REGIONS_MIN_ZOOM = 6;
 // Region names sit at the polygon centroid from here in; further out the
