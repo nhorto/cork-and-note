@@ -47,39 +47,53 @@ export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhot
     }
   };
 
+  // Both pickers can reject natively (camera in use, a picker dismissed by
+  // the OS, a simulator with no camera). Every other picker call site in the
+  // app catches that; an uncaught rejection here would surface as a dev red
+  // screen and, in release, as a silent no-op the user cannot explain.
   const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Camera permission is needed to take photos.');
-      return;
-    }
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Camera permission is needed to take photos.');
+        return;
+      }
 
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.7,
-    });
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.7,
+      });
 
-    if (!result.canceled && result.assets?.[0]) {
-      setPhotos(prev => [...prev, result.assets[0].uri]);
+      if (!result.canceled && result.assets?.[0]) {
+        setPhotos(prev => [...prev, result.assets[0].uri]);
+      }
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert('Camera unavailable', 'Could not open the camera. Please try again.');
     }
   };
 
   const pickPhoto = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Required', 'Photo library permission is needed.');
-      return;
-    }
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Photo library permission is needed.');
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.7,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.7,
+      });
 
-    if (!result.canceled && result.assets?.[0]) {
-      setPhotos(prev => [...prev, result.assets[0].uri]);
+      if (!result.canceled && result.assets?.[0]) {
+        setPhotos(prev => [...prev, result.assets[0].uri]);
+      }
+    } catch (error) {
+      console.error('Photo picker error:', error);
+      Alert.alert('Photos unavailable', 'Could not open your photo library. Please try again.');
     }
   };
 
