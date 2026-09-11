@@ -62,6 +62,22 @@ cd supabase/functions && deno test   # edge function tests (Track 3)
 node scripts/verify-backend-parity.mjs   # Track 6, read-only, needs a Supabase access token
 ```
 
+## Bugs found by this campaign
+
+Each has a test that fails on the previous code and is fixed in the same PR.
+
+| Where | What | Found by |
+|---|---|---|
+| `lib/cache.js` | A read still in flight during sign-out wrote its result back after the next sign-in, so the new account got a cache hit on the previous account's rows. `clearAll()` now bumps every generation counter. | `cache.test.js` |
+| `app/(tabs)/sommelier.js` | The server's 402 for a spent free meter was rendered as an assistant bubble ("Sorry, I encountered an error...") with no way to upgrade. It now opens the paywall like every other AI surface. | `sommelierSend.test.js` |
+| `app/winery/[id].js` | A hand-added winery without a pin still offered Directions and opened Apple Maps at `ll=null,null`. URL logic moved to `lib/directions.js`; the button hides without coordinates. | `directions.test.js` |
+| `components/ChatInput.js` | The only picker call site with no guard; a native picker rejection became an unhandled promise rejection from an Alert button. | `chatInput.test.js` |
+| `app/(tabs)/wines.js` | A handled backend failure (`{ success: false }`) rendered "No wines found" or the previous list instead of the retry state. | `journalScreen.test.js` |
+| `app/(tabs)/wishlist.js` | `item.wineries.name` with no null guard crashed the tab when a row's winery was not readable. | `wishlistScreen.test.js` |
+
+Pinned, not changed (documented reliance on row-level security): the chat usage counters in `ProProvider` and the per-conversation chat reads carry no `user_id` filter. `deletePhotos` removes by the last path segment, which is only correct for flat visit and wine photo names.
+
 ## Status log
 
-- 2026-09-11: baseline measured; flakiness root-caused and fixed; foundation, structural and cellar-service tests added (44 suites, 672 tests, green). Tracks 3, 4 and 6 started on their branches; Track 4 has the auth suites and the shared password rule committed; Track 3 has the handler refactor committed.
+- 2026-09-11: baseline measured; flakiness root-caused and fixed; foundation, structural and cellar-service tests added. Tracks 3, 4 and 6 started on their branches; Track 4 has the auth suites and the shared password rule committed; Track 3 has the handler refactor committed.
+- 2026-09-11, later: data-layer suites for visits, chat, cache and the real Pro provider; screen suites for the sommelier send path, chat input, journal and wishlist; six bugs found and fixed (table above). PR #266 at 53 suites, 746 tests, green.
