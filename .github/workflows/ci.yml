@@ -56,3 +56,14 @@ jobs:
       - name: Type check
         working-directory: supabase/functions
         run: deno check chat/index.ts delete-account/index.ts revenuecat-webhook/index.ts places/index.ts routes/index.ts _shared/*.ts
+
+      # Every handler runs end to end against a fake database, a fake
+      # upstream and a fake clock (_shared/testing.ts). --allow-run and
+      # --allow-read are for the CORS suite, which re-imports the module in a
+      # subprocess per allow-list configuration. The repo root's package.json
+      # would otherwise switch Deno into bring-your-own-node_modules mode, and
+      # this job never installs them, so npm-typed references (supabase-js
+      # pulls @types/node) would fail to resolve.
+      - name: Test
+        working-directory: supabase/functions
+        run: deno test --node-modules-dir=none --allow-env --allow-run --allow-read
