@@ -60,6 +60,10 @@
     "production": {
       "ios": {
         "ascAppId": "6780661381"
+      },
+      "android": {
+        "serviceAccountKeyPath": "/Users/nicholashorton/.private_keys/play-publisher.json",
+        "track": "internal"
       }
     }
   }

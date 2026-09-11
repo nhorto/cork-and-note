@@ -30,6 +30,7 @@ import {
   FREE_CELLAR_BOTTLE_LIMIT,
   FREE_TIER_LIMITS,
   PRIVACY_URL,
+  STORE_ACCOUNT_NAME,
   TERMS_URL,
   packagePeriod,
   packagePriceLine,
@@ -131,7 +132,7 @@ export default function PaywallScreen() {
     }
     Alert.alert(
       'Nothing to restore',
-      result.error || 'We could not find a previous purchase for this Apple Account.'
+      result.error || `We could not find a previous purchase for this ${STORE_ACCOUNT_NAME}.`
     );
   }, [busy, restore, router]);
 
@@ -263,12 +264,15 @@ export default function PaywallScreen() {
         {trialFor(selected) ? <Text style={styles.legalese}>
           {trialFor(selected)}, then {packagePriceLine(selected)}. Cancel before the trial ends to avoid being charged.
         </Text> : null}
-        {/* 3.1.2: auto-renew disclosure, in plain language, before purchase. */}
+        {/* 3.1.2: auto-renew disclosure, in plain language, before purchase.
+            STORE_ACCOUNT_NAME names the store this build actually bills through
+            (Apple Account on iOS, Google Play account on Android). */}
         <Text style={styles.legalese}>
-          Payment is charged to your Apple Account at confirmation of purchase. Your subscription
-          renews automatically for the same price and period unless you cancel at least 24 hours
-          before the end of the current period. Manage or cancel it any time in your Apple Account
-          settings. Any unused part of a free trial is forfeited when you subscribe.
+          Payment is charged to your {STORE_ACCOUNT_NAME} at confirmation of purchase. Your
+          subscription renews automatically for the same price and period unless you cancel at
+          least 24 hours before the end of the current period. Manage or cancel it any time in
+          your {STORE_ACCOUNT_NAME} settings. Any unused part of a free trial is forfeited when
+          you subscribe.
         </Text>
 
         <View style={styles.footerLinks}>

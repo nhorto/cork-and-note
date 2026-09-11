@@ -7,6 +7,7 @@ import {
   Alert,
   AppState,
   Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -19,6 +20,7 @@ import AppearanceSettings from '../../components/AppearanceSettings';
 import AiSharingSettings from '../../components/AiSharingSettings';
 import { usePro } from '../../hooks/usePro';
 import { accountService } from '../../lib/account';
+import { MANAGE_SUBSCRIPTIONS_URL, STORE_ACCOUNT_NAME } from '../../lib/pro';
 import { shareTastingsCsv } from '../../lib/exportTastings';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
@@ -52,7 +54,7 @@ export default function AccountSettingsScreen() {
     }
     Alert.alert(
       'Nothing to restore',
-      result.error || 'We could not find a previous purchase for this Apple Account.'
+      result.error || `We could not find a previous purchase for this ${STORE_ACCOUNT_NAME}.`
     );
   };
 
@@ -228,14 +230,14 @@ export default function AccountSettingsScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton} accessibilityRole="link" onPress={() =>
-            Linking.openURL('https://apps.apple.com/account/subscriptions').catch(() =>
-              Alert.alert('Could not open subscriptions', 'Manage your subscription in your Apple Account settings.'))
+            Linking.openURL(MANAGE_SUBSCRIPTIONS_URL).catch(() =>
+              Alert.alert('Could not open subscriptions', `Manage your subscription in your ${STORE_ACCOUNT_NAME} settings.`))
           }>
             <Ionicons name="card-outline" size={20} color={colors.primary.ink} />
             <Text style={styles.actionButtonText}>Manage subscription</Text>
           </TouchableOpacity>
           <Text style={styles.infoNote}>
-            Subscriptions are billed to your Apple Account and can be managed or cancelled there.
+            Subscriptions are billed to your {STORE_ACCOUNT_NAME} and can be managed or cancelled there.
           </Text>
         </View>
 
@@ -284,10 +286,10 @@ export default function AccountSettingsScreen() {
             onPress={() => {
               Alert.alert(
                 'Delete Account',
-                'This permanently deletes your account, tastings, photos, cellar and chat history. This cannot be undone. Deleting your account does not cancel an Apple subscription: billing continues until you cancel it in your Apple Account settings. You can manage your subscription here before deleting, or delete your account now.',
+                `This permanently deletes your account, tastings, photos, cellar and chat history. This cannot be undone. Deleting your account does not cancel ${Platform.OS === 'android' ? 'a Google Play' : 'an Apple'} subscription: billing continues until you cancel it in your ${STORE_ACCOUNT_NAME} settings. You can manage your subscription here before deleting, or delete your account now.`,
                 [
                   { text: 'Cancel', style: 'cancel' },
-                  { text: 'Manage subscription', onPress: () => Linking.openURL('https://apps.apple.com/account/subscriptions').catch(() => Alert.alert('Could not open subscriptions', 'Open your Apple Account subscription settings.')) },
+                  { text: 'Manage subscription', onPress: () => Linking.openURL(MANAGE_SUBSCRIPTIONS_URL).catch(() => Alert.alert('Could not open subscriptions', `Open your ${STORE_ACCOUNT_NAME} subscription settings.`)) },
                   {
                     text: 'Delete',
                     style: 'destructive',

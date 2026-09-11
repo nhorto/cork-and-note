@@ -1,7 +1,10 @@
 // app/profile/privacy-policy.js
+import { Platform } from 'react-native';
 import LegalDocScreen from '../../components/LegalDocScreen';
-import { PRIVACY_POLICY } from '../../lib/legalContent';
+import { legalDocsFor } from '../../lib/legalContent';
 
 export default function PrivacyPolicyScreen() {
-  return <LegalDocScreen doc={PRIVACY_POLICY} />;
+  // Platform-specific copy: billing sentences name the store this device
+  // actually uses (Apple Account on iOS, Google Play on Android).
+  return <LegalDocScreen doc={legalDocsFor(Platform.OS).privacyPolicy} />;
 }

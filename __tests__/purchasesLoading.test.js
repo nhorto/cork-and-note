@@ -7,6 +7,12 @@ jest.mock('react-native-purchases', () => ({ __esModule: true, default: {
   getOfferings: jest.fn(),
   checkTrialOrIntroductoryPriceEligibility: jest.fn(),
 } }));
+// Platform.OS is a getter on the real module, so tests that need to run "on
+// Android" swap in a plain mutable object instead.
+jest.mock('react-native/Libraries/Utilities/Platform', () => ({
+  __esModule: true,
+  default: { OS: 'ios', select: (specifics) => specifics.ios ?? specifics.default },
+}));
 
 it('loads plans even before the provider has configured purchases', async () => {
   const current = { availablePackages: [{ product: { identifier: 'pro_annual' } }] };
@@ -33,4 +39,46 @@ it('never promises an introductory offer for ineligible or unknown customers', a
   await expect(fetchTrialEligibility(packages)).resolves.toEqual({ eligible: true, ineligible: false, unknown: false });
   Purchases.checkTrialOrIntroductoryPriceEligibility.mockRejectedValue(new Error('Offline'));
   await expect(fetchTrialEligibility(packages)).resolves.toEqual({});
+});
+
+// ── Per-platform SDK keys ──────────────────────────────────────────────────
+// Each store has its own public key (appl_… / goog_…), and lib/purchases keeps
+// module state (configured, cached SDK), so each scenario loads a fresh copy of
+// the module with its own platform and app-config extra.
+function loadPurchases({ os, extra }) {
+  jest.resetModules();
+  jest.doMock('expo-constants', () => ({ __esModule: true, default: { expoConfig: { extra } } }));
+  require('react-native').Platform.OS = os;
+  const PurchasesMock = require('react-native-purchases').default;
+  const purchases = require('../lib/purchases');
+  return { purchases, PurchasesMock };
+}
+
+const BOTH_KEYS = { revenueCatIosKey: 'appl_test', revenueCatAndroidKey: 'goog_test' };
+
+it('configures with the Android store key on Android', async () => {
+  const { purchases, PurchasesMock } = loadPurchases({ os: 'android', extra: BOTH_KEYS });
+  expect(purchases.purchasesAvailable()).toBe(true);
+  await expect(purchases.configurePurchases()).resolves.toBe(true);
+  expect(PurchasesMock.configure).toHaveBeenCalledWith({ apiKey: 'goog_test' });
+});
+
+it('configures with the iOS store key on iOS', async () => {
+  const { purchases, PurchasesMock } = loadPurchases({ os: 'ios', extra: BOTH_KEYS });
+  expect(purchases.purchasesAvailable()).toBe(true);
+  await expect(purchases.configurePurchases()).resolves.toBe(true);
+  expect(PurchasesMock.configure).toHaveBeenCalledWith({ apiKey: 'appl_test' });
+});
+
+it('runs without Pro rather than crashing when the Android key is missing', async () => {
+  // Only the iOS key is set: Android must NOT borrow it — it must degrade.
+  const { purchases, PurchasesMock } = loadPurchases({
+    os: 'android',
+    extra: { revenueCatIosKey: 'appl_test' },
+  });
+  expect(purchases.purchasesAvailable()).toBe(false);
+  await expect(purchases.configurePurchases()).resolves.toBe(false);
+  expect(PurchasesMock.configure).not.toHaveBeenCalled();
+  await expect(purchases.fetchOffering()).rejects.toMatchObject({ code: 'PLANS_NOT_CONFIGURED' });
+  await expect(purchases.fetchProStatus()).resolves.toEqual({ isPro: false, expiresAt: null, willRenew: false });
 });
