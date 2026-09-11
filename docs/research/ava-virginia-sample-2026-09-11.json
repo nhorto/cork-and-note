@@ -1,0 +1,106 @@
+{
+  "inspected_on": "2026-09-11",
+  "source_url": "https://raw.githubusercontent.com/UCDavisLibrary/ava/5208ac65eeb9c3250945f1fa182b4f2ebb7756a9/avas_by_state/VA_avas.geojson",
+  "source_commit": "5208ac65eeb9c3250945f1fa182b4f2ebb7756a9",
+  "source_commit_date": "2025-12-10",
+  "license_url": "https://github.com/UCDavisLibrary/ava/blob/5208ac65eeb9c3250945f1fa182b4f2ebb7756a9/LICENSE",
+  "sha256": "72bf0b08bf45608666b5adbda3a2e0145af588a13f0f3110c2c81ba42719d403",
+  "raw_bytes": 1065612,
+  "gzip_bytes": 381113,
+  "feature_count": 9,
+  "coordinate_positions": 23561,
+  "scope": "Pinned Virginia sample only. Names compared with TTB single-state Virginia and cross-state entries. No geometric or legal certification.",
+  "reproduce": "Download source_url as bytes; use json.loads, len(raw), hashlib.sha256(raw), len(gzip.compress(raw, mtime=0)); count coordinate positions across each MultiPolygon ring.",
+  "features": [
+    {
+      "ava_id": "shenandoah_valley",
+      "name": "Shenandoah Valley",
+      "state": "VA|WV",
+      "valid_start": null,
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 1184,
+      "interior_rings": 0
+    },
+    {
+      "ava_id": "appalachian_high_country",
+      "name": "Appalachian High Country",
+      "state": "NC|TN|VA",
+      "valid_start": null,
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 4946,
+      "interior_rings": 0
+    },
+    {
+      "ava_id": "monticello",
+      "name": "Monticello",
+      "state": "VA",
+      "valid_start": "2019-01-14",
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 1883,
+      "interior_rings": 0
+    },
+    {
+      "ava_id": "northern_neck_george_washington_birthplace",
+      "name": "Northern Neck George Washington Birthplace",
+      "state": "VA",
+      "valid_start": null,
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 2502,
+      "interior_rings": 0
+    },
+    {
+      "ava_id": "virginia_peninsula",
+      "name": "Virginia Peninsula",
+      "state": "VA",
+      "valid_start": null,
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 3155,
+      "interior_rings": 0
+    },
+    {
+      "ava_id": "virginia_s_eastern_shore",
+      "name": "Virginia\u2019s Eastern Shore",
+      "state": "VA",
+      "valid_start": null,
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 2199,
+      "interior_rings": 0
+    },
+    {
+      "ava_id": "middleburg_virginia",
+      "name": "Middleburg Virginia",
+      "state": "VA",
+      "valid_start": null,
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 5572,
+      "interior_rings": 0
+    },
+    {
+      "ava_id": "north_fork_of_roanoke",
+      "name": "North Fork of Roanoke",
+      "state": "VA",
+      "valid_start": null,
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 1391,
+      "interior_rings": 0
+    },
+    {
+      "ava_id": "rocky_knob",
+      "name": "Rocky Knob",
+      "state": "VA",
+      "valid_start": null,
+      "valid_end": null,
+      "geometry_type": "MultiPolygon",
+      "coordinate_positions": 729,
+      "interior_rings": 0
+    }
+  ]
+}
