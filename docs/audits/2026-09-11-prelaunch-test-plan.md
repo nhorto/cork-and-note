@@ -79,14 +79,14 @@ Each has a test that fails on the previous code and is fixed in the same PR.
 | `lib/ai.js` | The tasting-menu parser's array fallback was unreachable whenever the array held objects (the greedy object match ran first and failed to parse), so a reply that dropped the fence was reported as unreadable. The fenced-JSON reader matched tags by prefix, so asking for `wine_list` on a `wine_list_picks` block read the picks as a list. | `aiParsers.test.js` |
 | `lib/cellarScan.js` | The convenience wrappers destructured their argument, so a null image threw instead of returning the service's soft failure. Both callers guard today; the wrappers now match the service's contract. | `cellarScan.test.js` |
 | `app/_layout.js` | No error boundary anywhere: a render throw was a blank white screen. `components/ErrorBoundary.js` now wraps the navigator inside the providers with a retry that remounts. | `errorBoundary.test.js` |
-| Storage policies on `visit-photos` and `wine-photos` | The read policies had no owner or role condition, so any caller could list every object name. The anon key ships in the app and the buckets are public, so a signed-out client could fetch every user's photos. Migration `20260911200000_photo_buckets_owner_list.sql` scopes reads to the owner; public URL display is unaffected. **Committed, not yet applied live.** | `scripts/rls-probe.mjs` |
+| Storage policies on `visit-photos` and `wine-photos` | The read policies had no owner or role condition, so any caller could list every object name. The anon key ships in the app and the buckets are public, so a signed-out client could fetch every user's photos. Migration `20260911200000_photo_buckets_owner_list.sql` scopes reads to the owner; public URL display is unaffected. Applied live 2026-09-11 and re-verified. | `scripts/rls-probe.mjs` |
 
 Pinned, not changed (documented reliance on row-level security): the chat usage counters in `ProProvider` and the per-conversation chat reads carry no `user_id` filter. `deletePhotos` removes by the last path segment, which is only correct for flat visit and wine photo names.
 
-## Live actions owed (need a deliberate deploy step)
+## Live actions (done 2026-09-11, late)
 
-1. `supabase db push` to apply `20260911200000_photo_buckets_owner_list.sql`, then `node scripts/rls-probe.mjs` (expect zero problems).
-2. Redeploy all five edge functions from main (the `createHandler` refactor plus the shared-module drift the parity check flags on `places` and `revenuecat-webhook`), then `node scripts/verify-backend-parity.mjs` (expect "Live backend matches the repo").
+1. `20260911200000_photo_buckets_owner_list.sql` applied through the Management API and recorded in the migration history. An existing public photo still loads by URL (HTTP 200 with no auth). `node scripts/rls-probe.mjs` now reports no leaks on every table and bucket, signed in or out.
+2. All five edge functions redeployed from main (chat v17, delete-account v5, places v3, revenuecat-webhook v6, routes v2). `node scripts/verify-backend-parity.mjs` reports "Live backend matches the repo." A throwaway user then smoked every function live: chat answered a real question, every free-tier and Pro gate returned its 402, malformed bodies returned 400, the webhook refused a wrong secret, and delete-account removed the user and refused the dead token afterwards.
 
 ## Status log
 
