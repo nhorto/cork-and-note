@@ -167,11 +167,11 @@ const JOURNAL_CHAPTER = {
   alt2: 'The same form filled in: a 4.5-star verdict, a plain-words note, and detailed sweetness and tannin sliders.',
   eyebrow: 'The journal',
   heading: 'Would you have it again?',
-  body: 'A bottle at home, dinner out, or a flight at the tasting bar — capture each wine while the glass is still in your hand: a rating, flavour notes, a photo, and how it made you feel. Tag the place, or don’t. A Tuesday-night bottle with no location still counts.',
+  body: 'A bottle at home, dinner out, or a flight at the tasting bar. Capture each wine while the glass is still in your hand: a rating, flavour notes, a photo, and how it made you feel. Tag the place, or don’t. A Tuesday-night bottle with no location still counts.',
   points: [
     'Scan the label or the tasting card and the producer, vintage and grapes fill themselves in.',
-    'No wine vocabulary required — plain words like “honey, but dry?” are exactly the point.',
-    'Go as deep as you like — optional sliders for sweetness, tannins and acidity, and a flavour-note picker.',
+    'No wine vocabulary required. Plain words like “honey, but dry?” are exactly the point.',
+    'Go as deep as you like, with optional sliders for sweetness, tannins and acidity, and a flavour-note picker.',
   ],
 };
 
@@ -181,10 +181,10 @@ const PLACES_CHAPTER = {
   alt: 'A winery page in Cork & Note showing your past visits and notes alongside live Google rating, opening hours and website.',
   eyebrow: 'The places · your passport',
   heading: 'What did we try last time?',
-  body: 'The wineries remember you back. Every place you’ve been keeps its own page — your visits, the wines you poured on each one, your notes and photos — so you walk back in knowing exactly what you loved. No other wine app keeps this.',
+  body: 'The wineries remember you back. Every place you’ve been keeps its own page: your visits, the wines you poured on each one, your notes and photos. You walk back in knowing exactly what you loved. No other wine app keeps this.',
   points: [
     'Pro adds live winery intel from Google, right on the page: rating, opening hours, website and phone.',
-    'Restaurants and tasting bars keep pages too — anywhere you drink wine counts.',
+    'Restaurants and tasting bars keep pages too. Anywhere you drink wine counts.',
   ],
 };
 
@@ -194,18 +194,18 @@ const MAP_CHAPTER = {
   alt: 'The Cork & Note map with your visited wineries, wishlist and nearby wineries in different colors.',
   eyebrow: 'The map',
   heading: 'Where should we go next?',
-  body: 'Your map fills in as you travel — visited wineries in green, your wishlist in blue. With Pro, wineries near you appear around them, and you can search a directory of 14,000+ US wineries by name — so the record of your last trip plans the next one.',
+  body: 'Your map fills in as you travel: visited wineries in green, your wishlist in blue, and wineries near you all around them. Search a directory of 14,000+ US wineries by name, on any plan, so the record of your last trip plans the next one.',
   points: [
-    'Long-press to pin anywhere on any plan — your places are never gated.',
-    'Tap a nearby winery and its page opens with live hours and ratings, ready to visit.',
+    'Long-press to pin anywhere. Your places are never gated, on any plan.',
+    'Tap any nearby winery to open its page. Pro adds its live Google rating, hours and website right there.',
   ],
 };
 
 const ASKS = [
   'What’s the word for that dry, grippy feeling after a sip?',
-  'We’re having lamb tonight — which bottle in my cellar fits?',
+  'We’re having lamb tonight. Which bottle in my cellar fits?',
   'I keep loving Virginia whites. What should I branch into?',
-  'Here’s a photo of the wine list — what would I actually like?',
+  'Here’s a photo of the wine list. What would I actually like?',
 ];
 
 const WINDOWS = [
@@ -225,25 +225,26 @@ const WHY = [
   ],
   [
     'Learn the words as you taste.',
-    'Ask the sommelier about the dry feeling after a sip or the flavour you can’t quite name. It has read your journal — because you wrote it — so its advice starts from what you actually liked.',
+    'Ask the sommelier about the dry feeling after a sip or the flavour you can’t quite name. It has read your journal, because you wrote it, so its advice starts from what you actually liked.',
     'Keep the suggestions that fit. Your rating is still yours.',
   ],
   [
     'Remember why you brought it home.',
     'Link a bottle in your cellar to the tasting that sold you on it. Open your original notes when you open the bottle, then record what you think this time.',
-    'The wine, the visit and the bottle stay connected — privately, and never deleted, on any plan.',
+    'The wine, the visit and the bottle stay connected. Private, never deleted, on any plan.',
   ],
 ];
 
 // Free/Pro split from docs/business/launch-plan-2026-09.md §4.2.
 const YES = '<span class="yes" role="img" aria-label="Included">✓</span>';
-const NO = '<span class="no" role="img" aria-label="Not included">—</span>';
+const NO = '<span class="no" role="img" aria-label="Not included">✕</span>';
 const COMPARE = [
   ['Journal', [
     ['Tastings, ratings, flavour notes & photos', 'Unlimited', 'Unlimited'],
   ]],
   ['Wineries', [
     ['Your map, pins, visits & wishlist', 'Unlimited', 'Unlimited'],
+    ['Nearby wineries & the searchable US directory', YES, YES],
     ['Live rating, hours & website on winery pages', NO, YES],
   ]],
   ['Cellar', [
@@ -276,19 +277,19 @@ const compareRows = COMPARE.map(
 const PRO_WINS = [
   [
     'A sommelier on call',
-    'Ask what to open, what to try next, or what that grape on the menu is. Every answer starts from your own ratings, not a crowd score — and when you ask about one specific bottle, it looks the wine up rather than guessing, and shows you where it read.',
+    'Ask what to open, what to try next, or what that grape on the menu is. Every answer starts from your own ratings, not a crowd score. Ask about one specific bottle and it looks the wine up rather than guessing, and shows you where it read.',
   ],
   [
     'The winery, live',
-    'Every winery page adds its Google rating, opening hours, website and phone next to your own history there — the record of your last visit, and everything you need to plan the next one.',
+    'Every winery page adds its Google rating, opening hours, website and phone next to your own history there: the record of your last visit, and everything you need to plan the next one.',
   ],
   [
     'Scans that fill the form',
-    'Point at the bottle or the tasting card and the producer, vintage and grapes fill themselves in — as many times a day as the tasting room pours.',
+    'Point at the bottle or the tasting card and the producer, vintage and grapes fill themselves in, as many times a day as the tasting room pours.',
   ],
   [
     'A cellar that watches itself',
-    'Every bottle you own, with drink windows, insights and Tonight’s Pick from whatever is ready — no 25-bottle ceiling.',
+    'Every bottle you own, with drink windows, insights and Tonight’s Pick from whatever is ready. No 25-bottle ceiling.',
   ],
 ];
 
@@ -299,11 +300,11 @@ const FAQ = [
   ],
   [
     'Will my journal get locked behind Pro?',
-    'No. Everything you log — tastings, places, photos, notes, your map, and up to 25 cellar bottles — is free for as long as you use the app, and we never delete your entries on any plan. Pro adds the unlimited sommelier (which can look specific wines up on the web), unlimited scans, live winery details, the unlimited cellar with drink windows and Tonight’s Pick, and export.',
+    'No. Everything you log (tastings, places, photos, notes, your map, and up to 25 cellar bottles) is free for as long as you use the app, and we never delete your entries on any plan. Pro adds the unlimited sommelier (which can look specific wines up on the web), unlimited scans, live winery details, the unlimited cellar with drink windows and Tonight’s Pick, and export.',
   ],
   [
     'Is my journal public?',
-    'No. Cork & Note has no social feed and no public profiles. Your tastings, photos and cellar are private to your account, and you can delete the account — and everything in it — at any time.',
+    'No. Cork & Note has no social feed and no public profiles. Your tastings, photos and cellar are private to your account, and you can delete the account, and everything in it, at any time.',
   ],
   [
     'Do I have to be at a winery to log a wine?',
@@ -315,14 +316,14 @@ const FAQ = [
   ],
   [
     'What about Android?',
-    'Cork & Note launches on iPhone first. Android will follow if enough people ask for it — tell us on the support page.',
+    'Cork & Note launches on iPhone first. Android will follow if enough people ask for it. Tell us on the support page.',
   ],
 ];
 
 const home = page({
-  title: 'Cork & Note — remember what you tasted, discover what you like',
+  title: 'Cork & Note: remember what you tasted, discover what you like',
   description:
-    'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere — no expertise needed. Coming soon to the App Store.',
+    'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere. No expertise needed. Coming soon to the App Store.',
   active: '/',
   dark: true,
   extraHead: `<script type="application/ld+json">${JSON.stringify({
@@ -332,7 +333,7 @@ const home = page({
     operatingSystem: 'iOS',
     applicationCategory: 'LifestyleApplication',
     description:
-      'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere — no expertise needed.',
+      'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere. No expertise needed.',
     offers: [
       { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD' },
       { '@type': 'Offer', name: 'Pro (monthly)', price: '9.99', priceCurrency: 'USD' },
@@ -343,9 +344,9 @@ const home = page({
   main: `<section class="hero">
   <div class="wide hero-grid">
     <div class="hero-text">
-      <p class="eyebrow">Your wine journal &amp; personal AI sommelier</p>
+      <p class="eyebrow">Your personal wine journey</p>
       <h1>Remember what you tasted. Discover what you like.</h1>
-      <p class="lede">Log any wine in plain words, ask a sommelier who has read your notes, and watch a map of your wine life fill in — every winery remembered, visit by visit. For a bottle at home, dinner out, or a day in wine country. <strong>No wine expertise needed.</strong></p>
+      <p class="lede">Your personal wine journal, so you never forget a wine you loved. Your personal sommelier, learning your palate with every tasting you log. And your own map of wine country, keeping every winery you visit. <strong>No wine expertise needed.</strong></p>
       <div class="hero-actions">
         <span class="badge">Coming soon to the App&nbsp;Store</span>
         <a class="textlink" href="#features">See how it works <span aria-hidden="true">↓</span></a>
@@ -359,7 +360,7 @@ const home = page({
 <section class="pain">
   <div class="wrap">
     <div class="double-rule" role="presentation"></div>
-    <p class="pain-line">You remember <em>liking</em> it — the label, the porch, the second pour. A week later, the name is gone.</p>
+    <p class="pain-line">You remember <em>liking</em> it: the label, the porch, the second pour. A week later, the name is gone.</p>
     <p class="pain-fix">Cork &amp; Note fixes that.</p>
     <div class="double-rule" role="presentation"></div>
   </div>
@@ -380,10 +381,10 @@ const home = page({
     <div class="somm-text">
       <p class="eyebrow"><span class="numeral">II</span>The sommelier</p>
       <h2>A sommelier that learns your palate.</h2>
-      <p class="lede">Every tasting you log teaches it a little more about what you like. Ask what to open tonight, how to describe the glass in your hand, or what to try next — the answers are built on your own ratings, visits and cellar, not a crowd score. The more you journal, the better it knows you. Beginner questions are its favourite kind.</p>
-      <p class="asks-label">Things people actually ask it</p>
+      <p class="lede">Every tasting you log teaches it a little more about what you like. Ask what to open tonight, how to describe the glass in your hand, or what to try next. The answers are built on your own ratings, visits and cellar, not a crowd score. The more you journal, the better it knows you.</p>
+      <p class="asks-label">Ask it things like</p>
       <ul class="asks">${ASKS.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>
-      <p class="somm-note">Five messages a month on Free, unlimited on Pro. Tonight’s Pick — the sommelier choosing from your own ready-to-drink bottles — is part of Pro.</p>
+      <p class="somm-note">Five messages a month on Free, unlimited on Pro. Tonight’s Pick, where the sommelier chooses from your own ready-to-drink bottles, is part of Pro.</p>
     </div>
     <div class="somm-stage">
       <p class="somm-question">“What should I try next, based on my tastings?”</p>
@@ -404,8 +405,8 @@ const home = page({
     <div class="cellar-text">
       <div class="section-head">
         <p class="eyebrow">The cellar</p>
-        <h2>A cellar that tells you when.</h2>
-        <p class="section-lede">Every bottle you own carries a drink window — what’s ready now, what needs holding, and what to open tonight before it slips past its peak. And when you can’t decide, Tonight’s Pick has the sommelier choose from your own ready bottles, tuned to the occasion, the food and your mood.</p>
+        <h2>Loved it at the tasting? Bring the bottle home.</h2>
+        <p class="section-lede">You tasted it, you logged it, you bought it. Add the bottle to your cellar and it stays linked to the tasting that sold you on it, so months later you open your own notes and remember exactly what it tasted like and why you brought it home. Every bottle also carries a drink window, so you know when it’s ready. And when you can’t decide, Tonight’s Pick has the sommelier choose from your ready bottles, tuned to the occasion, the food and your mood.</p>
       </div>
       <ul class="windows">${WINDOWS.map(
         ([k, name, note]) =>
@@ -421,7 +422,7 @@ const home = page({
     <div class="section-head">
       <p class="eyebrow">Why Cork &amp; Note</p>
       <h2>More useful every time you come back to it.</h2>
-      <p class="section-lede">Rating apps know the wine but not the trip. Passport apps stamp the visit but forget the wine. Cork &amp; Note keeps the whole story together — and hands it to a sommelier.</p>
+      <p class="section-lede">Rating apps know the wine but not the trip. Passport apps stamp the visit but forget the wine. Cork &amp; Note keeps the whole story together, and hands it to a sommelier.</p>
     </div>
     <div class="cards">
       ${WHY.map(([h, p, detail], i) => `<article class="card"><span class="why-number" aria-hidden="true">0${i + 1}</span><h3>${esc(h)}</h3><div><p>${esc(p)}</p><p class="why-detail">${esc(detail)}</p></div></article>`).join('\n      ')}
@@ -434,17 +435,17 @@ const home = page({
     <div class="section-head">
       <p class="eyebrow">Pricing at launch</p>
       <h2>Start with a free journal. Get more help with Pro.</h2>
-      <p class="section-lede">Logging is never gated: every tasting, place, photo and note is free for as long as you use the app — and never deleted. Pro adds the parts that help: an unlimited sommelier and scanner, live winery details, and the full cellar.</p>
+      <p class="section-lede">Logging is never gated: every tasting, place, photo and note is free for as long as you use the app, and never deleted. The map is never gated either: nearby wineries and the full winery directory are on every plan. Pro adds the parts that help: an unlimited sommelier and scanner, live winery details, and the full cellar.</p>
     </div>
     <div class="plan-cards">
       <article class="plan-card">
         <p class="eyebrow">Free</p><h3>Your everyday wine journal.</h3><p class="card-price">$0</p><p class="plan-description">For keeping track of what you taste, and trying everything once.</p>
-        <ul class="plan-features"><li>Unlimited tastings, notes and photos</li><li>Winery visits, your map and wishlist</li><li>Up to 25 bottles in your cellar</li><li>3 label or tasting-card scans to try</li><li>5 sommelier messages a month</li></ul>
+        <ul class="plan-features"><li>Unlimited tastings, notes and photos</li><li>Winery visits, your map, wishlist and nearby wineries</li><li>Up to 25 bottles in your cellar</li><li>3 label or tasting-card scans to try</li><li>5 sommelier messages a month</li></ul>
         <div class="plan-action"><p>Coming soon for iPhone</p><a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
       </article>
       <article class="plan-card pro-card">
         <p class="eyebrow">Pro</p><h3>More guidance with every tasting.</h3><p class="card-price">$9.99<span>/ month</span></p><p class="annual-price">or $59.99 / year with 3 days free</p><p class="plan-description">Everything in Free, with more room to ask, scan and explore.</p>
-        <ul class="plan-features"><li>Unlimited sommelier conversations — photos and web lookups included</li><li>Live winery ratings, hours &amp; websites, plus nearby-winery discovery</li><li>Unlimited label and tasting-card scans</li><li>Unlimited cellar with drink windows and Tonight’s Pick</li><li>Export your journal to CSV</li></ul>
+        <ul class="plan-features"><li>Unlimited sommelier conversations, photos and web lookups included</li><li>Live winery ratings, hours &amp; websites on every winery page</li><li>Unlimited label and tasting-card scans</li><li>Unlimited cellar with drink windows and Tonight’s Pick</li><li>Export your journal to CSV</li></ul>
         <div class="plan-action"><p>Coming soon for iPhone</p><a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
       </article>
     </div>
@@ -515,20 +516,20 @@ const support = page({
     <h2>Get in touch</h2>
     <p>Email <a href="mailto:${esc(SUPPORT_EMAIL)}">${esc(SUPPORT_EMAIL)}</a> for help, account access or privacy requests. You do not need to sign in to contact us.</p>
     <p>The fastest way to reach us is from inside the app: open <strong>Profile → Feedback</strong>. That form sends us your message along with your app version, which usually saves a round trip.</p>
-    <p>You can also report a bug the same way — choose the bug option and describe what you were doing when it happened.</p>
+    <p>You can also report a bug the same way: choose the bug option and describe what you were doing when it happened.</p>
   </section>
 
   <section>
     <h2>Common questions</h2>
     <p><strong>How do I find the wines I have logged?</strong> Open the <strong>Journal</strong> tab. Open the <strong>Map</strong> to browse places.</p>
     <p><strong>How do I delete my account?</strong> Open <strong>Profile → Account settings → Delete account</strong> to remove your account and its app data. Deleting your account does not cancel an Apple subscription. Cancel it separately in your Apple Account settings. For help accessing your account or a data request, email us above.</p>
-    <p><strong>Is the sommelier always right?</strong> No. It is an AI assistant and it can be wrong about wine facts, pairings and drink windows. Treat it as a knowledgeable friend, not an authority — and please drink responsibly.</p>
+    <p><strong>Is the sommelier always right?</strong> No. It is an AI assistant and it can be wrong about wine facts, pairings and drink windows. Treat it as a knowledgeable friend, not an authority. And please drink responsibly.</p>
   </section>
 
   <section>
     <h2>Privacy</h2>
     <p>Our <a href="/privacy">privacy policy</a> explains exactly what we collect and who we share it with, including what happens when you talk to the sommelier.</p>
-    <p>You can delete your account and all of its data at any time — see <a href="/delete-account">Delete your account</a>.</p>
+    <p>You can delete your account and all of its data at any time. See <a href="/delete-account">Delete your account</a>.</p>
   </section>
 </article></div>`,
 });
@@ -543,11 +544,11 @@ const support = page({
 const deleteAccount = page({
   title: 'Delete your account · Cork & Note',
   description:
-    'How to permanently delete your Cork & Note account and all of its data — in the app, or by email without the app installed.',
+    'How to permanently delete your Cork & Note account and all of its data, in the app or by email without the app installed.',
   active: '/delete-account',
   main: `<div class="wrap"><article class="prose">
   <h1>Delete your account</h1>
-  <p>Cork &amp; Note is a wine tasting journal operated by Nicholas Horton (app: <strong>Cork &amp; Note</strong>, package <code>com.nicholashorton.corkandnote</code>). This page explains how to permanently delete your Cork &amp; Note account and everything in it — whether or not you still have the app installed.</p>
+  <p>Cork &amp; Note is a wine tasting journal operated by Nicholas Horton (app: <strong>Cork &amp; Note</strong>, package <code>com.nicholashorton.corkandnote</code>). This page explains how to permanently delete your Cork &amp; Note account and everything in it, whether or not you still have the app installed.</p>
 
   <section>
     <h2>Delete from inside the app</h2>
@@ -557,28 +558,28 @@ const deleteAccount = page({
   <section>
     <h2>Request deletion without the app</h2>
     <p>If you no longer have the app installed, email <a href="mailto:${SUPPORT_EMAIL}?subject=Delete%20my%20Cork%20%26%20Note%20account"><strong>${SUPPORT_EMAIL}</strong></a> with the subject line <strong>“Delete my Cork &amp; Note account”</strong>.</p>
-    <p>Send the request <strong>from the email address your account is registered under</strong> — that is how we verify the request is really yours. We will confirm by reply and permanently delete the account.</p>
+    <p>Send the request <strong>from the email address your account is registered under</strong>; that is how we verify the request is really yours. We will confirm by reply and permanently delete the account.</p>
   </section>
 
   <section>
     <h2>What gets deleted</h2>
     <p>Account deletion permanently removes everything associated with your account:</p>
-    <p><strong>Your account itself</strong> — email address and sign-in credentials.<br>
-    <strong>Your journal</strong> — tastings, ratings, flavor notes, written notes, places and visits, and wishlist entries.<br>
-    <strong>Your photos</strong> — every photo you attached to wines, visits, and scans, including the stored files.<br>
-    <strong>Your cellar</strong> — all tracked bottles and their history.<br>
-    <strong>Your sommelier conversations</strong> — the AI chat history and the journal context it drew on.</p>
+    <p><strong>Your account itself</strong>: email address and sign-in credentials.<br>
+    <strong>Your journal</strong>: tastings, ratings, flavor notes, written notes, places and visits, and wishlist entries.<br>
+    <strong>Your photos</strong>: every photo you attached to wines, visits, and scans, including the stored files.<br>
+    <strong>Your cellar</strong>: all tracked bottles and their history.<br>
+    <strong>Your sommelier conversations</strong>: the AI chat history and the journal context it drew on.</p>
     <p>Deletion is all-or-nothing by design: if any step fails, nothing is removed and you can try again. There is no partial account deletion, but you can delete individual entries in the app at any time.</p>
   </section>
 
   <section>
     <h2>Retention</h2>
-    <p>We keep your data only for as long as your account exists. When your account is deleted, the app removes your journal, photos, cellar and chat history from its active storage, and the deletion cannot be undone. Information already processed by service providers, backup copies, and transaction records may be retained according to their retention policies or legal obligations — email us about deletion of information held by our processors.</p>
+    <p>We keep your data only for as long as your account exists. When your account is deleted, the app removes your journal, photos, cellar and chat history from its active storage, and the deletion cannot be undone. Information already processed by service providers, backup copies, and transaction records may be retained according to their retention policies or legal obligations. Email us about deletion of information held by our processors.</p>
   </section>
 
   <section>
     <h2>Subscriptions</h2>
-    <p>Pro subscriptions are billed by Apple or Google, not by us, and <strong>deleting your account does not cancel a subscription</strong>. Cancel it separately in your App&nbsp;Store subscription settings (iPhone) or Google&nbsp;Play subscription settings (Android) — ideally before deleting the account.</p>
+    <p>Pro subscriptions are billed by Apple or Google, not by us, and <strong>deleting your account does not cancel a subscription</strong>. Cancel it separately in your App&nbsp;Store subscription settings (iPhone) or Google&nbsp;Play subscription settings (Android), ideally before deleting the account.</p>
   </section>
 
   <section>
@@ -630,7 +631,7 @@ section{scroll-margin-top:16px}
 .section-head.centered .eyebrow{justify-content:center}
 .section-head.centered .section-lede{margin-left:auto;margin-right:auto}
 
-/* Rules — the app's decorative doubleLine */
+/* Rules: the app's decorative doubleLine */
 .double-rule{height:7px;border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);width:96px;margin:0 auto;opacity:.75}
 
 /* Badges & links */
@@ -671,7 +672,7 @@ section{scroll-margin-top:16px}
 .hero .textlink{color:var(--cream)}
 .hero .textlink:hover{color:var(--gold-light)}
 .hero .subnote{color:var(--gold-light)}
-/* Full phone, in normal flow — never cropped, no plate behind it (owner
+/* Full phone, in normal flow: never cropped, no plate behind it (owner
    feedback 2026-09-09: the cut-off phones in boxes looked terrible). */
 .hero-stage{display:flex;justify-content:center;padding:24px 0}
 .hero-stage .phone{width:min(340px,80vw)}
@@ -722,7 +723,7 @@ section{scroll-margin-top:16px}
 .somm-note{font-size:14px;color:var(--gold-light);margin:0;max-width:48ch}
 .somm-stage{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px 0}
 .somm-stage .phone{width:min(300px,78vw)}
-/* The question the phone is answering, as the user's sent bubble — the
+/* The question the phone is answering, as the user's sent bubble; the
    in-screenshot nav title truncates it (owner feedback 2026-09-11). */
 .somm-question{font-family:var(--serif);font-size:19px;line-height:1.4;color:var(--midnight);background:var(--gold);
   border-radius:18px 18px 4px 18px;padding:14px 22px;margin:0 0 -18px auto;max-width:340px;position:relative;z-index:1;
@@ -865,7 +866,12 @@ footer{background:var(--midnight);color:var(--gold-muted);font-size:14px}
   .somm-stage .phone{width:min(280px,78vw)}
   .windows{grid-template-columns:repeat(2,1fr)}
   .wins{grid-template-columns:1fr}
-  .card{grid-template-columns:32px .9fr 1.1fr;gap:20px}
+  /* Stack the why-cards: number as a gutter marker, heading beside it,
+     body text full-width underneath (side-by-side text columns were
+     unreadable on phones, owner feedback 2026-09-11). */
+  .card{grid-template-columns:32px 1fr;gap:8px 16px}
+  .card>div{grid-column:2}
+  .card h3{max-width:none}
   .plan-cards{grid-template-columns:1fr}
   .compare{font-size:14px}
   .compare th,.compare td{padding:12px 12px}
@@ -881,8 +887,8 @@ footer{background:var(--midnight);color:var(--gold-muted);font-size:14px}
   .prose h1{font-size:30px}
 }
 @media (max-width:480px){
-  .card{grid-template-columns:28px 1fr;gap:12px 18px;padding:28px 0}
-  .card h3{max-width:none;font-size:25px}
+  .card{grid-template-columns:28px 1fr;gap:8px 14px;padding:26px 0}
+  .card h3{font-size:25px}
   .bar-inner{padding:16px 20px}
   .bar nav{gap:16px}
   .bar nav a{font-size:14px}
