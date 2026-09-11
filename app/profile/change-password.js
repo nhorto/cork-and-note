@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Button from '../../components/Button';
 import ScreenHeader from '../../components/ScreenHeader';
+import { passwordRequirements as getPasswordRequirements, validatePassword } from '../../lib/password';
 import { supabase } from '../../lib/supabase';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
@@ -33,46 +34,6 @@ export default function ChangePasswordScreen() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // Password validation function
-  const validatePassword = (password) => {
-    const minLength = 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-    
-    const errors = [];
-    
-    if (password.length < minLength) {
-      errors.push(`at least ${minLength} characters`);
-    }
-    if (!hasUpperCase) {
-      errors.push('one uppercase letter');
-    }
-    if (!hasLowerCase) {
-      errors.push('one lowercase letter');
-    }
-    if (!hasNumbers) {
-      errors.push('one number');
-    }
-    
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  };
-
-  // Get password requirements status for display
-  const getPasswordRequirements = () => {
-    const requirements = [
-      { text: 'At least 8 characters', met: newPassword.length >= 8 },
-      { text: 'One uppercase letter', met: /[A-Z]/.test(newPassword) },
-      { text: 'One lowercase letter', met: /[a-z]/.test(newPassword) },
-      { text: 'One number', met: /\d/.test(newPassword) },
-    ];
-    
-    return requirements;
-  };
 
   const handleChangePassword = async () => {
     // Basic validation
@@ -151,7 +112,7 @@ export default function ChangePasswordScreen() {
     }
   };
 
-  const passwordRequirements = getPasswordRequirements();
+  const passwordRequirements = getPasswordRequirements(newPassword);
 
   return (
     <KeyboardAvoidingView 

@@ -17,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { passwordRequirements as getPasswordRequirements, validatePassword } from '../lib/password';
 import { PRIVACY_URL, TERMS_URL } from '../lib/pro';
 import { createThemedStyles } from '../styles/ThemeProvider';
 import { AuthContext } from './_layout';
@@ -34,46 +35,6 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  // Password validation function
-  const validatePassword = (password) => {
-    const minLength = 8;
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
-
-    const errors = [];
-
-    if (password.length < minLength) {
-      errors.push(`at least ${minLength} characters`);
-    }
-    if (!hasUpperCase) {
-      errors.push('one uppercase letter');
-    }
-    if (!hasLowerCase) {
-      errors.push('one lowercase letter');
-    }
-    if (!hasNumbers) {
-      errors.push('one number');
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
-  };
-
-  // Get password requirements status for display
-  const getPasswordRequirements = () => {
-    const requirements = [
-      { text: 'At least 8 characters', met: password.length >= 8 },
-      { text: 'One uppercase letter', met: /[A-Z]/.test(password) },
-      { text: 'One lowercase letter', met: /[a-z]/.test(password) },
-      { text: 'One number', met: /\d/.test(password) },
-    ];
-
-    return requirements;
-  };
 
   const handleRegister = async () => {
     // Basic validation
@@ -155,7 +116,7 @@ export default function RegisterScreen() {
     }
   };
 
-  const passwordRequirements = getPasswordRequirements();
+  const passwordRequirements = getPasswordRequirements(password);
   const showRequirements = password.length > 0;
 
   return (
