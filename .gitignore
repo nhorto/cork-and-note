@@ -64,3 +64,4 @@ site/dist/
 
 # jest transform cache (restored in CI by actions/cache)
 .jest-cache/
+*.swp
