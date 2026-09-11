@@ -149,7 +149,11 @@ const chapterBlock = (c, flip = false) => `<div class="chapter${flip ? ' flip' :
     <p>${esc(c.body)}</p>
     <ul class="points">${c.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
   </div>
-  <div class="stage">${phone(c.shot, c.alt)}</div>
+  <div class="stage${c.shot2 ? ' duo' : ''}">${
+    c.shot2
+      ? `<div class="duo-back">${phone(c.shot, c.alt)}</div><div class="duo-front">${phone(c.shot2, c.alt2)}</div>`
+      : phone(c.shot, c.alt)
+  }</div>
 </div>`;
 
 // Chapter headings are the questions a wine drinker actually asks (carried
@@ -157,14 +161,17 @@ const chapterBlock = (c, flip = false) => `<div class="chapter${flip ? ' flip' :
 // answers one of them.
 const JOURNAL_CHAPTER = {
   numeral: 'I',
-  shot: 'shot-2-log-a-tasting.png',
-  alt: 'Cork & Note screen for logging a wine, with a label-scan button and a rating form.',
+  shot: 'shot-2a-log-scan.png',
+  alt: 'The top of the Add wine form: scan a label to prefill it, with winemaker, grapes, and one compact row for name, type and year.',
+  shot2: 'shot-2b-log-filled.png',
+  alt2: 'The same form filled in: a 4.5-star verdict, a plain-words note, and detailed sweetness and tannin sliders.',
   eyebrow: 'The journal',
   heading: 'Would you have it again?',
   body: 'A bottle at home, dinner out, or a flight at the tasting bar — capture each wine while the glass is still in your hand: a rating, flavour notes, a photo, and how it made you feel. Tag the place, or don’t. A Tuesday-night bottle with no location still counts.',
   points: [
     'Scan the label or the tasting card and the producer, vintage and grapes fill themselves in.',
     'No wine vocabulary required — plain words like “honey, but dry?” are exactly the point.',
+    'Go as deep as you like — optional sliders for sweetness, tannins and acidity, and a flavour-note picker.',
   ],
 };
 
@@ -195,10 +202,10 @@ const MAP_CHAPTER = {
 };
 
 const ASKS = [
-  'I like this wine — how would I describe it?',
-  'What does “dry” actually mean?',
-  'What should I open with the lamb tonight?',
-  'What should I try next, based on my tastings?',
+  'What’s the word for that dry, grippy feeling after a sip?',
+  'We’re having lamb tonight — which bottle in my cellar fits?',
+  'I keep loving Virginia whites. What should I branch into?',
+  'Here’s a photo of the wine list — what would I actually like?',
 ];
 
 const WINDOWS = [
@@ -374,11 +381,14 @@ const home = page({
       <p class="eyebrow"><span class="numeral">II</span>The sommelier</p>
       <h2>A sommelier that learns your palate.</h2>
       <p class="lede">Every tasting you log teaches it a little more about what you like. Ask what to open tonight, how to describe the glass in your hand, or what to try next — the answers are built on your own ratings, visits and cellar, not a crowd score. The more you journal, the better it knows you. Beginner questions are its favourite kind.</p>
-      <p class="asks-label">Things you can ask</p>
+      <p class="asks-label">Things people actually ask it</p>
       <ul class="asks">${ASKS.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>
       <p class="somm-note">Five messages a month on Free, unlimited on Pro. Tonight’s Pick — the sommelier choosing from your own ready-to-drink bottles — is part of Pro.</p>
     </div>
-    <div class="somm-stage">${phone('shot-5-sommelier.png', 'The Cork & Note sommelier answering “What should I try next based on my tastings?” with recommendations built on the user’s own 5-star ratings.')}</div>
+    <div class="somm-stage">
+      <p class="somm-question">“What should I try next, based on my tastings?”</p>
+      ${phone('shot-5-sommelier.png', 'The Cork & Note sommelier answering “What should I try next based on my tastings?” with recommendations built on the user’s own 5-star ratings.')}
+    </div>
   </div>
 </section>
 
@@ -684,6 +694,13 @@ section{scroll-margin-top:16px}
 .points li::before{content:'';position:absolute;left:2px;top:9px;width:7px;height:7px;border-radius:999px;background:var(--gold)}
 .stage{display:flex;justify-content:center;align-items:center}
 .stage .phone{width:min(300px,78vw)}
+/* Two overlapping phones, echoing the App Store duo slides */
+.stage.duo{display:grid;justify-items:center;padding:12px 0;margin-bottom:92px}
+.stage.duo>div{grid-area:1/1}
+.duo-back{transform:translateX(-72px) rotate(-3deg)}
+.duo-back .phone{width:min(264px,60vw)}
+.duo-front{transform:translate(104px,92px) rotate(2.5deg);z-index:1;position:relative}
+.duo-front .phone{width:min(248px,56vw)}
 
 /* ---- Sommelier: midnight block ---- */
 .somm{background:
@@ -703,8 +720,13 @@ section{scroll-margin-top:16px}
 .asks li::before{content:'“';color:var(--gold-shimmer)}
 .asks li::after{content:'”';color:var(--gold-shimmer)}
 .somm-note{font-size:14px;color:var(--gold-light);margin:0;max-width:48ch}
-.somm-stage{display:flex;justify-content:center;align-items:center;padding:24px 0}
+.somm-stage{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px 0}
 .somm-stage .phone{width:min(300px,78vw)}
+/* The question the phone is answering, as the user's sent bubble — the
+   in-screenshot nav title truncates it (owner feedback 2026-09-11). */
+.somm-question{font-family:var(--serif);font-size:19px;line-height:1.4;color:var(--midnight);background:var(--gold);
+  border-radius:18px 18px 4px 18px;padding:14px 22px;margin:0 0 -18px auto;max-width:340px;position:relative;z-index:1;
+  box-shadow:0 12px 28px -8px rgba(33,21,46,.5)}
 
 /* ---- Cellar: parchment band ---- */
 .cellar{background:var(--parchment);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:88px 0}
@@ -833,6 +855,12 @@ footer{background:var(--midnight);color:var(--gold-muted);font-size:14px}
   .chapter{grid-template-columns:1fr;gap:28px;padding:24px 0 48px}
   .chapter.flip .stage{order:0}
   .stage .phone{width:min(270px,74vw)}
+  .duo-back{transform:translateX(-52px) rotate(-3deg)}
+  .duo-back .phone{width:min(228px,54vw)}
+  .duo-front{transform:translate(58px,56px) rotate(2.5deg)}
+  .duo-front .phone{width:min(214px,50vw)}
+  .stage.duo{margin-bottom:56px}
+  .somm-question{font-size:17px;max-width:300px}
   .somm-text{padding:64px 0 40px}
   .somm-stage .phone{width:min(280px,78vw)}
   .windows{grid-template-columns:repeat(2,1fr)}
