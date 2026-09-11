@@ -246,6 +246,8 @@ const COMPARE = [
     ['Your map, pins, visits & wishlist', 'Unlimited', 'Unlimited'],
     ['Nearby wineries & the searchable US directory', YES, YES],
     ['Live rating, hours & website on winery pages', NO, YES],
+    ['US wine regions (AVAs) on the map', NO, YES],
+    ['Plan a wine day: stops, drive times & a schedule', NO, YES],
   ]],
   ['Cellar', [
     ['Bottles tracked', 'Up to 25', 'Unlimited'],
@@ -256,6 +258,8 @@ const COMPARE = [
     ['Label & tasting-card scans', '3 to try', 'Unlimited'],
     ['Sommelier messages', '5 a month, text only', 'Unlimited, photos included'],
     ['Looks up specific wines on the web', NO, YES],
+    ['Choose from a wine list, in your budget', NO, YES],
+    ['Your taste report, from your whole journal', NO, YES],
   ]],
   ['Your data', [
     ['Export your journal to CSV', NO, YES],
@@ -280,6 +284,18 @@ const PRO_WINS = [
     'Ask what to open, what to try next, or what that grape on the menu is. Every answer starts from your own ratings, not a crowd score. Ask about one specific bottle and it looks the wine up rather than guessing, and shows you where it read.',
   ],
   [
+    'Choose from the list in front of you',
+    'Photograph the wine list, set a budget, and get two or three picks with the listed price and a reason each, grounded in what you have rated. It never invents a price or a score.',
+  ],
+  [
+    'Your taste, written down',
+    'Once you have rated a few wines, the sommelier reads your whole journal and tells you what keeps standing out, with the tastings that prove it, and two things to try next.',
+  ],
+  [
+    'A day in wine country, planned',
+    'Pick a start, a date and two or three stops. You get drive times, a schedule with room for lunch, and directions to each stop. Turn on wine regions and see every US AVA on the map, with the wineries inside it.',
+  ],
+  [
     'The winery, live',
     'Every winery page adds its Google rating, opening hours, website and phone next to your own history there: the record of your last visit, and everything you need to plan the next one.',
   ],
@@ -300,7 +316,7 @@ const FAQ = [
   ],
   [
     'Will my journal get locked behind Pro?',
-    'No. Everything you log (tastings, places, photos, notes, your map, and up to 25 cellar bottles) is free for as long as you use the app, and we never delete your entries on any plan. Pro adds the unlimited sommelier (which can look specific wines up on the web), unlimited scans, live winery details, the unlimited cellar with drink windows and Tonight’s Pick, and export.',
+    'No. Everything you log (tastings, places, photos, notes, your map, and up to 25 cellar bottles) is free for as long as you use the app, and we never delete your entries on any plan. Pro adds the unlimited sommelier (which can look specific wines up on the web) and its guided tools (choose from a wine list, your taste report, plan a wine day), wine regions on the map, unlimited scans, live winery details, the unlimited cellar with drink windows and Tonight’s Pick, and export.',
   ],
   [
     'Is my journal public?',
@@ -384,7 +400,7 @@ const home = page({
       <p class="lede">Every tasting you log teaches it a little more about what you like. Ask what to open tonight, how to describe the glass in your hand, or what to try next. The answers are built on your own ratings, visits and cellar, not a crowd score. The more you journal, the better it knows you.</p>
       <p class="asks-label">Ask it things like</p>
       <ul class="asks">${ASKS.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>
-      <p class="somm-note">Five messages a month on Free, unlimited on Pro. Tonight’s Pick, where the sommelier chooses from your own ready-to-drink bottles, is part of Pro.</p>
+      <p class="somm-note">Five messages a month on Free, unlimited on Pro. Pro also adds three guided tools: photograph a wine list and get picks in your budget, read a taste report written from your whole journal, and plan a wine day with drive times and a schedule.</p>
     </div>
     <div class="somm-stage">
       <p class="somm-question">“What should I try next, based on my tastings?”</p>
@@ -435,7 +451,7 @@ const home = page({
     <div class="section-head">
       <p class="eyebrow">Pricing at launch</p>
       <h2>Start with a free journal. Get more help with Pro.</h2>
-      <p class="section-lede">Logging is never gated: every tasting, place, photo and note is free for as long as you use the app, and never deleted. The map is never gated either: nearby wineries and the full winery directory are on every plan. Pro adds the parts that help: an unlimited sommelier and scanner, live winery details, and the full cellar.</p>
+      <p class="section-lede">Logging is never gated: every tasting, place, photo and note is free for as long as you use the app, and never deleted. The map is never gated either: nearby wineries and the full winery directory are on every plan. Pro adds the parts that help: an unlimited sommelier with guided tools for choosing from a wine list, understanding your taste and planning a wine day, wine regions on the map, live winery details, an unlimited scanner, and the full cellar.</p>
     </div>
     <div class="plan-cards">
       <article class="plan-card">
@@ -445,7 +461,7 @@ const home = page({
       </article>
       <article class="plan-card pro-card">
         <p class="eyebrow">Pro</p><h3>More guidance with every tasting.</h3><p class="card-price">$9.99<span>/ month</span></p><p class="annual-price">or $59.99 / year with 3 days free</p><p class="plan-description">Everything in Free, with more room to ask, scan and explore.</p>
-        <ul class="plan-features"><li>Unlimited sommelier conversations, photos and web lookups included</li><li>Live winery ratings, hours &amp; websites on every winery page</li><li>Unlimited label and tasting-card scans</li><li>Unlimited cellar with drink windows and Tonight’s Pick</li><li>Export your journal to CSV</li></ul>
+        <ul class="plan-features"><li>Unlimited sommelier conversations, photos and web lookups included</li><li>Choose from a wine list: picks in your budget, based on your ratings</li><li>Your taste report, and a plan for a wine day with drive times</li><li>US wine regions on the map, with the wineries inside each one</li><li>Live winery ratings, hours &amp; websites on every winery page</li><li>Unlimited label and tasting-card scans</li><li>Unlimited cellar with drink windows and Tonight’s Pick</li><li>Export your journal to CSV</li></ul>
         <div class="plan-action"><p>Coming soon for iPhone</p><a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
       </article>
     </div>

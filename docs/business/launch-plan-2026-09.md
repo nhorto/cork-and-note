@@ -144,6 +144,8 @@ Two paid tiers before you have any conversion data is premature. Launch with Fre
 | Label scan / tasting-card scan | **3 lifetime** (to try; was 3/month until 2026-09-09) | Unlimited (fair use: 30/day) |
 | AI sommelier chat | 5 messages per month, **text-only** — photos in chat would be a free scan by the back door | Unlimited (fair use: 50/day and 1,000/month), photos allowed |
 | Sommelier can search the web for a specific wine | — | **Yes** (added 2026-09-09; max 2 searches per message) |
+| Guided tools: choose from a wine list, taste report, plan a wine day | Sample only, with an upgrade button | **Yes** (added 2026-09-11; fair use: 15 list scans, 15 picks, 5 reports, 10 day plans per day) |
+| US wine regions (AVA boundaries) on the map | Toggle visible, opens the paywall | **Yes** (added 2026-09-11; 276 AVAs, in-app data) |
 | Export (CSV of tastings) | — | Yes |
 | Price | $0 | **$9.99/mo · $59.99/yr** — decided 2026-09-03, reconfirmed 2026-09-09; no lifetime SKU at launch. The free trial is on the annual product only (**3 days**, shortened from 7 on 2026-09-09 and updated in App Store Connect the same day); monthly has none. Both live in App Store Connect since 2026-09-08, priced in all 175 territories. Trial exposure is bounded either way: the fair-use caps apply during the trial, and Apple grants one intro offer per Apple ID per subscription group, ever |
 

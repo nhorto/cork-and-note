@@ -57,6 +57,9 @@ Each place you visit gets its own page — your visits, the wines you poured, yo
 SCAN THE LABEL
 Point your camera at a bottle or a tasting-room card and let Cork & Note fill in the producer, the vintage and the grapes, so you can get back to drinking.
 
+GET REAL HELP CHOOSING (PRO)
+Photograph a wine list and get two or three picks in your budget, each with the listed price and a reason grounded in what you have rated. Read a taste report written from your whole journal, with the tastings that prove it and what to try next. Plan a wine day: pick a start and two or three stops, and get drive times, a schedule with room for lunch, and directions. Turn on wine regions to see every US AVA on the map and the wineries inside it.
+
 KEEP A CELLAR
 Track the bottles you own with drink windows that tell you what is ready now, what needs holding, and what to open tonight before it slips past its peak.
 
@@ -121,11 +124,13 @@ Demo account:
   Password: (provided separately - this repo is public)
 
 Notes for the reviewer:
-1. The AI sommelier (Profile > Ask the sommelier, and "Tonight's Pick" on Home)
+1. The AI sommelier (the Somm tab, and "Tonight's Pick" on Home and Cellar)
    sends the text of the conversation, context from the user's own tasting
    history, and any photo they choose to scan to Anthropic's API to generate a
-   response. This is disclosed in the privacy policy. Under Anthropic's
-   commercial terms this data is not used to train models.
+   response. The Pro tools on the Somm tab (Choose from a list, My taste,
+   Plan a wine day) use the same service. This is disclosed in the privacy
+   policy. Under Anthropic's commercial terms this data is not used to train
+   models. The demo account is Pro, so every tool is reachable.
 2. Label scanning uses the camera only when the user taps a scan button.
 3. Location is requested only when the user opens the map or tags a visit, and
    is never collected in the background.
