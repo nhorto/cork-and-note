@@ -74,6 +74,9 @@ Each has a test that fails on the previous code and is fixed in the same PR.
 | `components/ChatInput.js` | The only picker call site with no guard; a native picker rejection became an unhandled promise rejection from an Alert button. | `chatInput.test.js` |
 | `app/(tabs)/wines.js` | A handled backend failure (`{ success: false }`) rendered "No wines found" or the previous list instead of the retry state. | `journalScreen.test.js` |
 | `app/(tabs)/wishlist.js` | `item.wineries.name` with no null guard crashed the tab when a row's winery was not readable. | `wishlistScreen.test.js` |
+| `lib/ai.js` | The tasting-menu parser's array fallback was unreachable whenever the array held objects (the greedy object match ran first and failed to parse), so a reply that dropped the fence was reported as unreadable. The fenced-JSON reader matched tags by prefix, so asking for `wine_list` on a `wine_list_picks` block read the picks as a list. | `aiParsers.test.js` |
+| `lib/cellarScan.js` | The convenience wrappers destructured their argument, so a null image threw instead of returning the service's soft failure. Both callers guard today; the wrappers now match the service's contract. | `cellarScan.test.js` |
+| `app/_layout.js` | No error boundary anywhere: a render throw was a blank white screen. `components/ErrorBoundary.js` now wraps the navigator inside the providers with a retry that remounts. | `errorBoundary.test.js` |
 
 Pinned, not changed (documented reliance on row-level security): the chat usage counters in `ProProvider` and the per-conversation chat reads carry no `user_id` filter. `deletePhotos` removes by the last path segment, which is only correct for flat visit and wine photo names.
 
@@ -81,3 +84,4 @@ Pinned, not changed (documented reliance on row-level security): the chat usage 
 
 - 2026-09-11: baseline measured; flakiness root-caused and fixed; foundation, structural and cellar-service tests added. Tracks 3, 4 and 6 started on their branches; Track 4 has the auth suites and the shared password rule committed; Track 3 has the handler refactor committed.
 - 2026-09-11, later: data-layer suites for visits, chat, cache and the real Pro provider; screen suites for the sommelier send path, chat input, journal and wishlist; six bugs found and fixed (table above). PR #266 at 53 suites, 746 tests, green.
+- 2026-09-11, evening: AI parsers and photo path, scan normalizers, error boundary, cellar add/tab/bottle screens, home, log session, both scan cards, age gate and offline banner, map sheets. Three more defects fixed (table above). PR #266 at 64 suites, 907 tests, green. PR #267 carries the auth suites, the shared password rule, and the paywall suite. Remaining from Track 4: log form internals (varietal to type inference, half-star input), and the Track 3, 5 and 6 branches.
