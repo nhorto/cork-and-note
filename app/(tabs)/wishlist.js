@@ -63,7 +63,7 @@ export default function WishlistScreen() {
   const handleRemoveItem = (item) => {
     Alert.alert(
       'Remove from Wishlist',
-      `Remove ${item.wineries.name} from your wishlist?`,
+      `Remove ${item.wineries?.name ?? 'this winery'} from your wishlist?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -107,8 +107,8 @@ export default function WishlistScreen() {
       </View>
 
       <View style={styles.wineryInfo}>
-        <Text style={styles.wineryName}>{item.wineries.name}</Text>
-        {item.wineries.address && (
+        <Text style={styles.wineryName}>{item.wineries?.name ?? 'Winery'}</Text>
+        {item.wineries?.address && (
           <Text style={styles.wineryAddress} numberOfLines={1}>
             {item.wineries.address}
           </Text>

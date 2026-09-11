@@ -61,3 +61,6 @@ deno.lock
 # App Atlas keeps its map here. Local to this machine.
 .app-atlas/
 site/dist/
+
+# jest transform cache (restored in CI by actions/cache)
+.jest-cache/
