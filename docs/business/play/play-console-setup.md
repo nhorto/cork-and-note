@@ -180,7 +180,20 @@ Personal developer accounts created after 13 Nov 2023 **must run a closed test b
 2. An Android `.aab` build (parallel branch owns `eas.json` / billing).
 3. 12+ tester Gmail addresses for the closed test.
 
-## 8. Android build requirements (added with the API-36 branch)
+## 8. Subscription products (state as of 2026-09-11)
+
+Both Play subscriptions exist and mirror App Store Connect exactly, so the paywall reads the same numbers on either store:
+
+| Play product | Base plan | Price (US) | Offer |
+|---|---|---|---|
+| `pro_monthly` | `monthly` (P1M) | $9.99 | none |
+| `pro_annual` | `annual` (P1Y) | $59.99 | `free-trial-3d`: 3-day free trial, ACTIVE, new-subscriber eligibility scoped to *any subscription in app* (the Play equivalent of Apple's one-intro-offer-per-subscription-group rule) |
+
+Both base plans are US-only for now (`regionalConfigs` = US). Add regions here and in App Store Connect together.
+
+The trial offer was created and activated through the Play Developer API with the `play-publisher` service account (`subscriptions.basePlans.offers.create` then `:activate`, with `regionsVersion.version=2022/02`); nothing in the app changes when an offer is added or removed, because the SDK reads the offer off the product. Google Play only returns offers the customer is eligible for, so on Android `product.introPrice` being present is the eligibility signal (`lib/purchases.js` `fetchTrialEligibility`); the iOS eligibility API always answers UNKNOWN on Android and must not be consulted there.
+
+## 9. Android build requirements (added with the API-36 branch)
 
 - **Maps API key + Play App Signing:** Google Play re-signs the app with its own key. The Android Maps API key restriction must include the **Play App Signing certificate SHA-1 fingerprint** (Play Console → Test and release → App integrity → App signing key certificate, visible after the first upload) in addition to the upload-key fingerprint — otherwise store-installed builds show a **blank map** while local/EAS-internal installs work fine.
 - **versionCode:** auto-increments via EAS (`autoIncrement: true` in the `production` profile with `appVersionSource: "remote"`) — do not hand-manage it.
