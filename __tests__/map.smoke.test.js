@@ -74,3 +74,66 @@ test.each([false, true])('directory loading uses map bounds without GPS (isPro: 
   expect(JSON.stringify(tree.toJSON())).toContain('Couldn’t load wineries. Tap to retry.');
   await act(async () => tree.unmount());
 });
+
+// #277: a viewport that stays inside a fully-loaded box needs no new fetch and
+// never flips a loading state; the spinner only appears for a slow fetch.
+test('panning inside a fully covered box does not refetch or show the spinner', async () => {
+  usePro.mockReturnValue({ isPro: false, presentPaywall: jest.fn() });
+  const MapView = require('react-native-maps').default;
+  let resolveFetch;
+  wineryDirectoryService.getInBounds.mockImplementation(
+    () => new Promise((resolve) => { resolveFetch = resolve; })
+  );
+  let tree;
+  await act(async () => { tree = create(<MapScreen />); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(360); });
+  expect(wineryDirectoryService.getInBounds).toHaveBeenCalledTimes(1);
+  // Still loading after the grace period: the search pill shows a spinner and
+  // the old text pill is gone.
+  await act(async () => { await jest.advanceTimersByTimeAsync(450); });
+  expect(tree.root.findAllByProps({ accessibilityLabel: 'Loading wineries' }).length).toBeGreaterThan(0);
+  expect(JSON.stringify(tree.toJSON())).not.toContain('Loading wineries…');
+  await act(async () => { resolveFetch({ success: true, wineries: [], truncated: false }); });
+  expect(tree.root.findAllByProps({ accessibilityLabel: 'Loading wineries' })).toHaveLength(0);
+
+  // Zoom in on the same spot: inside the loaded box, so no second query.
+  const map = tree.root.findByType(MapView);
+  await act(async () => map.props.onRegionChangeComplete({
+    latitude: 37.4316, longitude: -78.6569, latitudeDelta: 1, longitudeDelta: 1,
+  }));
+  await act(async () => { await jest.advanceTimersByTimeAsync(1000); });
+  expect(wineryDirectoryService.getInBounds).toHaveBeenCalledTimes(1);
+
+  // Pan far away: outside the box, so it fetches again.
+  await act(async () => map.props.onRegionChangeComplete({
+    latitude: 38.5, longitude: -122.4, latitudeDelta: 0.5, longitudeDelta: 0.5,
+  }));
+  await act(async () => { await jest.advanceTimersByTimeAsync(400); });
+  expect(wineryDirectoryService.getInBounds).toHaveBeenCalledTimes(2);
+  await act(async () => tree.unmount());
+});
+
+// #269: the places sheet is keyboard-aware and its title follows the tab.
+test('the places sheet avoids the keyboard, dismisses it on drag, and titles the Find tab', async () => {
+  usePro.mockReturnValue({ isPro: false, presentPaywall: jest.fn() });
+  const { FlatList, KeyboardAvoidingView } = require('react-native');
+  let tree;
+  await act(async () => { tree = create(<MapScreen />); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(400); });
+  const search = tree.root.findAllByType(TouchableOpacity).find((node) =>
+    node.findAllByType(Text).some((text) => text.props.children === 'Search wineries & your places'));
+  await act(async () => search.props.onPress());
+  expect(tree.root.findAllByType(KeyboardAvoidingView)).toHaveLength(1);
+  const list = tree.root.findByType(FlatList);
+  expect(list.props.keyboardDismissMode).toBe('on-drag');
+  expect(list.props.keyboardShouldPersistTaps).toBe('handled');
+  expect(tree.root.findByType(TextInput).props.onSubmitEditing).toBeDefined();
+  const titles = () => tree.root.findAllByType(Text).map((t) => t.props.children);
+  expect(titles()).toContain('Find a winery');
+  // The segment reads "Visited (n)"; the filter chip above the map is plain "Visited".
+  const visitedTab = tree.root.findAllByType(TouchableOpacity).find((node) =>
+    node.findAllByType(Text).some((text) => Array.isArray(text.props.children) && text.props.children[0] === 'Visited ('));
+  await act(async () => visitedTab.props.onPress());
+  expect(titles()).toContain('Your places');
+  await act(async () => tree.unmount());
+});

@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AgeGate from '../components/AgeGate';
+import ErrorBoundary from '../components/ErrorBoundary';
 import OfflineBanner from '../components/OfflineBanner';
 import { ProProvider } from '../components/ProProvider';
 import { checkAndReschedule, setNotificationHandler } from '../lib/notifications';
@@ -399,6 +400,10 @@ function AppRoot() {
             {/* Pinned above the navigator so it shows on every screen (§2.3). */}
             <OfflineBanner />
             <ThemeProvider value={navigationTheme}>
+              {/* A render throw in any screen lands here instead of on a blank
+                  white screen. Inside the providers so a retry keeps the
+                  session, theme and Pro state. */}
+              <ErrorBoundary>
               <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.neutral.bg } }}>
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="login" />
@@ -414,6 +419,7 @@ function AppRoot() {
                 <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
                 <Stack.Screen name="+not-found" />
               </Stack>
+              </ErrorBoundary>
               <StatusBar style={isDark ? 'light' : 'dark'} />
             </ThemeProvider>
             {/* Last child so its opaque absolute fill covers every screen

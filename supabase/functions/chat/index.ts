@@ -8,8 +8,8 @@
 // It is also the server-side gate for the Pro tier (launch plan §4.5 item 4).
 // The free meters live HERE, not in the app: `isPro` from the client is a
 // rendering hint, and a patched client must not be able to buy Claude calls.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
+import { type HandlerDeps, resolveDeps } from "../_shared/deps.ts";
 import {
   BURST_WINDOW_MIN,
   gateAiRequest,
@@ -54,399 +54,406 @@ const SYSTEM_PROMPT_FLOOR =
 // fetches the three usage counts and returns whatever gateAiRequest() decides,
 // so the sequences in __tests__/ai-gates.test.js exercise the production logic.
 
-Deno.serve(async (req: Request) => {
-  const cors = corsHeaders(req);
-  const json = (body: unknown, status = 200) =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+/**
+ * Build the request handler. `deps` default to the real Supabase client,
+ * `fetch`, `Deno.env` and `Date.now`; tests substitute fakes. The handler
+ * itself is exactly what `Deno.serve` ran before the factory existed.
+ */
+export function createHandler(overrides: Partial<HandlerDeps> = {}) {
+  const deps = resolveDeps(overrides);
 
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: cors });
-  }
+  return async (req: Request): Promise<Response> => {
+    const cors = corsHeaders(req);
+    const json = (body: unknown, status = 200) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
 
-  try {
-    // ── Auth ──────────────────────────────────────────────────────────
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return json({ error: "Missing authorization" }, 401);
-
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser();
-    if (userError || !user) return json({ error: "Unauthorized" }, 401);
-
-    // ── Body size guard (read raw, then parse) ────────────────────────
-    const raw = await req.text();
-    if (raw.length > MAX_BODY_BYTES) {
-      return json({ error: "Payload too large" }, 413);
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { headers: cors });
     }
 
-    let parsed: { messages?: unknown; system_prompt?: unknown; task?: unknown; ai_sharing_version?: unknown };
     try {
-      parsed = JSON.parse(raw);
-    } catch {
-      return json({ error: "Invalid JSON body" }, 400);
-    }
-    const { messages, system_prompt, task, ai_sharing_version } = parsed;
+      // ── Auth ──────────────────────────────────────────────────────────
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) return json({ error: "Missing authorization" }, 401);
 
-    // ── Input validation ──────────────────────────────────────────────
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return json({ error: "messages array is required" }, 400);
-    }
-    if (messages.length > MAX_MESSAGES) {
-      return json({ error: "Too many messages" }, 400);
-    }
-    if (system_prompt !== undefined && typeof system_prompt !== "string") {
-      return json({ error: "system_prompt must be a string" }, 400);
-    }
+      const supabaseClient = deps.createUserClient(authHeader);
 
-    for (const msg of messages as Array<Record<string, unknown>>) {
-      if (!msg || typeof msg !== "object") {
-        return json({ error: "Invalid message" }, 400);
-      }
-      if (!ALLOWED_ROLES.includes(msg.role as string)) {
-        return json({ error: "Invalid message role" }, 400);
-      }
-      if (msg.content !== undefined && typeof msg.content !== "string") {
-        return json({ error: "Message content must be a string" }, 400);
-      }
-      if (typeof msg.content === "string" && msg.content.length > MAX_CONTENT_CHARS) {
-        return json({ error: "Message content too long" }, 400);
-      }
-      if (msg.images !== undefined) {
-        if (!Array.isArray(msg.images)) {
-          return json({ error: "images must be an array" }, 400);
-        }
-        if (msg.images.length > MAX_IMAGES_PER_MESSAGE) {
-          return json({ error: "Too many images in a message" }, 400);
-        }
-        for (const img of msg.images as Array<Record<string, unknown>>) {
-          if (!img || typeof img.base64 !== "string") {
-            return json({ error: "Invalid image payload" }, 400);
-          }
-          if (img.base64.length > MAX_IMAGE_B64_CHARS) {
-            return json({ error: "Image too large" }, 413);
-          }
-          if (
-            img.mediaType !== undefined &&
-            !ALLOWED_MEDIA_TYPES.includes(img.mediaType as string)
-          ) {
-            return json({ error: "Unsupported image type" }, 400);
-          }
-        }
-      }
-    }
+      const {
+        data: { user },
+        error: userError,
+      } = await supabaseClient.auth.getUser();
+      if (userError || !user) return json({ error: "Unauthorized" }, 401);
 
-    // Older clients accepted an Anthropic-only disclosure. Never silently send
-    // their scans to a new provider. Updated clients attach this after consent.
-    if (visionConsentRequired(task, ai_sharing_version)) {
-      return json({ error: "Please update the app and review AI sharing before scanning.", code: "ai_consent_required" }, 428);
-    }
-    if (isVisionTask(task) && !messages.some((m) => m.role === "user" &&
-      Array.isArray(m.images) && m.images.some((i: { base64: string }) => i.base64.length > 0))) {
-      return json({ error: "A photo is required for a wine scan." }, 400);
-    }
-
-    // ── Usage counts + entitlement (the inputs the gate decides on) ───
-    const now = Date.now();
-    const meteredTask = normalizeTask(task);
-    const burstStart = new Date(now - BURST_WINDOW_MIN * 60_000).toISOString();
-    const dayStart = new Date(now - 24 * 60 * 60_000).toISOString();
-
-    const [burstRes, dayRes, entitlementRes] = await Promise.all([
-      supabaseClient
-        .from("chat_usage")
-        .select("id", { count: "exact", head: true })
-        .gte("created_at", burstStart),
-      supabaseClient
-        .from("chat_usage")
-        .select("id", { count: "exact", head: true })
-        .eq("task", meteredTask)
-        .gte("created_at", dayStart),
-      supabaseClient
-        .from("entitlements")
-        .select("is_pro, expires_at")
-        .eq("user_id", user.id)
-        .maybeSingle(),
-    ]);
-
-    // The chat_usage RLS auto-scopes counts to this user. Fail closed on any
-    // unreadable input: if we cannot count usage or prove a purchase, refuse
-    // the paid provider call rather than run it unmetered.
-    if (burstRes.error || dayRes.error || entitlementRes.error) {
-      console.error(
-        "Gate input read error:",
-        burstRes.error,
-        dayRes.error,
-        entitlementRes.error
-      );
-      return json({ error: "Service temporarily unavailable" }, 503);
-    }
-
-    // The window count — lifetime for scans, calendar month for chat — feeds
-    // both the free meter and Pro's monthly chat ceiling. Pro scans skip it.
-    const isPro = isEntitlementActive(entitlementRes.data, now);
-    let windowUsed = 0;
-    if (needsWindowCount(isPro, meteredTask)) {
-      let usageQuery = supabaseClient
-        .from("chat_usage")
-        .select("id", { count: "exact", head: true })
-        .eq("task", meteredTask);
-      const windowStart = usageWindowStart(meteredTask, now);
-      if (windowStart) usageQuery = usageQuery.gte("created_at", windowStart);
-      const usageRes = await usageQuery;
-      if (usageRes.error) {
-        console.error("Usage meter read error:", usageRes.error);
-        return json({ error: "Service temporarily unavailable" }, 503);
-      }
-      windowUsed = usageRes.count ?? 0;
-    }
-
-    const hasImages = (messages as Array<Record<string, unknown>>).some(
-      (m) => Array.isArray(m.images) && m.images.length > 0
-    );
-
-    const verdict = gateAiRequest({
-      nowMs: now,
-      task,
-      hasImages,
-      entitlement: entitlementRes.data,
-      counts: {
-        burst: burstRes.count ?? 0,
-        day: dayRes.count ?? 0,
-        window: windowUsed,
-      },
-    });
-    if (!verdict.allowed) {
-      return json(verdict.body, verdict.status);
-    }
-    const meter = verdict.meter;
-
-    const tools = webSearchToolsFor({ isPro, task: meteredTask });
-    const canSearch = !isVisionTask(task) && tools.length > 0;
-    let responseText = "";
-    let sources: ReturnType<typeof collectSources> = [];
-    let usageInputTokens = 0;
-    let usageOutputTokens = 0;
-    let webSearches = 0;
-    let scanFailure: { error: string; status: number } | null = null;
-
-    if (isVisionTask(task)) {
-      const googleApiKey = Deno.env.get("GEMINI_API_KEY");
-      if (!googleApiKey) {
-        console.error("GEMINI_API_KEY not configured");
-        return json({ error: "Service temporarily unavailable" }, 503);
-      }
-      const result = await requestGeminiVision(task, messages as VisionMessage[], SYSTEM_PROMPT_FLOOR,
-        (system_prompt as string) || "Read the wines printed in this photo.", googleApiKey);
-      responseText = result.response;
-      usageInputTokens = result.inputTokens;
-      usageOutputTokens = result.outputTokens;
-      if (result.error) scanFailure = { error: result.error, status: result.status || 502 };
-    } else {
-      // ── API key ───────────────────────────────────────────────────────
-      const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
-      if (!anthropicApiKey) {
-        console.error("ANTHROPIC_API_KEY not configured");
-        return json({ error: "Service temporarily unavailable" }, 503);
+      // ── Body size guard (read raw, then parse) ────────────────────────
+      const raw = await req.text();
+      if (raw.length > MAX_BODY_BYTES) {
+        return json({ error: "Payload too large" }, 413);
       }
 
-      // ── Build Claude messages ─────────────────────────────────────────
-      const claudeMessages = [];
+      let parsed: { messages?: unknown; system_prompt?: unknown; task?: unknown; ai_sharing_version?: unknown };
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        return json({ error: "Invalid JSON body" }, 400);
+      }
+      const { messages, system_prompt, task, ai_sharing_version } = parsed;
+
+      // ── Input validation ──────────────────────────────────────────────
+      if (!Array.isArray(messages) || messages.length === 0) {
+        return json({ error: "messages array is required" }, 400);
+      }
+      if (messages.length > MAX_MESSAGES) {
+        return json({ error: "Too many messages" }, 400);
+      }
+      if (system_prompt !== undefined && typeof system_prompt !== "string") {
+        return json({ error: "system_prompt must be a string" }, 400);
+      }
+
       for (const msg of messages as Array<Record<string, unknown>>) {
-        const images = (msg.images as Array<Record<string, unknown>>) || [];
-        const text = (msg.content as string) || "";
-
-        if (images.length > 0) {
-          const content: Array<
-            | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
-            | { type: "text"; text: string }
-          > = [];
-          for (const img of images) {
-            if (typeof img.base64 === "string" && img.base64.length > 0) {
-              content.push({
-                type: "image",
-                source: {
-                  type: "base64",
-                  media_type: (img.mediaType as string) || "image/jpeg",
-                  data: img.base64 as string,
-                },
-              });
+        if (!msg || typeof msg !== "object") {
+          return json({ error: "Invalid message" }, 400);
+        }
+        if (!ALLOWED_ROLES.includes(msg.role as string)) {
+          return json({ error: "Invalid message role" }, 400);
+        }
+        if (msg.content !== undefined && typeof msg.content !== "string") {
+          return json({ error: "Message content must be a string" }, 400);
+        }
+        if (typeof msg.content === "string" && msg.content.length > MAX_CONTENT_CHARS) {
+          return json({ error: "Message content too long" }, 400);
+        }
+        if (msg.images !== undefined) {
+          if (!Array.isArray(msg.images)) {
+            return json({ error: "images must be an array" }, 400);
+          }
+          if (msg.images.length > MAX_IMAGES_PER_MESSAGE) {
+            return json({ error: "Too many images in a message" }, 400);
+          }
+          for (const img of msg.images as Array<Record<string, unknown>>) {
+            if (!img || typeof img.base64 !== "string") {
+              return json({ error: "Invalid image payload" }, 400);
+            }
+            if (img.base64.length > MAX_IMAGE_B64_CHARS) {
+              return json({ error: "Image too large" }, 413);
+            }
+            if (
+              img.mediaType !== undefined &&
+              !ALLOWED_MEDIA_TYPES.includes(img.mediaType as string)
+            ) {
+              return json({ error: "Unsupported image type" }, 400);
             }
           }
-          if (text) content.push({ type: "text", text });
-          if (content.some((c) => c.type === "image")) {
-            claudeMessages.push({ role: msg.role, content });
+        }
+      }
+
+      // Older clients accepted an Anthropic-only disclosure. Never silently send
+      // their scans to a new provider. Updated clients attach this after consent.
+      if (visionConsentRequired(task, ai_sharing_version)) {
+        return json({ error: "Please update the app and review AI sharing before scanning.", code: "ai_consent_required" }, 428);
+      }
+      if (isVisionTask(task) && !messages.some((m) => m.role === "user" &&
+        Array.isArray(m.images) && m.images.some((i: { base64: string }) => i.base64.length > 0))) {
+        return json({ error: "A photo is required for a wine scan." }, 400);
+      }
+
+      // ── Usage counts + entitlement (the inputs the gate decides on) ───
+      const now = deps.now();
+      const meteredTask = normalizeTask(task);
+      const burstStart = new Date(now - BURST_WINDOW_MIN * 60_000).toISOString();
+      const dayStart = new Date(now - 24 * 60 * 60_000).toISOString();
+
+      const [burstRes, dayRes, entitlementRes] = await Promise.all([
+        supabaseClient
+          .from("chat_usage")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", burstStart),
+        supabaseClient
+          .from("chat_usage")
+          .select("id", { count: "exact", head: true })
+          .eq("task", meteredTask)
+          .gte("created_at", dayStart),
+        supabaseClient
+          .from("entitlements")
+          .select("is_pro, expires_at")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]);
+
+      // The chat_usage RLS auto-scopes counts to this user. Fail closed on any
+      // unreadable input: if we cannot count usage or prove a purchase, refuse
+      // the paid provider call rather than run it unmetered.
+      if (burstRes.error || dayRes.error || entitlementRes.error) {
+        console.error(
+          "Gate input read error:",
+          burstRes.error,
+          dayRes.error,
+          entitlementRes.error
+        );
+        return json({ error: "Service temporarily unavailable" }, 503);
+      }
+
+      // The window count — lifetime for scans, calendar month for chat — feeds
+      // both the free meter and Pro's monthly chat ceiling. Pro scans skip it.
+      const isPro = isEntitlementActive(entitlementRes.data, now);
+      let windowUsed = 0;
+      if (needsWindowCount(isPro, meteredTask)) {
+        let usageQuery = supabaseClient
+          .from("chat_usage")
+          .select("id", { count: "exact", head: true })
+          .eq("task", meteredTask);
+        const windowStart = usageWindowStart(meteredTask, now);
+        if (windowStart) usageQuery = usageQuery.gte("created_at", windowStart);
+        const usageRes = await usageQuery;
+        if (usageRes.error) {
+          console.error("Usage meter read error:", usageRes.error);
+          return json({ error: "Service temporarily unavailable" }, 503);
+        }
+        windowUsed = usageRes.count ?? 0;
+      }
+
+      const hasImages = (messages as Array<Record<string, unknown>>).some(
+        (m) => Array.isArray(m.images) && m.images.length > 0
+      );
+
+      const verdict = gateAiRequest({
+        nowMs: now,
+        task,
+        hasImages,
+        entitlement: entitlementRes.data,
+        counts: {
+          burst: burstRes.count ?? 0,
+          day: dayRes.count ?? 0,
+          window: windowUsed,
+        },
+      });
+      if (!verdict.allowed) {
+        return json(verdict.body, verdict.status);
+      }
+      const meter = verdict.meter;
+
+      const tools = webSearchToolsFor({ isPro, task: meteredTask });
+      const canSearch = !isVisionTask(task) && tools.length > 0;
+      let responseText = "";
+      let sources: ReturnType<typeof collectSources> = [];
+      let usageInputTokens = 0;
+      let usageOutputTokens = 0;
+      let webSearches = 0;
+      let scanFailure: { error: string; status: number } | null = null;
+
+      if (isVisionTask(task)) {
+        const googleApiKey = deps.env("GEMINI_API_KEY");
+        if (!googleApiKey) {
+          console.error("GEMINI_API_KEY not configured");
+          return json({ error: "Service temporarily unavailable" }, 503);
+        }
+        const result = await requestGeminiVision(task, messages as VisionMessage[], SYSTEM_PROMPT_FLOOR,
+          (system_prompt as string) || "Read the wines printed in this photo.", googleApiKey, deps.fetch);
+        responseText = result.response;
+        usageInputTokens = result.inputTokens;
+        usageOutputTokens = result.outputTokens;
+        if (result.error) scanFailure = { error: result.error, status: result.status || 502 };
+      } else {
+        // ── API key ───────────────────────────────────────────────────────
+        const anthropicApiKey = deps.env("ANTHROPIC_API_KEY");
+        if (!anthropicApiKey) {
+          console.error("ANTHROPIC_API_KEY not configured");
+          return json({ error: "Service temporarily unavailable" }, 503);
+        }
+
+        // ── Build Claude messages ─────────────────────────────────────────
+        const claudeMessages = [];
+        for (const msg of messages as Array<Record<string, unknown>>) {
+          const images = (msg.images as Array<Record<string, unknown>>) || [];
+          const text = (msg.content as string) || "";
+
+          if (images.length > 0) {
+            const content: Array<
+              | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
+              | { type: "text"; text: string }
+            > = [];
+            for (const img of images) {
+              if (typeof img.base64 === "string" && img.base64.length > 0) {
+                content.push({
+                  type: "image",
+                  source: {
+                    type: "base64",
+                    media_type: (img.mediaType as string) || "image/jpeg",
+                    data: img.base64 as string,
+                  },
+                });
+              }
+            }
+            if (text) content.push({ type: "text", text });
+            if (content.some((c) => c.type === "image")) {
+              claudeMessages.push({ role: msg.role, content });
+            } else {
+              claudeMessages.push({ role: msg.role, content: text });
+            }
           } else {
             claudeMessages.push({ role: msg.role, content: text });
           }
-        } else {
-          claudeMessages.push({ role: msg.role, content: text });
-        }
-      }
-
-      // ── Model selection (server-side allowlist) ───────────────────────
-      // The client may pass a `task` hint; we map it to a model HERE. We never
-      // accept a raw model string from the client (cost/abuse safety): an unknown
-      // or absent task falls back to the default chat model.
-      const MODELS: Record<string, string> = {
-        chat: "claude-sonnet-4-6", // sommelier conversation (migrated off the deprecated claude-sonnet-4)
-        // Journal reasoning stays on Sonnet. Scan tasks use Gemini above.
-        wine_list_pick: "claude-sonnet-4-6",
-        taste_report: "claude-sonnet-4-6",
-        trip_plan: "claude-sonnet-4-6",
-      };
-      const model =
-        typeof task === "string" && Object.prototype.hasOwnProperty.call(MODELS, task)
-          ? MODELS[task]
-          : MODELS.chat;
-
-      // Output ceilings for journal reasoning; scan budgets live in geminiVision.ts.
-      // These are ceilings, not spend: unused headroom costs nothing.
-      const MAX_OUTPUT_TOKENS: Record<string, number> = {
-        wine_list_pick: 1536,
-        taste_report: 1536,
-        trip_plan: 1536,
-      };
-
-
-      // ── Server tools ──────────────────────────────────────────────────
-      // Pro-only web search, so the sommelier can look a wine up instead of
-      // recalling it. Empty for free users — an absent tool is the only kind a
-      // patched client cannot talk us into using. See webSearchToolsFor().
-      //
-      // Note this splits the prompt cache by tier: `tools` renders BEFORE `system`,
-      // so Pro and free users have different cached prefixes. That is correct
-      // (they are different requests), just worth knowing when reading cache stats.
-      const maxTokens =
-        typeof task === "string" && Object.prototype.hasOwnProperty.call(MAX_OUTPUT_TOKENS, task)
-          ? MAX_OUTPUT_TOKENS[task]
-          : canSearch
-          ? 2048
-          : 1024;
-
-      // ── Call Claude ───────────────────────────────────────────────────
-      // A searched reply is a MIXED content list (server_tool_use +
-      // web_search_tool_result + several cited text blocks) spread over a
-      // server-side sampling loop, and if that loop hits its iteration limit the
-      // turn comes back `pause_turn` — finished thinking, not finished talking.
-      // Resuming is just re-sending the same messages with the partial assistant
-      // turn appended; the server sees the trailing tool block and picks up. We
-      // bound it because "loop until the model says stop" is how a $0.03 message
-      // becomes a $3 one.
-      const MAX_PAUSE_RESUMES = 2;
-      const conversation: Array<Record<string, unknown>> = [...claudeMessages];
-      const responseBlocks: unknown[] = [];
-
-      for (let resume = 0; ; resume++) {
-        const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": anthropicApiKey,
-            "anthropic-version": "2023-06-01",
-          },
-          body: JSON.stringify({
-            model,
-            // Room for a cited answer without truncating mid-sentence. max_tokens
-            // is a ceiling, not a spend — unused headroom costs nothing.
-            max_tokens: maxTokens,
-            // Prompt caching (launch plan §4.3): the system prompt is stable across
-            // the turns of a sommelier conversation (and byte-identical across all
-            // label scans), so mark it as a cache breakpoint — cached reads bill at
-            // ~10% of input price. Prompts under the model's minimum cacheable size
-            // silently skip the cache, so this is safe for short prompts too.
-            // The breakpoint on the LAST block caches everything before it, so the
-            // floor block rides in the same cache entry for free.
-            system: [
-              { type: "text", text: SYSTEM_PROMPT_FLOOR },
-              {
-                type: "text",
-                text: (system_prompt as string) || "You are a helpful wine sommelier.",
-                cache_control: { type: "ephemeral" },
-              },
-            ],
-            messages: conversation,
-            ...(canSearch ? { tools } : {}),
-          }),
-        });
-
-        if (!claudeResponse.ok) {
-          const errorText = await claudeResponse.text();
-          console.error("Claude API error:", claudeResponse.status, errorText);
-          // Log details server-side; return a generic message + a proper status code.
-          const status = claudeResponse.status === 429 ? 429 : 502;
-          return json(
-            { error: "The sommelier is unavailable right now. Please try again." },
-            status
-          );
         }
 
-        const claudeData = await claudeResponse.json();
-        if (Array.isArray(claudeData.content)) responseBlocks.push(...claudeData.content);
-        usageInputTokens += claudeData.usage?.input_tokens ?? 0;
-        usageOutputTokens += claudeData.usage?.output_tokens ?? 0;
-        webSearches += webSearchRequestCount(claudeData.usage);
+        // ── Model selection (server-side allowlist) ───────────────────────
+        // The client may pass a `task` hint; we map it to a model HERE. We never
+        // accept a raw model string from the client (cost/abuse safety): an unknown
+        // or absent task falls back to the default chat model.
+        const MODELS: Record<string, string> = {
+          chat: "claude-sonnet-4-6", // sommelier conversation (migrated off the deprecated claude-sonnet-4)
+          // Journal reasoning stays on Sonnet. Scan tasks use Gemini above.
+          wine_list_pick: "claude-sonnet-4-6",
+          taste_report: "claude-sonnet-4-6",
+          trip_plan: "claude-sonnet-4-6",
+        };
+        const model =
+          typeof task === "string" && Object.prototype.hasOwnProperty.call(MODELS, task)
+            ? MODELS[task]
+            : MODELS.chat;
 
-        if (claudeData.stop_reason !== "pause_turn" || resume >= MAX_PAUSE_RESUMES) break;
-        // Resume: append the paused turn verbatim. Do NOT add a "continue" message —
-        // the API detects the trailing server_tool_use block and carries on itself.
-        conversation.push({ role: "assistant", content: claudeData.content });
+        // Output ceilings for journal reasoning; scan budgets live in geminiVision.ts.
+        // These are ceilings, not spend: unused headroom costs nothing.
+        const MAX_OUTPUT_TOKENS: Record<string, number> = {
+          wine_list_pick: 1536,
+          taste_report: 1536,
+          trip_plan: 1536,
+        };
+
+
+        // ── Server tools ──────────────────────────────────────────────────
+        // Pro-only web search, so the sommelier can look a wine up instead of
+        // recalling it. Empty for free users — an absent tool is the only kind a
+        // patched client cannot talk us into using. See webSearchToolsFor().
+        //
+        // Note this splits the prompt cache by tier: `tools` renders BEFORE `system`,
+        // so Pro and free users have different cached prefixes. That is correct
+        // (they are different requests), just worth knowing when reading cache stats.
+        const maxTokens =
+          typeof task === "string" && Object.prototype.hasOwnProperty.call(MAX_OUTPUT_TOKENS, task)
+            ? MAX_OUTPUT_TOKENS[task]
+            : canSearch
+            ? 2048
+            : 1024;
+
+        // ── Call Claude ───────────────────────────────────────────────────
+        // A searched reply is a MIXED content list (server_tool_use +
+        // web_search_tool_result + several cited text blocks) spread over a
+        // server-side sampling loop, and if that loop hits its iteration limit the
+        // turn comes back `pause_turn` — finished thinking, not finished talking.
+        // Resuming is just re-sending the same messages with the partial assistant
+        // turn appended; the server sees the trailing tool block and picks up. We
+        // bound it because "loop until the model says stop" is how a $0.03 message
+        // becomes a $3 one.
+        const MAX_PAUSE_RESUMES = 2;
+        const conversation: Array<Record<string, unknown>> = [...claudeMessages];
+        const responseBlocks: unknown[] = [];
+
+        for (let resume = 0; ; resume++) {
+          const claudeResponse = await deps.fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-api-key": anthropicApiKey,
+              "anthropic-version": "2023-06-01",
+            },
+            body: JSON.stringify({
+              model,
+              // Room for a cited answer without truncating mid-sentence. max_tokens
+              // is a ceiling, not a spend — unused headroom costs nothing.
+              max_tokens: maxTokens,
+              // Prompt caching (launch plan §4.3): the system prompt is stable across
+              // the turns of a sommelier conversation (and byte-identical across all
+              // label scans), so mark it as a cache breakpoint — cached reads bill at
+              // ~10% of input price. Prompts under the model's minimum cacheable size
+              // silently skip the cache, so this is safe for short prompts too.
+              // The breakpoint on the LAST block caches everything before it, so the
+              // floor block rides in the same cache entry for free.
+              system: [
+                { type: "text", text: SYSTEM_PROMPT_FLOOR },
+                {
+                  type: "text",
+                  text: (system_prompt as string) || "You are a helpful wine sommelier.",
+                  cache_control: { type: "ephemeral" },
+                },
+              ],
+              messages: conversation,
+              ...(canSearch ? { tools } : {}),
+            }),
+          });
+
+          if (!claudeResponse.ok) {
+            const errorText = await claudeResponse.text();
+            console.error("Claude API error:", claudeResponse.status, errorText);
+            // Log details server-side; return a generic message + a proper status code.
+            const status = claudeResponse.status === 429 ? 429 : 502;
+            return json(
+              { error: "The sommelier is unavailable right now. Please try again." },
+              status
+            );
+          }
+
+          const claudeData = await claudeResponse.json();
+          if (Array.isArray(claudeData.content)) responseBlocks.push(...claudeData.content);
+          usageInputTokens += claudeData.usage?.input_tokens ?? 0;
+          usageOutputTokens += claudeData.usage?.output_tokens ?? 0;
+          webSearches += webSearchRequestCount(claudeData.usage);
+
+          if (claudeData.stop_reason !== "pause_turn" || resume >= MAX_PAUSE_RESUMES) break;
+          // Resume: append the paused turn verbatim. Do NOT add a "continue" message —
+          // the API detects the trailing server_tool_use block and carries on itself.
+          conversation.push({ role: "assistant", content: claudeData.content });
+        }
+
+        // Text and sources are read across every turn at once, so a paused-and-
+        // resumed answer reads as one reply and cites each page only once.
+        responseText = textFromContent(responseBlocks);
+        sources = collectSources(responseBlocks);
+
       }
 
-      // Text and sources are read across every turn at once, so a paused-and-
-      // resumed answer reads as one reply and cites each page only once.
-      responseText = textFromContent(responseBlocks);
-      sources = collectSources(responseBlocks);
+      // ── Record usage (append-only; best-effort) ───────────────────────
+      const { error: usageError } = await supabaseClient.from("chat_usage").insert({
+        user_id: user.id,
+        task: meteredTask,
+        input_tokens: usageInputTokens || null,
+        output_tokens: usageOutputTokens || null,
+        // Only meaningful where search was actually on the table; null elsewhere
+        // keeps "free users never search" readable straight off the table.
+        web_searches: canSearch ? webSearches : null,
+      });
+      if (usageError) console.error("Failed to record chat_usage:", usageError);
 
+      const nextMeter = {
+        task: meter.task,
+        limit: meter.limit,
+        used: meter.used + 1,
+        remaining: meter.remaining === null ? null : Math.max(0, meter.remaining - 1),
+        isPro,
+      };
+      // Failed scans still consume an attempt; update the client meter without partial wine data.
+      if (scanFailure) return json({ error: scanFailure.error, meter: nextMeter }, scanFailure.status);
+
+      // Hand back the meter this call just spent, so the app can update its
+      // "2 free scans left" hint without a second round-trip.
+      return json({
+        response: responseText,
+        // Pages behind the answer, for the "Sources" row under a reply. Always an
+        // array so the client never has to null-check it.
+        sources,
+        usage: {
+          input_tokens: usageInputTokens,
+          output_tokens: usageOutputTokens,
+          web_searches: webSearches,
+        },
+        meter: nextMeter,
+      });
+    } catch (error) {
+      console.error("Edge function error:", error);
+      return json({ error: "Internal error" }, 500);
     }
+  };
+}
 
-    // ── Record usage (append-only; best-effort) ───────────────────────
-    const { error: usageError } = await supabaseClient.from("chat_usage").insert({
-      user_id: user.id,
-      task: meteredTask,
-      input_tokens: usageInputTokens || null,
-      output_tokens: usageOutputTokens || null,
-      // Only meaningful where search was actually on the table; null elsewhere
-      // keeps "free users never search" readable straight off the table.
-      web_searches: canSearch ? webSearches : null,
-    });
-    if (usageError) console.error("Failed to record chat_usage:", usageError);
-
-    const nextMeter = {
-      task: meter.task,
-      limit: meter.limit,
-      used: meter.used + 1,
-      remaining: meter.remaining === null ? null : Math.max(0, meter.remaining - 1),
-      isPro,
-    };
-    // Failed scans still consume an attempt; update the client meter without partial wine data.
-    if (scanFailure) return json({ error: scanFailure.error, meter: nextMeter }, scanFailure.status);
-
-    // Hand back the meter this call just spent, so the app can update its
-    // "2 free scans left" hint without a second round-trip.
-    return json({
-      response: responseText,
-      // Pages behind the answer, for the "Sources" row under a reply. Always an
-      // array so the client never has to null-check it.
-      sources,
-      usage: {
-        input_tokens: usageInputTokens,
-        output_tokens: usageOutputTokens,
-        web_searches: webSearches,
-      },
-      meter: nextMeter,
-    });
-  } catch (error) {
-    console.error("Edge function error:", error);
-    return json({ error: "Internal error" }, 500);
-  }
-});
+if (import.meta.main) Deno.serve(createHandler());

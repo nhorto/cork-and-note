@@ -106,7 +106,7 @@ test('a Pro user with the layer on sees polygons at zoom 6+, a hint below it, an
   // Default Virginia view is longitudeDelta 5, zoom ~6.2: both regions render.
   expect(tree.root.findAllByType('Polygon')).toHaveLength(2);
   expect(polygon(tree, 'outer').props.coordinates[0]).toEqual({ latitude: 36.5, longitude: -80 });
-  expect(polygon(tree, 'outer').props.strokeWidth).toBe(1.5);
+  expect(polygon(tree, 'outer').props.strokeWidth).toBe(2);
   expect(polygon(tree, 'inner')).toBeDefined();
   expect(texts(tree)).not.toContain('Zoom in to see wine regions');
 
@@ -117,8 +117,8 @@ test('a Pro user with the layer on sees polygons at zoom 6+, a hint below it, an
   expect(after).toContain('Outer Valley');
   expect(after).toContain('Virginia · established 1984');
   expect(after).toContain('Contains: Inner Hollow');
-  expect(polygon(tree, 'outer').props.strokeWidth).toBe(2.5);
-  expect(polygon(tree, 'inner').props.strokeWidth).toBe(1.5);
+  expect(polygon(tree, 'outer').props.strokeWidth).toBe(3);
+  expect(polygon(tree, 'inner').props.strokeWidth).toBe(2);
 
   // "Plan a day here" hands the region's centre and radius to the planner.
   await act(async () => tree.root.findByProps({ accessibilityLabel: 'Plan a day in Outer Valley' }).props.onPress());

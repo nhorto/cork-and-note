@@ -16,8 +16,8 @@
 //    route over the Apple base map (Routes display policy).
 //  - Nothing from Google is stored here. The app persists only leg minutes
 //    alongside the user's own chosen stops.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "../_shared/cors.ts";
+import { type HandlerDeps, resolveDeps } from "../_shared/deps.ts";
 import { isEntitlementActive } from "../_shared/entitlements.ts";
 
 // ── Limits ──────────────────────────────────────────────────────────────
@@ -54,169 +54,176 @@ function parseSeconds(value: unknown): number | null {
   return Math.round(Number(match[1]));
 }
 
-Deno.serve(async (req: Request) => {
-  const cors = corsHeaders(req);
-  const json = (body: unknown, status = 200) =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+/**
+ * Build the request handler. `deps` default to the real Supabase clients,
+ * `fetch`, `Deno.env` and `Date.now`; tests substitute fakes. The handler
+ * itself is exactly what `Deno.serve` ran before the factory existed.
+ */
+export function createHandler(overrides: Partial<HandlerDeps> = {}) {
+  const deps = resolveDeps(overrides);
 
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: cors });
-  }
+  return async (req: Request): Promise<Response> => {
+    const cors = corsHeaders(req);
+    const json = (body: unknown, status = 200) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
 
-  try {
-    // ── Auth ──────────────────────────────────────────────────────────
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) return json({ error: "Missing authorization" }, 401);
+    if (req.method === "OPTIONS") {
+      return new Response("ok", { headers: cors });
+    }
 
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseClient.auth.getUser();
-    if (userError || !user) return json({ error: "Unauthorized" }, 401);
-
-    // ── Body ──────────────────────────────────────────────────────────
-    const raw = await req.text();
-    if (raw.length > MAX_BODY_BYTES) return json({ error: "Payload too large" }, 413);
-
-    let parsed: Record<string, unknown>;
     try {
-      parsed = JSON.parse(raw);
-    } catch {
-      return json({ error: "Invalid JSON body" }, 400);
-    }
+      // ── Auth ──────────────────────────────────────────────────────────
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) return json({ error: "Missing authorization" }, 401);
 
-    const origin = readLatLng(parsed.origin);
-    if (!origin) return json({ error: "origin must be { lat, lng }" }, 400);
+      const supabaseClient = deps.createUserClient(authHeader);
 
-    const rawStops = parsed.stops;
-    if (!Array.isArray(rawStops) || rawStops.length < 1 || rawStops.length > MAX_STOPS) {
-      return json({ error: `stops must contain 1 to ${MAX_STOPS} points` }, 400);
-    }
-    const stops: LatLng[] = [];
-    for (const item of rawStops) {
-      const point = readLatLng(item);
-      if (!point) return json({ error: "each stop must be { lat, lng }" }, 400);
-      stops.push(point);
-    }
-    const returnToOrigin = parsed.returnToOrigin === true;
+      const {
+        data: { user },
+        error: userError,
+      } = await supabaseClient.auth.getUser();
+      if (userError || !user) return json({ error: "Unauthorized" }, 401);
 
-    // ── Pro gate (server-side; fail closed) ───────────────────────────
-    const { data: entitlement, error: entitlementError } = await supabaseClient
-      .from("entitlements")
-      .select("is_pro, expires_at")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (entitlementError) {
-      console.error("Entitlement read error:", entitlementError);
-      return json({ error: "Service temporarily unavailable" }, 503);
-    }
-    if (!isEntitlementActive(entitlement, Date.now())) {
-      return json(
-        { error: "Planning a wine day is a Pro feature.", code: "pro_required" },
-        402
-      );
-    }
+      // ── Body ──────────────────────────────────────────────────────────
+      const raw = await req.text();
+      if (raw.length > MAX_BODY_BYTES) return json({ error: "Payload too large" }, 413);
 
-    // ── Rate limiting (per user, append-only places_usage) ────────────
-    const now = Date.now();
-    const shortWindowStart = new Date(now - SHORT_WINDOW_MIN * 60_000).toISOString();
-    const dayStart = new Date(now - 24 * 60 * 60_000).toISOString();
+      let parsed: Record<string, unknown>;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        return json({ error: "Invalid JSON body" }, 400);
+      }
 
-    const [shortRes, dayRes] = await Promise.all([
-      supabaseClient
-        .from("places_usage")
-        .select("id", { count: "exact", head: true })
-        .gte("created_at", shortWindowStart),
-      supabaseClient
-        .from("places_usage")
-        .select("id", { count: "exact", head: true })
-        .eq("mode", MODE)
-        .gte("created_at", dayStart),
-    ]);
-    // RLS auto-scopes counts to this user. Fail closed: an unreadable counter
-    // refuses the metered Google call rather than running it unmetered.
-    if (shortRes.error || dayRes.error) {
-      console.error("Rate-limit read error:", shortRes.error, dayRes.error);
-      return json({ error: "Service temporarily unavailable" }, 503);
-    }
-    if ((shortRes.count ?? 0) >= MAX_REQUESTS_SHORT) {
-      return json({ error: "Too many requests. Please wait a few minutes." }, 429);
-    }
-    if ((dayRes.count ?? 0) >= MAX_ROUTES_PER_DAY) {
-      return json({ error: "Daily limit reached. Please try again tomorrow." }, 429);
-    }
+      const origin = readLatLng(parsed.origin);
+      if (!origin) return json({ error: "origin must be { lat, lng }" }, 400);
 
-    // ── API key ───────────────────────────────────────────────────────
-    const apiKey = Deno.env.get("GOOGLE_PLACES_API_KEY");
-    if (!apiKey) {
-      console.error("GOOGLE_PLACES_API_KEY not configured");
-      return json({ error: "Service temporarily unavailable" }, 503);
-    }
+      const rawStops = parsed.stops;
+      if (!Array.isArray(rawStops) || rawStops.length < 1 || rawStops.length > MAX_STOPS) {
+        return json({ error: `stops must contain 1 to ${MAX_STOPS} points` }, 400);
+      }
+      const stops: LatLng[] = [];
+      for (const item of rawStops) {
+        const point = readLatLng(item);
+        if (!point) return json({ error: "each stop must be { lat, lng }" }, 400);
+        stops.push(point);
+      }
+      const returnToOrigin = parsed.returnToOrigin === true;
 
-    // ── One computeRoutes call, fixed order ───────────────────────────
-    const destination = returnToOrigin ? origin : stops[stops.length - 1];
-    const intermediates = returnToOrigin ? stops : stops.slice(0, -1);
+      // ── Pro gate (server-side; fail closed) ───────────────────────────
+      const { data: entitlement, error: entitlementError } = await supabaseClient
+        .from("entitlements")
+        .select("is_pro, expires_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (entitlementError) {
+        console.error("Entitlement read error:", entitlementError);
+        return json({ error: "Service temporarily unavailable" }, 503);
+      }
+      if (!isEntitlementActive(entitlement, deps.now())) {
+        return json(
+          { error: "Planning a wine day is a Pro feature.", code: "pro_required" },
+          402
+        );
+      }
 
-    const body: Record<string, unknown> = {
-      origin: toWaypoint(origin),
-      destination: toWaypoint(destination),
-      travelMode: "DRIVE",
-      routingPreference: "TRAFFIC_UNAWARE",
-    };
-    if (intermediates.length > 0) body.intermediates = intermediates.map(toWaypoint);
+      // ── Rate limiting (per user, append-only places_usage) ────────────
+      const now = deps.now();
+      const shortWindowStart = new Date(now - SHORT_WINDOW_MIN * 60_000).toISOString();
+      const dayStart = new Date(now - 24 * 60 * 60_000).toISOString();
 
-    const res = await fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": apiKey,
-        "X-Goog-FieldMask": ROUTES_FIELD_MASK,
-      },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("Routes error:", res.status, errText);
-      return json({ error: "Drive times are unavailable right now." }, 502);
-    }
-    const data = await res.json();
-    const rawLegs: unknown[] = data?.routes?.[0]?.legs ?? [];
-    const expectedLegs = intermediates.length + 1;
-    if (rawLegs.length !== expectedLegs) {
-      // No route (an island, a typo'd coordinate) comes back as an empty
-      // routes array. Say so plainly rather than inventing a drive time.
-      console.error("Routes returned", rawLegs.length, "legs, expected", expectedLegs);
-      return json({ error: "No drivable route between these stops." }, 422);
-    }
-    const legs = rawLegs.map((leg) => {
-      const { duration, distanceMeters } = leg as {
-        duration?: unknown;
-        distanceMeters?: unknown;
+      const [shortRes, dayRes] = await Promise.all([
+        supabaseClient
+          .from("places_usage")
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", shortWindowStart),
+        supabaseClient
+          .from("places_usage")
+          .select("id", { count: "exact", head: true })
+          .eq("mode", MODE)
+          .gte("created_at", dayStart),
+      ]);
+      // RLS auto-scopes counts to this user. Fail closed: an unreadable counter
+      // refuses the metered Google call rather than running it unmetered.
+      if (shortRes.error || dayRes.error) {
+        console.error("Rate-limit read error:", shortRes.error, dayRes.error);
+        return json({ error: "Service temporarily unavailable" }, 503);
+      }
+      if ((shortRes.count ?? 0) >= MAX_REQUESTS_SHORT) {
+        return json({ error: "Too many requests. Please wait a few minutes." }, 429);
+      }
+      if ((dayRes.count ?? 0) >= MAX_ROUTES_PER_DAY) {
+        return json({ error: "Daily limit reached. Please try again tomorrow." }, 429);
+      }
+
+      // ── API key ───────────────────────────────────────────────────────
+      const apiKey = deps.env("GOOGLE_PLACES_API_KEY");
+      if (!apiKey) {
+        console.error("GOOGLE_PLACES_API_KEY not configured");
+        return json({ error: "Service temporarily unavailable" }, 503);
+      }
+
+      // ── One computeRoutes call, fixed order ───────────────────────────
+      const destination = returnToOrigin ? origin : stops[stops.length - 1];
+      const intermediates = returnToOrigin ? stops : stops.slice(0, -1);
+
+      const body: Record<string, unknown> = {
+        origin: toWaypoint(origin),
+        destination: toWaypoint(destination),
+        travelMode: "DRIVE",
+        routingPreference: "TRAFFIC_UNAWARE",
       };
-      return {
-        seconds: parseSeconds(duration),
-        meters: typeof distanceMeters === "number" ? Math.round(distanceMeters) : null,
-      };
-    });
+      if (intermediates.length > 0) body.intermediates = intermediates.map(toWaypoint);
 
-    // ── Record usage (append-only; best-effort) ───────────────────────
-    const { error: usageError } = await supabaseClient
-      .from("places_usage")
-      .insert({ user_id: user.id, mode: MODE });
-    if (usageError) console.error("Failed to record places_usage:", usageError);
+      const res = await deps.fetch("https://routes.googleapis.com/directions/v2:computeRoutes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": apiKey,
+          "X-Goog-FieldMask": ROUTES_FIELD_MASK,
+        },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("Routes error:", res.status, errText);
+        return json({ error: "Drive times are unavailable right now." }, 502);
+      }
+      const data = await res.json();
+      const rawLegs: unknown[] = data?.routes?.[0]?.legs ?? [];
+      const expectedLegs = intermediates.length + 1;
+      if (rawLegs.length !== expectedLegs) {
+        // No route (an island, a typo'd coordinate) comes back as an empty
+        // routes array. Say so plainly rather than inventing a drive time.
+        console.error("Routes returned", rawLegs.length, "legs, expected", expectedLegs);
+        return json({ error: "No drivable route between these stops." }, 422);
+      }
+      const legs = rawLegs.map((leg) => {
+        const { duration, distanceMeters } = leg as {
+          duration?: unknown;
+          distanceMeters?: unknown;
+        };
+        return {
+          seconds: parseSeconds(duration),
+          meters: typeof distanceMeters === "number" ? Math.round(distanceMeters) : null,
+        };
+      });
 
-    return json({ legs });
-  } catch (error) {
-    console.error("Edge function error:", error);
-    return json({ error: "Internal error" }, 500);
-  }
-});
+      // ── Record usage (append-only; best-effort) ───────────────────────
+      const { error: usageError } = await supabaseClient
+        .from("places_usage")
+        .insert({ user_id: user.id, mode: MODE });
+      if (usageError) console.error("Failed to record places_usage:", usageError);
+
+      return json({ legs });
+    } catch (error) {
+      console.error("Edge function error:", error);
+      return json({ error: "Internal error" }, 500);
+    }
+  };
+}
+
+if (import.meta.main) Deno.serve(createHandler());

@@ -6,12 +6,15 @@ import { supabase } from '../lib/supabase';
 import {
   buildAggregates,
   buildTasteSystemPrompt,
+  buildTasteRequest,
   buildTasteUserMessage,
   collectRatedWines,
   distinctRatedCount,
   distinctWineKey,
+  MIN_DISTINCT_FOR_REPORT,
   pickEvidenceSample,
   reportTier,
+  MAX_TASTE_MESSAGE_CHARS,
   sourceRevision,
   tasteReportService,
   validateReport,
@@ -243,6 +246,38 @@ describe('prompt', () => {
     expect(msg).not.toContain('Winery v1');
     expect(msg).not.toContain('Home');
     expect(buildTasteSystemPrompt()).toContain('```taste_report');
+  });
+
+  it('keeps verbose journals below the chat endpoint message limit', () => {
+    const verbose = [];
+    for (let i = 0; i < 80; i++) {
+      verbose.push({
+        id: `verbose-${i}`,
+        name: `Wine ${i} ${'N'.repeat(180)}`,
+        producer: `Producer ${'P'.repeat(180)}`,
+        year: 2020,
+        type: `Red ${'T'.repeat(80)}`,
+        varietals: Array.from({ length: 8 }, (_, j) => `Grape ${j} ${'V'.repeat(80)}`),
+        rating: 1 + (i % 5),
+        sliders: { sweetness: 2, tannin: 3, acidity: 4, body: 3, alcohol: 2 },
+        flavors: Array.from({ length: 12 }, (_, j) => ({ name: `Flavor ${j} ${'F'.repeat(80)}` })),
+        notes: `Line one\n${'A very detailed note. '.repeat(20)}`,
+        visitId: `visit-${i % 4}`,
+        visitDate: `2026-0${1 + (i % 9)}-01`,
+        place: null,
+      });
+    }
+
+    const request = buildTasteRequest({
+      rated: verbose,
+      aggregates: buildAggregates(verbose, { now: NOW }),
+    });
+
+    expect(request.message.length).toBeLessThanOrEqual(MAX_TASTE_MESSAGE_CHARS);
+    expect(request.message).toContain('Rated tastings: 80');
+    expect(request.evidence.length).toBeGreaterThanOrEqual(MIN_DISTINCT_FOR_REPORT);
+    expect(request.evidence.length).toBeLessThan(40);
+    request.evidence.forEach((w) => expect(request.message).toContain(`id ${w.id} |`));
   });
 });
 

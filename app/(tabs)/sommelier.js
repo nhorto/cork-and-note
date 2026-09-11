@@ -28,7 +28,7 @@ import TypingDots from '../../components/TypingDots';
 import UpgradePill from '../../components/UpgradePill';
 import { usePro } from '../../hooks/usePro';
 import { aiService } from '../../lib/ai';
-import { meterHint } from '../../lib/pro';
+import { isPaywallError, meterHint } from '../../lib/pro';
 import { chatService } from '../../lib/chat';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 
@@ -293,6 +293,13 @@ export default function SommelierScreen() {
       setMessages(prev => [...prev, { ...aiMsg, displayText, sources: aiResponse.sources || [] }]);
     } catch (err) {
       console.error('Send error:', err);
+      // The server refused because the free meter is spent: that is a paywall,
+      // not an error, and the user's message is already saved to the
+      // conversation, so the answer is one tap away once they upgrade.
+      if (isPaywallError(err)) {
+        presentPaywall('chat');
+        return;
+      }
       // Add error message locally
       setMessages(prev => [...prev, {
         id: `error-${Date.now()}`,
@@ -305,7 +312,7 @@ export default function SommelierScreen() {
     } finally {
       setSending(false);
     }
-  }, [activeConversation, messages, systemPrompt, loadedEmpty, gate]);
+  }, [activeConversation, messages, systemPrompt, loadedEmpty, gate, presentPaywall]);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {

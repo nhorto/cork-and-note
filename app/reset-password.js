@@ -25,6 +25,7 @@ import {
   View,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
+import { validatePassword } from '../lib/password';
 import { establishPasswordRecovery } from '../lib/passwordRecovery';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
@@ -72,8 +73,11 @@ export default function ResetPasswordScreen() {
 
   const handleSubmit = async () => {
     setFormError(null);
-    if (password.length < 8) {
-      setFormError('Password must be at least 8 characters.');
+    // Same rule as sign-up and "change password" (lib/password.js): a reset
+    // must not be a back door to a password the other screens would refuse.
+    const validation = validatePassword(password);
+    if (!validation.isValid) {
+      setFormError(`Password must have ${validation.errors.join(', ')}.`);
       return;
     }
     if (password !== confirm) {

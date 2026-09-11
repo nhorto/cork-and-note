@@ -5,13 +5,13 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', 'site/dist/*', '.vision-bench/**'],
+    ignores: ['dist/*', 'site/dist/*', '.jest-cache/*', '.claude/**', '.vision-bench/**'],
   },
   {
     // Unit tests run under Jest in Node, not in the app runtime — so they get
     // both the Jest globals and CommonJS/Node ones (a test that walks the repo
     // to lint theme tokens legitimately needs `require` and `__dirname`).
-    files: ['__tests__/**/*.js'],
+    files: ['__tests__/**/*.js', 'test-utils/**/*.js', 'jest.setup.js'],
     languageOptions: {
       globals: {
         __dirname: 'readonly',
