@@ -107,6 +107,9 @@
       "<rootDir>/.claude/",
       "<rootDir>/site/dist/",
       "<rootDir>/dist/"
-    ]
+    ],
+    "transform": {
+      "^.+\\.(js|jsx|ts|tsx|mjs)$": "babel-jest"
+    }
   }
 }
