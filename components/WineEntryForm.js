@@ -373,12 +373,20 @@ export default function WineEntryForm({
     const fields = [];
 
     // --- Text / select fields ---
-    const addTextField = (key, label, suggested, current, setter) => {
+    const allowedIdentityReplacements = Array.isArray(suggestions._replace_fields)
+      ? suggestions._replace_fields
+      : [];
+    const addTextField = (key, label, suggested, current, setter, { identity = false } = {}) => {
       if (suggested == null) return;
       const suggestedStr = String(suggested).trim();
       if (!suggestedStr) return;
       const currentStr = (current ?? '').toString();
       if (currentStr.trim() === suggestedStr) return; // no change
+      // A model reply is not authority to rewrite identity the user already
+      // entered. WineChatModal marks a field only when the latest user message
+      // explicitly asked to correct that exact field; historical/unsanitized
+      // suggestions carry no such mark and are safely omitted from review.
+      if (identity && currentStr.trim() && !allowedIdentityReplacements.includes(key)) return;
       fields.push({
         key,
         label,
@@ -389,33 +397,41 @@ export default function WineEntryForm({
       });
     };
 
-    addTextField('winemaker', 'Winemaker', suggestions.winemaker, winemaker, setWinemaker);
-    addTextField('wine_name', 'Wine name', suggestions.wine_name, wineName, setWineName);
-    addTextField('wine_type', 'Type', suggestions.wine_type, wineType, setWineTypeByUser);
-    addTextField('year', 'Year', suggestions.year, wineYear, setWineYear);
+    addTextField('winemaker', 'Winemaker', suggestions.winemaker, winemaker, setWinemaker, { identity: true });
+    addTextField('wine_name', 'Wine name', suggestions.wine_name, wineName, setWineName, { identity: true });
+    addTextField('wine_type', 'Type', suggestions.wine_type, wineType, setWineTypeByUser, { identity: true });
+    addTextField('year', 'Year', suggestions.year, wineYear, setWineYear, { identity: true });
 
-    // Varietal(s): MERGE into the chip list (multi-varietal, #135) — never discard
-    // grapes the user already added.
+    // Varietal(s): normally merge into the chip list (multi-varietal, #135).
+    // Replacement is available only for a client-verified, explicit correction.
     if (suggestions.varietal != null) {
       const incoming = parseVarietals(suggestions.varietal);
       const newOnes = incoming.filter(
         (g) => !wineVarietals.some((x) => x.toLowerCase() === g.toLowerCase())
       );
-      if (newOnes.length > 0) {
+      const canChangeVarietal =
+        wineVarietals.length === 0 || allowedIdentityReplacements.includes('varietal');
+      if (newOnes.length > 0 && canChangeVarietal) {
+        const replacesVarietals = allowedIdentityReplacements.includes('varietal');
         fields.push({
           key: 'varietal',
           label: 'Varietal',
           current: wineVarietals.length ? wineVarietals.join(', ') : '(none)',
-          suggestedDisplay: `+ ${newOnes.join(', ')}`,
+          suggestedDisplay: replacesVarietals ? incoming.join(', ') : `+ ${newOnes.join(', ')}`,
           apply: wineVarietals.length === 0, // pre-check only when none added yet
-          applyValue: () =>
+          applyValue: () => {
+            if (replacesVarietals) {
+              setWineVarietals(incoming);
+              return;
+            }
             setWineVarietals((prev) => {
               const merged = [...prev];
               newOnes.forEach((g) => {
                 if (!merged.some((x) => x.toLowerCase() === g.toLowerCase())) merged.push(g);
               });
               return merged;
-            }),
+            });
+          },
         });
       }
     }
@@ -636,6 +652,7 @@ export default function WineEntryForm({
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
+      nestedScrollEnabled
       keyboardDismissMode="on-drag"
     >
       {/* Scan a bottle label to prefill the fields below (#138) */}

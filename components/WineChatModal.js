@@ -1,10 +1,9 @@
 // components/WineChatModal.js
-// Half-sheet modal (~65% height) with mini chat for wine identification
+// Full-screen mini chat for wine identification and tasting-form assistance.
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Dimensions,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -14,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ChatBubble from './ChatBubble';
 import ChatInput from './ChatInput';
 import MeterHint from './MeterHint';
@@ -21,14 +21,13 @@ import TypingDots from './TypingDots';
 import { usePro } from '../hooks/usePro';
 import { aiService } from '../lib/ai';
 import { chatService } from '../lib/chat';
+import { buildSommelierPrompt } from '../lib/sommelierPrompt';
+import { buildWineEntryAssistantPrompt, protectWineEntrySuggestions } from '../lib/wineEntryAssistant';
 import { createThemedStyles } from '../styles/ThemeProvider';
-
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const MODAL_HEIGHT = SCREEN_HEIGHT * 0.65;
 
 export default function WineChatModal({ visible, onClose, onUseSuggestions, onConversationStarted, onDismiss, existingConversationId, currentWineData }) {
   const { colors, styles } = useScreenTheme();
+  const insets = useSafeAreaInsets();
 
   const { gate, isPro, presentPaywall } = usePro();
   const [conversation, setConversation] = useState(null);
@@ -61,34 +60,19 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
     try {
       if (isActive()) setLoading(true);
 
-      // Build system prompt with current wine form context
-      let prompt = await aiService.buildSystemPrompt();
-
-      if (currentWineData) {
-        let formContext = '\n\nThe user is currently logging a wine. Here is what they have filled in so far on the form:';
-        const d = currentWineData;
-        if (d.winemaker) formContext += `\n- Winemaker: ${d.winemaker}`;
-        if (d.name) formContext += `\n- Wine Name: ${d.name}`;
-        formContext += `\n- Wine Type: ${d.type || '(not set)'}`;
-        if (d.varietal) formContext += `\n- Varietal: ${d.varietal}`;
-        if (d.year) formContext += `\n- Year: ${d.year}`;
-        if (d.overallRating > 0) formContext += `\n- Overall Rating: ${d.overallRating}/5`;
-        const nonZeroRatings = Object.entries(d.ratings || {}).filter(([_, v]) => v > 0);
-        if (nonZeroRatings.length > 0) {
-          formContext += '\n- Detailed Ratings: ' + nonZeroRatings.map(([k, v]) => `${k}: ${v}/5`).join(', ');
-        }
-        if (d.flavorNotes?.length > 0) formContext += `\n- Flavor Notes: ${d.flavorNotes.join(', ')}`;
-        if (d.additionalNotes) formContext += `\n- Notes: "${d.additionalNotes}"`;
-        if (d.photoCount > 0) formContext += `\n- Photos: ${d.photoCount} photo(s) attached to the wine entry`;
-
-        const hasAnyData = d.winemaker || d.name || d.varietal || d.year || d.overallRating > 0 || nonZeroRatings.length > 0 || d.flavorNotes?.length > 0 || d.additionalNotes;
-        if (!hasAnyData) {
-          formContext += '\n- (Nothing filled in yet — the form is mostly blank)';
-        }
-
-        formContext += '\n\nUse this context to give relevant, specific help. If they have ratings, comment on those. If the form is blank, help them get started. Always offer to help fill in any missing fields.';
-        prompt += formContext;
+      // The form-specific contract tells the model that structured suggestions
+      // are an actual UI action. Without it, models often reply that they cannot
+      // edit the form even though this surface is built to do exactly that.
+      let basePrompt = '';
+      try {
+        basePrompt = await aiService.buildSystemPrompt();
+      } catch (err) {
+        // Journal/cellar context is helpful, but the form action must still be
+        // usable if that background lookup is temporarily unavailable.
+        console.error('WineChatModal context error:', err);
+        basePrompt = buildSommelierPrompt();
       }
+      const prompt = buildWineEntryAssistantPrompt(basePrompt, currentWineData);
 
       if (isActive()) setSystemPrompt(prompt);
 
@@ -98,10 +82,22 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
         if (isActive()) setConversation(conv);
         const msgs = await chatService.getMessages(existingConversationId);
         if (isActive()) {
-          setMessages(msgs.map(m => ({
-            ...m,
-            displayText: m.role === 'assistant' ? aiService.getDisplayText(m.content) : m.content,
-          })));
+          let precedingUserText = '';
+          let precedingUserHasPhotos = false;
+          setMessages(msgs.map((m) => {
+            if (m.role === 'user') {
+              precedingUserText = m.content || '';
+              precedingUserHasPhotos = Array.isArray(m.image_urls) && m.image_urls.length > 0;
+            }
+            const safeSuggestions = m.role === 'assistant'
+              ? protectWineEntrySuggestions(m.ai_suggestions, currentWineData, precedingUserText, { hasPhotos: precedingUserHasPhotos })
+              : m.ai_suggestions;
+            return {
+              ...m,
+              ai_suggestions: safeSuggestions,
+              displayText: m.role === 'assistant' ? aiService.getDisplayText(m.content) : m.content,
+            };
+          }));
         }
       } else if (isActive()) {
         // Don't create conversation yet — wait until first message is sent
@@ -177,18 +173,27 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
       // Call AI
       const aiResponse = await aiService.sendMessage(aiMessages, systemPrompt);
       const responseText = aiResponse.response;
-      const suggestions = aiService.parseSuggestions(responseText);
+      const suggestions = protectWineEntrySuggestions(
+        aiService.parseSuggestions(responseText),
+        currentWineData,
+        text,
+        { hasPhotos: base64Images.length > 0 }
+      );
       const displayText = aiService.getDisplayText(responseText);
 
       // Save AI message
       const aiMsg = await chatService.addMessage(
-        activeConv.id, 'assistant', responseText, [], suggestions
+        activeConv.id, 'assistant', responseText, [], suggestions, aiResponse.sources || []
       );
 
-      // Sources ride along in memory only (see ChatBubble) — this is the most
-      // likely place to get them, since "what is this bottle?" while logging it
-      // is exactly the question the Pro sommelier searches for.
-      setMessages(prev => [...prev, { ...aiMsg, displayText, sources: aiResponse.sources || [] }]);
+      setMessages(prev => [...prev, {
+        ...aiMsg,
+        // Use the locally protected value even if a database mock/older schema
+        // returns the inserted row without ai_suggestions.
+        ai_suggestions: suggestions,
+        displayText,
+        sources: aiResponse.sources || [],
+      }]);
     } catch (err) {
       console.error('WineChatModal send error:', err);
       setMessages(prev => [...prev, {
@@ -206,7 +211,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
       sendingRef.current = false;
       setSending(false);
     }
-  }, [conversation, messages, systemPrompt, onConversationStarted, gate]);
+  }, [conversation, messages, systemPrompt, currentWineData, onConversationStarted, gate]);
 
   const handleUseSuggestions = useCallback((suggestions) => {
     if (onUseSuggestions) {
@@ -217,7 +222,8 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
   // Auto-scroll
   useEffect(() => {
     if (messages.length > 0 && flatListRef.current) {
-      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+      const timer = setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+      return () => clearTimeout(timer);
     }
   }, [messages.length]);
 
@@ -225,24 +231,17 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
     <Modal
       visible={visible}
       animationType="slide"
-      transparent
+      presentationStyle="fullScreen"
       onRequestClose={onClose}
       onDismiss={onDismiss}
     >
       <View style={styles.overlay}>
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
-
         <KeyboardAvoidingView
           style={styles.modalContainer}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
-          {/* Handle bar */}
-          <View style={styles.handleBar}>
-            <View style={styles.handle} />
-          </View>
-
           {/* Header */}
-          <View style={styles.header}>
+          <View style={[styles.header, { paddingTop: Math.max(insets.top, 12) }]}>
             <View style={styles.headerLeft}>
               <Ionicons name="wine" size={18} color={colors.primary.ink} />
               <Text style={styles.headerTitle}>Ask the sommelier</Text>
@@ -305,7 +304,10 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
           <MeterHint task="chat" style={styles.meterHint} />
           <ChatInput
             onSend={handleSend}
-            disabled={sending}
+            // Do not let a fast tap race prompt construction. A send with a
+            // null prompt falls back to general chat and loses the form-action
+            // contract, which was the intermittent "I can't fill that" bug.
+            disabled={sending || loading || !systemPrompt}
             photosLocked={!isPro}
             onLockedPhotoPress={() => presentPaywall('chat')}
           />
@@ -319,7 +321,7 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
 
 
 const useScreenTheme = createThemedStyles((theme) => {
-const { colors, typography, spacing, borderRadius, shadows } = theme;
+const { colors, typography, spacing, borderRadius } = theme;
 
 const styles = StyleSheet.create({
   meterHint: {
@@ -327,28 +329,11 @@ const styles = StyleSheet.create({
   },
   overlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: colors.overlay.scrim,
+    backgroundColor: colors.neutral.bg,
   },
   modalContainer: {
-    height: MODAL_HEIGHT,
+    flex: 1,
     backgroundColor: colors.neutral.bg,
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    ...shadows.strong,
-  },
-  handleBar: {
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.neutral.border,
   },
   header: {
     flexDirection: 'row',

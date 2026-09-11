@@ -55,6 +55,14 @@ const claudeReply = (text: string, extra: Record<string, unknown> = {}) => ({
 const ask = (content = "What pairs with oysters?", extra: Record<string, unknown> = {}) =>
   jsonRequest({ messages: [{ role: "user", content }], system_prompt: "You are the Cork & Note sommelier.", ...extra });
 
+const streamedReply = (parts: string[]) => [
+  'event: message_start\ndata: {"type":"message_start","message":{"usage":{"input_tokens":100}}}\n\n',
+  'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}\n\n',
+  ...parts.map((text) => `event: content_block_delta\ndata: ${JSON.stringify({ type: "content_block_delta", index: 0, delta: { type: "text_delta", text } })}\n\n`),
+  'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":20}}\n\n',
+  'event: message_stop\ndata: {"type":"message_stop"}\n\n',
+].join("");
+
 Deno.test("OPTIONS preflight answers without touching auth", async () => {
   const { handler, db } = setup();
   const res = await handler(new Request("https://edge.test/chat", { method: "OPTIONS" }));
@@ -94,6 +102,7 @@ Deno.test("every validation rule refuses with 400 and its own message, before an
     [{ messages: [] }, "messages array is required"],
     [{ messages: Array.from({ length: 51 }, () => ({ role: "user", content: "x" })) }, "Too many messages"],
     [{ messages: [{ role: "user", content: "x" }], system_prompt: 42 }, "system_prompt must be a string"],
+    [{ messages: [{ role: "user", content: "x" }], stream: "yes" }, "stream must be a boolean"],
     [{ messages: [null] }, "Invalid message"],
     [{ messages: [{ role: "system", content: "x" }] }, "Invalid message role"],
     [{ messages: [{ role: "user", content: 42 }] }, "Message content must be a string"],
@@ -128,6 +137,23 @@ Deno.test("a free user within allowance gets an answer, the meter, and one chat_
   const insert = db.queriesTo("chat_usage").find((q) => q.op === "insert");
   assert(insert, "usage recorded");
   assertEquals(insert.payload, { user_id: USER.id, task: "chat", input_tokens: 100, output_tokens: 20, web_searches: null });
+});
+
+Deno.test("streaming chat forwards deltas before a final result and records usage once", async () => {
+  const { handler, db, fetch } = setup({ counts: { window: 2 } });
+  fetch.reply(200, streamedReply(["Try ", "Muscadet."]), { "Content-Type": "text/event-stream" });
+  const res = await handler(ask(undefined, { stream: true }));
+  assertEquals(res.status, 200);
+  assertStringIncludes(res.headers.get("content-type") || "", "application/x-ndjson");
+  const events = (await res.text()).trim().split("\n").map((line) => JSON.parse(line));
+  assertEquals(events.slice(0, 2), [
+    { type: "delta", text: "Try " },
+    { type: "delta", text: "Muscadet." },
+  ]);
+  assertEquals(events.at(-1).response, "Try Muscadet.");
+  assertEquals(events.at(-1).meter.remaining, 2);
+  assertEquals(fetch.calls[0].body.stream, true);
+  assertEquals(db.queriesTo("chat_usage").filter((q) => q.op === "insert").length, 1);
 });
 
 Deno.test("the free chat meter refuses the sixth message of the month with a 402 and the meter", async () => {
