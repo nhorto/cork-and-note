@@ -70,6 +70,20 @@ it('configures with the iOS store key on iOS', async () => {
   expect(PurchasesMock.configure).toHaveBeenCalledWith({ apiKey: 'appl_test' });
 });
 
+it('reads Android trial eligibility off the offer Play already filtered, not the iOS API', async () => {
+  // checkTrialOrIntroductoryPriceEligibility always answers UNKNOWN on Android;
+  // trusting it there would hide the annual trial from every Android customer.
+  const { purchases, PurchasesMock } = loadPurchases({ os: 'android', extra: BOTH_KEYS });
+  await purchases.configurePurchases();
+  PurchasesMock.checkTrialOrIntroductoryPriceEligibility.mockResolvedValue({ pro_annual: { status: 0 } });
+  const packages = [
+    { product: { identifier: 'pro_annual', introPrice: { price: 0, periodNumberOfUnits: 3, periodUnit: 'DAY' } } },
+    { product: { identifier: 'pro_monthly', introPrice: null } },
+  ];
+  await expect(purchases.fetchTrialEligibility(packages)).resolves.toEqual({ pro_annual: true, pro_monthly: false });
+  expect(PurchasesMock.checkTrialOrIntroductoryPriceEligibility).not.toHaveBeenCalled();
+});
+
 it('runs without Pro rather than crashing when the Android key is missing', async () => {
   // Only the iOS key is set: Android must NOT borrow it — it must degrade.
   const { purchases, PurchasesMock } = loadPurchases({
