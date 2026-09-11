@@ -64,3 +64,43 @@ test('a pre-stream HTTP refusal keeps the server error code for paywall routing'
     message: 'Free limit reached', code: 'free_limit_reached',
   });
 });
+
+test('a legacy Edge Function JSON response completes as one streamed update', async () => {
+  const xhr = new FakeXhr();
+  const updates = [];
+  const resultPromise = streamEdgeFunction({
+    url: 'https://example.supabase.co',
+    anonKey: 'anon',
+    accessToken: 'jwt',
+    body: { messages: [{ role: 'user', content: 'Pairing?' }] },
+    onDelta: (text) => updates.push(text),
+    xhrFactory: () => xhr,
+  });
+
+  xhr.status = 200;
+  xhr.responseText = JSON.stringify({
+    response: 'Try Muscadet.',
+    sources: [],
+    meter: { task: 'chat', used: 1 },
+  });
+  xhr.onload();
+
+  await expect(resultPromise).resolves.toMatchObject({ response: 'Try Muscadet.' });
+  expect(updates).toEqual(['Try Muscadet.']);
+});
+
+test('a legacy handled JSON error is not reported as an unexpected ending', async () => {
+  const xhr = new FakeXhr();
+  const resultPromise = streamEdgeFunction({
+    url: 'https://example.supabase.co', anonKey: 'anon', accessToken: 'jwt', body: {},
+    xhrFactory: () => xhr,
+  });
+
+  xhr.status = 200;
+  xhr.responseText = JSON.stringify({ error: 'Service temporarily unavailable', code: 'service_error' });
+  xhr.onload();
+
+  await expect(resultPromise).rejects.toMatchObject({
+    message: 'Service temporarily unavailable', code: 'service_error',
+  });
+});
