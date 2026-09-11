@@ -60,7 +60,10 @@ jobs:
       # Every handler runs end to end against a fake database, a fake
       # upstream and a fake clock (_shared/testing.ts). --allow-run and
       # --allow-read are for the CORS suite, which re-imports the module in a
-      # subprocess per allow-list configuration.
+      # subprocess per allow-list configuration. The repo root's package.json
+      # would otherwise switch Deno into bring-your-own-node_modules mode, and
+      # this job never installs them, so npm-typed references (supabase-js
+      # pulls @types/node) would fail to resolve.
       - name: Test
         working-directory: supabase/functions
-        run: deno test --allow-env --allow-run --allow-read
+        run: deno test --node-modules-dir=none --allow-env --allow-run --allow-read
