@@ -11,7 +11,7 @@
 // the RevenueCat dashboard's "Authorization header value" field and stored here
 // as REVENUECAT_WEBHOOK_SECRET. Without that secret set the function refuses
 // every request rather than accepting unauthenticated entitlement grants.
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { type HandlerDeps, resolveDeps } from "../_shared/deps.ts";
 import { entitlementUpdatesFromEvent } from "../_shared/entitlements.ts";
 
 /** Constant-time-ish compare so a wrong secret leaks no length/prefix timing. */
@@ -24,57 +24,65 @@ function secretMatches(provided: string | null, expected: string): boolean {
   return diff === 0;
 }
 
-Deno.serve(async (req: Request) => {
-  const json = (body: unknown, status = 200) =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { "Content-Type": "application/json" },
-    });
+/**
+ * Build the request handler. `deps` default to the real Supabase clients,
+ * `fetch`, `Deno.env` and `Date.now`; tests substitute fakes. The handler
+ * itself is exactly what `Deno.serve` ran before the factory existed.
+ */
+export function createHandler(overrides: Partial<HandlerDeps> = {}) {
+  const deps = resolveDeps(overrides);
 
-  // No CORS headers on purpose: no browser should ever call this.
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  return async (req: Request): Promise<Response> => {
+    const json = (body: unknown, status = 200) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      });
 
-  const expectedSecret = Deno.env.get("REVENUECAT_WEBHOOK_SECRET");
-  if (!expectedSecret) {
-    console.error("REVENUECAT_WEBHOOK_SECRET is not configured");
-    return json({ error: "Not configured" }, 503);
-  }
-  if (!secretMatches(req.headers.get("Authorization"), expectedSecret)) {
-    return json({ error: "Unauthorized" }, 401);
-  }
+    // No CORS headers on purpose: no browser should ever call this.
+    if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  let body: unknown;
-  try {
-    body = await req.json();
-  } catch {
-    return json({ error: "Invalid JSON body" }, 400);
-  }
+    const expectedSecret = deps.env("REVENUECAT_WEBHOOK_SECRET");
+    if (!expectedSecret) {
+      console.error("REVENUECAT_WEBHOOK_SECRET is not configured");
+      return json({ error: "Not configured" }, 503);
+    }
+    if (!secretMatches(req.headers.get("Authorization"), expectedSecret)) {
+      return json({ error: "Unauthorized" }, 401);
+    }
 
-  const updates = entitlementUpdatesFromEvent(body, Date.now());
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return json({ error: "Invalid JSON body" }, 400);
+    }
 
-  // No updates is a success, not a failure: RevenueCat also sends events for
-  // other entitlements, for anonymous device ids, and test pings. Returning 2xx
-  // stops it retrying something that will never apply.
-  if (updates.length === 0) return json({ ok: true, updated: 0 });
+    const updates = entitlementUpdatesFromEvent(body, deps.now());
 
-  const admin = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-  );
+    // No updates is a success, not a failure: RevenueCat also sends events for
+    // other entitlements, for anonymous device ids, and test pings. Returning 2xx
+    // stops it retrying something that will never apply.
+    if (updates.length === 0) return json({ ok: true, updated: 0 });
 
-  const { error } = await admin
-    .from("entitlements")
-    .upsert(
-      updates.map((u) => ({ ...u, updated_at: new Date().toISOString() })),
-      { onConflict: "user_id" }
-    );
+    const admin = deps.createAdminClient();
 
-  if (error) {
-    // A 5xx makes RevenueCat retry with backoff, which is what we want: dropping
-    // this event would leave a paying user un-entitled with nothing to fix it.
-    console.error("entitlements upsert failed:", error);
-    return json({ error: "Upsert failed" }, 500);
-  }
+    const { error } = await admin
+      .from("entitlements")
+      .upsert(
+        updates.map((u) => ({ ...u, updated_at: new Date(deps.now()).toISOString() })),
+        { onConflict: "user_id" }
+      );
 
-  return json({ ok: true, updated: updates.length });
-});
+    if (error) {
+      // A 5xx makes RevenueCat retry with backoff, which is what we want: dropping
+      // this event would leave a paying user un-entitled with nothing to fix it.
+      console.error("entitlements upsert failed:", error);
+      return json({ error: "Upsert failed" }, 500);
+    }
+
+    return json({ ok: true, updated: updates.length });
+  };
+}
+
+if (import.meta.main) Deno.serve(createHandler());
