@@ -23,6 +23,9 @@ export default function ProFeaturePreview({
   ctaLabel = 'Unlock with Pro',
   sampleLabel = 'SAMPLE',
   footnote = 'Your journal, map, wineries and cellar stay free.',
+  // Optional real content rendered ABOVE the sample box, outside the SAMPLE
+  // badge, for tools that can show the user's own numbers before the paid part.
+  above = null,
   children,
   contentContainerStyle,
 }) {
@@ -37,6 +40,7 @@ export default function ProFeaturePreview({
       <Text style={styles.eyebrow}>{eyebrow}</Text>
       {title ? <Text style={styles.title}>{title}</Text> : null}
       {body ? <Text style={styles.body}>{body}</Text> : null}
+      {above ? <View style={styles.above}>{above}</View> : null}
 
       {children ? (
         <View style={styles.sampleWrap}>
@@ -86,6 +90,7 @@ const useScreenTheme = createThemedStyles((theme) => {
       color: colors.neutral.inkSecondary,
       marginBottom: spacing.md,
     },
+    above: { marginBottom: spacing.lg },
     sampleWrap: {
       backgroundColor: colors.neutral.surface,
       borderWidth: 1,

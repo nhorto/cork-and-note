@@ -2,7 +2,7 @@
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -17,6 +17,7 @@ import ScreenHeader from '../../components/ScreenHeader';
 import WinesFilterModal from '../../components/WinesFilterModal';
 import { cellarService } from '../../lib/cellar';
 import { matchWineToCellar } from '../../lib/cellarMatch';
+import { MIN_DISTINCT_FOR_REPORT, distinctRatedCount } from '../../lib/tasteProfile';
 import { varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
 import { wineDisplayName } from '../../lib/wineDisplay';
@@ -49,6 +50,13 @@ export default function Wines() {
 
   const router = useRouter();
   const { user } = useContext(AuthContext);
+
+  // Quiet "See your taste" link once there is enough rated to report on
+  // (research doc 2026-09-11 §3). Counted from the rows already loaded.
+  const showTasteLink = useMemo(
+    () => distinctRatedCount(wines) >= MIN_DISTINCT_FOR_REPORT,
+    [wines]
+  );
 
   // Reload whenever the tab gains focus so wines logged elsewhere show up
   // without a manual refresh.
@@ -327,6 +335,21 @@ export default function Wines() {
         contentContainerStyle={styles.wineList}
         onRefresh={handleRefresh}                // NEW
         refreshing={refreshing}                  // NEW
+        ListHeaderComponent={
+          showTasteLink ? (
+            <TouchableOpacity
+              style={styles.tasteLink}
+              onPress={() => router.push('/sommelier/taste')}
+              accessibilityRole="button"
+              accessibilityLabel="See your taste"
+              testID="see-your-taste"
+            >
+              <Ionicons name="sparkles-outline" size={16} color={colors.accent.ink} />
+              <Text style={styles.tasteLinkText}>See your taste</Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.neutral.inkTertiary} />
+            </TouchableOpacity>
+          ) : null
+        }
         ListEmptyComponent={
           error ? (
             <View style={styles.emptyContainer}>
@@ -486,6 +509,22 @@ const styles = StyleSheet.create({
   sortRow: {
     flexDirection: 'row',
     gap: spacing.xs,
+  },
+
+  // "See your taste" quiet row above the list
+  tasteLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  tasteLinkText: {
+    ...typography.body.small,
+    color: colors.accent.ink,
+    fontWeight: '600',
+    flex: 1,
   },
 
   // Wine List
