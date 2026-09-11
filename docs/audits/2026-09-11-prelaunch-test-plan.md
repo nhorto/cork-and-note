@@ -35,9 +35,9 @@ Rule for every track: a test must assert behavior (the calls made and their argu
 
 Behavior tests on the fake client for `lib/visits.js` (the primary write path and photo upload partitioning), `lib/chat.js`, `lib/wineries.js`, `lib/wishlist.js`, `lib/places.js`, `lib/notifications.js`, `lib/cache.js` across sign-out, `lib/cellarScan.js` normalization, and the real `ProProvider` and `usePro`. The photo pipeline gets its own set: resize thresholds, bucket and path per photo type, HEIC handling, and what the user sees on each failure.
 
-### 3. Edge functions executed for real (branch `test/edge-function-handlers`)
+### 3. Edge functions executed for real (merged, #282)
 
-Each function exports `createHandler(deps)` with `Deno.serve` behind `import.meta.main`, so `deno test` can drive it with a fake Supabase client and fetch. Covers auth 401, body validation, the 402 and 429 shapes and copy, fail-closed 503 paths, model and token selection per task, the webhook secret and every RevenueCat event type, places and routes caps, and the CORS origin rule. The CI deno job gains a `deno test` step.
+Each function exports `createHandler(deps)` with `Deno.serve` behind `import.meta.main`, so `deno test` drives it with a fake Supabase client, a fake fetch and a fake clock (`_shared/testing.ts`). 76 tests: auth 401, body validation, the 402 and 429 shapes and copy, fail-closed 503 paths, model and token selection per task, the exact request to Anthropic, `pause_turn` resumption, the webhook secret and every RevenueCat event type, places and routes caps and field masks, the directory write-back guard, and the CORS origin rule. The CI deno job runs `deno test` after `deno check`. No handler bugs found.
 
 ### 4. Screens and components (branch `test/screens-and-components`)
 
@@ -49,9 +49,11 @@ Suspects handed to this track from the code read, each to be pinned by a failing
 
 Maestro flows checked into `.maestro/` so they are rerunnable: signup, age gate, plan choice, log a wine with a library photo, label scan, map clusters and search and the AVA toggle, cellar add and open, free versus Pro chat, paywall offerings, account deletion. iOS simulator first, then the Android emulator for function only (its colors are a known false alarm on this display). Known Android issues filed from the owner's own emulator pass are checked against the run rather than re-diagnosed.
 
-### 6. Backend parity (branch `test/backend-parity`)
+### 6. Backend parity (merged, #283)
 
-`scripts/verify-backend-parity.mjs` checks every migration file is applied on the live project, that no deployed function is older than its source, and that the three storage buckets exist with the right visibility. `scripts/rls-probe.mjs` creates two throwaway users, has one write a row in every user-scoped table and an object in every bucket, proves the other can read, update and delete none of it, then deletes both through the app's own delete-account path and verifies zero residue.
+`scripts/verify-backend-parity.mjs` checks every migration file is recorded as applied on the live project and that a sentinel schema object from each structural migration exists, that no deployed function is older than the last commit touching it or the shared files it imports, that the three storage buckets exist with the right visibility, and that row-level security is on for every user table. `scripts/rls-probe.mjs` creates two throwaway users through the app's sign-up, has one write a row in each of 13 user-scoped tables and an object in every bucket, proves the other (and a signed-out client) can read, update and delete none of it and cannot open the first user's bottle, then deletes both through the app's own delete-account path and verifies zero residue. `__tests__/migrationHygiene.test.js` keeps the repo's migration story straight offline.
+
+Run live on 2026-09-11: every table and RPC held; both accounts left no residue. One leak found (table below).
 
 ## How to run
 
@@ -77,11 +79,18 @@ Each has a test that fails on the previous code and is fixed in the same PR.
 | `lib/ai.js` | The tasting-menu parser's array fallback was unreachable whenever the array held objects (the greedy object match ran first and failed to parse), so a reply that dropped the fence was reported as unreadable. The fenced-JSON reader matched tags by prefix, so asking for `wine_list` on a `wine_list_picks` block read the picks as a list. | `aiParsers.test.js` |
 | `lib/cellarScan.js` | The convenience wrappers destructured their argument, so a null image threw instead of returning the service's soft failure. Both callers guard today; the wrappers now match the service's contract. | `cellarScan.test.js` |
 | `app/_layout.js` | No error boundary anywhere: a render throw was a blank white screen. `components/ErrorBoundary.js` now wraps the navigator inside the providers with a retry that remounts. | `errorBoundary.test.js` |
+| Storage policies on `visit-photos` and `wine-photos` | The read policies had no owner or role condition, so any caller could list every object name. The anon key ships in the app and the buckets are public, so a signed-out client could fetch every user's photos. Migration `20260911200000_photo_buckets_owner_list.sql` scopes reads to the owner; public URL display is unaffected. **Committed, not yet applied live.** | `scripts/rls-probe.mjs` |
 
 Pinned, not changed (documented reliance on row-level security): the chat usage counters in `ProProvider` and the per-conversation chat reads carry no `user_id` filter. `deletePhotos` removes by the last path segment, which is only correct for flat visit and wine photo names.
+
+## Live actions owed (need a deliberate deploy step)
+
+1. `supabase db push` to apply `20260911200000_photo_buckets_owner_list.sql`, then `node scripts/rls-probe.mjs` (expect zero problems).
+2. Redeploy all five edge functions from main (the `createHandler` refactor plus the shared-module drift the parity check flags on `places` and `revenuecat-webhook`), then `node scripts/verify-backend-parity.mjs` (expect "Live backend matches the repo").
 
 ## Status log
 
 - 2026-09-11: baseline measured; flakiness root-caused and fixed; foundation, structural and cellar-service tests added. Tracks 3, 4 and 6 started on their branches; Track 4 has the auth suites and the shared password rule committed; Track 3 has the handler refactor committed.
 - 2026-09-11, later: data-layer suites for visits, chat, cache and the real Pro provider; screen suites for the sommelier send path, chat input, journal and wishlist; six bugs found and fixed (table above). PR #266 at 53 suites, 746 tests, green.
+- 2026-09-11, night: #266, #267, #282 and #283 merged. Track 3 (edge functions, 76 deno tests) and Track 6 (parity script, RLS probe, migration hygiene) done; the RLS probe found the public-bucket listing leak. Track 4 closed out with the wine entry form suite (#284). Remaining: Track 5 device runs (simulators still in use by another session) and the em-dash sweep.
 - 2026-09-11, evening: AI parsers and photo path, scan normalizers, error boundary, cellar add/tab/bottle screens, home, log session, both scan cards, age gate and offline banner, map sheets. Three more defects fixed (table above). PR #266 at 64 suites, 907 tests, green. PR #267 carries the auth suites, the shared password rule, and the paywall suite. Remaining from Track 4: log form internals (varietal to type inference, half-star input), and the Track 3, 5 and 6 branches.
