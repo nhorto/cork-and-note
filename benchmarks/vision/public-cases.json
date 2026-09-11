@@ -1,0 +1,322 @@
+{
+  "source_page": "https://bigdoorvineyards.com/menu",
+  "retrieved": "2026-09-11",
+  "notes": "Two PDF pages from one winery; correlated clean-document controls, not phone-photo evidence. Gold visually reviewed by assistant. Region is unscored because grape/venue geography is ambiguous. No source PDFs/images committed.",
+  "cases": [
+    {
+      "id": "public-big-door-flight",
+      "pdf_url": "https://img1.wsimg.com/blobby/go/50a43616-c447-4bad-8e79-e7400edda4b4/June%20%2726%20Flight%20Menu%20%281%29.pdf",
+      "pdf_sha256": "5fb163e9454e8ea60797e54f34f6914dd2eb72a0a56cbdbd6ab0da5d38046ac9",
+      "page": 1,
+      "gold": [
+        {
+          "wine_name": "Blanc Du Bois",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Blanc Du Bois",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Chardonel",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Chardonel",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Lenoir",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Lenoir",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Lomanto",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Lomanto",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Blanc Du Bois",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Blanc Du Bois",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Chardonel",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Chardonel",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Ocean View",
+          "producer": null,
+          "vintage": null,
+          "varietal": null,
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Sauvignon Blanc",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Sauvignon Blanc",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Lenoir",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Lenoir",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Lomanto",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Lomanto",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Best Friends",
+          "producer": null,
+          "vintage": null,
+          "varietal": [
+            "Lenoir, Lomanto",
+            "Lenoir and Lomanto"
+          ],
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Cabernet Sauvignon",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Cabernet Sauvignon",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Cork in the Door",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Muscadine",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Golden Door",
+          "producer": null,
+          "vintage": null,
+          "varietal": "Muscadine",
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Lasting Impression",
+          "producer": null,
+          "vintage": null,
+          "varietal": null,
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": [
+            "Perfefct Evening",
+            "Perfect Evening"
+          ],
+          "producer": null,
+          "vintage": null,
+          "varietal": [
+            "Lenoir, Muscadine",
+            "Lenoir and Muscadine"
+          ],
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Peachcasso",
+          "producer": null,
+          "vintage": null,
+          "varietal": null,
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Secret Lover",
+          "producer": null,
+          "vintage": null,
+          "varietal": null,
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Cherry Pie",
+          "producer": null,
+          "vintage": null,
+          "varietal": null,
+          "price_glass": null,
+          "price_bottle": null
+        },
+        {
+          "wine_name": "Innocent Kiss",
+          "producer": null,
+          "vintage": null,
+          "varietal": [
+            "Blanc Du Bois, Muscadine",
+            "Blanc Du Bois and Muscadine"
+          ],
+          "price_glass": null,
+          "price_bottle": null
+        }
+      ]
+    },
+    {
+      "id": "public-big-door-wine",
+      "pdf_url": "https://img1.wsimg.com/blobby/go/50a43616-c447-4bad-8e79-e7400edda4b4/July%20%2726%20Wine%20Menu%20%282%29.pdf",
+      "pdf_sha256": "435ef32d46d7be8a729207c37d6125030b7b89561f7eda7fe2cc6c107e77e155",
+      "page": 1,
+      "gold": [
+        {
+          "wine_name": "Blanc Du Bois",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": "Blanc Du Bois",
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Chardonel",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": "Chardonel",
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Oceanview",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": null,
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Sauvignon Blanc",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": "Sauvignon Blanc",
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Lomanto",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": "Lomanto",
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Lenoir",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": "Lenoir",
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Best Friends",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": [
+            "Lomanto, Lenoir",
+            "Lomanto and Lenoir"
+          ],
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Cabernet Sauvignon",
+          "producer": [
+            "Currahee Vineyards",
+            "Big Door Vineyards"
+          ],
+          "vintage": null,
+          "varietal": "Cabernet Sauvignon",
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Lenoir Bourbon Barrel Select",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": "Lenoir",
+          "price_glass": "12",
+          "price_bottle": "44"
+        },
+        {
+          "wine_name": "Golden Door",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": "Muscadine",
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Evening Breeze",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": "Muscadine",
+          "price_glass": "10",
+          "price_bottle": "28"
+        },
+        {
+          "wine_name": "Gold Lace",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": [
+            "Blanc Du Bois, Muscadine",
+            "Blanc Du Bois and Muscadine"
+          ],
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Perfect Evening",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": [
+            "Lenoir, Muscadine",
+            "Lenoir and Muscadine"
+          ],
+          "price_glass": "11",
+          "price_bottle": "36"
+        },
+        {
+          "wine_name": "Lasting Impression",
+          "producer": "Big Door Vineyards",
+          "vintage": null,
+          "varietal": [
+            "Sauvignon Blanc, Noble Muscadine",
+            "Sauvignon Blanc and Noble Muscadine"
+          ],
+          "price_glass": "11",
+          "price_bottle": "36"
+        }
+      ]
+    }
+  ]
+}

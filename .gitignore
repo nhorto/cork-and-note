@@ -61,3 +61,7 @@ deno.lock
 # App Atlas keeps its map here. Local to this machine.
 .app-atlas/
 site/dist/
+
+# Vision benchmark: private photos, local labels, API outputs, and Python env
+.vision-bench/
+__pycache__/
