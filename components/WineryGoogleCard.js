@@ -36,7 +36,9 @@ export default function WineryGoogleCard({ winery, directoryId = null, onPlaceId
   const [hoursOpen, setHoursOpen] = useState(false);
 
   useEffect(() => {
-    if (!isPro || !winery?.id) return;
+    // A preview page (#270) has no wineries row yet but does have a directory
+    // row; the edge function stamps place id and status onto that row.
+    if (!isPro || (!winery?.id && directoryId == null)) return;
     let active = true;
 
     (async () => {
@@ -56,7 +58,7 @@ export default function WineryGoogleCard({ winery, directoryId = null, onPlaceId
         if (placeId) {
           // Place IDs are the one Google datum we may store — persist so the
           // next open skips the match entirely.
-          placesService.saveWineryPlaceId(winery.id, placeId);
+          if (winery.id != null) placesService.saveWineryPlaceId(winery.id, placeId);
           onPlaceIdSaved?.(placeId);
         }
       }
@@ -69,7 +71,7 @@ export default function WineryGoogleCard({ winery, directoryId = null, onPlaceId
     return () => {
       active = false;
     };
-  }, [isPro, winery?.id, winery?.google_place_id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isPro, winery?.id, winery?.google_place_id, directoryId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Free tier: the teaser IS the feature's storefront.
   if (!isPro) {

@@ -216,6 +216,43 @@ Client behavior: discovery queries (`lib/wineryDirectory.js`) exclude only
 `details` call (Pro winery page open) or a user report
 (`public.winery_reports`) settles their fate later.
 
+## Freshness: duplicates and the Google validation pass (#271, #273, epic #268)
+
+Two more `operating_status` values and three bookkeeping columns landed on
+2026-09-11 (migrations `20260912010000_directory_duplicates` and
+`20260912020000_directory_validated_at`):
+
+| column | meaning |
+|---|---|
+| `operating_status = 'duplicate'` | this row is the same winery as `duplicate_of`; hidden from discovery, never deleted |
+| `duplicate_of` | the kept row's id |
+| `validated_at` | when `scripts/validate-winery-directory.mjs` last checked the row against Google |
+| `validation_note` | why a checked row stayed unknown (`no match in box`, `name mismatch: …`, `… km away`) |
+
+**Exact-name pass (one-off, in the migration):** rows with the same
+normalised name in the same state within 3 km are one winery; the kept row
+prefers Google-confirmed open, then a website, then an address, then the
+lowest id, never a permanently closed row over an open one. 342 rows flagged
+on 2026-09-11; spot-check list in `docs/audits/directory-duplicates-2026-09-11.csv`.
+
+**Google pass (daily, `.github/workflows/validate-directory.yml`):**
+`scripts/validate-winery-directory.mjs` takes 160 unvalidated rows a day
+(priority states first), finds each on Google with a free IDs-only text
+search restricted to a 5 km box, then fetches `id,displayName,location,businessStatus`
+(Place Details Pro SKU, 5,000 free calls a month; the mask must never grow
+to include rating or hours). A match is trusted only if the names share
+distinctive words and it lies within 3 km; then `operating_status` and
+`google_place_id` are written. A place id already held by another row makes
+this row a `duplicate`; a flagged twin nearer Google's location than the kept
+row swaps roles (Overture sometimes kept the wrong twin's coordinates).
+Google's location is used in the moment and never stored. About three months
+covers the directory at $0; after that run it with `--refresh-older-than 90`.
+
+Review bucket: `select id, name, city, state, validation_note from
+winery_directory where validation_note is not null` lists rows Google could
+not confirm (no place in the box, or a different-named winery there, which
+often means Overture's coordinates are off).
+
 ## License / attribution
 
 This data is licensed under **CDLA-Permissive-2.0** (Community Data License

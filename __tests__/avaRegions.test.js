@@ -103,9 +103,15 @@ test('formatStates and establishedYear read the feature', () => {
 test('the bundled asset loads with every US AVA', () => {
   const features = loadRegions();
   const meta = regionsMeta();
-  expect(meta.license).toBe('CC0-1.0');
-  expect(meta.count).toBe(276);
-  expect(features).toHaveLength(276);
+  // TTB's own AVA Map Explorer service (public domain), 280 established AVAs
+  // as of 2026-08-18, including the four established in 2026.
+  expect(meta.license).toBe('US Government work (public domain)');
+  expect(meta.count).toBe(280);
+  expect(features).toHaveLength(280);
+  const allNames = features.map((f) => f.name);
+  expect(allNames).toEqual(expect.arrayContaining(['Tryon Foothills', 'Nashoba Valley', 'Nine Lakes of East Tennessee', 'Columbia Hills']));
+  expect(allNames).not.toContain('Mendocino Ridge (Outline)');
+  expect(new Set(allNames).size).toBe(280);
   for (const f of features) {
     expect(typeof f.id).toBe('string');
     expect(f.bbox).toHaveLength(4);

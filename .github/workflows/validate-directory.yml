@@ -1,0 +1,48 @@
+# Daily, paced validation of the winery directory against Google Places
+# (#273 Tier 1, epic #268). 160 rows a day is about 4,800 Place Details Pro
+# calls a month, inside the 5,000 free allowance, so the whole 14k-row
+# directory is covered in about three months at no cost. Once every row has
+# been checked, switch the command to a quarterly refresh:
+#   node scripts/validate-winery-directory.mjs --limit 160 --refresh-older-than 90
+#
+# Secrets (repo settings): GOOGLE_PLACES_API_KEY (the "Places proxy" server
+# key, Places API only), SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY.
+name: Validate winery directory
+
+on:
+  schedule:
+    - cron: '17 9 * * *' # 09:17 UTC daily
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: Rows to validate this run
+        default: '160'
+      states:
+        description: Comma-separated state codes to restrict to (optional)
+        default: ''
+      dry_run:
+        description: Log outcomes without writing back
+        type: boolean
+        default: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Validate
+        env:
+          GOOGLE_PLACES_API_KEY: ${{ secrets.GOOGLE_PLACES_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node scripts/validate-winery-directory.mjs \
+            --limit "${{ github.event.inputs.limit || '160' }}" \
+            ${{ github.event.inputs.states && format('--states {0}', github.event.inputs.states) || '' }} \
+            ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}

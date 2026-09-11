@@ -7,11 +7,18 @@ import { wishlistService } from '../lib/wishlist';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
 
+// resolveWineryId (optional, #270): on a directory PREVIEW the winery has no
+// row yet; this promotes it (find-or-create, linked to the directory) and
+// returns the id, and onSaved(id) then lets the page become that winery's.
+// closed: a permanently closed winery can't be added to the wishlist.
 const WineryActionButtons = ({
   winery,
   initialStatus = null,
   onStatusChange = () => {},
-  compact = false
+  compact = false,
+  resolveWineryId = null,
+  onSaved = () => {},
+  closed = false,
 }) => {
   const { colors, styles } = useScreenTheme();
 
@@ -26,9 +33,9 @@ const WineryActionButtons = ({
 
   // Load initial status
   useEffect(() => {
-    if (initialStatus) {
+    if (initialStatus || winery.id == null) {
       setStatus({
-        isWantToVisit: initialStatus.isWantToVisit || false
+        isWantToVisit: initialStatus?.isWantToVisit || false
       });
       setLoading(false);
     } else {
@@ -56,6 +63,10 @@ const WineryActionButtons = ({
   // Toggle wishlist status
   const toggleWishlist = async () => {
     try {
+      if (!status.isWantToVisit && closed) {
+        Alert.alert('Permanently closed', `${winery.name} is permanently closed, so it can't go on your wishlist.`);
+        return;
+      }
       setLoading(true);
 
       if (status.isWantToVisit) {
@@ -66,13 +77,16 @@ const WineryActionButtons = ({
           onStatusChange({ ...status, isWantToVisit: false });
         }
       } else {
-        // Add to wishlist
-        const { success } = await wishlistService.addToWishlist(winery.id);
+        // Add to wishlist (a preview saves the winery first)
+        const wineryId = winery.id ?? (resolveWineryId ? await resolveWineryId() : null);
+        if (wineryId == null) throw new Error('Could not save this winery');
+        const { success } = await wishlistService.addToWishlist(wineryId);
         if (success) {
           setStatus(prev => ({ ...prev, isWantToVisit: true }));
           onStatusChange({ ...status, isWantToVisit: true });
 
           Alert.alert('Added', `${winery.name} has been added to your "Want to Visit" list.`);
+          if (winery.id == null) onSaved(wineryId);
         }
       }
     } catch (error) {
@@ -144,6 +158,9 @@ const WineryActionButtons = ({
         ]}
         onPress={toggleWishlist}
         disabled={loading}
+        accessibilityRole="button"
+        accessibilityLabel={status.isWantToVisit ? 'Remove from wishlist' : 'Add to wishlist'}
+        accessibilityState={{ selected: status.isWantToVisit, disabled: loading }}
       >
         <Ionicons
           name={status.isWantToVisit ? "bookmark" : "bookmark-outline"}
