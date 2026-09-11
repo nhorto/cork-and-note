@@ -1,5 +1,5 @@
 // supabase/functions/chat/index.ts
-// Edge Function proxy for the Claude API — AI Wine Sommelier.
+// Edge Function proxy for Anthropic chat and Google Gemini wine extraction — AI Wine Sommelier.
 // Hardened per docs/audits/sommelier-security-audit.md:
 //  - per-user rate limiting + daily cap backed by public.chat_usage (#2 / Issue #30)
 //  - request-size, image-count/size, and per-message input validation (#3, #4)
@@ -24,6 +24,8 @@ import {
   textFromContent,
   webSearchRequestCount,
 } from "../_shared/claudeResponse.ts";
+
+import { isVisionTask, requestGeminiVision, visionConsentRequired, type VisionMessage } from "../_shared/geminiVision.ts";
 
 // ── Limits ──────────────────────────────────────────────────────────────
 const MAX_BODY_BYTES = 25_000_000; // ~25MB (base64 images are large)
@@ -87,13 +89,13 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Payload too large" }, 413);
     }
 
-    let parsed: { messages?: unknown; system_prompt?: unknown; task?: unknown };
+    let parsed: { messages?: unknown; system_prompt?: unknown; task?: unknown; ai_sharing_version?: unknown };
     try {
       parsed = JSON.parse(raw);
     } catch {
       return json({ error: "Invalid JSON body" }, 400);
     }
-    const { messages, system_prompt, task } = parsed;
+    const { messages, system_prompt, task, ai_sharing_version } = parsed;
 
     // ── Input validation ──────────────────────────────────────────────
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -143,6 +145,16 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // Older clients accepted an Anthropic-only disclosure. Never silently send
+    // their scans to a new provider. Updated clients attach this after consent.
+    if (visionConsentRequired(task, ai_sharing_version)) {
+      return json({ error: "Please update the app and review AI sharing before scanning.", code: "ai_consent_required" }, 428);
+    }
+    if (isVisionTask(task) && !messages.some((m) => m.role === "user" &&
+      Array.isArray(m.images) && m.images.some((i: { base64: string }) => i.base64.length > 0))) {
+      return json({ error: "A photo is required for a wine scan." }, 400);
+    }
+
     // ── Usage counts + entitlement (the inputs the gate decides on) ───
     const now = Date.now();
     const meteredTask = normalizeTask(task);
@@ -168,7 +180,7 @@ Deno.serve(async (req: Request) => {
 
     // The chat_usage RLS auto-scopes counts to this user. Fail closed on any
     // unreadable input: if we cannot count usage or prove a purchase, refuse
-    // the (paid) Anthropic call rather than run it unmetered.
+    // the paid provider call rather than run it unmetered.
     if (burstRes.error || dayRes.error || entitlementRes.error) {
       console.error(
         "Gate input read error:",
@@ -218,172 +230,184 @@ Deno.serve(async (req: Request) => {
     }
     const meter = verdict.meter;
 
-    // ── API key ───────────────────────────────────────────────────────
-    const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
-    if (!anthropicApiKey) {
-      console.error("ANTHROPIC_API_KEY not configured");
-      return json({ error: "Service temporarily unavailable" }, 503);
-    }
-
-    // ── Build Claude messages ─────────────────────────────────────────
-    const claudeMessages = [];
-    for (const msg of messages as Array<Record<string, unknown>>) {
-      const images = (msg.images as Array<Record<string, unknown>>) || [];
-      const text = (msg.content as string) || "";
-
-      if (images.length > 0) {
-        const content: Array<
-          | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
-          | { type: "text"; text: string }
-        > = [];
-        for (const img of images) {
-          if (typeof img.base64 === "string" && img.base64.length > 0) {
-            content.push({
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: (img.mediaType as string) || "image/jpeg",
-                data: img.base64 as string,
-              },
-            });
-          }
-        }
-        if (text) content.push({ type: "text", text });
-        if (content.some((c) => c.type === "image")) {
-          claudeMessages.push({ role: msg.role, content });
-        } else {
-          claudeMessages.push({ role: msg.role, content: text });
-        }
-      } else {
-        claudeMessages.push({ role: msg.role, content: text });
-      }
-    }
-
-    // ── Model selection (server-side allowlist) ───────────────────────
-    // The client may pass a `task` hint; we map it to a model HERE. We never
-    // accept a raw model string from the client (cost/abuse safety): an unknown
-    // or absent task falls back to the default chat model.
-    const MODELS: Record<string, string> = {
-      chat: "claude-sonnet-4-6", // sommelier conversation (migrated off the deprecated claude-sonnet-4)
-      label_scan: "claude-haiku-4-5", // cheap, fast label read/prefill (#59)
-      // Guided Pro tools (2026-09-11). Extraction is a vision read → Haiku;
-      // anything that has to reason about the user's journal → Sonnet.
-      wine_list_scan: "claude-haiku-4-5",
-      wine_list_pick: "claude-sonnet-4-6",
-      taste_report: "claude-sonnet-4-6",
-      trip_plan: "claude-sonnet-4-6",
-    };
-    const model =
-      typeof task === "string" && Object.prototype.hasOwnProperty.call(MODELS, task)
-        ? MODELS[task]
-        : MODELS.chat;
-
-    // Output ceilings by task. Chat gets room for a cited answer; a wine-list
-    // scan returns one JSON row per entry and a 40-entry list is ~3k tokens,
-    // so it needs far more than a chat reply — a truncated JSON block is a
-    // failed scan, not a shorter one. Ceilings, not spend: unused headroom
-    // costs nothing.
-    const MAX_OUTPUT_TOKENS: Record<string, number> = {
-      wine_list_scan: 4096,
-      wine_list_pick: 1536,
-      taste_report: 1536,
-      trip_plan: 1536,
-    };
-
-
-    // ── Server tools ──────────────────────────────────────────────────
-    // Pro-only web search, so the sommelier can look a wine up instead of
-    // recalling it. Empty for free users — an absent tool is the only kind a
-    // patched client cannot talk us into using. See webSearchToolsFor().
-    //
-    // Note this splits the prompt cache by tier: `tools` renders BEFORE `system`,
-    // so Pro and free users have different cached prefixes. That is correct
-    // (they are different requests), just worth knowing when reading cache stats.
     const tools = webSearchToolsFor({ isPro, task: meteredTask });
-    const canSearch = tools.length > 0;
-    const maxTokens =
-      typeof task === "string" && Object.prototype.hasOwnProperty.call(MAX_OUTPUT_TOKENS, task)
-        ? MAX_OUTPUT_TOKENS[task]
-        : canSearch
-        ? 2048
-        : 1024;
-
-    // ── Call Claude ───────────────────────────────────────────────────
-    // A searched reply is a MIXED content list (server_tool_use +
-    // web_search_tool_result + several cited text blocks) spread over a
-    // server-side sampling loop, and if that loop hits its iteration limit the
-    // turn comes back `pause_turn` — finished thinking, not finished talking.
-    // Resuming is just re-sending the same messages with the partial assistant
-    // turn appended; the server sees the trailing tool block and picks up. We
-    // bound it because "loop until the model says stop" is how a $0.03 message
-    // becomes a $3 one.
-    const MAX_PAUSE_RESUMES = 2;
-    const conversation: Array<Record<string, unknown>> = [...claudeMessages];
-    const responseBlocks: unknown[] = [];
+    const canSearch = !isVisionTask(task) && tools.length > 0;
+    let responseText = "";
+    let sources: ReturnType<typeof collectSources> = [];
     let usageInputTokens = 0;
     let usageOutputTokens = 0;
     let webSearches = 0;
+    let scanFailure: { error: string; status: number } | null = null;
 
-    for (let resume = 0; ; resume++) {
-      const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": anthropicApiKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model,
-          // Room for a cited answer without truncating mid-sentence. max_tokens
-          // is a ceiling, not a spend — unused headroom costs nothing.
-          max_tokens: maxTokens,
-          // Prompt caching (launch plan §4.3): the system prompt is stable across
-          // the turns of a sommelier conversation (and byte-identical across all
-          // label scans), so mark it as a cache breakpoint — cached reads bill at
-          // ~10% of input price. Prompts under the model's minimum cacheable size
-          // silently skip the cache, so this is safe for short prompts too.
-          // The breakpoint on the LAST block caches everything before it, so the
-          // floor block rides in the same cache entry for free.
-          system: [
-            { type: "text", text: SYSTEM_PROMPT_FLOOR },
-            {
-              type: "text",
-              text: (system_prompt as string) || "You are a helpful wine sommelier.",
-              cache_control: { type: "ephemeral" },
-            },
-          ],
-          messages: conversation,
-          ...(canSearch ? { tools } : {}),
-        }),
-      });
-
-      if (!claudeResponse.ok) {
-        const errorText = await claudeResponse.text();
-        console.error("Claude API error:", claudeResponse.status, errorText);
-        // Log details server-side; return a generic message + a proper status code.
-        const status = claudeResponse.status === 429 ? 429 : 502;
-        return json(
-          { error: "The sommelier is unavailable right now. Please try again." },
-          status
-        );
+    if (isVisionTask(task)) {
+      const googleApiKey = Deno.env.get("GEMINI_API_KEY");
+      if (!googleApiKey) {
+        console.error("GEMINI_API_KEY not configured");
+        return json({ error: "Service temporarily unavailable" }, 503);
+      }
+      const result = await requestGeminiVision(task, messages as VisionMessage[], SYSTEM_PROMPT_FLOOR,
+        (system_prompt as string) || "Read the wines printed in this photo.", googleApiKey);
+      responseText = result.response;
+      usageInputTokens = result.inputTokens;
+      usageOutputTokens = result.outputTokens;
+      if (result.error) scanFailure = { error: result.error, status: result.status || 502 };
+    } else {
+      // ── API key ───────────────────────────────────────────────────────
+      const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
+      if (!anthropicApiKey) {
+        console.error("ANTHROPIC_API_KEY not configured");
+        return json({ error: "Service temporarily unavailable" }, 503);
       }
 
-      const claudeData = await claudeResponse.json();
-      if (Array.isArray(claudeData.content)) responseBlocks.push(...claudeData.content);
-      usageInputTokens += claudeData.usage?.input_tokens ?? 0;
-      usageOutputTokens += claudeData.usage?.output_tokens ?? 0;
-      webSearches += webSearchRequestCount(claudeData.usage);
+      // ── Build Claude messages ─────────────────────────────────────────
+      const claudeMessages = [];
+      for (const msg of messages as Array<Record<string, unknown>>) {
+        const images = (msg.images as Array<Record<string, unknown>>) || [];
+        const text = (msg.content as string) || "";
 
-      if (claudeData.stop_reason !== "pause_turn" || resume >= MAX_PAUSE_RESUMES) break;
-      // Resume: append the paused turn verbatim. Do NOT add a "continue" message —
-      // the API detects the trailing server_tool_use block and carries on itself.
-      conversation.push({ role: "assistant", content: claudeData.content });
+        if (images.length > 0) {
+          const content: Array<
+            | { type: "image"; source: { type: "base64"; media_type: string; data: string } }
+            | { type: "text"; text: string }
+          > = [];
+          for (const img of images) {
+            if (typeof img.base64 === "string" && img.base64.length > 0) {
+              content.push({
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: (img.mediaType as string) || "image/jpeg",
+                  data: img.base64 as string,
+                },
+              });
+            }
+          }
+          if (text) content.push({ type: "text", text });
+          if (content.some((c) => c.type === "image")) {
+            claudeMessages.push({ role: msg.role, content });
+          } else {
+            claudeMessages.push({ role: msg.role, content: text });
+          }
+        } else {
+          claudeMessages.push({ role: msg.role, content: text });
+        }
+      }
+
+      // ── Model selection (server-side allowlist) ───────────────────────
+      // The client may pass a `task` hint; we map it to a model HERE. We never
+      // accept a raw model string from the client (cost/abuse safety): an unknown
+      // or absent task falls back to the default chat model.
+      const MODELS: Record<string, string> = {
+        chat: "claude-sonnet-4-6", // sommelier conversation (migrated off the deprecated claude-sonnet-4)
+        // Journal reasoning stays on Sonnet. Scan tasks use Gemini above.
+        wine_list_pick: "claude-sonnet-4-6",
+        taste_report: "claude-sonnet-4-6",
+        trip_plan: "claude-sonnet-4-6",
+      };
+      const model =
+        typeof task === "string" && Object.prototype.hasOwnProperty.call(MODELS, task)
+          ? MODELS[task]
+          : MODELS.chat;
+
+      // Output ceilings for journal reasoning; scan budgets live in geminiVision.ts.
+      // These are ceilings, not spend: unused headroom costs nothing.
+      const MAX_OUTPUT_TOKENS: Record<string, number> = {
+        wine_list_pick: 1536,
+        taste_report: 1536,
+        trip_plan: 1536,
+      };
+
+
+      // ── Server tools ──────────────────────────────────────────────────
+      // Pro-only web search, so the sommelier can look a wine up instead of
+      // recalling it. Empty for free users — an absent tool is the only kind a
+      // patched client cannot talk us into using. See webSearchToolsFor().
+      //
+      // Note this splits the prompt cache by tier: `tools` renders BEFORE `system`,
+      // so Pro and free users have different cached prefixes. That is correct
+      // (they are different requests), just worth knowing when reading cache stats.
+      const maxTokens =
+        typeof task === "string" && Object.prototype.hasOwnProperty.call(MAX_OUTPUT_TOKENS, task)
+          ? MAX_OUTPUT_TOKENS[task]
+          : canSearch
+          ? 2048
+          : 1024;
+
+      // ── Call Claude ───────────────────────────────────────────────────
+      // A searched reply is a MIXED content list (server_tool_use +
+      // web_search_tool_result + several cited text blocks) spread over a
+      // server-side sampling loop, and if that loop hits its iteration limit the
+      // turn comes back `pause_turn` — finished thinking, not finished talking.
+      // Resuming is just re-sending the same messages with the partial assistant
+      // turn appended; the server sees the trailing tool block and picks up. We
+      // bound it because "loop until the model says stop" is how a $0.03 message
+      // becomes a $3 one.
+      const MAX_PAUSE_RESUMES = 2;
+      const conversation: Array<Record<string, unknown>> = [...claudeMessages];
+      const responseBlocks: unknown[] = [];
+
+      for (let resume = 0; ; resume++) {
+        const claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": anthropicApiKey,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model,
+            // Room for a cited answer without truncating mid-sentence. max_tokens
+            // is a ceiling, not a spend — unused headroom costs nothing.
+            max_tokens: maxTokens,
+            // Prompt caching (launch plan §4.3): the system prompt is stable across
+            // the turns of a sommelier conversation (and byte-identical across all
+            // label scans), so mark it as a cache breakpoint — cached reads bill at
+            // ~10% of input price. Prompts under the model's minimum cacheable size
+            // silently skip the cache, so this is safe for short prompts too.
+            // The breakpoint on the LAST block caches everything before it, so the
+            // floor block rides in the same cache entry for free.
+            system: [
+              { type: "text", text: SYSTEM_PROMPT_FLOOR },
+              {
+                type: "text",
+                text: (system_prompt as string) || "You are a helpful wine sommelier.",
+                cache_control: { type: "ephemeral" },
+              },
+            ],
+            messages: conversation,
+            ...(canSearch ? { tools } : {}),
+          }),
+        });
+
+        if (!claudeResponse.ok) {
+          const errorText = await claudeResponse.text();
+          console.error("Claude API error:", claudeResponse.status, errorText);
+          // Log details server-side; return a generic message + a proper status code.
+          const status = claudeResponse.status === 429 ? 429 : 502;
+          return json(
+            { error: "The sommelier is unavailable right now. Please try again." },
+            status
+          );
+        }
+
+        const claudeData = await claudeResponse.json();
+        if (Array.isArray(claudeData.content)) responseBlocks.push(...claudeData.content);
+        usageInputTokens += claudeData.usage?.input_tokens ?? 0;
+        usageOutputTokens += claudeData.usage?.output_tokens ?? 0;
+        webSearches += webSearchRequestCount(claudeData.usage);
+
+        if (claudeData.stop_reason !== "pause_turn" || resume >= MAX_PAUSE_RESUMES) break;
+        // Resume: append the paused turn verbatim. Do NOT add a "continue" message —
+        // the API detects the trailing server_tool_use block and carries on itself.
+        conversation.push({ role: "assistant", content: claudeData.content });
+      }
+
+      // Text and sources are read across every turn at once, so a paused-and-
+      // resumed answer reads as one reply and cites each page only once.
+      responseText = textFromContent(responseBlocks);
+      sources = collectSources(responseBlocks);
+
     }
-
-    // Text and sources are read across every turn at once, so a paused-and-
-    // resumed answer reads as one reply and cites each page only once.
-    const responseText = textFromContent(responseBlocks);
-    const sources = collectSources(responseBlocks);
 
     // ── Record usage (append-only; best-effort) ───────────────────────
     const { error: usageError } = await supabaseClient.from("chat_usage").insert({
@@ -397,6 +421,16 @@ Deno.serve(async (req: Request) => {
     });
     if (usageError) console.error("Failed to record chat_usage:", usageError);
 
+    const nextMeter = {
+      task: meter.task,
+      limit: meter.limit,
+      used: meter.used + 1,
+      remaining: meter.remaining === null ? null : Math.max(0, meter.remaining - 1),
+      isPro,
+    };
+    // Failed scans still consume an attempt; update the client meter without partial wine data.
+    if (scanFailure) return json({ error: scanFailure.error, meter: nextMeter }, scanFailure.status);
+
     // Hand back the meter this call just spent, so the app can update its
     // "2 free scans left" hint without a second round-trip.
     return json({
@@ -409,13 +443,7 @@ Deno.serve(async (req: Request) => {
         output_tokens: usageOutputTokens,
         web_searches: webSearches,
       },
-      meter: {
-        task: meter.task,
-        limit: meter.limit,
-        used: meter.used + 1,
-        remaining: meter.remaining === null ? null : Math.max(0, meter.remaining - 1),
-        isPro,
-      },
+      meter: nextMeter,
     });
   } catch (error) {
     console.error("Edge function error:", error);

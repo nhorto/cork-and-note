@@ -31,3 +31,19 @@ it('supports withdrawal and explicit permission to re-enable AI', async () => {
   jest.spyOn(Alert, 'alert').mockImplementation((title, text, actions) => actions[1].onPress());
   await expect(requestAiConsent('user-a', { promptAgain: true })).resolves.toBe(true);
 });
+
+it('requires renewed consent for a prior Anthropic-only opt-in', async () => {
+  await AsyncStorage.setItem('ai-sharing-consent:v1:user-a', 'allowed');
+  expect(await getAiConsent('user-a')).toBeNull();
+  const prompt = jest.spyOn(Alert, 'alert').mockImplementation((title, text, actions) => actions[1].onPress());
+  await expect(requireAiConsent('user-a')).resolves.toBeUndefined();
+  expect(prompt.mock.calls[0][1]).toContain('Google Gemini');
+  expect(await AsyncStorage.getItem('ai-sharing-consent:v2:user-a')).toBe('allowed');
+});
+
+it('preserves a prior opt-out without prompting automatically', async () => {
+  await AsyncStorage.setItem('ai-sharing-consent:v1:user-a', 'declined');
+  const prompt = jest.spyOn(Alert, 'alert');
+  await expect(requireAiConsent('user-a')).rejects.toMatchObject({ code: 'ai_consent_required' });
+  expect(prompt).not.toHaveBeenCalled();
+});
