@@ -198,7 +198,7 @@ const ASKS = [
   'I like this wine — how would I describe it?',
   'What does “dry” actually mean?',
   'What should I open with the lamb tonight?',
-  'What do the wines I’ve liked have in common?',
+  'What should I try next, based on my tastings?',
 ];
 
 const WINDOWS = [
@@ -372,13 +372,13 @@ const home = page({
   <div class="wide somm-grid">
     <div class="somm-text">
       <p class="eyebrow"><span class="numeral">II</span>The sommelier</p>
-      <h2>Ask a sommelier who has read your notes.</h2>
-      <p class="lede">An AI wine companion grounded in your own ratings, visits and cellar — not a crowd score. It knows what you actually liked, because it has read your journal. Beginner questions are its favourite kind.</p>
+      <h2>A sommelier that learns your palate.</h2>
+      <p class="lede">Every tasting you log teaches it a little more about what you like. Ask what to open tonight, how to describe the glass in your hand, or what to try next — the answers are built on your own ratings, visits and cellar, not a crowd score. The more you journal, the better it knows you. Beginner questions are its favourite kind.</p>
       <p class="asks-label">Things you can ask</p>
       <ul class="asks">${ASKS.map((a) => `<li>${esc(a)}</li>`).join('')}</ul>
       <p class="somm-note">Five messages a month on Free, unlimited on Pro. Tonight’s Pick — the sommelier choosing from your own ready-to-drink bottles — is part of Pro.</p>
     </div>
-    <div class="somm-stage">${phone('shot-5-sommelier.png', 'The Cork & Note sommelier answering a plain-words question about the wines you have rated.')}</div>
+    <div class="somm-stage">${phone('shot-5-sommelier.png', 'The Cork & Note sommelier answering “What should I try next based on my tastings?” with recommendations built on the user’s own 5-star ratings.')}</div>
   </div>
 </section>
 
@@ -390,16 +390,19 @@ const home = page({
 </section>
 
 <section class="cellar">
-  <div class="wide">
-    <div class="section-head">
-      <p class="eyebrow">The cellar</p>
-      <h2>A cellar that tells you when.</h2>
-      <p class="section-lede">Track the bottles you own with drink windows that say what’s ready now, what needs holding, and what to open tonight before it slips past its peak.</p>
+  <div class="wide cellar-grid">
+    <div class="cellar-text">
+      <div class="section-head">
+        <p class="eyebrow">The cellar</p>
+        <h2>A cellar that tells you when.</h2>
+        <p class="section-lede">Every bottle you own carries a drink window — what’s ready now, what needs holding, and what to open tonight before it slips past its peak. And when you can’t decide, Tonight’s Pick has the sommelier choose from your own ready bottles, tuned to the occasion, the food and your mood.</p>
+      </div>
+      <ul class="windows">${WINDOWS.map(
+        ([k, name, note]) =>
+          `<li class="tile ${k}"><span class="dot" aria-hidden="true"></span><span class="tile-name">${esc(name)}</span><span class="tile-note">${esc(note)}</span></li>`
+      ).join('')}</ul>
     </div>
-    <ul class="windows">${WINDOWS.map(
-      ([k, name, note]) =>
-        `<li class="tile ${k}"><span class="dot" aria-hidden="true"></span><span class="tile-name">${esc(name)}</span><span class="tile-note">${esc(note)}</span></li>`
-    ).join('')}</ul>
+    <div class="cellar-stage">${phone('shot-6-cellar.png', 'The Cork & Note cellar: Tonight’s Pick asking “What should I drink tonight?” above bottles labelled past peak, drink soon and ready.')}</div>
   </div>
 </section>
 
@@ -705,8 +708,11 @@ section{scroll-margin-top:16px}
 
 /* ---- Cellar: parchment band ---- */
 .cellar{background:var(--parchment);border-top:1px solid var(--stone);border-bottom:1px solid var(--stone);padding:88px 0}
+.cellar-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
 .cellar .section-head{margin-bottom:36px}
-.windows{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.cellar-stage{display:flex;justify-content:center;align-items:center;padding:8px 0}
+.cellar-stage .phone{width:min(300px,78vw)}
+.windows{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:560px}
 .tile{background:var(--cream);border:1px solid var(--stone);border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;gap:6px}
 .dot{width:10px;height:10px;border-radius:999px;margin-bottom:8px}
 .tile-name{font-family:var(--serif);font-size:22px;color:var(--charcoal)}
@@ -817,6 +823,8 @@ footer{background:var(--midnight);color:var(--gold-muted);font-size:14px}
 
 @media (max-width:960px){
   .hero-grid,.somm-grid{grid-template-columns:1fr;gap:0}
+  .cellar-grid{grid-template-columns:1fr;gap:32px}
+  .cellar-stage .phone{width:min(280px,78vw)}
   .hero-text{padding:56px 0 40px;text-align:center}
   .hero .eyebrow,.hero-actions{justify-content:center}
   .hero .lede{margin-left:auto;margin-right:auto}
