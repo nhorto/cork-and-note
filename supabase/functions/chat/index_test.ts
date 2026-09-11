@@ -5,6 +5,7 @@
 import { assert, assertEquals, assertMatch, assertStringIncludes } from "jsr:@std/assert";
 import { createHandler } from "./index.ts";
 import { fakeDeps, jsonRequest, readJson } from "../_shared/testing.ts";
+import { AI_SHARING_VERSION, VISION_MODEL } from "../_shared/geminiVision.ts";
 import {
   BURST_LIMIT,
   FAIR_USE_DAILY_CAPS,
@@ -26,7 +27,7 @@ function setup({
   user = USER as typeof USER | null,
   env = {} as Record<string, string | undefined>,
 } = {}) {
-  const f = fakeDeps({ user, env });
+  const f = fakeDeps({ user, env: { GEMINI_API_KEY: "g-test", ...env } });
   const { burst = 0, day = 0, window = 0 } = counts;
   // The handler issues three count queries against chat_usage: burst (no task
   // filter), rolling day (task filter), and the meter window (task filter,
@@ -54,6 +55,24 @@ const claudeReply = (text: string, extra: Record<string, unknown> = {}) => ({
 
 const ask = (content = "What pairs with oysters?", extra: Record<string, unknown> = {}) =>
   jsonRequest({ messages: [{ role: "user", content }], system_prompt: "You are the Cork & Note sommelier.", ...extra });
+
+// Scans are vision tasks: they carry a photo and the AI-sharing consent
+// version the client accepted, and they are answered by Gemini, not Claude.
+const scan = (task = "label_scan", extra: Record<string, unknown> = {}) =>
+  jsonRequest({
+    task,
+    ai_sharing_version: AI_SHARING_VERSION,
+    messages: [{ role: "user", content: "read", images: [{ base64: "AAAA" }] }],
+    ...extra,
+  });
+
+const geminiReply = (json: string, usage: Record<string, number> = {}, finishReason = "STOP") => ({
+  candidates: [{ finishReason, content: { parts: [{ text: json }] } }],
+  usageMetadata: { promptTokenCount: 500, candidatesTokenCount: 10, thoughtsTokenCount: 20, ...usage },
+});
+
+const GEMINI_URL = /generativelanguage\.googleapis\.com/;
+const EMPTY_LABEL = '{"wine_name":null,"producer":null,"vintage":null,"wine_type":null,"varietal":null,"region":null}';
 
 Deno.test("OPTIONS preflight answers without touching auth", async () => {
   const { handler, db } = setup();
@@ -143,7 +162,7 @@ Deno.test("the free chat meter refuses the sixth message of the month with a 402
 
 Deno.test("a free scan meter is lifetime: three scans ever, then 402", async () => {
   const { handler, fetch } = setup({ counts: { window: FREE_TIER_LIMITS.label_scan } });
-  const res = await handler(ask("read this", { task: "label_scan", messages: [{ role: "user", content: "read", images: [{ base64: "AAAA" }] }] }));
+  const res = await handler(scan());
   assertEquals(res.status, 402);
   assertEquals(fetch.calls.length, 0);
 });
@@ -176,12 +195,12 @@ Deno.test("Pro's monthly chat ceiling is 429; Pro scans have no monthly window",
   const capped = setup({ counts: { window: FAIR_USE_MONTHLY_CHAT_CAP }, entitlement: { is_pro: true, expires_at: FUTURE } });
   assertEquals((await capped.handler(ask())).status, 429);
 
-  const scan = setup({ counts: { window: 999_999 }, entitlement: { is_pro: true, expires_at: FUTURE } });
-  scan.fetch.reply(200, claudeReply("```cellar_label\n{}\n```"));
-  const res = await scan.handler(jsonRequest({ task: "label_scan", messages: [{ role: "user", content: "read", images: [{ base64: "AAAA" }] }] }));
+  const proScan = setup({ counts: { window: 999_999 }, entitlement: { is_pro: true, expires_at: FUTURE } });
+  proScan.fetch.reply(200, geminiReply(EMPTY_LABEL));
+  const res = await proScan.handler(scan());
   assertEquals(res.status, 200);
   // Pro scans never issue the window count at all.
-  const windowReads = scan.db.queriesTo("chat_usage").filter((q) => q.op === "select" && q.filters.some((x) => x.column === "task"));
+  const windowReads = proScan.db.queriesTo("chat_usage").filter((q) => q.op === "select" && q.filters.some((x) => x.column === "task"));
   assertEquals(windowReads.length, 1, "only the rolling-day count carries a task filter for a Pro scan");
 });
 
@@ -247,8 +266,6 @@ Deno.test("an image message becomes a base64 image block plus text, defaulting t
 
 Deno.test("each task selects its model and output ceiling from the server allowlist; an unknown task is chat", async () => {
   const expected: Record<string, [string, number]> = {
-    label_scan: ["claude-haiku-4-5", 1024],
-    wine_list_scan: ["claude-haiku-4-5", 4096],
     wine_list_pick: ["claude-sonnet-4-6", 1536],
     taste_report: ["claude-sonnet-4-6", 1536],
     trip_plan: ["claude-sonnet-4-6", 1536],
@@ -266,6 +283,21 @@ Deno.test("each task selects its model and output ceiling from the server allowl
   }
 });
 
+Deno.test("scan tasks go to Gemini, each with its own output budget; chat never does", async () => {
+  const budgets: Record<string, number> = { label_scan: 2048, tasting_menu_scan: 8192, wine_list_scan: 8192 };
+  for (const [task, maxOutputTokens] of Object.entries(budgets)) {
+    const { handler, fetch } = setup({ entitlement: { is_pro: true, expires_at: null } });
+    fetch.reply(200, geminiReply(task === "label_scan" ? EMPTY_LABEL : task === "tasting_menu_scan" ? '{"wines":[]}' : '{"entries":[],"notes":null}'));
+    const res = await handler(scan(task));
+    assertEquals(res.status, 200, task);
+    assertEquals(fetch.calls.length, 1, task);
+    assertMatch(fetch.calls[0].url, GEMINI_URL);
+    assertStringIncludes(fetch.calls[0].url, VISION_MODEL);
+    const body = fetch.calls[0].body as { generationConfig: { maxOutputTokens: number } };
+    assertEquals(body.generationConfig.maxOutputTokens, maxOutputTokens, task);
+  }
+});
+
 Deno.test("web search is attached only for Pro chat, with the pinned tool version and use cap", async () => {
   const pro = setup({ entitlement: { is_pro: true, expires_at: null } });
   pro.fetch.reply(200, claudeReply("ok"));
@@ -277,9 +309,71 @@ Deno.test("web search is attached only for Pro chat, with the pinned tool versio
   assertEquals((pro.fetch.calls[0].body as Record<string, unknown>).max_tokens, 2048);
 
   const proScan = setup({ entitlement: { is_pro: true, expires_at: null } });
-  proScan.fetch.reply(200, claudeReply("ok"));
-  await proScan.handler(ask("read", { task: "label_scan" }));
+  proScan.fetch.reply(200, geminiReply(EMPTY_LABEL));
+  await proScan.handler(scan());
+  assertMatch(proScan.fetch.calls[0].url, GEMINI_URL);
   assertEquals((proScan.fetch.calls[0].body as Record<string, unknown>).tools, undefined);
+});
+
+// ── Gemini scans (ported from the jest dispatch suite that came with the switch) ──
+
+Deno.test("a scan is answered by Gemini without an Anthropic key, re-fenced for the app parser, and metered as a label scan", async () => {
+  const { handler, fetch, db } = setup({ entitlement: { is_pro: true, expires_at: null }, env: { ANTHROPIC_API_KEY: undefined } });
+  fetch.reply(200, geminiReply('{"wines":[]}'));
+  const res = await handler(scan("tasting_menu_scan"));
+  assertEquals(res.status, 200);
+  const body = await readJson(res);
+  assertEquals(body.response, "```tasting_menu\n{\"wines\":[]}\n```");
+  assertEquals(body.sources, []);
+  // Billed thinking tokens count as output.
+  assertEquals(body.usage, { input_tokens: 500, output_tokens: 30, web_searches: 0 });
+  assertEquals(body.meter.task, "label_scan");
+  assertEquals(body.meter.used, 1);
+  assertMatch(fetch.calls[0].url, GEMINI_URL);
+  const insert = db.queriesTo("chat_usage").find((q) => q.op === "insert");
+  assert(insert, "usage row recorded");
+  const row = insert.payload as Record<string, unknown>;
+  assertEquals(row.task, "label_scan");
+  assertEquals(row.output_tokens, 30);
+  assertEquals(row.web_searches, null);
+});
+
+Deno.test("a scan from a client on the old AI-sharing disclosure is 428, and one without a photo is 400, before any provider I/O", async () => {
+  const stale = setup({ entitlement: { is_pro: true, expires_at: null } });
+  const res = await stale.handler(scan("tasting_menu_scan", { ai_sharing_version: AI_SHARING_VERSION - 1 }));
+  assertEquals(res.status, 428);
+  assertEquals((await readJson(res)).code, "ai_consent_required");
+  assertEquals(stale.fetch.calls.length, 0);
+  assertEquals(stale.db.queriesTo("chat_usage").length, 0);
+
+  const noPhoto = setup({ entitlement: { is_pro: true, expires_at: null } });
+  assertEquals((await noPhoto.handler(scan("tasting_menu_scan", { messages: [{ role: "user", content: "read" }] }))).status, 400);
+  assertEquals(noPhoto.fetch.calls.length, 0);
+  assertEquals(noPhoto.db.queriesTo("chat_usage").length, 0);
+});
+
+Deno.test("a missing Gemini key fails closed with 503 and nothing is metered", async () => {
+  const { handler, fetch, db } = setup({ entitlement: { is_pro: true, expires_at: null }, env: { GEMINI_API_KEY: undefined } });
+  const res = await handler(scan());
+  assertEquals(res.status, 503);
+  assertEquals(await readJson(res), { error: "Service temporarily unavailable" });
+  assertEquals(fetch.calls.length, 0);
+  assertEquals(db.queriesTo("chat_usage").filter((q) => q.op === "insert").length, 0);
+});
+
+Deno.test("a truncated scan is a paid attempt: metered and 502 with crop guidance, never partial wines", async () => {
+  const { handler, fetch, db } = setup({ entitlement: { is_pro: true, expires_at: null } });
+  fetch.reply(200, geminiReply('{"wines":[', { candidatesTokenCount: 8192, thoughtsTokenCount: 0 }, "MAX_TOKENS"));
+  const res = await handler(scan("tasting_menu_scan"));
+  assertEquals(res.status, 502);
+  const body = await readJson(res);
+  assertMatch(body.error, /Crop/);
+  assertEquals(body.response, undefined);
+  assertEquals(body.meter.task, "label_scan");
+  assertEquals(body.meter.used, 1);
+  const insert = db.queriesTo("chat_usage").find((q) => q.op === "insert");
+  assert(insert, "usage row recorded");
+  assertEquals((insert.payload as Record<string, unknown>).output_tokens, 8192);
 });
 
 Deno.test("a searched Pro reply returns text across blocks, deduplicated sources, and the search count", async () => {

@@ -14,6 +14,7 @@ import {
   scanWineLabel,
   WINE_TYPES,
 } from '../lib/cellarScan';
+import { parseGeminiVisionResponse } from '../supabase/functions/_shared/geminiVision.ts';
 
 jest.mock('../lib/supabase', () => ({ supabase: require('../test-utils/fakeSupabase').currentFake() }));
 jest.mock('../lib/ai', () => {
@@ -174,7 +175,7 @@ describe('scanTastingCard', () => {
     expect(res.wines[1].wine_type).toBe('Dessert');
     expect(res.wines[0]).not.toHaveProperty('price');
     expect(res.note).toBe('A nice flight.');
-    expect(aiService.sendMessage.mock.calls[0][2]).toEqual({ task: 'label_scan' });
+    expect(aiService.sendMessage.mock.calls[0][2]).toEqual({ task: 'tasting_menu_scan' });
   });
 
   test('an empty card is a soft failure with its own guidance', async () => {
@@ -182,5 +183,31 @@ describe('scanTastingCard', () => {
     const res = await scanTastingCard({ base64: 'AAAA' });
     expect(res.success).toBe(false);
     expect(res.error).toMatch(/Couldn't read any wines from that card/);
+  });
+});
+
+// The Edge Function now answers scans with Gemini's structured JSON, re-wrapped
+// by parseGeminiVisionResponse into the same fenced blocks the app parsers
+// expect. Round-trip both scan kinds through the real adapter to pin that.
+describe('Gemini structured output through the app parsers', () => {
+  test('passes structured Gemini cards through the real app parser using the card task', async () => {
+    const wines = ['2022', '2023'].map((vintage) => ({
+      wine_name: 'Reserve', producer: 'Example', vintage, wine_type: 'Red', varietal: 'Cabernet Franc', region: null,
+    }));
+    const adapted = parseGeminiVisionResponse('tasting_menu_scan', {
+      candidates: [{ finishReason: 'STOP', content: { parts: [{ text: JSON.stringify({ wines }) }] } }],
+    });
+    aiService.sendMessage.mockResolvedValue(adapted);
+    expect(await cellarScan.scanTastingCard({ base64: 'photo' })).toMatchObject({ success: true, count: 2, wines });
+    expect(aiService.sendMessage.mock.calls[0][2]).toEqual({ task: 'tasting_menu_scan' });
+  });
+
+  test('passes structured Gemini labels through the existing cellar prefill parser', async () => {
+    const wine = { wine_name: 'Reserve', producer: 'Example', vintage: '2023', wine_type: 'White', varietal: null, region: null };
+    const adapted = parseGeminiVisionResponse('label_scan', {
+      candidates: [{ finishReason: 'STOP', content: { parts: [{ text: JSON.stringify(wine) }] } }],
+    });
+    aiService.sendMessage.mockResolvedValue(adapted);
+    expect(await cellarScan.scanWineLabel({ base64: 'photo' })).toMatchObject({ success: true, fields: wine });
   });
 });

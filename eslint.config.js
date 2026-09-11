@@ -5,7 +5,7 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*', 'site/dist/*', '.jest-cache/*', '.claude/**'],
+    ignores: ['dist/*', 'site/dist/*', '.jest-cache/*', '.claude/**', '.vision-bench/**'],
   },
   {
     // Unit tests run under Jest in Node, not in the app runtime — so they get

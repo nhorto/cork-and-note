@@ -65,7 +65,7 @@ export default function TastingMenuScanner({ onScanned }) {
       setError(null);
       setReading(true);
       try {
-        const image = await aiService.photoToBase64(uri);
+        const image = await aiService.photoToBase64(uri, { maxEdge: 1568 });
         if (!image?.base64) {
           setError("Couldn't read that photo. Try another, or add wines manually.");
           return;

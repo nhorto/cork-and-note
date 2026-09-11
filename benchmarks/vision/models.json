@@ -1,0 +1,20 @@
+{
+  "pricing_checked": "2026-09-11",
+  "currency": "USD",
+  "sources": {
+    "google": "https://ai.google.dev/gemini-api/docs/pricing",
+    "openai": "https://developers.openai.com/api/docs/pricing",
+    "anthropic": "https://platform.claude.com/docs/en/about-claude/pricing"
+  },
+  "models": [
+    {"id":"gemini-3.8-flash","provider":"google","input":0.75,"cached_input":0.075,"output":3.75,"thinking":"low","media_resolution":"MEDIA_RESOLUTION_HIGH","pricing_expires":"2026-12-31"},
+    {"id":"gemini-3.5-flash","provider":"google","input":1.5,"cached_input":0.15,"output":9,"thinking":"low","media_resolution":"MEDIA_RESOLUTION_HIGH"},
+    {"id":"gemini-3.5-flash-lite","provider":"google","input":0.3,"cached_input":0.03,"output":2.5,"thinking":"low","media_resolution":"MEDIA_RESOLUTION_HIGH"},
+    {"id":"gemini-3.1-flash-lite","provider":"google","input":0.25,"cached_input":0.025,"output":1.5,"thinking":"low","media_resolution":"MEDIA_RESOLUTION_HIGH"},
+    {"id":"gpt-5.4-mini-2026-03-17","provider":"openai","input":0.75,"cached_input":0.075,"output":4.5,"thinking":"low","detail":"high"},
+    {"id":"gpt-5.6-luna","provider":"openai","input":0.2,"cached_input":0.02,"output":1.2,"thinking":"low","detail":"high"},
+    {"id":"gpt-5.6-terra","provider":"openai","input":2,"cached_input":0.2,"output":12,"thinking":"low","detail":"high"},
+    {"id":"claude-haiku-4-5-20251001","provider":"anthropic","input":1,"cached_input":0.1,"output":5,"thinking":"disabled"},
+    {"id":"claude-sonnet-5","provider":"anthropic","input":2,"cached_input":0.2,"output":10,"thinking":"disabled"}
+  ]
+}

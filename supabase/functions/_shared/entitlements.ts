@@ -33,7 +33,7 @@ export type MeterWindow = "lifetime" | "month";
 
 /**
  * The window each free meter counts over. Scans are LIFETIME — three to feel
- * the magic, then the wall, like Sommo's five — because a Haiku scan costs a
+ * the magic, then the wall, like Sommo's five — because a vision scan costs a
  * third of a cent and the reason to gate it is conversion, not cost. Chat
  * resets each calendar month because five-ever would starve the habit loop
  * that makes the sommelier worth paying for.
@@ -81,7 +81,7 @@ export const FAIR_USE_DAILY_CAPS: Record<MeteredTask, number> = {
   // the whole cellar to Sonnet (~1-2c). Twenty is far past any human evening
   // and still bounds a scripted grind at a few dollars a month.
   tonights_pick: 20,
-  // Guided tools. A list scan is a Haiku vision call on up to three photos
+  // Guided tools. A list scan is a Gemini vision call on up to three photos
   // (~1c); a pick, a taste report and a trip plan are each one Sonnet call
   // with a few thousand tokens of context (~3c). Nobody photographs fifteen
   // wine lists in a day; five taste reports is "refresh, edit, refresh" with
@@ -107,6 +107,8 @@ export const PRO_ENTITLEMENT_ID = "pro";
  * meter — an unrecognised task must never buy a cheaper allowance.
  */
 export function normalizeTask(task: unknown): MeteredTask {
+  // Cards have a separate model budget, but share the lifetime label-scan meter.
+  if (task === "tasting_menu_scan") return "label_scan";
   if (typeof task === "string" && task !== "chat" && isKnownTask(task)) return task;
   return "chat";
 }

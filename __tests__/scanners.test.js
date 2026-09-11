@@ -41,6 +41,7 @@ const CASES = [
     cta: 'Scan a label',
     result: { success: true, fields: { wine_name: 'Octagon' }, note: 'Nice' },
     handedUp: { wine_name: 'Octagon' },
+    photoArgs: ['file:///label.jpg'],
   },
   {
     name: 'TastingMenuScanner',
@@ -49,6 +50,8 @@ const CASES = [
     cta: 'Scan a card',
     result: { success: true, wines: [{ wine_name: 'A' }, { wine_name: 'B' }], count: 2, note: 'Nice' },
     handedUp: [{ wine_name: 'A' }, { wine_name: 'B' }],
+    // Dense cards ask for the larger tested edge so small print survives.
+    photoArgs: ['file:///label.jpg', { maxEdge: 1568 }],
   },
 ];
 
@@ -66,7 +69,7 @@ beforeEach(() => {
 });
 afterEach(() => Alert.alert.mockRestore());
 
-describe.each(CASES)('$name', ({ Component, scan, cta, result, handedUp }) => {
+describe.each(CASES)('$name', ({ Component, scan, cta, result, handedUp, photoArgs }) => {
   async function mount(onScanned = jest.fn()) {
     let tree;
     await act(async () => { tree = create(<Component onScanned={onScanned} />); });
@@ -92,7 +95,7 @@ describe.each(CASES)('$name', ({ Component, scan, cta, result, handedUp }) => {
     await pressText(tree, cta);
     await flush();
     expect(picker.launchCameraAsync).toHaveBeenCalledWith(expect.objectContaining({ allowsEditing: true, quality: 0.7 }));
-    expect(aiService.photoToBase64).toHaveBeenCalledWith('file:///label.jpg');
+    expect(aiService.photoToBase64).toHaveBeenCalledWith(...photoArgs);
     expect(scan).toHaveBeenCalledWith({ base64: 'AAAA', mediaType: 'image/jpeg' });
     expect(onScanned).toHaveBeenCalledWith(handedUp);
     // Back to the CTA so the prefilled form below is the focus.

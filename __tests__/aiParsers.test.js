@@ -114,12 +114,17 @@ describe('photoToBase64', () => {
   });
   afterEach(() => jest.restoreAllMocks());
 
-  test('a photo within the cap is sent as read, typed by its extension', async () => {
+  test('a photo within the cap is re-encoded as JPEG without resizing; the original is typed by extension only if that fails', async () => {
+    // Small photos still go through the manipulator (no resize action) so a
+    // HEIC from the camera roll never reaches the server as "image/jpeg" bytes.
     sized(800, 600);
-    expect(await aiService.photoToBase64('file:///a/label.PNG')).toEqual({ base64: 'ORIGINAL', mediaType: 'image/png' });
+    expect(await aiService.photoToBase64('file:///a/label.PNG')).toEqual({ base64: 'SMALL', mediaType: 'image/jpeg' });
+    expect(ImageManipulator.manipulateAsync).toHaveBeenCalledWith('file:///a/label.PNG', [], { compress: 0.8, format: 'jpeg', base64: true });
+    expect(FileSystem.readAsStringAsync).not.toHaveBeenCalled();
+
+    ImageManipulator.manipulateAsync.mockResolvedValue({});
     expect(await aiService.photoToBase64('file:///a/label.webp')).toEqual({ base64: 'ORIGINAL', mediaType: 'image/webp' });
     expect(await aiService.photoToBase64('file:///a/label.jpg')).toEqual({ base64: 'ORIGINAL', mediaType: 'image/jpeg' });
-    expect(ImageManipulator.manipulateAsync).not.toHaveBeenCalled();
   });
 
   test('anything without a known extension is declared JPEG, which is what the picker produces', async () => {

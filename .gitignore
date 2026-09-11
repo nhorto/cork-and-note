@@ -65,3 +65,7 @@ site/dist/
 # jest transform cache (restored in CI by actions/cache)
 .jest-cache/
 *.swp
+
+# Vision benchmark: private photos, local labels, API outputs, and Python env
+.vision-bench/
+__pycache__/
