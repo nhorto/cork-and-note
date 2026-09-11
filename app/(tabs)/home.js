@@ -1,7 +1,7 @@
 // app/(tabs)/home.js - Home / overview landing
 // Château Label Design - Elegant & Refined
 // "Passport" layout (epic #203, Home A): leads with Your Journey — where
-// you've been — then Tonight's Pick and the cellar. The Near You (Pro) row
+// you've been — then Tonight's Pick and the cellar. The Near You row
 // slots in under the Journey card when Google winery enrichment ships
 // (Phase 2). Logging moved to the floating "＋ Log" pill; the sommelier is a
 // first-class tab now, so neither needs a home card anymore.
@@ -196,7 +196,7 @@ export default function HomeScreen() {
           onPressWishlist={() => router.push('/wishlist')}
         />
 
-        {/* Near You — Pro winery discovery from our own directory (#203 P2).
+        {/* Near You — free winery discovery from our own directory (#203 P2).
             Hides itself entirely when location is denied or nothing is near. */}
         <NearYouRow />
 

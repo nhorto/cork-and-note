@@ -82,7 +82,7 @@ export default function WineryGoogleCard({ winery, directoryId = null, onPlaceId
         accessibilityLabel="Winery ratings and hours — Pro feature"
       >
         <Ionicons name="star" size={18} color={colors.accent.base} />
-        <Text style={styles.teaserText}>Ratings, hours & website</Text>
+        <Text style={styles.teaserText}>Check ratings & opening hours with Pro</Text>
         <View style={styles.proBadge}>
           <Text style={styles.proBadgeText}>PRO</Text>
         </View>

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import {
+  Alert,
   Linking,
   Platform,
   SafeAreaView,
@@ -20,6 +21,7 @@ import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryGoogleCard from '../../components/WineryGoogleCard';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import { wineriesService } from '../../lib/wineries';
+import { wineryDirectoryService } from '../../lib/wineryDirectory';
 import { wineryStatusService } from '../../lib/wineryStatus';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
@@ -45,6 +47,18 @@ export default function WineryDetail() {
   const [wineryStatus, setWineryStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(true);
   const [reportVisible, setReportVisible] = useState(false);
+  const [website, setWebsite] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+    setWebsite(null);
+    if (winery?.id != null && String(winery.id) === String(id)) {
+      wineryDirectoryService.getWebsite({ ...winery, directoryId }).then((url) => {
+        if (active) setWebsite(url);
+      });
+    }
+    return () => { active = false; };
+  }, [id, winery, directoryId]);
 
   useEffect(() => {
     const fetchWinery = async () => {
@@ -221,6 +235,22 @@ export default function WineryDetail() {
               </View>
               <Text style={styles.actionLabel}>Directions</Text>
             </TouchableOpacity>
+            {website && (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => Linking.openURL(website).catch(() =>
+                  Alert.alert('Could not open website', 'Please try again.')
+                )}
+                accessibilityRole="link"
+                accessibilityLabel="Winery website"
+                activeOpacity={0.7}
+              >
+                <View style={[styles.actionIcon, { backgroundColor: colors.primary.base }]}>
+                  <Ionicons name="globe-outline" size={22} color={colors.onPrimary} />
+                </View>
+                <Text style={styles.actionLabel}>Website</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Divider */}
