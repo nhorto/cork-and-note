@@ -202,7 +202,10 @@ export default function HomeScreen() {
 
         {/* Sommelier — one card, one input, quick chips (owner feedback
             2026-09-12: no separate "Start a new chat" button; the input is the
-            new chat). Typing hands the question to the Somm tab via ?ask=…,
+            new chat). The placeholder stays the component's open invitation
+            ("Ask anything about wine") rather than a tonight-specific prompt,
+            so Home does not read as a what-to-open-tonight box (owner feedback
+            2026-09-12). Typing hands the question to the Somm tab via ?ask=…,
             which opens a fresh conversation and sends it. The tool chips go
             straight to the guided screens; "Pair a dish" half-writes the
             question so the user finishes it. */}
@@ -213,7 +216,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         <AskSommelierBox
-          placeholder="What should I open tonight?"
           onAsk={(question) =>
             router.push({ pathname: '/(tabs)/sommelier', params: { ask: question } })
           }
