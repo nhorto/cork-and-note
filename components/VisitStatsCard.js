@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { varietalText } from '../lib/varietals';
-import { visitsService } from '../lib/visits';
+import { isWineryVisit, visitsService } from '../lib/visits';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
 
@@ -35,25 +35,17 @@ const VisitStatsCard = () => {
       const { success, visits } = await visitsService.getUserVisits();
 
       if (success && visits) {
-        const totalVisits = visits.length;
-        // "Places" = distinct real wineries. Location-optional logs have a
-        // null winery_id and must not be counted as a place.
-        const uniqueWineries = new Set(
-          visits.map(v => v.winery_id).filter(Boolean)
-        );
-        const totalWineries = uniqueWineries.size;
-
-        let totalWines = 0;
-        visits.forEach(visit => {
-          totalWines += visit.wines?.length || 0;
-        });
+        // One source of truth for the counters, so this card can never disagree
+        // with Home about how many places you have visited (#294).
+        const { totalVisits, totalWineries, totalWines } =
+          visitsService.summarizeVisitStats(visits);
 
         // Only surface logs that actually have a tagged place as "visits" —
         // place-less logs would render as blank, nameless rows (#99) and tapping
         // one would crash on a null winery_id (#98). They still appear under
         // Recent Wines below.
         const recentVisits = [...visits]
-          .filter(visit => visit.winery_id && visit.wineries?.name)
+          .filter(visit => isWineryVisit(visit) && visit.wineries?.name)
           .sort((a, b) => new Date(b.visit_date) - new Date(a.visit_date))
           .slice(0, 3);
 

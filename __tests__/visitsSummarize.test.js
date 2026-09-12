@@ -1,6 +1,8 @@
 // Unit tests for visitsService.summarizeVisits — the pure aggregation behind
 // Home's "Where you've been" card. Place-less logs (null winery_id) must never
-// surface as a nameless place (#99) or crash a tap-through (#98).
+// surface as a nameless place (#99) or crash a tap-through (#98), and neither
+// must a cellar-origin tasting, which carries the producer's winery_id but was
+// poured at home (#294).
 jest.mock('../lib/supabase', () => ({
   supabase: {
     // lib/cache.js subscribes to auth changes at import time.
@@ -8,13 +10,36 @@ jest.mock('../lib/supabase', () => ({
   },
 }));
 
-import { visitsService } from '../lib/visits';
+import { isWineryVisit, visitsService } from '../lib/visits';
 
-const visit = (winery_id, name, visit_date) => ({
+// place_type defaults the way a real logged visit reads: 'winery' when a place
+// was tagged, null when it was not. Pass it explicitly for the cellar-origin
+// case (a winery_id with no place_type).
+const visit = (winery_id, name, visit_date, place_type = winery_id ? 'winery' : null) => ({
   id: `v-${winery_id}-${visit_date}`,
   winery_id,
+  place_type,
   visit_date,
   wineries: name ? { name } : null,
+});
+
+// A bottle opened at home: the producer is linked, the place is not.
+const openedAtHome = (winery_id, name, visit_date) =>
+  visit(winery_id, name, visit_date, null);
+
+describe('isWineryVisit', () => {
+  it('needs both a winery and place_type winery', () => {
+    expect(isWineryVisit(visit(1, 'Barrel Oak', '2026-01-01'))).toBe(true);
+    expect(isWineryVisit(openedAtHome(1, 'Barrel Oak', '2026-01-01'))).toBe(false);
+    expect(isWineryVisit(visit(null, null, '2026-01-01'))).toBe(false);
+    expect(isWineryVisit({ winery_id: null, place_type: 'winery' })).toBe(false);
+    expect(isWineryVisit(null)).toBe(false);
+  });
+
+  it('does not count a restaurant or other place as a winery', () => {
+    expect(isWineryVisit(visit(1, 'Rappahannock', '2026-01-01', 'restaurant'))).toBe(false);
+    expect(isWineryVisit(visit(1, 'A festival', '2026-01-01', 'other'))).toBe(false);
+  });
 });
 
 describe('summarizeVisits', () => {
@@ -43,6 +68,16 @@ describe('summarizeVisits', () => {
     ]);
     expect(result.totalPlaces).toBe(1);
     expect(result.mostRecentPlace.name).toBe('Barrel Oak');
+  });
+
+  it('ignores a bottle opened at home, however recent (#294)', () => {
+    const result = visitsService.summarizeVisits([
+      visit(1, 'Barrel Oak', '2026-01-01'),
+      openedAtHome(2, 'Hark', '2026-06-01'),
+    ]);
+    expect(result.totalPlaces).toBe(1);
+    expect(result.mostRecentPlace).toEqual({ name: 'Barrel Oak', date: '2026-01-01' });
+    expect(result.topWinery).toMatchObject({ name: 'Barrel Oak', visits: 1 });
   });
 
   it('ignores a linked winery with no name rather than showing a blank row', () => {
@@ -107,6 +142,27 @@ describe('summarizeVisitStats', () => {
       totalVisits: 1,
       totalWineries: 0,
       totalWines: 1,
+    });
+  });
+
+  it('counts an opened bottle as a tasting, never as a winery (#294)', () => {
+    expect(visitsService.summarizeVisitStats([
+      { ...openedAtHome(1, 'Barrel Oak', '2026-04-01'), wines: [{ id: 'w1' }] },
+    ])).toEqual({
+      totalVisits: 1,
+      totalWineries: 0,
+      totalWines: 1,
+    });
+  });
+
+  it('does not double count a winery you have both visited and opened at home', () => {
+    expect(visitsService.summarizeVisitStats([
+      { ...visit(1, 'Barrel Oak', '2026-01-01'), wines: [{ id: 'w1' }] },
+      { ...openedAtHome(1, 'Barrel Oak', '2026-04-01'), wines: [{ id: 'w2' }] },
+    ])).toEqual({
+      totalVisits: 2,
+      totalWineries: 1,
+      totalWines: 2,
     });
   });
 

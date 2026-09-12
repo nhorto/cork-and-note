@@ -15,7 +15,7 @@ import {
   View
 } from 'react-native';
 import { varietalText } from '../lib/varietals';
-import { visitsService } from '../lib/visits';
+import { isWineryVisit, visitsService } from '../lib/visits';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
 
@@ -45,10 +45,11 @@ const PastVisitsSection = ({ wineryId, wineryName }) => {
           const { success, visits } = await visitsService.getUserVisits();
 
           if (success && visits) {
-            // Filter visits to this winery (winery_id can be null for
-            // location-optional logs, so guard the toString()).
+            // Visits to THIS winery. isWineryVisit keeps out location-optional
+            // logs (null winery_id) and cellar-origin tastings, which carry the
+            // producer's winery_id but were poured at home (#294).
             const wineryVisits = visits.filter(visit =>
-              visit.winery_id?.toString() === wineryId?.toString()
+              isWineryVisit(visit) && visit.winery_id.toString() === wineryId?.toString()
             );
             setVisits(wineryVisits);
 
