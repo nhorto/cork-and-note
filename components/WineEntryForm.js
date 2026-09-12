@@ -777,6 +777,9 @@ export default function WineEntryForm({
         <TouchableOpacity
           style={styles.sommelierButton}
           onPress={() => setShowChatModal(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Ask the sommelier about this wine"
+          testID="wine-entry-sommelier-button"
         >
           <Ionicons name="sparkles" size={18} color={colors.accent.base} />
           <Text style={styles.sommelierButtonText}>Ask the sommelier</Text>

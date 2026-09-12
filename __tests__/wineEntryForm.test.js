@@ -188,10 +188,9 @@ describe('sommelier form actions', () => {
   test('reviewing AI suggestions applies the selected values to the tasting form', async () => {
     const onSave = jest.fn();
     const tree = await mount({ onSave });
-    const ask = tree.root.findAll((node) =>
-      node.props.onPress && node.findAllByType(require('react-native').Text)
-        .some((text) => text.props.children === 'Ask the sommelier')
-    ).at(-1);
+    const ask = tree.root.findByProps({ testID: 'wine-entry-sommelier-button' });
+    expect(ask.props.accessibilityRole).toBe('button');
+    expect(ask.props.accessibilityLabel).toBe('Ask the sommelier about this wine');
     await act(async () => ask.props.onPress());
 
     const chat = mockWineChat.mock.calls.at(-1)[0];
