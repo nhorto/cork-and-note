@@ -21,6 +21,7 @@ import CellarBottleForm from '../../components/CellarBottleForm';
 import LabelScanner from '../../components/LabelScanner';
 import MeterHint from '../../components/MeterHint';
 import ScreenHeader from '../../components/ScreenHeader';
+import { useAchievementCelebration } from '../../hooks/useAchievementCelebration';
 import { usePro } from '../../hooks/usePro';
 import { cellarService } from '../../lib/cellar';
 import { getEntrySuggestions } from '../../lib/cellarEntry';
@@ -36,6 +37,9 @@ export default function AddBottleScreen() {
   const { colors, styles } = useScreenTheme();
 
   const { isPro, presentPaywall } = usePro();
+  // The screen stays open after a save (it offers "add another"), so it hosts
+  // its own celebration rather than waiting for a tab (#296).
+  const { check, sheet } = useAchievementCelebration();
   const router = useRouter();
   const goBack = useSafeBack('/(tabs)/cellar');
   const [saving, setSaving] = useState(false);
@@ -152,6 +156,7 @@ export default function AddBottleScreen() {
 
     notifySuccess();
     setBottleCount((count) => count + adding);
+    check(); // never awaited: the alert below must not wait on badges
 
     // If we auto-linked the new bottle to an existing tasting (#140), say so.
     const linkedNote = res.linkedWine ? ' Linked to a matching tasting in your journal.' : '';
@@ -223,6 +228,7 @@ export default function AddBottleScreen() {
           />
         </ScrollView>
       </KeyboardAvoidingView>
+      {sheet}
     </View>
   );
 }
