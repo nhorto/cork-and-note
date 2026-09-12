@@ -4,13 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, AppState, FlatList, Linking, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, AppState, FlatList, Linking, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import MapLayersSheet from '../../components/MapLayersSheet';
 import PinActionModal from '../../components/PinActionModal';
+import StableMarker from '../../components/StableMarker';
 import WineRegionSheet from '../../components/WineRegionSheet';
 import WineryNameModal from '../../components/WineryNameModal';
 import { usePro } from '../../hooks/usePro';
@@ -708,92 +709,58 @@ export default function MapScreen() {
     setRegion(newRegion);
   };
 
-  const getMarkerColor = (pin) => {
-    if (pin.hasVisit) return colors.status.visited;
-    if (pin.inWishlist) return colors.status.wishlist;
-    return colors.primary.base;
-  };
-
-  const renderPinMarker = (pin) => {
-    if (Platform.OS === 'android') {
-      return (
-        <Marker
-          key={`${pin.id}-${mode}`}
-          coordinate={{
-            latitude: pin.latitude,
-            longitude: pin.longitude
-          }}
-          pinColor={getMarkerColor(pin)}
-          title={pin.name}
-          description="Tap for options"
-          onPress={() => handlePinPress(pin)}
-        />
-      );
-    }
-
-    return (
-      <Marker
-        key={`${pin.id}-${mode}`}
-        coordinate={{
-          latitude: pin.latitude,
-          longitude: pin.longitude
-        }}
-        tracksViewChanges={labelPulse}
-        onPress={() => handlePinPress(pin)}
-      >
-        <View style={styles.markerContainer}>
-          {showLabels && (
-            <View style={styles.markerLabelContainer}>
-              <Text style={styles.markerLabel} numberOfLines={1}>
-                {pin.name}
-              </Text>
-            </View>
-          )}
-          <View style={[
-            styles.wineryMarker,
-            pin.hasVisit && styles.visitedMarker,
-            pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
-          ]}>
-            <Ionicons name="wine" size={16} color={pin.hasVisit || pin.inWishlist ? colors.onStatus : colors.onPrimary} />
+  const renderPinMarker = (pin) => (
+    <StableMarker
+      key={`${pin.id}-${mode}`}
+      coordinate={{
+        latitude: pin.latitude,
+        longitude: pin.longitude
+      }}
+      pulse={labelPulse}
+      onPress={() => handlePinPress(pin)}
+    >
+      <View style={styles.markerContainer}>
+        {showLabels && (
+          <View style={styles.markerLabelContainer}>
+            <Text style={styles.markerLabel} numberOfLines={1}>
+              {pin.name}
+            </Text>
           </View>
+        )}
+        <View style={[
+          styles.wineryMarker,
+          pin.hasVisit && styles.visitedMarker,
+          pin.inWishlist && !pin.hasVisit && styles.wishlistMarker
+        ]}>
+          <Ionicons name="wine" size={16} color={pin.hasVisit || pin.inWishlist ? colors.onStatus : colors.onPrimary} />
         </View>
-      </Marker>
-    );
-  };
+      </View>
+    </StableMarker>
+  );
 
   // Discovery pins (all plans): nearby directory wineries in the accent color,
   // visually apart from visited (sage) and wishlist (slate).
-  const renderDiscoverMarker = (w) =>
-    Platform.OS === 'android' ? (
-      <Marker
-        key={`dir-${w.id}`}
-        coordinate={{ latitude: w.latitude, longitude: w.longitude }}
-        pinColor={colors.accent.base}
-        title={w.name}
-        description="Nearby winery — tap to view"
-        onPress={() => handleDiscoverPinPress(w)}
-      />
-    ) : (
-      <Marker
-        key={`dir-${w.id}`}
-        coordinate={{ latitude: w.latitude, longitude: w.longitude }}
-        tracksViewChanges={labelPulse}
-        onPress={() => handleDiscoverPinPress(w)}
-      >
-        <View style={styles.markerContainer}>
-          {showLabels && (
-            <View style={styles.markerLabelContainer}>
-              <Text style={styles.markerLabel} numberOfLines={1}>
-                {w.name}
-              </Text>
-            </View>
-          )}
-          <View style={[styles.wineryMarker, styles.discoverMarker]}>
-            <Ionicons name="wine-outline" size={16} color={colors.neutral.ink} />
+  const renderDiscoverMarker = (w) => (
+    <StableMarker
+      key={`dir-${w.id}`}
+      coordinate={{ latitude: w.latitude, longitude: w.longitude }}
+      pulse={labelPulse}
+      onPress={() => handleDiscoverPinPress(w)}
+    >
+      <View style={styles.markerContainer}>
+        {showLabels && (
+          <View style={styles.markerLabelContainer}>
+            <Text style={styles.markerLabel} numberOfLines={1}>
+              {w.name}
+            </Text>
           </View>
+        )}
+        <View style={[styles.wineryMarker, styles.discoverMarker]}>
+          <Ionicons name="wine-outline" size={16} color={colors.neutral.ink} />
         </View>
-      </Marker>
-    );
+      </View>
+    </StableMarker>
+  );
 
   const renderClusterMarker = (cluster) => {
     const [longitude, latitude] = cluster.geometry.coordinates;
@@ -803,14 +770,12 @@ export default function MapScreen() {
     const allDiscover = cluster.properties.discoverCount === count;
     const size = count >= 100 ? 52 : count >= 25 ? 44 : 36;
     return (
-      <Marker
+      <StableMarker
         key={`cluster-${cluster.properties.cluster_id}`}
         coordinate={{ latitude, longitude }}
-        anchor={{ x: 0.5, y: 0.5 }}
-        // Android only renders custom marker views reliably while
-        // tracksViewChanges stays on (the Feb 2026 marker bug); clusters are
-        // few enough on screen that the extra redraws don't matter.
-        tracksViewChanges={Platform.OS === 'android'}
+        // The count text changes as clusters merge and split, so re-snapshot
+        // on the same pulse the labels use.
+        pulse={labelPulse}
         onPress={() => handleClusterPress(cluster)}
       >
         <View
@@ -824,7 +789,7 @@ export default function MapScreen() {
             {cluster.properties.point_count_abbreviated}
           </Text>
         </View>
-      </Marker>
+      </StableMarker>
     );
   };
 
