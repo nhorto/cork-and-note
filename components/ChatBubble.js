@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Markdown from 'react-native-markdown-display';
 import { chatService } from '../lib/chat';
+import { formatMarkdownForMobile } from '../lib/chatMarkdown';
 import { createThemedStyles } from '../styles/ThemeProvider';
 import ReportAiResponseModal from './ReportAiResponseModal';
 
@@ -31,6 +32,7 @@ export default function ChatBubble({ message, onUseSuggestions, reportContext = 
   const isUser = message.role === 'user';
   const hasSuggestions = message.ai_suggestions && Object.keys(message.ai_suggestions).length > 0;
   const displayContent = message.displayText || message.content;
+  const mobileDisplayContent = isUser ? displayContent : formatMarkdownForMobile(displayContent);
   // Report flag: real assistant replies only. Local error bubbles (synthetic,
   // client-made) aren't AI content — nothing there for anyone to review.
   const reportable =
@@ -86,7 +88,7 @@ export default function ChatBubble({ message, onUseSuggestions, reportContext = 
         {isUser ? (
           <Text style={[styles.text, styles.userText]}>{displayContent}</Text>
         ) : (
-          <Markdown style={mdStyles}>{displayContent}</Markdown>
+          <Markdown style={mdStyles}>{mobileDisplayContent}</Markdown>
         )}
 
         {/* Sources — what the sommelier actually read, so a claim about a
@@ -290,7 +292,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
   bubble: {
-    maxWidth: '78%',
+    maxWidth: '86%',
     borderRadius: borderRadius.lg,
     padding: spacing.md,
     ...shadows.soft,
