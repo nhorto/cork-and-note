@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Research and a proposed badge system for a wine discovery, winery visits, and cellar app.">
+<title>Cork &amp; Note: Wine Journey Badges, Points and Levels (v3)</title>
+<style>
+:root{--paper:#f8f5ed;--ink:#282e28;--muted:#62665d;--line:#dcded2;--wine:#6c293f;--green:#254b40;--gold:#a47931;--card:#fffefa}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:85px}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--wine);text-underline-offset:3px}a:hover{text-decoration-thickness:2px}button,input,select{font:inherit}button,select{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #b87d24;outline-offset:4px}.wrap{max-width:1180px;margin:auto;padding:0 44px}.top{border-bottom:1px solid var(--line);padding:20px 0}.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px}.brand,.eyebrow{font-size:11px;letter-spacing:.17em;text-transform:uppercase;font-weight:750}.brand{color:var(--green)}.small{font-size:13px;color:var(--muted)}.print{border:1px solid var(--line);background:transparent;border-radius:30px;padding:8px 17px;font-size:12px;color:var(--ink)}header{padding:66px 0 44px}.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:45px;align-items:center}h1,h2,h3{line-height:1.12}h1,h2{font-family:Georgia,"Times New Roman",serif;font-weight:400;letter-spacing:-.035em}h1{font-size:clamp(44px,6.4vw,76px);margin:18px 0 25px;max-width:760px}h1 em{color:var(--wine);font-weight:400}h2{font-size:38px;margin:10px 0 23px}h3{font-size:19px;margin:0 0 13px}p{margin:0 0 17px}.lead{font-size:19px;max-width:730px;color:#505b50;line-height:1.6}.hero-art{background:var(--green);color:#fff7e8;border-radius:180px 180px 18px 18px;padding:45px 30px 35px;text-align:center;min-height:345px;display:flex;flex-direction:column;align-items:center;justify-content:center}.hero-art .seal{width:144px;height:144px;color:#e6c990}.hero-art p{margin:13px 0 0}.hero-art .eyebrow{color:#d0dac9}.decision{background:#e9eee4;border:1px solid #d5dfd0;border-radius:12px;padding:26px 30px;margin-top:34px;font-size:18px}.decision strong{color:var(--green)}nav{position:sticky;top:0;z-index:5;background:rgba(248,245,237,.97);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}nav .wrap{display:flex;gap:25px;overflow:auto;white-space:nowrap;padding-top:14px;padding-bottom:14px}nav a{font-size:12px;text-decoration:none;color:var(--ink);font-weight:650}section{padding:53px 0;border-bottom:1px solid var(--line)}.section-intro{max-width:830px}.kicker{color:var(--wine);font-size:11px;font-weight:750;letter-spacing:.15em;text-transform:uppercase}.grid2,.grid3{display:grid;gap:20px}.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid3{grid-template-columns:repeat(3,minmax(0,1fr))}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:25px}.card p:last-child{margin-bottom:0}.tag{display:inline-block;background:#edf0e8;color:var(--green);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:650;letter-spacing:.02em;margin-bottom:14px}.card .source{font-size:12px;line-height:1.6;margin:14px 0 0}.source a{color:#6d3c4a}.observed{font-size:14px}.takeaway{border-top:1px solid var(--line);padding-top:14px;font-size:14px}.note{border-left:3px solid var(--gold);padding:10px 0 10px 20px;color:var(--muted);font-size:14px;margin:24px 0}.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;margin:22px 0}table{border-collapse:collapse;width:100%;font-size:14px;background:var(--card)}th{text-align:left;background:#eef0e7;color:var(--green);font-size:12px;letter-spacing:.025em}td,th{padding:16px 18px;border-bottom:1px solid var(--line);vertical-align:top}tr:last-child td{border-bottom:0}td:first-child{font-weight:650}tr.recommended{background:#f0f4e9}ul,ol{padding-left:23px;margin:12px 0 20px}li{margin:8px 0}strong{font-weight:700}.num{font:400 40px Georgia,serif;color:var(--wine);margin-bottom:15px}.tier-line{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0}.tier{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid currentColor}.bronze{color:#8a4e2a}.silver{color:#596779}.gold{color:#8b681e}.platinum{color:#406b69}.demo{margin:25px 0;background:#e7ece2;border:1px solid #d2dacb;border-radius:16px;padding:30px}.demo-header{display:flex;align-items:start;justify-content:space-between;gap:25px;margin-bottom:23px}.demo-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.demo-controls label{font-size:13px}.demo-controls select{border:1px solid #c2cdbb;border-radius:8px;background:var(--card);padding:8px 10px;color:var(--ink);max-width:100%}.demo-body{display:grid;grid-template-columns:220px 1fr;gap:35px;align-items:center}.badge-display{text-align:center;padding:24px;background:var(--card);border:1px solid var(--line);border-radius:13px}.seal{width:105px;height:105px;display:block;margin:auto}.badge-display h3{margin:14px 0 6px}.badge-display p{margin:0;font-size:13px}.range-label{display:flex;justify-content:space-between;gap:15px;font-size:14px;margin-top:17px}input[type=range]{width:100%;accent-color:var(--green);margin:17px 0 4px}.progress-track{height:8px;background:#d1d9cc;border-radius:10px;margin:16px 0}.progress-fill{height:100%;background:var(--green);border-radius:10px;width:40%}.steps{display:flex;gap:9px;justify-content:space-between;font-size:11px;line-height:1.4}.steps span{opacity:.55}.steps .earned{opacity:1;font-weight:750}.callout{background:var(--wine);color:#fff7ec;padding:28px 30px;border-radius:12px;margin:26px 0}.callout h3{color:#fff7ec}.callout p{margin-bottom:0}.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:23px 0}.flow div{border:1px solid var(--line);border-radius:10px;padding:19px;background:var(--card);font-size:13px}.flow b{display:block;color:var(--green);margin-bottom:9px}details{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:20px 24px;margin:16px 0}summary{font-weight:700;cursor:pointer;color:var(--green)}details[open] summary{margin-bottom:20px}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.86em;background:#edf0e9;padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:#253b33;color:#eef1e5;padding:22px;border-radius:8px;line-height:1.65}pre code{background:none;color:inherit;padding:0}.roadmap{counter-reset:phase}.phase{position:relative;border-left:1px solid #bec9b5;padding:0 0 28px 30px;margin-left:14px}.phase:before{counter-increment:phase;content:counter(phase);position:absolute;left:-15px;top:-3px;background:var(--green);color:white;border:4px solid var(--paper);width:30px;height:30px;border-radius:50%;text-align:center;font-size:12px;line-height:22px}.phase:last-child{padding-bottom:0}.phase h3{margin-bottom:10px}.source-list{list-style:none;padding:0;counter-reset:source;display:grid;grid-template-columns:1fr 1fr;gap:14px 28px}.source-list li{padding:0 0 14px 0;margin:0;border-bottom:1px solid var(--line);font-size:13px}.source-list a{font-weight:650}.source-list small{display:block;color:var(--muted);margin-top:4px;line-height:1.5}.footer{padding:32px 0 44px;font-size:12px;color:var(--muted)}.skip{position:absolute;left:15px;top:-100px}.skip:focus{top:15px;background:white;padding:10px;z-index:20}.print-only{display:none}
+@media(max-width:800px){.wrap{padding:0 24px}.hero{grid-template-columns:1fr}.hero-art{display:none}.grid3{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.source-list{grid-template-columns:1fr}.demo-body{grid-template-columns:1fr}.badge-display{max-width:260px;width:100%;margin:auto}.demo-header{display:block}.demo-controls{margin-top:16px}.demo{padding:22px}.top .small{display:none}h2{font-size:33px}section{padding:40px 0}.decision{padding:22px}nav .wrap{gap:20px}.lead{font-size:18px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{@page{size:A4;margin:17mm}body{background:white;font-size:10pt;line-height:1.5}.wrap{max-width:none;padding:0}.top,nav,.print,.demo-controls,input[type=range],.range-label,.skip{display:none}.hero{display:block}.hero-art{display:none}header{padding:0 0 18px}h1{font-size:40pt}h2{font-size:25pt}section{padding:24px 0}h2,h3,summary{break-after:avoid}.card,.phase,.demo,.callout,tr{break-inside:avoid}.grid2,.grid3{display:block}.card{margin-bottom:14px}.source-list{display:block}.source-list li{break-inside:avoid}.table-wrap{overflow:visible}table{font-size:9pt}td,th{padding:9px}.print-only{display:block}.demo-body{grid-template-columns:170px 1fr}a{color:inherit}.callout{color:var(--ink);background:#eee}.callout h3{color:var(--ink)}pre{color:var(--ink);background:#eee}.footer{padding:20px 0}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head>
+<body>
+<a class="skip" href="#verdict">Skip to the verdict</a>
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><defs>
+<symbol id="seal" viewBox="0 0 120 120"><path d="M60 5 72 11 86 12 94 24 106 32 107 46 114 60 107 73 106 87 94 95 86 108 72 109 60 115 47 109 33 108 25 95 13 87 12 73 6 60 12 46 13 32 25 24 33 12 47 11Z" fill="currentColor" opacity=".12"/><circle cx="60" cy="60" r="46" stroke="currentColor" fill="none" stroke-width="1.5"/><circle cx="60" cy="60" r="39" stroke="currentColor" fill="none" stroke-width=".8" stroke-dasharray="2 4"/><path d="M44 34h32l-3 21c-1 10-7 15-13 15s-12-5-13-15l-3-21Zm16 36v18m-12 0h24M47 50h26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m29 60 3 3 5-6m46 3 3 3 5-6" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+</defs></svg>
+<div class="top"><div class="wrap"><span class="brand">Cork &amp; Note / Product research</span><span class="small">Version 3 · Revised September 12, 2026 · Decisions recorded</span><button class="print" type="button" onclick="window.print()">Print / Save PDF</button></div></div>
+<header><div class="wrap"><div class="hero"><div><span class="eyebrow">Concept &amp; implementation brief · Version 3</span><h1>A wine journey<br>worth collecting.</h1><p class="lead">Badges, points and levels for Cork &amp; Note: the wineries you visit, the grapes you keep coming back to, the regions you cross off, and the cellar you look after.</p><p class="small">Version 3 revises the Version 2 brief after a full read of the app source. It keeps the family-and-tier foundation, pulls the collectible one-off badges and a points ladder into the first release, replaces the server pipeline with a design sized for this app, and records the owner's decisions.</p></div>
+<div class="hero-art"><svg class="seal" aria-hidden="true"><use href="#seal"/></svg><p class="eyebrow">Wine Journey</p><p style="font:30px Georgia,serif">Every collection<br>has a story.</p></div></div>
+<div class="decision"><strong>Recommendation:</strong> ship six tiered badge families, a collection of about thirty one-off badges, and a single points total with named levels in the first release. Compute progress in the app from data it already loads. Persist only what was earned and when.</div>
+<p class="note"><strong>Scope:</strong> planning artifact, no app changes made. Version 3 was written after a full read of the current <code>main</code> checkout of Cork &amp; Note on September 12, 2026, including migrations, services and screens. Production data was not inspected. The owner settled the open decisions the same day; they are recorded in §08.</p>
+</div></header>
+<nav aria-label="Report sections"><div class="wrap"><a href="#verdict">Verdict on v2</a><a href="#why-deferred">The two deferrals</a><a href="#catalog">The catalog</a><a href="#concept">Try the concept</a><a href="#rules">What counts</a><a href="#app-fit">Code fit</a><a href="#implementation">Implementation</a><a href="#decisions">Decisions</a><a href="#sources">Sources</a></div></nav>
+
+<main class="wrap">
+
+<section id="verdict"><span class="kicker">01 / Review of Version 2</span><h2>What stands, and what changes.</h2>
+<p class="section-intro">Version 2 was a careful brief. Its research is sound, its counting rules are the right instinct, and its read of the codebase found three real data traps. Where it goes wrong is scale: it designs the award pipeline of a product with millions of users, and it defers the parts that make a badge system fun.</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Version 2 said</th><th scope="col">Version 3 verdict</th><th scope="col">Why</th></tr></thead><tbody>
+<tr><td>Named families with Bronze → Platinum tiers as the foundation</td><td><strong>Keep.</strong></td><td>Clear meaning, visible progress, lifetime and private. Nothing to argue with.</td></tr>
+<tr><td>Three families: Winery Explorer, Wine Discoverer, Cellar Curator</td><td><strong>Keep, and add three more.</strong></td><td>Grape Explorer, Region Explorer and Journal Keeper are computable today from the same rows. See §03.</td></tr>
+<tr><td>Distinct one-off badges "later"</td><td><strong>Reverse. Ship in v1.</strong></td><td>The stated cost (objects to explain and maintain) disappears with a data-driven catalog. One badge is one line of config. See §02.</td></tr>
+<tr><td>Points, levels and an overall rank "unnecessary" and "deferred"</td><td><strong>Reverse, with one constraint.</strong></td><td>Points are earned only through badges, never directly. That removes every objection v2 raised. See §02.</td></tr>
+<tr><td>Wine Discoverer requires the user to "explicitly mark the wine as tried"</td><td><strong>Drop.</strong></td><td>In Cork &amp; Note every wine row is a tasting. There is no wishlist-only or scan-only wine row to exclude.</td></tr>
+<tr><td>Cellar Curator requires a confirmed quantity and a storage location</td><td><strong>Simplify.</strong></td><td>Location is optional on the cellar form. Requiring it would punish people who use the cellar as a simple list. Any cataloged wine counts.</td></tr>
+<tr><td>The three data traps: visit-stat counts any winery id, cellar-opened tastings look like winery visits, wine rows are tastings not distinct wines</td><td><strong>Confirmed in code. Keep.</strong></td><td>All three verified against the current main. One needs a small code fix before launch. See §05.</td></tr>
+<tr><td>Server-side evaluation, pending-evaluation table, trusted processor, rule versions, revocation with correction reasons, serialized per-user jobs</td><td><strong>Replace.</strong></td><td>Badges are private, non-monetary and cannot be traded for anything. Nobody gains by cheating themselves. Progress is recomputed live from the user's own rows; a single owner-scoped table records what was earned. See §06.</td></tr>
+<tr><td>Opt-in private pilot with holdout groups and user interviews before release</td><td><strong>Replace with a feature flag.</strong></td><td>The app is pre-launch with a handful of testers. Ship behind a flag, watch TestFlight feedback, tune thresholds in config.</td></tr>
+<tr><td>Same rules for Free and Pro; badges never used as upgrade prompts</td><td><strong>Keep.</strong></td><td>This is an engagement feature, not a monetization lever.</td></tr>
+<tr><td>No streaks, no expiry, no public leaderboards, no consumption-speed challenges</td><td><strong>Keep.</strong></td><td>Lifetime progress at the user's pace. A "drink faster" mechanic has no place in a wine app.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="why-deferred"><span class="kicker">02 / The two deferrals</span><h2>Why v2 pushed one-offs and points out, and why v3 pulls them back in.</h2>
+<div class="grid2">
+<article class="card"><h3>One-off badges</h3><p><strong>v2's reason:</strong> "Three families with four milestones already create twelve separate objects to explain and maintain." It treated every badge as a bespoke thing with its own artwork, copy and rule.</p><p><strong>Why that does not hold here:</strong> if the catalog is data, a badge is a row: key, name, one-line rule, icon, metric, threshold, points. The evaluator is one function over about eight metric types. Adding "Chardonnay Lover" after "Cabernet Lover" costs a line, not a feature. Artwork is a vector icon inside a tier ring in v1, so there is no illustration backlog either.</p><p><strong>Why it matters:</strong> the tiered families reward volume. The one-offs reward variety and personality, which is the part people screenshot. "Full Spectrum" or "Virginia Regular" says something about you; "Wine Discoverer · Silver" says how much you logged.</p></article>
+<article class="card"><h3>Points, levels and one overall rank</h3><p><strong>v2's reasons:</strong> a global rank needs a formula that weighs unrelated activities; points invite people to grind whatever pays best; a "Gold member" label can read as a paid tier or as expertise.</p><p><strong>The constraint that answers all three:</strong> points are only ever awarded by badges. There is no per-log point, no per-bottle point, nothing to grind that badges do not already reward. The weighting question becomes "how many points is a Gold tier worth", which is a config value, not a philosophy. The level is a name for a points range and is shown as "Level 4", never as "Gold member".</p><p><strong>What you get:</strong> a single number that always goes up, a level that gives Home and Profile something to celebrate between badges, and a "next level in 40 points" nudge. Cost once badges exist: one reducer and one line of UI.</p></article>
+</div>
+</section>
+
+<section id="catalog"><span class="kicker">03 / The catalog</span><h2>Six evolving families, a collection of one-offs, and one points ladder.</h2>
+<p class="section-intro">Thresholds are starting values. They live in one config file and can change before anyone earns them. Bronze arrives on the first qualifying action so a new user sees the system on day one.</p>
+<h3>Tiered families</h3>
+<div class="table-wrap"><table><thead><tr><th scope="col">Family</th><th scope="col">Counts</th><th scope="col">Bronze</th><th scope="col">Silver</th><th scope="col">Gold</th><th scope="col">Platinum</th></tr></thead><tbody>
+<tr><td>Winery Explorer</td><td>Distinct wineries with a logged visit (place type winery)</td><td>1</td><td>5</td><td>15</td><td>40</td></tr>
+<tr><td>Wine Discoverer</td><td>Distinct wines tasted (producer + wine name, vintages collapsed)</td><td>1</td><td>10</td><td>25</td><td>100</td></tr>
+<tr><td>Grape Explorer</td><td>Distinct varietals tasted, after canonicalization</td><td>3</td><td>8</td><td>15</td><td>30</td></tr>
+<tr><td>Region Explorer</td><td>Distinct American Viticultural Areas containing a visited winery</td><td>1</td><td>3</td><td>6</td><td>12</td></tr>
+<tr><td>Cellar Curator</td><td>Distinct wines ever cataloged in the cellar, any status</td><td>1</td><td>10</td><td>25</td><td>75</td></tr>
+<tr><td>Journal Keeper</td><td>Tastings logged, all sources</td><td>1</td><td>10</td><td>50</td><td>200</td></tr>
+</tbody></table></div>
+<p class="small">Region Explorer uses the AVA layer already bundled with the app. Many wineries sit outside any AVA, so this count is a floor. A state-based companion lives in the one-offs below. The metric is "wine regions visited", so when French, Spanish and Italian appellation layers arrive later they extend the same family without renaming it. Cellar regions are a separate cellar one-off because the region field exists only on cellar bottles.</p>
+
+<h3>One-off collection</h3>
+<p>Each is earned once, with points. Grouped so the collection screen reads as five shelves. Names are drafts.</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Shelf</th><th scope="col">Badge</th><th scope="col">Rule</th><th scope="col">Points</th></tr></thead><tbody>
+<tr><td rowspan="3">Grapes</td><td><em>Varietal</em> Fan · Lover · Devotee (one tiered badge per grape)</td><td>3, 10 and 25 tastings of that varietal. Launch set of 18: Cabernet Sauvignon, Merlot, Pinot Noir, Syrah, Zinfandel, Malbec, Sangiovese, Tempranillo, Chardonnay, Sauvignon Blanc, Riesling, Pinot Grigio, plus six that matter in Virginia: Cabernet Franc, Petit Verdot, Viognier, Petit Manseng, Chambourcin, Norton. Syrah and Shiraz merge; Pinot Grigio and Pinot Gris merge.</td><td>10 · 25 · 50</td></tr>
+<tr><td>Curious Palate</td><td>3 tastings of any single varietal not in the launch set</td><td>15</td></tr>
+<tr><td>Off the Beaten Vine</td><td>Tasted 5 hybrids or lesser-known grapes (Norton, Traminette, Vidal Blanc, Petit Manseng, Chambourcin, Marquette, Frontenac, and similar)</td><td>30</td></tr>
+<tr><td rowspan="4">Styles</td><td>Full Spectrum</td><td>Tasted a Red, a White, a Rosé, a Sparkling and a Dessert wine</td><td>30</td></tr>
+<tr><td>Bubbles</td><td>5 sparkling wines tasted</td><td>15</td></tr>
+<tr><td>Think Pink</td><td>5 rosés tasted</td><td>15</td></tr>
+<tr><td>Sweet Tooth</td><td>5 dessert wines tasted</td><td>15</td></tr>
+<tr><td rowspan="5">Places</td><td>Regular</td><td>5 logged visits to the same winery</td><td>30</td></tr>
+<tr><td>Day Tripper</td><td>3 different wineries visited on one date</td><td>15</td></tr>
+<tr><td>Home Turf</td><td>10 wineries visited in one state</td><td>30</td></tr>
+<tr><td>Crossed State Lines</td><td>Wineries visited in 2 states</td><td>15</td></tr>
+<tr><td>Road Tripper</td><td>Wineries visited in 5 states</td><td>30</td></tr>
+<tr><td rowspan="5">Cellar</td><td>Cork Popped</td><td>First bottle opened from the cellar</td><td>15</td></tr>
+<tr><td>Patience</td><td>Opened a bottle held for a year or more (purchase date to consumed date)</td><td>30</td></tr>
+<tr><td>Right on Time</td><td>Opened a bottle inside its drink window</td><td>15</td></tr>
+<tr><td>Well Travelled Cellar</td><td>Cellar bottles from 5 distinct regions, canonicalized through the region list</td><td>30</td></tr>
+<tr><td>Globe Trotter</td><td>Cellar bottles from 3 countries</td><td>30</td></tr>
+<tr><td rowspan="5">Journal</td><td>Critic</td><td>25 rated tastings</td><td>15</td></tr>
+<tr><td>Wordsmith</td><td>25 tastings with written notes</td><td>15</td></tr>
+<tr><td>Shutterbug</td><td>10 tastings with a photo</td><td>15</td></tr>
+<tr><td>Flavor Hunter</td><td>25 distinct flavor notes used</td><td>30</td></tr>
+<tr><td>Year Round</td><td>Tastings logged in all 12 calendar months, any years</td><td>50</td></tr>
+</tbody></table></div>
+<p class="small">Deliberately absent: a separate "first visit" or "first tasting" badge (Bronze does that), anything counting bottles consumed per week, anything counting money spent, and anything that needs a region on a tasted wine, because that column does not exist.</p>
+
+<h3>Points and levels</h3>
+<div class="grid2">
+<article class="card"><h3>How points accrue</h3><p>Tier awards: Bronze 10, Silver 25, Gold 50, Platinum 100. A completed family is worth 185. Per-grape badges pay 10, 25 and 50 for Fan, Lover and Devotee. One-offs pay 15, 30 or 50 as listed. With six families, eighteen grapes and the launch one-offs the ceiling is about 3,100 points, so the ladder below has headroom.</p><p>Points never decrease. Live progress bars can move down if records are deleted; earned badges and their points stay.</p></article>
+<article class="card"><h3>The ladder</h3><div class="table-wrap"><table><thead><tr><th scope="col">Level</th><th scope="col">Points</th><th scope="col">Title</th></tr></thead><tbody>
+<tr><td>1</td><td>0</td><td>Split</td></tr><tr><td>2</td><td>50</td><td>Half Bottle</td></tr><tr><td>3</td><td>150</td><td>Bottle</td></tr><tr><td>4</td><td>300</td><td>Magnum</td></tr><tr><td>5</td><td>500</td><td>Jeroboam</td></tr><tr><td>6</td><td>800</td><td>Methuselah</td></tr><tr><td>7</td><td>1200</td><td>Salmanazar</td></tr><tr><td>8</td><td>1700</td><td>Balthazar</td></tr><tr><td>9</td><td>2300</td><td>Nebuchadnezzar</td></tr></tbody></table></div><p class="small">Titles are bottle sizes, smallest to largest, chosen by the owner. They are playful, wine-native, and cannot be mistaken for a qualification or a paid tier. Shown as "Level 5 · Jeroboam · 540 pts".</p></article>
+</div>
+</section>
+
+<section id="concept"><span class="kicker">04 / Try the concept</span><h2>Preview a family, and see what it pays.</h2>
+<div class="demo" aria-label="Interactive badge concept">
+<div class="demo-header"><div><span class="kicker">Interactive concept · Fictional data</span><h3 style="margin-top:8px">Preview an evolving badge</h3></div><div class="demo-controls"><label for="family">Badge family</label><select id="family"><option value="winery">Winery Explorer</option><option value="wine">Wine Discoverer</option><option value="grape">Grape Explorer</option><option value="region">Region Explorer</option><option value="cellar">Cellar Curator</option><option value="journal">Journal Keeper</option></select></div></div>
+<div class="demo-body"><div class="badge-display"><svg id="demo-seal" class="seal silver" aria-hidden="true"><use href="#seal"/></svg><h3 id="demo-name">Winery Explorer</h3><p id="demo-tier">Silver · Level 2 of 4</p><p id="demo-points" class="small">35 points from this family</p></div><div><p id="demo-description"></p><div class="range-label"><label for="count">Qualifying lifetime count</label><output id="count-output" for="count">7</output></div><input id="count" type="range" min="0" max="45" value="7" step="1"><div aria-live="polite" aria-atomic="true"><strong id="demo-progress"></strong><div class="progress-track" aria-hidden="true"><div id="demo-fill" class="progress-fill"></div></div><p id="demo-next" class="small"></p></div><div id="demo-steps" class="steps"></div></div></div>
+<p class="small" style="margin:22px 0 0">The slider changes only this page. Final artwork is a family icon inside a tier ring drawn with the app's Royal Velvet and Purple After Dark tokens; this page's palette is editorial.</p><noscript><p>The interactive preview requires JavaScript. All thresholds are in the tables above.</p></noscript>
+</div>
+<div class="grid3"><article class="card"><h3>Where it lives</h3><p>Profile gets an Achievements card under the visit stats: level, points, the three most recent badges, and "12 of 41 earned". Tapping opens a full screen with three sections: Families (progress bars), Collection (the five shelves, locked badges greyed with their rule), and History. Home's Your Journey card gains one line: the nearest next milestone.</p></article><article class="card"><h3>How it appears</h3><p>One vector icon per family or badge from the icon set already in the app, inside a ring coloured by tier. Text and shape carry the tier, not colour alone. Locked badges show the icon dimmed and the rule in plain words, so the collection doubles as a list of things to try.</p></article><article class="card"><h3>How it celebrates</h3><p>After a save completes, one bottom sheet: "New badge" with the icon, name, rule and points, plus a level-up line if one happened. Several at once are grouped in one sheet. A haptic tap on open. Dismiss or "See collection". A toggle in Profile settings turns the sheets off.</p></article></div>
+</section>
+
+<section id="rules"><span class="kicker">05 / What counts</span><h2>Definitions, and the honest caveats.</h2>
+<div class="table-wrap"><table><thead><tr><th scope="col">Metric</th><th scope="col">Definition</th><th scope="col">Caveat</th></tr></thead><tbody>
+<tr><td>Wineries visited</td><td>Distinct <code>winery_id</code> across the user's visits where <code>place_type = 'winery'</code>. Revisits do not add.</td><td>Requires the cellar-origin fix in §06 so a bottle opened at home is not a visit. Winery rows are per user, so duplicates a user created by hand count twice until the directory link dedupes them.</td></tr>
+<tr><td>Distinct wines</td><td>Key of normalized producer plus normalized wine name across all tasting rows. Vintage and rating ignored. A row with no name is its own key.</td><td>"Reserve Cab" and "Reserve Cabernet" are two wines. Acceptable; this is the user's own journal.</td></tr>
+<tr><td>Varietals</td><td>Every element of <code>wine_varietal</code> passed through the existing canonical key and alias table, so Shiraz and Syrah merge. Unknown free text keeps its own key.</td><td>Blend labels such as "Red Blend" are not grapes and are skipped.</td></tr>
+<tr><td>Styles</td><td><code>wine_type</code> mapped to five buckets. "Red Blend" is Red, "White Blend" is White.</td><td>Free text; anything unrecognized is ignored.</td></tr>
+<tr><td>AVAs visited</td><td>For each visited winery with coordinates, the AVAs containing that point from the bundled layer. Nested AVAs each count (a Rutherford visit is also a Napa Valley visit).</td><td>US only, display-grade polygons, a floor not a census. Region Explorer needs a "USA only for now" line in its rule text.</td></tr>
+<tr><td>States visited</td><td>State from the linked directory row, else from the AVA layer, else parsed from the address text.</td><td>Best effort; a winery with none of the three is skipped.</td></tr>
+<tr><td>Wines cataloged</td><td>Distinct producer plus name across <code>cellar_bottles</code> in any status, fetched with removed lots included.</td><td>Deleting a bottle removes the row, so a deleted mistake stops counting. Consumed, gifted and sold lots keep counting.</td></tr>
+<tr><td>Cellar regions and countries</td><td>Each bottle's region resolved through the curated region list to its canonical name and country.</td><td>Free text the list has never seen counts as its own region with no country.</td></tr>
+<tr><td>Tastings, ratings, notes, photos, flavor notes</td><td>Straight counts over tasting rows. Rated means rating above zero, since zero is the unrated sentinel.</td><td>None.</td></tr>
+<tr><td>Bottles opened, held a year, in window</td><td>From <code>cellar_consumptions</code> joined to the lot's purchase date and drink window.</td><td>Only lots with a purchase date can earn Patience. Only lots with a window can earn Right on Time.</td></tr>
+</tbody></table></div>
+<div class="grid2">
+<article class="card"><h3>Deletions and edits</h3><p>Progress is recomputed from live rows every time, so bars move honestly. Earned badges are never revoked. It is the user's private journal; if they delete a mistaken visit that once tipped them to Silver, Silver stays and the bar shows the true count underneath. This is what Untappd does and it avoids the entire revocation and correction-reason machinery in v2.</p></article>
+<article class="card"><h3>Existing users</h3><p>The first evaluation after the feature ships walks all history and awards everything already earned in one pass, with one grouped sheet: "Recognized from your journal: 9 badges, Level 4". No per-badge celebrations for backfill.</p></article>
+</div>
+</section>
+
+<section id="app-fit"><span class="kicker">06 / Code fit</span><h2>What the source review found, verified.</h2>
+<p class="section-intro">Everything below was checked against the current main checkout, not the v2 snapshot. Paths are relative to the repo root.</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Area</th><th scope="col">Found</th><th scope="col">Consequence</th></tr></thead><tbody>
+<tr><td>Cellar-origin tastings</td><td><code>lib/cellar.js</code> <code>openBottle()</code> inserts a visit with <code>place_type: 'winery'</code> whenever the bottle has a <code>winery_id</code>. A bottle opened on the couch becomes a winery visit.</td><td><strong>Fix before launch.</strong> Write <code>place_type: null</code> for cellar-origin tastings and keep <code>winery_id</code> for producer attribution. One migration backfills old rows by following <code>cellar_consumptions.wine_id → wines.visit_id</code>. The visit stats card should then count wineries the same way.</td></tr>
+<tr><td>Wine rows</td><td><code>wines</code> has no <code>user_id</code>; ownership is through <code>visits</code>. Varietal is <code>text[]</code> on tastings but a single <code>text</code> on cellar bottles. Free-text varietals are not canonicalized on write.</td><td>Compute in the app over visits already fetched with their wines, exactly as <code>lib/tasteProfile.js</code> does. Canonicalize at read time with <code>varietalKey</code> and <code>matchVarietal</code>.</td></tr>
+<tr><td>Regions</td><td>No AVA table. The 280-AVA layer is <code>assets/data/avas.json</code> with point-in-polygon in <code>lib/avaRegions.js</code>, used by the map. Tasted wines have no region column; cellar bottles do, resolved through <code>lib/wineRegions.js</code>.</td><td>Region Explorer must be computed on device. That settles the architecture question: facts are computed in the app.</td></tr>
+<tr><td>Wineries</td><td>Per-user rows with lat/lng and address, optional <code>directory_id</code> to the global directory which carries <code>state</code>. No region, state or country on the user row.</td><td>States come from the directory link first, the AVA layer second, the address string last.</td></tr>
+<tr><td>Cellar history</td><td><code>getCellar({ includeRemoved: true })</code> returns consumed, gifted and sold lots. Delete is a hard delete.</td><td>"Ever cataloged" works without a new durable fact. v2's extra table is unnecessary.</td></tr>
+<tr><td>Existing aggregation patterns</td><td><code>lib/tasteProfile.js</code> flattens visits to wines, groups by type and varietal, and hashes the source rows to detect change. <code>lib/visits.js</code> has <code>summarizeVisitStats</code> and <code>summarizeVisits</code>.</td><td>The achievements evaluator is the same shape: pure functions over cached data, unit-tested with fixtures.</td></tr>
+<tr><td>Cache and save paths</td><td><code>lib/cache.js</code> has a fixed key set and <code>invalidate()</code> calls at every visit, wine, cellar and consumption write. <code>openBottle</code> already invalidates five keys at once.</td><td>Add an <code>achievements</code> key; run the evaluator after the same invalidations. No trigger, no queue, no edge function.</td></tr>
+<tr><td>Celebration plumbing</td><td><code>lib/haptics.js</code> exists. <code>lib/notifications.js</code> already schedules opt-in local "milestone" pushes for the cellar. Several bottom sheets exist to clone.</td><td>The badge sheet is a new component in the existing sheet style; a later optional push reuses the notifications module.</td></tr>
+<tr><td>Pro</td><td><code>hooks/usePro.js</code> and <code>ProProvider</code> gate Pro tools.</td><td>Not used. Achievements are free for everyone.</td></tr>
+<tr><td>Prior art in the tracker</td><td>Issue #104 "Engagement: badges &amp; levels / gamification (future, tracking)" holds the owner's original ask: tasting 20 wines is bronze, 100 platinum, badges for wineries visited and cellar size.</td><td>This brief closes the loop on #104. The epic and sub-issues in §07 should link to it.</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="implementation"><span class="kicker">07 / Implementation</span><h2>Small, testable, no new infrastructure.</h2>
+<div class="grid2">
+<article class="card"><h3>Architecture in one paragraph</h3><p>A catalog file describes every badge as data. A pure evaluator turns the user's visits, wines, cellar lots and consumptions into a facts object, then into progress for every badge. After any save, the app runs the evaluator over the freshly cached data, diffs against the earned rows it has, inserts the new ones into a single owner-scoped table, and shows one sheet. The screens only read. Nothing on the server has to know what a badge is.</p><p>If badges ever become public or comparable, move the evaluator into an edge function then. The catalog and evaluator are plain JavaScript and would move without change.</p></article>
+<article class="card"><h3>Data model</h3><p><strong>New table <code>user_achievements</code>:</strong> <code>user_id</code>, <code>badge_key</code>, <code>tier</code> (null for one-offs), <code>points</code>, <code>earned_at</code>, <code>seen_at</code>, <code>source</code> ('live' or 'backfill'). Unique on user, key and tier. Row-level security: owner reads and inserts, nobody updates points, delete-account already cascades through user-owned tables.</p><p><strong>New preference:</strong> a boolean for celebration sheets, stored where the other profile toggles live.</p><p>That is the entire migration. No pending-evaluation table, no rule versions, no revocation columns.</p></article>
+</div>
+<div class="table-wrap"><table><thead><tr><th scope="col">Piece</th><th scope="col">Where</th><th scope="col">Notes</th></tr></thead><tbody>
+<tr><td>Catalog</td><td><code>lib/achievements/catalog.js</code></td><td>Families, one-offs, point values, level ladder. Exports helpers to look up a badge and compute a level from points.</td></tr>
+<tr><td>Facts</td><td><code>lib/achievements/facts.js</code></td><td><code>buildFacts({ visits, wineries, cellar, consumptions })</code>. Pure. Uses <code>varietalKey</code>, <code>matchVarietal</code>, <code>regionsAtPoint</code>, <code>findRegion</code>, <code>regionCountry</code>.</td></tr>
+<tr><td>Evaluator</td><td><code>lib/achievements/evaluate.js</code></td><td><code>evaluate(facts)</code> returns progress for every badge and the list that is newly earned given the existing earned rows. Pure.</td></tr>
+<tr><td>Service</td><td><code>lib/achievements/index.js</code></td><td>Loads data through the existing cached services, persists new awards, marks seen, exposes <code>refreshAchievements()</code> and <code>getAchievements()</code>. New <code>CACHE_KEYS.achievements</code>.</td></tr>
+<tr><td>Hook and sheet</td><td><code>hooks/useAchievementCelebration.js</code>, <code>components/AchievementSheet.js</code></td><td>Called from the log-session save, cellar add, open-bottle and edit paths. Groups multiple awards. Haptic on open.</td></tr>
+<tr><td>Badge visual</td><td><code>components/AchievementBadge.js</code></td><td>Icon in a tier ring, locked state, small and large sizes. Themed with <code>createThemedStyles</code>.</td></tr>
+<tr><td>Screens</td><td><code>app/profile/achievements.js</code></td><td>Families, Collection, History sections. Profile card on <code>app/(tabs)/profile.js</code>. One nudge line in Home's Your Journey card.</td></tr>
+<tr><td>Pre-fix</td><td><code>lib/cellar.js</code>, one migration</td><td>Cellar-origin tastings get <code>place_type: null</code>; backfill old rows.</td></tr>
+<tr><td>Tests</td><td><code>__tests__/achievements.*.test.js</code></td><td>Fixture journals hitting every threshold, vintages collapsing to one wine, Shiraz and Syrah merging, repeat visits not adding, nested AVAs, cellar lots at zero still counting, backfill producing one grouped result, idempotent re-runs producing nothing.</td></tr>
+</tbody></table></div>
+<h3>Delivery as pull requests</h3>
+<ol>
+<li><strong>Pre-fix:</strong> cellar-origin tasting provenance plus backfill migration. Small, independent, worth doing regardless.</li>
+<li><strong>Engine:</strong> catalog, facts, evaluator, tests, migration for <code>user_achievements</code>, service and cache key. No UI. Feature flag off.</li>
+<li><strong>Surfaces:</strong> badge component, Achievements screen, Profile card, Home nudge, celebration sheet wired to the save paths, settings toggle. Flag on for TestFlight.</li>
+<li><strong>Follow-ups after feedback:</strong> custom badge artwork, optional push for level-ups through the existing notifications module, share card, more one-offs as data suggests them.</li>
+</ol>
+<p class="small">An epic on GitHub with those four as sub-issues, linked to #104, follows the repo's plan-then-build workflow. Nothing in this brief has been coded.</p>
+</section>
+
+<section id="decisions"><span class="kicker">08 / Decisions</span><h2>Settled by the owner on September 12, 2026.</h2>
+<ol>
+<li><strong>Points and levels ship in v1.</strong></li>
+<li><strong>Level titles are bottle sizes:</strong> Split, Half Bottle, Bottle, Magnum, Jeroboam, Methuselah, Salmanazar, Balthazar, Nebuchadnezzar.</li>
+<li><strong>Per-grape badges are tiered</strong> at 3, 10 and 25 tastings: Fan, Lover, Devotee.</li>
+<li><strong>Launch grape set</strong> left to the author: the twelve most-logged international grapes plus six Virginia grapes, listed in §03.</li>
+<li><strong>Region Explorer counts US AVAs only for now.</strong> Non-US regions (France, Spain, Italy and others) are wanted later, once a region layer exists for them.</li>
+<li><strong>A bottle opened at home is not a winery visit.</strong> The pre-fix lands first.</li>
+<li><strong>Earned badges are never revoked.</strong></li>
+</ol>
+<p class="small">Next: this brief is committed under the repo's research docs, an epic with four sub-issues is opened against issue #104, and work starts with the pre-fix.</p>
+</section>
+
+<section id="sources"><span class="kicker">09 / Sources</span><h2>Evidence carried over from Version 2.</h2>
+<p class="small">All are product-owned help pages or product-team articles, reviewed September 12, 2026. They support the described mechanics; thresholds and architecture here are original proposals.</p>
+<ol>
+<li><a href="https://www.vivino.com/wine-news/your-unique-taste-visualized">Vivino, Your Unique Taste Visualized</a>: category levels Explorer, Enthusiast, Expert, Ambassador at 1, 6, 26 and 100 rated wines.</li>
+<li><a href="https://www.vivino.com/wine-news/wine-adventures">Vivino, Wine Adventures</a>: guided chapters and challenges, historical precedent.</li>
+<li><a href="https://untappd.com/blog/all-about-untappd-badges">Untappd, All About Untappd Badges</a>: core, local and sponsored badge families with leveling.</li>
+<li><a href="https://help.untappd.com/hc/en-us/articles/360007727352-Badge-Levels">Untappd, Badge Levels</a>: level cap and creation-date treatment.</li>
+<li><a href="https://help.untappd.com/hc/en-us/articles/360007726892-How-to-Enable-Retroactive-Badges">Untappd, Retroactive Badges</a>: historical credit after a qualifying check-in.</li>
+<li><a href="https://blog.duolingo.com/achievement-badges/">Duolingo, How to Earn Achievement Badges</a>: milestone awards, difficulty levels, profile collection.</li>
+<li><a href="https://support.duolingo.com/hc/en-us/articles/360036687211">Duolingo, Leaderboards and Leagues</a>: weekly competition as a distinct mechanism, not adopted here.</li>
+<li><a href="https://support.strava.com/hc/en-us/articles/216917727-Challenges">Strava, Challenges</a>: published requirements and progress bars.</li>
+<li><a href="https://support.strava.com/hc/en-us/articles/216919587-The-Trophy-Case">Strava, The Trophy Case</a>: collection and recent trophies on the profile.</li>
+<li><a href="https://support.google.com/local-guides/answer/6225851">Google Maps, Local Guides points, levels and badging</a>: a contribution score becoming a rank, the model for the points ladder.</li>
+<li><a href="https://support.alltrails.com/hc/en-us/articles/19003938907156">AllTrails, Verified Completed badges</a>: say what a badge proves; ours say "logged", never "verified".</li>
+</ol>
+<p class="small">Local evidence: <code>lib/cellar.js</code>, <code>lib/visits.js</code>, <code>lib/tasteProfile.js</code>, <code>lib/varietals.js</code>, <code>lib/avaRegions.js</code>, <code>lib/wineRegions.js</code>, <code>lib/cache.js</code>, <code>lib/notifications.js</code>, <code>components/VisitStatsCard.js</code>, <code>app/(tabs)/home.js</code>, <code>supabase/migrations/</code>, <code>docs/research/region-model.md</code>, <code>docs/research/varietals.md</code>, GitHub issue #104.</p>
+</section>
+
+</main>
+<div class="footer"><div class="wrap">Cork &amp; Note · Wine Journey research &amp; recommendation · Version 3: revised catalog, points ladder and implementation · September 12, 2026</div></div>
+
+<script>
+(() => {
+  const families = {
+    winery:{name:'Winery Explorer',thresholds:[1,5,15,40],max:45,initial:7,unit:'distinct wineries',description:n=>`${n} distinct ${n===1?'winery has':'wineries have'} a logged visit in your journal. Revisits do not add.`},
+    wine:{name:'Wine Discoverer',thresholds:[1,10,25,100],max:110,initial:18,unit:'distinct wines',description:n=>`${n} distinct ${n===1?'wine':'wines'} tasted. Vintages and repeat tastings collapse to one.`},
+    grape:{name:'Grape Explorer',thresholds:[3,8,15,30],max:35,initial:9,unit:'distinct varietals',description:n=>`${n} distinct ${n===1?'varietal':'varietals'} tasted, with Shiraz and Syrah counted once.`},
+    region:{name:'Region Explorer',thresholds:[1,3,6,12],max:14,initial:2,unit:'AVAs',description:n=>`Visited wineries inside ${n} American Viticultural ${n===1?'Area':'Areas'}. US only for now; a floor, not a census.`},
+    cellar:{name:'Cellar Curator',thresholds:[1,10,25,75],max:85,initial:12,unit:'wines cataloged',description:n=>`${n} distinct ${n===1?'wine':'wines'} ever cataloged in your cellar. Lots you have finished still count.`},
+    journal:{name:'Journal Keeper',thresholds:[1,10,50,200],max:220,initial:31,unit:'tastings',description:n=>`${n} ${n===1?'tasting':'tastings'} logged, at wineries, at home and from the cellar.`}
+  };
+  const names=['Bronze','Silver','Gold','Platinum'];
+  const points=[10,25,50,100];
+  const colors=['#8a4e2a','#596779','#8b681e','#406b69'];
+  const family=document.getElementById('family');
+  const slider=document.getElementById('count');
+  const get=id=>document.getElementById(id);
+  function render(){
+    const f=families[family.value], n=Number(slider.value);
+    const level=f.thresholds.filter(t=>n>=t).length;
+    const earned=points.slice(0,level).reduce((a,b)=>a+b,0);
+    get('count-output').textContent=n;
+    get('demo-name').textContent=f.name;
+    get('demo-description').textContent=f.description(n);
+    get('demo-tier').textContent=level?`${names[level-1]} · Tier ${level} of 4`:'First tier ahead';
+    get('demo-points').textContent=`${earned} ${earned===1?'point':'points'} from this family`;
+    get('demo-seal').style.color=level?colors[level-1]:'#788170';
+    const next=f.thresholds[level];
+    get('demo-progress').textContent=level===4?`${n} ${f.unit} · Platinum earned`:`${n} of ${next} toward ${names[level]}`;
+    get('demo-next').textContent=level===4?'All four tiers earned. The count keeps growing.':`Next: ${names[level]} at ${next} ${f.unit}, worth ${points[level]} points. No deadline.`;
+    get('demo-fill').style.width=(level===4?100:Math.min(100,n/next*100))+'%';
+    get('demo-steps').replaceChildren(...names.map((name,i)=>{
+      const s=document.createElement('span');
+      if(i<level)s.className='earned';
+      s.append(name,document.createElement('br'),String(f.thresholds[i]));
+      return s;
+    }));
+  }
+  family.addEventListener('change',()=>{const f=families[family.value];slider.max=f.max;slider.value=f.initial;render()});
+  slider.addEventListener('input',render);
+  window.addEventListener('beforeprint',()=>document.querySelectorAll('details').forEach(d=>{d.dataset.wasOpen=d.open?'yes':'no';d.open=true}));
+  window.addEventListener('afterprint',()=>document.querySelectorAll('details').forEach(d=>{if(d.dataset.wasOpen==='no')d.open=false}));
+  render();
+})();
+</script>
+</body>
+</html>
