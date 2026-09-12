@@ -164,7 +164,7 @@ export default function CellarBottleForm({
     });
     setWindowSuggesting(false);
     if (res.success) {
-      setWindowProposal(res.window);
+      setWindowProposal({ ...res.window, fallback: Boolean(res.fallback) });
     } else {
       setWindowError('Could not suggest a window — enter it manually.');
     }
@@ -419,8 +419,8 @@ export default function CellarBottleForm({
             <Field flex label="Drink by" value={form.drink_by} onChangeText={set('drink_by')} placeholder="2030" keyboardType="number-pad" />
           </Row>
 
-          {/* AI-seeded drink window (R4 / #54): propose a window from grape /
-              region / vintage; the user accepts (fills the fields) or edits. */}
+          {/* Sommelier-seeded drink window (R4 / #54): propose a window from
+              grape / region / vintage; the user accepts or edits. */}
           <TouchableOpacity
             style={[styles.suggestBtn, windowSuggesting && styles.submitDisabled]}
             onPress={suggestWindow}
@@ -461,7 +461,11 @@ export default function CellarBottleForm({
                   <Text style={styles.proposalDismissText}>I&apos;ll edit manually</Text>
                 </TouchableOpacity>
               </View>
-              <Text style={styles.proposalNote}>An estimate from the grape, region & vintage — adjust as you like.</Text>
+              <Text style={styles.proposalNote}>
+                {windowProposal.fallback
+                  ? 'A general style estimate — adjust it as you like.'
+                  : 'An estimate from the grape, region & vintage — adjust as you like.'}
+              </Text>
             </View>
           ) : null}
 

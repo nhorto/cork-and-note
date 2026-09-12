@@ -238,6 +238,14 @@ describe('addBottle / updateBottle / deleteBottle', () => {
 });
 
 describe('getCellarStats', () => {
+  test('uses the restored session without a second network user validation', async () => {
+    const res = await cellarService.getCellarStats();
+
+    expect(res.success).toBe(true);
+    expect(supabase.auth.getSession).toHaveBeenCalled();
+    expect(supabase.auth.getUser).not.toHaveBeenCalled();
+  });
+
   test('counts lots per drink-window status and bottles in total, ignoring retired lots', async () => {
     const year = new Date().getFullYear();
     supabase.reset({

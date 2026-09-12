@@ -1,5 +1,5 @@
 import { act, create } from 'react-test-renderer';
-import { Text, TextInput, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { usePro } from '../hooks/usePro';
 import { wineryDirectoryService } from '../lib/wineryDirectory';
 import { wineriesService } from '../lib/wineries';
@@ -62,6 +62,55 @@ test('a free profile can discover and open a winery without GPS or a paywall', a
   expect(mockPush).toHaveBeenCalledWith('/winery/dir-7');
   expect(wineriesService.findOrCreateWinery).not.toHaveBeenCalled();
   expect(presentPaywall).not.toHaveBeenCalled();
+  await act(async () => tree.unmount());
+});
+
+test('an individual directory winery uses the purple marker treatment', async () => {
+  usePro.mockReturnValue({ isPro: false, presentPaywall: jest.fn() });
+  wineryDirectoryService.getInBounds.mockResolvedValue({
+    success: true,
+    wineries: [{ id: 7, name: 'Purple Estate', latitude: 37.4, longitude: -78.6 }],
+  });
+  let tree;
+  await act(async () => { tree = create(<MapScreen />); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(500); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(50); });
+  const marker = tree.root.findByType('Marker');
+  const circle = marker.findAllByType(View).find(
+    (node) => StyleSheet.flatten(node.props.style)?.width === 32
+  );
+  expect(StyleSheet.flatten(circle.props.style)).toEqual(
+    expect.objectContaining({ backgroundColor: '#54258A' })
+  );
+  await act(async () => tree.unmount());
+});
+
+test('street-level markers render at their collision-free display coordinates', async () => {
+  usePro.mockReturnValue({ isPro: false, presentPaywall: jest.fn() });
+  const latitude = 37.4316;
+  const longitude = -78.6569;
+  wineryDirectoryService.getInBounds.mockResolvedValue({
+    success: true,
+    wineries: [
+      { id: 7, name: 'Suite Seven', latitude, longitude },
+      { id: 8, name: 'Suite Eight', latitude, longitude },
+    ],
+    truncated: false,
+  });
+  let tree;
+  await act(async () => { tree = create(<MapScreen />); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(550); });
+  const map = tree.root.findByType('MapView');
+  await act(async () => map.props.onRegionChangeComplete({
+    latitude,
+    longitude,
+    latitudeDelta: 0.005,
+    longitudeDelta: 0.005,
+  }));
+  await act(async () => { await jest.advanceTimersByTimeAsync(50); });
+  const coordinates = tree.root.findAllByType('Marker').map((marker) => marker.props.coordinate);
+  expect(coordinates).toHaveLength(2);
+  expect(new Set(coordinates.map((point) => `${point.latitude},${point.longitude}`)).size).toBe(2);
   await act(async () => tree.unmount());
 });
 

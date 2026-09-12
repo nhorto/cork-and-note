@@ -39,14 +39,56 @@ describe('conversations and messages', () => {
     expect(list.map((c) => c.title)).toEqual(['new', 'old']);
   });
 
-  test('messages are returned oldest first with their photos and suggestions', async () => {
+  test('messages are returned oldest first with their photos, suggestions, and sources', async () => {
     const convo = await chatService.createConversation();
     await chatService.addMessage(convo.id, 'user', 'What pairs with oysters?', ['chat_user-a_1.jpg']);
-    await chatService.addMessage(convo.id, 'assistant', 'A crisp Muscadet.', [], [{ name: 'Muscadet' }]);
+    await chatService.addMessage(
+      convo.id,
+      'assistant',
+      'A crisp Muscadet.',
+      [],
+      [{ name: 'Muscadet' }],
+      [{ url: 'https://example.com/muscadet', title: 'Muscadet' }]
+    );
     const messages = await chatService.getMessages(convo.id);
     expect(messages.map((m) => m.role)).toEqual(['user', 'assistant']);
     expect(messages[0]).toEqual(expect.objectContaining({ image_urls: ['chat_user-a_1.jpg'], ai_suggestions: null }));
     expect(messages[1].ai_suggestions).toEqual([{ name: 'Muscadet' }]);
+    expect(messages[1].sources).toEqual([
+      { url: 'https://example.com/muscadet', title: 'Muscadet' },
+    ]);
+  });
+
+  test('source persistence is backward compatible for every existing addMessage caller', async () => {
+    const convo = await chatService.createConversation();
+    const message = await chatService.addMessage(convo.id, 'user', 'Hello');
+    expect(message.sources).toEqual([]);
+    expect(supabase.callsTo('messages').at(-1).payload).not.toHaveProperty('sources');
+  });
+
+  test('an older database without the sources column does not break chat', async () => {
+    const convo = await chatService.createConversation();
+    supabase.respond('messages', (query) => {
+      if (query.op === 'insert' && Object.hasOwn(query.payload, 'sources')) {
+        return {
+          data: null,
+          error: {
+            code: 'PGRST204',
+            message: "Could not find the 'sources' column of 'messages' in the schema cache",
+          },
+        };
+      }
+      return undefined;
+    });
+
+    const sources = [{ url: 'https://example.com/wine', title: 'Wine' }];
+    const message = await chatService.addMessage(1, 'assistant', 'Try this.', [], null, sources);
+
+    expect(message.sources).toEqual(sources);
+    const inserts = supabase.callsTo('messages').filter((call) => call.op === 'insert');
+    expect(inserts).toHaveLength(2);
+    expect(inserts[0].payload.sources).toEqual(sources);
+    expect(inserts[1].payload).not.toHaveProperty('sources');
   });
 
   test('per-conversation reads and writes carry no user filter: row-level security is the only owner check', async () => {

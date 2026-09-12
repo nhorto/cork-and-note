@@ -24,6 +24,7 @@ import {
   textFromContent,
   webSearchRequestCount,
 } from "../_shared/claudeResponse.ts";
+import { readAnthropicStream } from "../_shared/anthropicStream.ts";
 
 import { isVisionTask, requestGeminiVision, visionConsentRequired, type VisionMessage } from "../_shared/geminiVision.ts";
 
@@ -93,13 +94,19 @@ export function createHandler(overrides: Partial<HandlerDeps> = {}) {
         return json({ error: "Payload too large" }, 413);
       }
 
-      let parsed: { messages?: unknown; system_prompt?: unknown; task?: unknown; ai_sharing_version?: unknown };
+      let parsed: {
+        messages?: unknown;
+        system_prompt?: unknown;
+        task?: unknown;
+        ai_sharing_version?: unknown;
+        stream?: unknown;
+      };
       try {
         parsed = JSON.parse(raw);
       } catch {
         return json({ error: "Invalid JSON body" }, 400);
       }
-      const { messages, system_prompt, task, ai_sharing_version } = parsed;
+      const { messages, system_prompt, task, ai_sharing_version, stream } = parsed;
 
       // ── Input validation ──────────────────────────────────────────────
       if (!Array.isArray(messages) || messages.length === 0) {
@@ -110,6 +117,9 @@ export function createHandler(overrides: Partial<HandlerDeps> = {}) {
       }
       if (system_prompt !== undefined && typeof system_prompt !== "string") {
         return json({ error: "system_prompt must be a string" }, 400);
+      }
+      if (stream !== undefined && typeof stream !== "boolean") {
+        return json({ error: "stream must be a boolean" }, 400);
       }
 
       for (const msg of messages as Array<Record<string, unknown>>) {
@@ -350,38 +360,138 @@ export function createHandler(overrides: Partial<HandlerDeps> = {}) {
         const conversation: Array<Record<string, unknown>> = [...claudeMessages];
         const responseBlocks: unknown[] = [];
 
-        for (let resume = 0; ; resume++) {
-          const claudeResponse = await deps.fetch("https://api.anthropic.com/v1/messages", {
+        const anthropicBody = (streamResponse = false) => ({
+          model,
+          // Room for a cited answer without truncating mid-sentence. max_tokens
+          // is a ceiling, not a spend; unused headroom costs nothing.
+          max_tokens: maxTokens,
+          system: [
+            { type: "text", text: SYSTEM_PROMPT_FLOOR },
+            {
+              type: "text",
+              text: (system_prompt as string) || "You are a helpful wine sommelier.",
+              cache_control: { type: "ephemeral" },
+            },
+          ],
+          messages: conversation,
+          ...(canSearch ? { tools } : {}),
+          ...(streamResponse ? { stream: true } : {}),
+        });
+        const callClaude = (streamResponse = false) =>
+          deps.fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               "x-api-key": anthropicApiKey,
               "anthropic-version": "2023-06-01",
             },
-            body: JSON.stringify({
-              model,
-              // Room for a cited answer without truncating mid-sentence. max_tokens
-              // is a ceiling, not a spend — unused headroom costs nothing.
-              max_tokens: maxTokens,
-              // Prompt caching (launch plan §4.3): the system prompt is stable across
-              // the turns of a sommelier conversation (and byte-identical across all
-              // label scans), so mark it as a cache breakpoint — cached reads bill at
-              // ~10% of input price. Prompts under the model's minimum cacheable size
-              // silently skip the cache, so this is safe for short prompts too.
-              // The breakpoint on the LAST block caches everything before it, so the
-              // floor block rides in the same cache entry for free.
-              system: [
-                { type: "text", text: SYSTEM_PROMPT_FLOOR },
-                {
-                  type: "text",
-                  text: (system_prompt as string) || "You are a helpful wine sommelier.",
-                  cache_control: { type: "ephemeral" },
-                },
-              ],
-              messages: conversation,
-              ...(canSearch ? { tools } : {}),
-            }),
+            body: JSON.stringify(anthropicBody(streamResponse)),
           });
+
+        // Ordinary conversation can opt into newline-delimited events. The
+        // first upstream request opens before returning 200, preserving proper
+        // HTTP errors for auth, entitlement, and immediate provider failures.
+        // Vision and structured tasks remain atomic.
+        if (stream === true && meteredTask === "chat") {
+          let firstResponse = await callClaude(true);
+          if (!firstResponse.ok) {
+            const errorText = await firstResponse.text();
+            console.error("Claude API error:", firstResponse.status, errorText);
+            return json(
+              { error: "The sommelier is unavailable right now. Please try again." },
+              firstResponse.status === 429 ? 429 : 502,
+            );
+          }
+
+          const encoder = new TextEncoder();
+          const eventStream = new ReadableStream({
+            async start(controller) {
+              const emit = (event: unknown) =>
+                controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
+              let usageRecorded = false;
+              const recordUsage = async () => {
+                if (usageRecorded) return;
+                usageRecorded = true;
+                const { error: usageError } = await supabaseClient.from("chat_usage").insert({
+                  user_id: user.id,
+                  task: meteredTask,
+                  input_tokens: usageInputTokens || null,
+                  output_tokens: usageOutputTokens || null,
+                  web_searches: canSearch ? webSearches : null,
+                });
+                if (usageError) console.error("Failed to record chat_usage:", usageError);
+              };
+
+              try {
+                for (let resume = 0; ; resume++) {
+                  const claudeData = await readAnthropicStream(firstResponse, (text) =>
+                    emit({ type: "delta", text })
+                  );
+                  responseBlocks.push(...claudeData.content);
+                  usageInputTokens += Number(claudeData.usage?.input_tokens) || 0;
+                  usageOutputTokens += Number(claudeData.usage?.output_tokens) || 0;
+                  webSearches += webSearchRequestCount(claudeData.usage);
+
+                  if (claudeData.stop_reason !== "pause_turn" || resume >= MAX_PAUSE_RESUMES) break;
+                  conversation.push({ role: "assistant", content: claudeData.content });
+                  firstResponse = await callClaude(true);
+                  if (!firstResponse.ok) {
+                    await firstResponse.text();
+                    throw new Error("The sommelier is unavailable right now. Please try again.");
+                  }
+                }
+
+                const streamedText = textFromContent(responseBlocks);
+                const streamedSources = collectSources(responseBlocks);
+                await recordUsage();
+                emit({
+                  type: "done",
+                  response: streamedText,
+                  sources: streamedSources,
+                  usage: {
+                    input_tokens: usageInputTokens,
+                    output_tokens: usageOutputTokens,
+                    web_searches: webSearches,
+                  },
+                  meter: {
+                    task: meter.task,
+                    limit: meter.limit,
+                    used: meter.used + 1,
+                    remaining: meter.remaining === null ? null : Math.max(0, meter.remaining - 1),
+                    isPro,
+                  },
+                });
+              } catch (error) {
+                console.error("Claude stream error:", error);
+                // Count an admitted call even if its connection breaks so a
+                // disconnect cannot bypass the free/fair-use meter.
+                await recordUsage();
+                try {
+                  emit({
+                    type: "error",
+                    error: "The sommelier response was interrupted. Please try again.",
+                  });
+                } catch {
+                  // The reader disconnected; there is nobody left to notify.
+                }
+              } finally {
+                try { controller.close(); } catch {}
+              }
+            },
+          });
+
+          return new Response(eventStream, {
+            status: 200,
+            headers: {
+              ...cors,
+              "Content-Type": "application/x-ndjson; charset=utf-8",
+              "Cache-Control": "no-cache, no-transform",
+            },
+          });
+        }
+
+        for (let resume = 0; ; resume++) {
+          const claudeResponse = await callClaude();
 
           if (!claudeResponse.ok) {
             const errorText = await claudeResponse.text();

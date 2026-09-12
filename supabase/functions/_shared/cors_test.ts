@@ -50,5 +50,5 @@ Deno.test("a wildcard is never emitted, even if someone puts one in the secret",
 Deno.test("a request with no Origin (the native app) gets the method and header allowances and nothing else", async () => {
   const h = await headersFor(null, "https://cork-and-note.vercel.app");
   assertEquals(h["Access-Control-Allow-Origin"], undefined);
-  assertEquals(h["Access-Control-Allow-Headers"], "authorization, x-client-info, apikey, content-type");
+  assertEquals(h["Access-Control-Allow-Headers"], "authorization, x-client-info, apikey, content-type, accept");
 });
