@@ -448,7 +448,7 @@ export default function WineListScreen() {
   if (isLoading) {
     return (
       <View style={styles.safeArea}>
-        <ScreenHeader title="Choose from a list" onBack={goBack} />
+        <ScreenHeader title="Photograph a wine list" onBack={goBack} />
         <View style={styles.centered}>
           <ActivityIndicator color={colors.primary.ink} />
         </View>
@@ -460,7 +460,7 @@ export default function WineListScreen() {
   if (!isPro && !(readOnly && step === 'picks')) {
     return (
       <View style={styles.safeArea}>
-        <ScreenHeader title="Choose from a list" onBack={goBack} />
+        <ScreenHeader title="Photograph a wine list" onBack={goBack} />
         <ProFeaturePreview
           source="wine_list_pick"
           title="A few good picks from the list in front of you"
@@ -486,7 +486,7 @@ export default function WineListScreen() {
 
   return (
     <View style={styles.safeArea}>
-      <ScreenHeader title="Choose from a list" onBack={goBack} />
+      <ScreenHeader title="Photograph a wine list" onBack={goBack} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <StepIndicator

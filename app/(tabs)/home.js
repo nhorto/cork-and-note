@@ -200,18 +200,43 @@ export default function HomeScreen() {
             Hides itself entirely when location is denied or nothing is near. */}
         <NearYouRow />
 
-        {/* Ask the sommelier — a real input, not a card (owner feedback
-            2026-09-09: Tonight's Pick moved to the Somm tab and the Cellar;
-            Home's job is starting a conversation). Submitting hands the
-            question to the Somm tab via ?ask=…, which opens a fresh chat and
-            sends it. */}
+        {/* Sommelier — one card, one input, quick chips (owner feedback
+            2026-09-12: no separate "Start a new chat" button; the input is the
+            new chat). Typing hands the question to the Somm tab via ?ask=…,
+            which opens a fresh conversation and sends it. The tool chips go
+            straight to the guided screens; "Pair a dish" half-writes the
+            question so the user finishes it. */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionLabel}>SOMMELIER</Text>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/sommelier')}>
+            <Text style={styles.sectionAction}>Open</Text>
+          </TouchableOpacity>
+        </View>
         <AskSommelierBox
+          placeholder="What should I open tonight?"
           onAsk={(question) =>
             router.push({ pathname: '/(tabs)/sommelier', params: { ask: question } })
           }
           onOpen={() => router.push('/(tabs)/sommelier')}
-          onOpenWineList={() => router.push('/sommelier/wine-list')}
-          showActions
+          chips={[
+            {
+              icon: 'camera-outline',
+              label: 'Wine list photo',
+              accessibilityLabel: 'Photograph a restaurant wine list',
+              onPress: () => router.push('/sommelier/wine-list'),
+            },
+            {
+              icon: 'sparkles-outline',
+              label: "Tonight's pick",
+              accessibilityLabel: "Tonight's pick from your cellar",
+              onPress: () => router.push('/sommelier/tonight'),
+            },
+            {
+              icon: 'restaurant-outline',
+              label: 'Pair a dish',
+              prefill: 'What wine pairs with ',
+            },
+          ]}
         />
 
         {/* Ready-to-Drink strip — first-class drink-window surface (R4 / #54).

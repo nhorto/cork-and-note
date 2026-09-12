@@ -187,7 +187,7 @@ export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhot
           answers are AI-generated and can be wrong. Lives here so every chat
           surface (Sommelier tab + wine-entry modal) carries it. */}
       <Text style={styles.aiDisclaimer}>
-        The sommelier is AI and can be wrong — trust your own taste.
+        The sommelier is AI and can be wrong. Trust your own taste.
       </Text>
     </View>
   );

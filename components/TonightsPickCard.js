@@ -69,7 +69,14 @@ function PickerRow({ label, options, value, onChange }) {
 // guided tools sit under it, so Tonight's Pick starts collapsed there and
 // remembers its own state separately from Home. An empty cellar becomes a
 // one-line row rather than the full "add a bottle" card.
-export default function TonightsPickCard({ onRequireCellar, compact = false }) {
+// `collapsible={false}` (the dedicated /sommelier/tonight screen, 2026-09-12):
+// the card is the whole screen there, so it never folds and ignores the
+// collapse preference the Cellar copy remembers.
+export default function TonightsPickCard({
+  onRequireCellar,
+  compact = false,
+  collapsible = true,
+}) {
   const { colors, spacing, styles } = useScreenTheme();
   const collapseKey = compact ? `${COLLAPSE_KEY}.compact` : COLLAPSE_KEY;
 
@@ -108,6 +115,7 @@ export default function TonightsPickCard({ onRequireCellar, compact = false }) {
 
   // Restore the saved collapse preference once on mount (fails soft → expanded).
   useEffect(() => {
+    if (!collapsible) return undefined;
     let active = true;
     AsyncStorage.getItem(collapseKey)
       .then((v) => {
@@ -117,15 +125,16 @@ export default function TonightsPickCard({ onRequireCellar, compact = false }) {
     return () => {
       active = false;
     };
-  }, [collapseKey]);
+  }, [collapseKey, collapsible]);
 
   const toggleCollapsed = useCallback(() => {
+    if (!collapsible) return;
     setCollapsed((c) => {
       const next = !c;
       AsyncStorage.setItem(collapseKey, next ? '1' : '0').catch(() => {});
       return next;
     });
-  }, [collapseKey]);
+  }, [collapseKey, collapsible]);
 
   const hasCellar = Array.isArray(bottles) && bottles.length > 0;
 
@@ -226,8 +235,15 @@ export default function TonightsPickCard({ onRequireCellar, compact = false }) {
         style={styles.headerRow}
         activeOpacity={0.7}
         onPress={toggleCollapsed}
-        accessibilityRole="button"
-        accessibilityLabel={collapsed ? "Expand Tonight's Pick" : "Collapse Tonight's Pick"}
+        disabled={!collapsible}
+        accessibilityRole={collapsible ? 'button' : 'header'}
+        accessibilityLabel={
+          !collapsible
+            ? "Tonight's Pick"
+            : collapsed
+              ? "Expand Tonight's Pick"
+              : "Collapse Tonight's Pick"
+        }
       >
         <Ionicons name="sparkles" size={18} color={colors.accent.base} />
         <Text style={styles.eyebrow}>TONIGHT&apos;S PICK</Text>
@@ -244,11 +260,13 @@ export default function TonightsPickCard({ onRequireCellar, compact = false }) {
           </Text>
         ) : null}
         <View style={styles.flexSpacer} />
-        <Ionicons
-          name={collapsed ? 'chevron-down' : 'chevron-up'}
-          size={18}
-          color={colors.primary.ink}
-        />
+        {collapsible ? (
+          <Ionicons
+            name={collapsed ? 'chevron-down' : 'chevron-up'}
+            size={18}
+            color={colors.primary.ink}
+          />
+        ) : null}
       </TouchableOpacity>
 
       {!collapsed && (
