@@ -41,6 +41,29 @@ jest.mock('../lib/wishlist', () => ({ wishlistService: { getUserWishlist: jest.f
 jest.mock('../lib/cellar', () => ({ ...jest.requireActual('../lib/cellar'), cellarService: { getCellarStats: jest.fn() } }));
 jest.mock('../lib/cellarInsights', () => ({ getCellarInsights: jest.fn() }));
 jest.mock('../lib/supabase', () => ({ supabase: require('../test-utils/fakeSupabase').currentFake() }));
+// Badges are a garnish on this screen: the engine has its own tests, so here it
+// is a fixture. refreshAchievements stands in for "the last save earned
+// nothing", which is the normal case on a focus load.
+jest.mock('../lib/achievements', () => ({
+  getAchievements: jest.fn(),
+  refreshAchievements: jest.fn(),
+}));
+const { getAchievements, refreshAchievements } = require('../lib/achievements');
+
+const journey = (over = {}) => ({
+  success: true,
+  newlyEarned: [],
+  result: {
+    points: 30,
+    level: { level: 1, title: 'Split', points: 0, next: { level: 2, title: 'Half Bottle', points: 50 } },
+    families: [
+      { key: 'winery_explorer', name: 'Winery Explorer', unit: 'wineries', count: 3, tier: 'bronze', nextTier: 'silver', nextThreshold: 5, progress: 0.5 },
+      { key: 'journal_keeper', name: 'Journal Keeper', unit: 'tastings', count: 1, tier: 'bronze', nextTier: 'silver', nextThreshold: 10, progress: 0.1 },
+    ],
+    allGrapes: [], oneOffs: [],
+  },
+  ...over,
+});
 
 const { AuthContext } = require('../app/_layout');
 const texts = (tree) => tree.root.findAllByType(Text).map((n) => [].concat(n.props.children).join(''));
@@ -69,12 +92,16 @@ const ok = () => {
   wishlistService.getUserWishlist.mockResolvedValue({ success: true, wishlist: [{ id: 1 }, { id: 2 }] });
   cellarService.getCellarStats.mockResolvedValue({ success: true, stats: { lots: 2, totalBottles: 5, readyToDrink: 3, byStatus: { too_young: 1, ready: 3, drink_up: 0, past_peak: 0, unknown: 0 } } });
   getCellarInsights.mockResolvedValue({ success: false });
+  refreshAchievements.mockResolvedValue(journey());
+  getAchievements.mockResolvedValue(journey());
 };
 const down = () => {
   visitsService.getUserVisits.mockResolvedValue({ success: false, error: 'offline' });
   wishlistService.getUserWishlist.mockRejectedValue(new Error('offline'));
   cellarService.getCellarStats.mockResolvedValue({ success: false });
   getCellarInsights.mockResolvedValue({ success: false });
+  refreshAchievements.mockRejectedValue(new Error('offline'));
+  getAchievements.mockRejectedValue(new Error('offline'));
 };
 
 beforeEach(() => {
@@ -151,4 +178,29 @@ test('a question typed into the ask box opens the sommelier with it', async () =
   const tree = await mount();
   await act(async () => tree.root.findByProps({ accessibilityLabel: 'Ask your sommelier a question' }).props.onSubmitEditing());
   expect(mockRouter.push).toHaveBeenLastCalledWith({ pathname: '/(tabs)/sommelier', params: { ask: 'What pairs with lamb?' } });
+});
+
+test('the Journey card nudges toward the nearest badge', async () => {
+  ok();
+  const tree = await mount();
+  // Winery Explorer is furthest along (3 of 5), so it is the one to name.
+  expect(texts(tree)).toContain('2 more wineries to Winery Explorer · Silver ›');
+});
+
+test('one away reads in the singular', async () => {
+  ok();
+  const nearly = journey();
+  nearly.result.families[0].count = 4;
+  refreshAchievements.mockResolvedValue(nearly);
+  const tree = await mount();
+  expect(texts(tree)).toContain('1 more winery to Winery Explorer · Silver ›');
+});
+
+test('no nudge when achievements cannot load, and the rest of Home still renders', async () => {
+  ok();
+  refreshAchievements.mockRejectedValue(new Error('offline'));
+  getAchievements.mockRejectedValue(new Error('offline'));
+  const tree = await mount();
+  expect(texts(tree).some((t) => t.includes('more wineries to'))).toBe(false);
+  expect(texts(tree)).toContain('Octagon');
 });

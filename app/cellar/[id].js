@@ -2,6 +2,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeBack } from '../../hooks/useSafeBack';
+import { useAchievementCelebration } from '../../hooks/useAchievementCelebration';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -47,6 +48,8 @@ export default function BottleDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const goBack = useSafeBack('/(tabs)/cellar');
+  // The screen stays open after opening a bottle, so it celebrates here (#296).
+  const { check, sheet } = useAchievementCelebration();
 
   const [bottle, setBottle] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -166,6 +169,7 @@ export default function BottleDetailScreen() {
       return;
     }
     await load();
+    check(); // opening a bottle can earn Cork Popped, Patience, Right on Time
     const wroteTasting = Boolean(res.wineId && res.visitId);
     const loggedNote = wroteTasting ? ' A tasting was added to your journal.' : '';
     // #92: when a tasting was created, offer to flesh it out in the FULL logger
@@ -564,6 +568,7 @@ export default function BottleDetailScreen() {
           </View>
         </View>
       </Modal>
+      {sheet}
     </View>
   );
 }

@@ -28,6 +28,7 @@ import {
 } from '../../lib/notifications';
 import Chip from '../../components/Chip';
 import ScreenHeader from '../../components/ScreenHeader';
+import { getCelebrationPref, setCelebrationPref } from '../../lib/achievements/prefs';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 
 
@@ -47,11 +48,19 @@ export default function NotificationsScreen() {
   const [prefs, setLocalPrefs] = useState(null);
   const [permission, setPermission] = useState('undetermined');
   const [busy, setBusy] = useState(false);
+  // Badge celebrations are a device preference, not a push notification, so
+  // they live in AsyncStorage and work with push switched off (#296).
+  const [celebrate, setCelebrate] = useState(true);
 
   const load = useCallback(async () => {
-    const [p, perm] = await Promise.all([getPrefs(), getPermissionStatus()]);
+    const [p, perm, celebratePref] = await Promise.all([
+      getPrefs(),
+      getPermissionStatus(),
+      getCelebrationPref(),
+    ]);
     setLocalPrefs(p);
     setPermission(perm);
+    setCelebrate(celebratePref);
     setLoading(false);
   }, []);
 
@@ -163,6 +172,31 @@ export default function NotificationsScreen() {
                   value={!!prefs.enabled}
                   onValueChange={handleMasterToggle}
                   disabled={busy || unavailable}
+                  trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
+                  thumbColor={colors.onPrimary}
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* Badges: in-app only, so this stays usable with push off. */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>BADGES</Text>
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <View style={styles.rowInfo}>
+                  <Text style={styles.rowTitle}>Celebrate new badges</Text>
+                  <Text style={styles.rowDescription}>
+                    Show a card when you earn one. Badges are still collected
+                    either way.
+                  </Text>
+                </View>
+                <Switch
+                  value={celebrate}
+                  onValueChange={async (value) => {
+                    setCelebrate(value);
+                    await setCelebrationPref(value);
+                  }}
                   trackColor={{ false: colors.neutral.border, true: colors.primary.base }}
                   thumbColor={colors.onPrimary}
                 />

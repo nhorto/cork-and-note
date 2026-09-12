@@ -413,6 +413,7 @@ function AppRoot() {
                 <Stack.Screen name="reset-password" />
                 <Stack.Screen name="profile/account-settings" />
                 <Stack.Screen name="profile/notifications" />
+                <Stack.Screen name="profile/achievements" />
                 <Stack.Screen name="profile/change-password" />
                 <Stack.Screen name="profile/help-support" />
                 <Stack.Screen name="profile/feedback" />
