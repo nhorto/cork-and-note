@@ -280,10 +280,9 @@ export default function SommelierScreen() {
 
       const aiMessages = [...previousMsgs, currentMsg];
 
-      // Stream the answer into one temporary message. This is real transport
-      // streaming from Anthropic through the Edge Function, not a timer-driven
-      // typewriter effect after a buffered response.
-      const aiResponse = await aiService.sendMessageStream(aiMessages, systemPrompt, {
+      // The shared chat entry point currently returns a complete response.
+      // Keep the delta handler ready for the deferred backend streaming rollout.
+      const aiResponse = await aiService.sendChatMessage(aiMessages, systemPrompt, {
         onDelta: (textSoFar) => {
           setReceiving(true);
           setMessages((previous) => {

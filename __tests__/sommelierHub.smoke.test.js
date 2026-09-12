@@ -28,11 +28,7 @@ jest.mock('../components/UpgradePill', () => () => null);
 jest.mock('../lib/ai', () => ({
   aiService: {
     buildSystemPrompt: jest.fn().mockResolvedValue('system'),
-    sendMessageStream: jest.fn().mockImplementation(async (_messages, _prompt, { onDelta }) => {
-      onDelta('Try a Cab');
-      onDelta('Try a Cab Franc.');
-      return { response: 'Try a Cab Franc.', sources: [] };
-    }),
+    sendChatMessage: jest.fn().mockResolvedValue({ response: 'Try a Cab Franc.', sources: [] }),
     parseSuggestions: jest.fn().mockReturnValue([]),
     getDisplayText: (t) => t,
     photoToBase64: jest.fn(),
@@ -145,7 +141,7 @@ describe('Sommelier hub', () => {
       'What pairs with roast chicken?',
       expect.anything()
     );
-    expect(aiService.sendMessageStream).toHaveBeenCalled();
+    expect(aiService.sendChatMessage).toHaveBeenCalled();
     // Let the chat view's scroll-to-end timer fire inside the test environment.
     await act(async () => {
       await new Promise((r) => setTimeout(r, 150));

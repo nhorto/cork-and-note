@@ -174,10 +174,9 @@ export default function WineChatModal({ visible, onClose, onUseSuggestions, onCo
         }));
       const aiMessages = [...previousMsgs, currentMsg];
 
-      // Use the same real streaming transport as the main Sommelier chat. The
-      // structured suggestions are still parsed and made actionable only after
-      // the complete response arrives.
-      const aiResponse = await aiService.sendMessageStream(aiMessages, systemPrompt, {
+      // The shared chat entry point currently returns a complete response.
+      // Keep the delta handler ready for the deferred backend streaming rollout.
+      const aiResponse = await aiService.sendChatMessage(aiMessages, systemPrompt, {
         onDelta: (textSoFar) => {
           setReceiving(true);
           setMessages((previous) => {

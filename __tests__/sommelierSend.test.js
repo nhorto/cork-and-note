@@ -27,7 +27,7 @@ jest.mock('../components/UpgradePill', () => () => null);
 jest.mock('../lib/ai', () => ({
   aiService: {
     buildSystemPrompt: jest.fn().mockResolvedValue('system'),
-    sendMessageStream: jest.fn(),
+    sendChatMessage: jest.fn(),
     parseSuggestions: jest.fn().mockReturnValue([]),
     getDisplayText: (t) => t,
     photoToBase64: jest.fn(),
@@ -82,7 +82,7 @@ afterEach(() => console.error.mockRestore());
 test('a server paywall refusal opens the paywall instead of impersonating the sommelier', async () => {
   const refusal = new Error('You have used your 5 free sommelier messages this month.');
   refusal.code = 'free_limit_reached';
-  aiService.sendMessageStream.mockRejectedValueOnce(refusal);
+  aiService.sendChatMessage.mockRejectedValueOnce(refusal);
 
   await askFromHub('What pairs with oysters?');
 
@@ -92,7 +92,7 @@ test('a server paywall refusal opens the paywall instead of impersonating the so
 });
 
 test('a dropped connection shows a retryable error bubble and never opens the paywall', async () => {
-  aiService.sendMessageStream.mockRejectedValueOnce(new Error('Network request failed'));
+  aiService.sendChatMessage.mockRejectedValueOnce(new Error('Network request failed'));
 
   await askFromHub('What pairs with oysters?');
 
@@ -102,12 +102,10 @@ test('a dropped connection shows a retryable error bubble and never opens the pa
   expect(bubble.content).toContain('Network request failed');
 });
 
-test('renders partial assistant text before the streamed response is complete', async () => {
+test('waits for the complete chat response before displaying the assistant reply', async () => {
   let finish;
-  aiService.sendMessageStream.mockImplementationOnce(async (_messages, _prompt, { onDelta }) => {
-    onDelta('A crisp');
+  aiService.sendChatMessage.mockImplementationOnce(async () => {
     await new Promise((resolve) => { finish = resolve; });
-    onDelta('A crisp Muscadet works well.');
     return { response: 'A crisp Muscadet works well.', sources: [] };
   });
 
@@ -119,7 +117,7 @@ test('renders partial assistant text before the streamed response is complete', 
   await act(async () => { input.props.onSubmitEditing(); });
   await flush();
 
-  expect(assistantBubbles().some((message) => message.content === 'A crisp' && message.isStreaming)).toBe(true);
+  expect(assistantBubbles()).toEqual([]);
   await act(async () => finish());
   await flush();
   expect(assistantBubbles().some((message) => message.content === 'A crisp Muscadet works well.')).toBe(true);

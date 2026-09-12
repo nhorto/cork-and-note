@@ -19,7 +19,7 @@ jest.mock('react-native-safe-area-context', () => ({
 jest.mock('../lib/ai', () => ({
   aiService: {
     buildSystemPrompt: jest.fn(),
-    sendMessageStream: jest.fn(),
+    sendChatMessage: jest.fn(),
     parseSuggestions: jest.fn(),
     getDisplayText: jest.fn((value) => value),
     photoToBase64: jest.fn(),
@@ -74,11 +74,7 @@ test('sends the explicit form-action contract and exposes returned fields to App
     overall_rating: 4,
   };
   const response = `I filled in what we know.\n\n\`\`\`wine_suggestions\n${JSON.stringify(suggestions)}\n\`\`\``;
-  aiService.sendMessageStream.mockImplementation(async (_messages, _prompt, { onDelta }) => {
-    onDelta('I filled in');
-    onDelta('I filled in what we know.');
-    return { response, sources: [] };
-  });
+  aiService.sendChatMessage.mockResolvedValue({ response, sources: [] });
   aiService.parseSuggestions.mockReturnValue(suggestions);
   chatService.addMessage.mockImplementation(async (_id, role, content, _images, aiSuggestions) => ({
     id: role === 'user' ? 'user-1' : 'assistant-1',
@@ -104,12 +100,12 @@ test('sends the explicit form-action contract and exposes returned fields to App
   await act(async () => latestInput().onSend('Fill in this tasting for me'));
   await flush();
 
-  const sentPrompt = aiService.sendMessageStream.mock.calls[0][1];
+  const sentPrompt = aiService.sendChatMessage.mock.calls[0][1];
   expect(sentPrompt).toContain('Winemaker: Honig Vineyard & Winery');
   expect(sentPrompt).toContain('app CAN fill its fields');
   expect(sentPrompt).toContain('do not say that you cannot edit or access the form');
 
-  expect(aiService.sendMessageStream).toHaveBeenCalledTimes(1);
+  expect(aiService.sendChatMessage).toHaveBeenCalledTimes(1);
 
   const assistant = mockBubble.mock.calls.map(([props]) => props).find((props) => props.message.role === 'assistant');
   expect(assistant.message.ai_suggestions).toEqual(suggestions);
