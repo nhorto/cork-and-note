@@ -44,7 +44,7 @@ describe('app.json', () => {
 
   test('declares every native module plugin the code imports', () => {
     const plugins = appJson.plugins.map((p) => (Array.isArray(p) ? p[0] : p));
-    for (const mod of ['expo-router', 'expo-camera', 'expo-image-picker', 'expo-location', 'expo-notifications']) {
+    for (const mod of ['expo-router', 'expo-image-picker', 'expo-location', 'expo-notifications']) {
       expect(plugins).toContain(mod);
     }
   });

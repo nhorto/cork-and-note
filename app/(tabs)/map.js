@@ -22,11 +22,12 @@ import {
   View,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MapView, { Marker, Polygon } from 'react-native-maps';
+import MapView, { Polygon } from 'react-native-maps';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
 import ManualWineryEntryModal from '../../components/ManualWineryEntryModal';
 import MapLayersSheet from '../../components/MapLayersSheet';
 import PinActionModal from '../../components/PinActionModal';
+import StableMarker from '../../components/StableMarker';
 import WineRegionSheet from '../../components/WineRegionSheet';
 import WineryNameModal from '../../components/WineryNameModal';
 import { usePro } from '../../hooks/usePro';
@@ -779,38 +780,15 @@ export default function MapScreen() {
   // bookmark; a dropped pin = purple wine glass; directory = hollow gold
   // ring with an outline glass; permanently closed = grey.
   const pinClosed = (pin) => pin.operatingStatus === 'permanently_closed';
-  const getMarkerColor = (pin) => {
-    if (pinClosed(pin)) return colors.neutral.inkTertiary;
-    if (pin.hasVisit) return colors.status.visited;
-    if (pin.inWishlist) return colors.status.wishlist;
-    return colors.primary.base;
-  };
-
   const renderPinMarker = (pin, labelled) => {
-    if (Platform.OS === 'android') {
-      return (
-        <Marker
-          key={`${pin.id}-${mode}`}
-          coordinate={{
-            latitude: pin.latitude,
-            longitude: pin.longitude
-          }}
-          pinColor={getMarkerColor(pin)}
-          title={pin.name}
-          description="Tap for options"
-          onPress={() => handlePinPress(pin)}
-        />
-      );
-    }
-
     return (
-      <Marker
+      <StableMarker
         key={`${pin.id}-${mode}`}
         coordinate={{
           latitude: pin.latitude,
           longitude: pin.longitude
         }}
-        tracksViewChanges={labelPulse}
+        pulse={labelPulse}
         onPress={() => handlePinPress(pin)}
       >
         <View style={styles.markerContainer}>
@@ -839,27 +817,18 @@ export default function MapScreen() {
             )}
           </View>
         </View>
-      </Marker>
+      </StableMarker>
     );
   };
 
   // Discovery pins (all plans): nearby directory wineries in the accent color,
   // visually apart from visited (sage) and wishlist (slate).
   const renderDiscoverMarker = (w, labelled) =>
-    Platform.OS === 'android' ? (
-      <Marker
-        key={`dir-${w.id}`}
+    (
+      <StableMarker
+        key={`dir-${w.id}-${mode}`}
         coordinate={{ latitude: w.latitude, longitude: w.longitude }}
-        pinColor={colors.accent.base}
-        title={w.name}
-        description="Nearby winery. Tap to view"
-        onPress={() => handleDiscoverPinPress(w)}
-      />
-    ) : (
-      <Marker
-        key={`dir-${w.id}`}
-        coordinate={{ latitude: w.latitude, longitude: w.longitude }}
-        tracksViewChanges={labelPulse}
+        pulse={labelPulse}
         onPress={() => handleDiscoverPinPress(w)}
       >
         <View style={styles.markerContainer}>
@@ -874,7 +843,7 @@ export default function MapScreen() {
             <Ionicons name="wine-outline" size={16} color={colors.accent.strong} />
           </View>
         </View>
-      </Marker>
+      </StableMarker>
     );
 
   const renderClusterMarker = (cluster) => {
@@ -885,14 +854,13 @@ export default function MapScreen() {
     const allDiscover = cluster.properties.discoverCount === count;
     const size = count >= 100 ? 52 : count >= 25 ? 44 : 36;
     return (
-      <Marker
-        key={`cluster-${cluster.properties.cluster_id}`}
+      <StableMarker
+        key={`cluster-${cluster.properties.cluster_id}-${mode}-${count}`}
         coordinate={{ latitude, longitude }}
         anchor={{ x: 0.5, y: 0.5 }}
-        // Android only renders custom marker views reliably while
-        // tracksViewChanges stays on (the Feb 2026 marker bug); clusters are
-        // few enough on screen that the extra redraws don't matter.
-        tracksViewChanges={Platform.OS === 'android'}
+        // Freeze cluster snapshots after layout; continuous Android redraws
+        // otherwise grow native bitmap pressure during map use.
+        pulse={labelPulse}
         onPress={() => handleClusterPress(cluster)}
       >
         <View
@@ -906,7 +874,7 @@ export default function MapScreen() {
             {cluster.properties.point_count_abbreviated}
           </Text>
         </View>
-      </Marker>
+      </StableMarker>
     );
   };
 
@@ -946,11 +914,11 @@ export default function MapScreen() {
             needs tracksViewChanges for custom marker views to paint at all. */}
         {zoom >= WINE_REGION_LABEL_ZOOM &&
           visibleRegions.map((feature) => (
-            <Marker
-              key={`region-label-${feature.id}`}
+            <StableMarker
+              key={`region-label-${feature.id}-${mode}`}
               coordinate={regionCenter(feature)}
               anchor={{ x: 0.5, y: 0.5 }}
-              tracksViewChanges={Platform.OS === 'android'}
+              pulse={labelPulse}
               zIndex={3}
               onPress={() => selectRegion(feature)}
             >
@@ -959,7 +927,7 @@ export default function MapScreen() {
                   {feature.name}
                 </Text>
               </View>
-            </Marker>
+            </StableMarker>
           ))}
 
         {/* User + discovery pins, clustered (#224): overlapping pins collapse
@@ -973,7 +941,7 @@ export default function MapScreen() {
         )}
 
         {tempPin && (
-          <Marker
+          <StableMarker
             coordinate={tempPin}
             pinColor={colors.primary.base}
           />

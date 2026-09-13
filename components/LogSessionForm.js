@@ -6,6 +6,7 @@
 // (the "A" feel) — same underlying data, two experiences.
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { requestPhotoSelectionPermission } from '../lib/photoPermissions';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
@@ -328,7 +329,7 @@ export default function LogSessionForm({
 
   const addVisitPhotosFromLibrary = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } = await requestPhotoSelectionPermission();
       if (status !== 'granted') {
         Alert.alert('Permission needed', 'Photo library access is needed to add photos.');
         return;

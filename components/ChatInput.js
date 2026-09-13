@@ -2,6 +2,7 @@
 // Text input + camera/photo button + send button, keyboard-aware
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { requestPhotoSelectionPermission } from '../lib/photoPermissions';
 import { useState } from 'react';
 import {
   Alert,
@@ -76,7 +77,7 @@ export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhot
 
   const pickPhoto = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } = await requestPhotoSelectionPermission();
       if (status !== 'granted') {
         Alert.alert('Permission Required', 'Photo library permission is needed.');
         return;

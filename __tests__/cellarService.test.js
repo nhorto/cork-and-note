@@ -97,9 +97,11 @@ describe('openBottle', () => {
     const res = await cellarService.openBottle(1, { logTasting: true, rating: 4.5, note: 'silky', tastingDate: '2026-09-11' });
     expect(res.success).toBe(true);
 
+    // The session keeps the producer link, but a bottle opened at home is NOT a
+    // visit to that winery, so place_type stays null (#294).
     const [visit] = supabase.tables.visits;
     expect(visit).toEqual(expect.objectContaining({
-      user_id: USER.id, winery_id: 7, place_type: 'winery', visit_date: '2026-09-11', notes: 'silky',
+      user_id: USER.id, winery_id: 7, place_type: null, visit_date: '2026-09-11', notes: 'silky',
     }));
     const [wine] = supabase.tables.wines;
     expect(wine).toEqual(expect.objectContaining({

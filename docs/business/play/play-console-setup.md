@@ -1,5 +1,7 @@
 # Google Play Console setup — click-by-click
 
+> **Historical setup guide; do not copy its form answers unchanged.** The [September 13 audit](../launch-readiness-2026-09-13.md) verifies Android billing, active subscriptions/trial and internal build 4. The statements below that billing is unavailable, purchase history is not collected and digital purchases should be answered No are obsolete. Review current RevenueCat and Gemini data flows and retention before completing declarations. The listing images and descriptions are still missing; use actual Android captures for production.
+
 **Prepared:** 2026-09-10 · Companion to [`app-store-listing.md`](../app-store-listing.md) (Apple) — this is the Android equivalent, for the first Google Play release.
 
 Assumes: the developer account exists (fee paid, identity/phone/device verified — done). Nothing app-side exists in Play Console yet. Everything below is in submission order; each section says exactly what to click and what to paste.

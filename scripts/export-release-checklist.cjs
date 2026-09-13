@@ -5,7 +5,8 @@ const path = require('node:path');
 const os = require('node:os');
 const MarkdownIt = require('markdown-it');
 const root = path.resolve(__dirname, '..');
-const source = fs.readFileSync(path.join(root, 'docs/business/app-store-readiness-2026-09-10.md'), 'utf8');
+const sourcePath = path.join(root, 'docs/business/launch-readiness-2026-09-13.md');
+const source = fs.readFileSync(sourcePath, 'utf8');
 const md = new MarkdownIt({ html: false, linkify: true });
 const escape = md.utils.escapeHtml;
 const headings = [];
@@ -46,7 +47,7 @@ code{font-size:.88em;padding:2px 5px;border-radius:4px;background:#eee8f1;overfl
 @media(max-width:850px){.layout{display:block;padding:0 18px;margin-top:22px}aside{position:static;margin-bottom:30px}nav{grid-template-columns:1fr 1fr;gap:4px 16px}header img{width:64px;height:64px}header{gap:16px;padding:26px 18px}table{font-size:12px}td,th{padding:8px}h2{font-size:24px}}
 @media print{header{background:white;color:var(--purple);padding:0 0 20px}header p{color:#555}.layout{display:block;margin:20px 0;padding:0}aside,footer{display:none}body{font-size:11px;background:white}.task{break-inside:avoid;padding:8px}h2{break-after:avoid;font-size:21px}h3{break-after:avoid}table{font-size:10px}a{color:inherit}.task input{appearance:auto}main>h1{display:none}@page{margin:16mm}}
 </style></head><body>
-<header><img alt="Cork &amp; Note" src="data:image/png;base64,${logo}"><div><h1>From here to launch.</h1><p>Cork &amp; Note · iPhone + Google Play · September 10, 2026</p></div></header>
+<header><img alt="Cork &amp; Note" src="data:image/png;base64,${logo}"><div><h1>From here to launch.</h1><p>Cork &amp; Note · iPhone + Google Play · September 13, 2026</p></div></header>
 <div class="layout"><aside><div class="tools"><button id="print">Print / Save PDF</button><button id="reset">Reset my checks</button></div><p class="progress-text" id="count"></p><progress id="progress" value="0" max="1"></progress><p class="save-note" id="save-note">Checks save in this browser when local storage is available. They do not change the project checklist or store accounts.</p><nav aria-label="Document sections">${toc}</nav></aside><main>${body}</main></div><footer>Prepared from the project readiness checklist. Source links open the original Apple, Google and service documentation.</footer>
 <script>
 const boxes=[...document.querySelectorAll('.task input')];const defaults=new Map(boxes.map(b=>[b.id,b.checked]));

@@ -1,9 +1,8 @@
 // Updated WineEntryForm.js with multiple photos support
 // Château Label Design - Elegant & Refined
 import { Ionicons } from '@expo/vector-icons';
-import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import * as MediaLibrary from 'expo-media-library';
+import { requestPhotoSelectionPermission } from '../lib/photoPermissions';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
@@ -185,15 +184,14 @@ export default function WineEntryForm({
   );
   const duplicate = sessionDup || priorDup;
 
-  // Request permissions for camera and media library
+  // Taking a photo does not require reading the device photo library.
   const requestPermissions = async () => {
-    const { status: cameraStatus } = await Camera.requestCameraPermissionsAsync();
-    const { status: mediaStatus } = await MediaLibrary.requestPermissionsAsync();
+    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
     
-    if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
+    if (cameraStatus !== 'granted') {
       Alert.alert(
         'Permissions Required',
-        'Camera and media library permissions are needed to take and save photos.',
+        'Camera permission is needed to take a photo.',
         [{ text: 'OK' }]
       );
       return false;
@@ -228,7 +226,7 @@ export default function WineEntryForm({
   // Pick an image from the media library
   const pickImage = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } = await requestPhotoSelectionPermission();
       
       if (status !== 'granted') {
         Alert.alert(
