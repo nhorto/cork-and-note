@@ -158,5 +158,25 @@
   "layerOffVisuallyVerifiedAfterRun": true,
   "recenterAccepted": false,
   "issue265Closed": false,
-  "assessment": "Five-minute pan exercise completed; memory grew and recenter remained disabled. Not full map stability acceptance."
+  "assessment": "Five-minute pan exercise completed; memory grew and recenter remained disabled. Not full map stability acceptance.",
+  "harnessSmokeAfterLayerToggle": {
+    "serial": "emulator-5556",
+    "requestedSeconds": 15,
+    "status": "completed; manual visual and log review required",
+    "samples": [
+      {
+        "seconds": 4.0,
+        "sameProcess": true,
+        "pssKb": 603641,
+        "rssKb": 748248,
+        "swapPssKb": 9637
+      }
+    ],
+    "panGestures": 2,
+    "physicalDevice": false,
+    "playSigningVerified": false,
+    "visualAcceptanceRequired": true,
+    "elapsedSeconds": 15.1
+  },
+  "harnessFailurePathVerified": true
 }
