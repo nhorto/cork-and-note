@@ -16,7 +16,7 @@ The website now provides `/reset-password`, matching the already allow-listed UR
 
 Live SMTP host, port and sender remain unset. The default service is limited to project team recipients and two emails/hour. Signup auto-confirm remains enabled, as previously chosen; it does not provide password recovery delivery. [Supabase custom SMTP documentation](https://supabase.com/docs/guides/auth/auth-smtp).
 
-The locally authenticated Resend profile has one verified domain, `reply-staging.fabispulse.com`, belonging to a different application's staging environment. It has not been repurposed. An owner-approved Cork & Note sending domain and DNS control are required. The domain need not be `corkandnote.com`.
+The locally authenticated Resend profile has one verified domain, `reply-staging.fabispulse.com`, belonging to a different application's staging environment. It has not been repurposed. The owner confirmed no Cork & Note domain is owned yet and prefers Cloudflare for registration. The available Cloudflare session lacks Registrar access (HTTP 403), and automated dashboard access stopped at a security check. A public registry lookup returned HTTP 404 for `corkandnote.com`, but Cloudflare availability and price are not yet confirmed. No domain was purchased. An owner-approved sending domain and DNS control remain required.
 
 Once the sender is available:
 
