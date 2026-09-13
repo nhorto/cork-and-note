@@ -1,0 +1,97 @@
+{
+  "checkedAt": "2026-09-13T19:15:37.786130+00:00",
+  "android": {
+    "versionCode": 7,
+    "versionName": "1.0.0",
+    "device": "Cork_Launch_QA Android API 36.1 emulator",
+    "installSource": "Exact Android 7 AAB converted to locally signed universal APK",
+    "physicalDevice": false,
+    "playSigningVerified": false,
+    "reviewerLogin": true,
+    "badgeRecognitionDisplayed": true,
+    "mapTilesClustersAndAvaBoundariesRendered": true,
+    "napaDirectorySearchAndDetail": true,
+    "clusterExpansion": true,
+    "testArea": "Napa / Sonoma / North Coast",
+    "plannedStressSeconds": 300,
+    "stressResult": "INCONCLUSIVE: adb input swipe exceeded 20 second deadline",
+    "completedSamples": [
+      {
+        "seconds": 7.5,
+        "pssKb": 325946,
+        "rssKb": 481892,
+        "swapPssKb": 81,
+        "sameProcess": true
+      },
+      {
+        "seconds": 19.1,
+        "pssKb": 332454,
+        "rssKb": 488444,
+        "swapPssKb": 81,
+        "sameProcess": true
+      },
+      {
+        "seconds": 34.2,
+        "pssKb": 337602,
+        "rssKb": 493656,
+        "swapPssKb": 81,
+        "sameProcess": true
+      },
+      {
+        "seconds": 49.2,
+        "pssKb": 357845,
+        "rssKb": 513984,
+        "swapPssKb": 81,
+        "sameProcess": true
+      },
+      {
+        "seconds": 65.7,
+        "pssKb": 354151,
+        "rssKb": 510300,
+        "swapPssKb": 81,
+        "sameProcess": true
+      },
+      {
+        "seconds": 82.7,
+        "pssKb": 369495,
+        "rssKb": 525756,
+        "swapPssKb": 81,
+        "sameProcess": true
+      },
+      {
+        "seconds": 94.2,
+        "pssKb": 393691,
+        "rssKb": 549972,
+        "swapPssKb": 81,
+        "sameProcess": true
+      }
+    ],
+    "sameAppProcessThroughoutSamples": true,
+    "appAnrObserved": false,
+    "launcherAnrObserved": true,
+    "appCrashObserved": false,
+    "recenterAcceptance": "NOT ESTABLISHED; control remained busy during observation",
+    "rootCause": "Not established. Launcher ANR and emulator input timeout do not identify an app root cause.",
+    "issue265": "Remain open; repeat under stable emulator conditions and on a physical Play-installed device.",
+    "finalScreen": "Unsaved Drop a pin dialog after delayed gesture; no pin saved",
+    "testEmulatorStopped": true
+  },
+  "website": {
+    "host": "https://cork-and-note.vercel.app",
+    "http200Routes": [
+      "/",
+      "/privacy",
+      "/terms",
+      "/support",
+      "/delete-account",
+      "/reset-password",
+      "/auth-recovery.js"
+    ],
+    "build": "PASS: 8 files plus assets",
+    "customDomain": "Pending Vercel authentication/project access; no DNS changed this turn"
+  },
+  "storeSubmission": {
+    "appReviewSubmitted": false,
+    "publicRelease": false
+  }
+}

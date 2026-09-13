@@ -1,6 +1,25 @@
-# Owner checklist — things only Nick can do
+# Owner checklist — current handoff and setup history
 
-> **Current release status:** use the [September 10 readiness checklist](app-store-readiness-2026-09-10.md), which includes live App Store Connect, RevenueCat and EAS checks. This document retains earlier setup history; its remaining-work claims below are superseded. Banking details have now been submitted, build 17 is uploaded, and additional submission gaps are recorded in the new checklist.
+**Current handoff — September 13, 2026:** use the [current launch checklist](launch-readiness-2026-09-13.md). The older checklist below is historical and must not be used as a list of unfinished tasks.
+
+Already handled: all seven PRs merged with stack ancestry preserved; production backend updated; iOS **27** selected in the manual-release draft; Android **7** on internal testing; store screenshots uploaded; **corkandnote.com** purchased; custom SMTP and branded password-reset email delivered and verified. No need to buy another domain, create another email provider, or repeat those uploads.
+
+The remaining owner/device handoff is:
+
+- Install iOS 27 from TestFlight and Android 7 from Google Play internal testing. Complete the [device acceptance worksheet](device-acceptance-2026-09-13.md), particularly email links, Maps and purchase/restore.
+- Confirm Apple agreement/tax/banking activation and Google payment readiness in the store dashboards. Prior banking submission is recorded; active status still needs confirmation.
+- Check Google's production-access requirements for this account and arrange eligible closed testers if required. Internal testing is already available; the closed-test calendar has not been established.
+- Confirm the actual store privacy/content declarations, subscription availability and territory choices before submission.
+- Confirm someone monitors **cork_and_note@yahoo.com**, the support address already published in the app and website. The new automated sender is not a support inbox.
+- Vercel access is needed to attach the new root domain to the existing website; the current Vercel website and reset page remain live.
+
+Do not share passwords or API keys in chat. The Cloudflare token previously shared should be revoked; the configured email sender uses a separate credential.
+
+---
+
+## Historical setup notes (September 8–10)
+
+The unchecked items below describe earlier work and are superseded by the current handoff above.
 
 **Updated:** 2026-09-08 · Companion to [`launch-plan-2026-09.md`](launch-plan-2026-09.md)
 
