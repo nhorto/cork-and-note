@@ -8,6 +8,16 @@ const root = path.resolve(__dirname, '..');
 const sourcePath = path.join(root, 'docs/business/launch-readiness-2026-09-13.md');
 const source = fs.readFileSync(sourcePath, 'utf8');
 const md = new MarkdownIt({ html: false, linkify: true });
+// The exported file lives in Downloads, so repository links need a stable base.
+const renderLink = md.renderer.rules.link_open || ((tokens, index, options, env, self) => self.renderToken(tokens, index, options));
+md.renderer.rules.link_open = (tokens, index, options, env, self) => {
+  const href = tokens[index].attrGet('href');
+  if (href && !/^(?:[a-z][a-z\d+.-]*:|\/|#)/i.test(href)) {
+    const repoPath = path.posix.normalize(path.posix.join('docs/business', href));
+    tokens[index].attrSet('href', `https://github.com/nhorto/cork-and-note/blob/main/${repoPath}`);
+  }
+  return renderLink(tokens, index, options, env, self);
+};
 const escape = md.utils.escapeHtml;
 const headings = [];
 md.renderer.rules.heading_open = (tokens, index) => {
