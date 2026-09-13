@@ -26,7 +26,7 @@ export default function AiSharingSettings({ userId }) {
   return <View style={styles.row}>
     <View style={styles.copy}>
       <Text style={styles.title}>AI sharing</Text>
-      <Text style={styles.description}>Allow messages, scanned or attached photos, and relevant journal details to go to Anthropic for AI suggestions. Pro web searches share queries with its search provider. Turning this off stops new AI requests on this device; it does not remove previously shared data.</Text>
+      <Text style={styles.description}>Allow wine-label, tasting-card, and wine-list scan photos and extraction instructions to go to Google Gemini. Sommelier messages, attached chat photos, and relevant tasting notes and cellar details go to Anthropic for AI suggestions. Pro web searches share queries with its search provider. Turning this off stops new AI requests on this device; it does not remove previously shared data.</Text>
     </View>
     <Switch accessibilityLabel="Allow AI sharing" value={enabled} onValueChange={toggle} disabled={busy || !userId}
       trackColor={{ false: colors.neutral.border, true: colors.primary.base }} thumbColor={colors.onPrimary} />

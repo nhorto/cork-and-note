@@ -60,6 +60,10 @@ export default function TasteScreen() {
 
   const [loaded, setLoaded] = useState(false);
   const [rated, setRated] = useState([]);
+  const [journalAvailable, setJournalAvailable] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [retry, setRetry] = useState(0);
   const [saved, setSaved] = useState(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState(null);
@@ -67,13 +71,23 @@ export default function TasteScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      setLoading(true);
       (async () => {
         const [visitsRes, reportRes] = await Promise.all([
           visitsService.getUserVisits().catch(() => ({ success: false })),
           tasteReportService.loadLatest().catch(() => ({ success: false, report: null })),
         ]);
         if (!active) return;
-        setRated(visitsRes?.success ? collectRatedWines(visitsRes.visits) : []);
+        setJournalAvailable(!!visitsRes?.success);
+        if (visitsRes?.success) setRated(collectRatedWines(visitsRes.visits));
+        setLoadError(
+          !visitsRes?.success
+            ? 'We couldn’t load your journal. Try again to see your current taste profile.'
+            : !reportRes?.success
+              ? 'We couldn’t load your saved taste report. Please try again.'
+              : null
+        );
+        setLoading(false);
         // Keep whatever we already had if the read failed (offline): the last
         // saved report is the whole point of saving it.
         if (reportRes?.success) setSaved(reportRes.report);
@@ -82,15 +96,16 @@ export default function TasteScreen() {
       return () => {
         active = false;
       };
-    }, [])
+    }, [retry])
   );
 
   const aggregates = useMemo(() => buildAggregates(rated), [rated]);
   const tier = reportTier(aggregates.counts);
   const revision = useMemo(() => sourceRevision(rated), [rated]);
-  const stale = !!saved && saved.source_revision !== revision;
+  const stale = !loadError && journalAvailable && !!saved && saved.source_revision !== revision;
 
   const generate = async () => {
+    if (loadError || !journalAvailable || loading) return;
     if (!isPro) {
       presentPaywall('taste_report');
       return;
@@ -126,6 +141,8 @@ export default function TasteScreen() {
         <ActivityIndicator color={colors.primary.ink} />
       </View>
     );
+  } else if (loadError && !saved) {
+    content = null;
   } else if (tier === 'progress' && !saved) {
     content = (
       <ProgressState
@@ -138,7 +155,7 @@ export default function TasteScreen() {
     content = (
       <ReportView
         saved={saved}
-        rated={rated}
+        rated={journalAvailable ? rated : null}
         stale={stale}
         isPro={isPro}
         generating={generating}
@@ -191,6 +208,19 @@ export default function TasteScreen() {
   return (
     <View style={styles.safeArea}>
       <ScreenHeader title="My taste" onBack={goBack} />
+      {loadError ? (
+        <View style={styles.content}>
+          <Text style={styles.error} accessibilityRole="alert">{loadError}</Text>
+          <Button
+            variant="outline"
+            title={loading ? 'Trying again…' : 'Try again'}
+            accessibilityLabel="Retry loading my taste"
+            disabled={loading}
+            onPress={() => setRetry((value) => value + 1)}
+            style={styles.cta}
+          />
+        </View>
+      ) : null}
       {content}
     </View>
   );
@@ -235,8 +265,8 @@ function ProgressState({ counts, onJournal, onLog }) {
 function ReportView({ saved, rated, stale, isPro, generating, error, onRefresh, onRemove, onAsk, onOpenWine }) {
   const { colors, styles } = useScreenTheme();
   const report = saved.report || {};
-  const aggregates = saved.aggregates || buildAggregates(rated);
-  const wineById = useMemo(() => new Map(rated.map((w) => [String(w.id), w])), [rated]);
+  const aggregates = saved.aggregates || buildAggregates(rated || []);
+  const wineById = useMemo(() => rated ? new Map(rated.map((w) => [String(w.id), w])) : undefined, [rated]);
   const count = saved.wine_count ?? aggregates?.counts?.distinctWines ?? 0;
 
   return (
@@ -278,7 +308,7 @@ function ReportView({ saved, rated, stale, isPro, generating, error, onRefresh, 
         accessibilityLabel="Ask about my taste"
       />
 
-      <StatsSections aggregates={aggregates} />
+      {saved.aggregates || rated ? <StatsSections aggregates={aggregates} /> : null}
 
       <TouchableOpacity onPress={onRemove} style={styles.removeLink} accessibilityRole="button" accessibilityLabel="Remove this report">
         <Text style={styles.removeText}>Remove this report</Text>
