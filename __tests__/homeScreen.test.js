@@ -2,7 +2,7 @@
 // restored, it must distinguish "backend down" from "new account", and its
 // tiles must go where they say.
 import { act, create } from 'react-test-renderer';
-import { Text } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native';
 import { cellarService } from '../lib/cellar';
 import { getCellarInsights } from '../lib/cellarInsights';
 import { visitsService } from '../lib/visits';
@@ -236,4 +236,16 @@ test('no nudge when achievements cannot load, and the rest of Home still renders
   const tree = await mount();
   expect(texts(tree).some((t) => t.includes('more wineries to'))).toBe(false);
   expect(texts(tree)).toContain('Octagon');
+});
+
+
+test('Home finishes loading while optional badge refresh is still pending', async () => {
+  ok();
+  refreshAchievements.mockReturnValue(new Promise(() => {}));
+  const tree = await mount();
+  expect(visitsService.getUserVisits).toHaveBeenCalled();
+  expect(refreshAchievements).toHaveBeenCalled();
+  expect(tree.root.findAllByType(ActivityIndicator)).toHaveLength(0);
+  expect(texts(tree).join(' ')).toContain('Octagon');
+  act(() => tree.unmount());
 });

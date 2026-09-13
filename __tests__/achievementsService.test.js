@@ -238,3 +238,28 @@ describe('the feature flag', () => {
     jest.resetModules();
   });
 });
+
+
+describe('source failures', () => {
+  test.each(['visits', 'cellar_bottles'])('%s failure is not an empty successful journey or a cached result', async (table) => {
+    let fail = true;
+    supabase.reset({
+      user: USER,
+      tables: { visits: seededJournal, cellar_bottles: [], user_achievements: [] },
+      responders: {
+        [table]: () => fail ? { data: null, error: { message: 'history unavailable' } } : undefined,
+      },
+    });
+    supabase.emitAuth('SIGNED_IN', { user: USER, access_token: 't' });
+
+    await expect(getAchievements()).resolves.toMatchObject({ success: false, result: null });
+    await expect(refreshAchievements()).resolves.toMatchObject({ success: false, newlyEarned: [] });
+    expect(supabase.tables.user_achievements).toEqual([]);
+
+    fail = false;
+    const recovered = await getAchievements();
+    expect(recovered.success).toBe(true);
+    expect(recovered.facts.tastings).toBe(1);
+    expect((await refreshAchievements()).newlyEarned.length).toBeGreaterThan(0);
+  });
+});

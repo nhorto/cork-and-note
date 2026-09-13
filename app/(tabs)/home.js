@@ -132,11 +132,17 @@ export default function HomeScreen() {
           // milestone. check() already returns the recomputed journey, so this
           // only falls back to a read when it could not run. Best effort: any
           // failure simply leaves the line off.
-          const checked = await check();
-          const badges = checked?.result
-            ? checked
-            : await getAchievements().catch(() => null);
-          if (active) setNextMilestone(describeNextMilestone(badges?.result));
+          // Keep optional badge requests outside the Home loading lifecycle.
+          // A slow ledger write must not hide the journal we already loaded.
+          void (async () => {
+            const checked = await check();
+            const badges = checked?.result
+              ? checked
+              : await getAchievements().catch(() => null);
+            if (active) setNextMilestone(describeNextMilestone(badges?.result));
+          })().catch(() => {
+            if (active) setNextMilestone(null);
+          });
         } catch {
           // ignore — empty states will render
         } finally {

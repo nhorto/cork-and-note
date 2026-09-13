@@ -299,8 +299,22 @@ describe('the cellar', () => {
         },
       ],
     });
-    expect(facts.bottlesOpened).toBe(2);
+    expect(facts.bottlesOpened).toBe(1);
     expect(facts.longestHoldDays).toBeGreaterThanOrEqual(365 * 2);
     expect(facts.openedInWindow).toBe(1);
   });
+});
+
+
+test.each(['in_cellar', 'gifted', 'sold', 'spoiled'])('%s does not earn bottle-opening achievements', (reason) => {
+  const facts = buildFacts({
+    consumptions: [{
+      reason,
+      consumed_date: '2026-09-13',
+      bottle: { purchase_date: '2020-01-01', drink_from: 2025, drink_by: 2027 },
+    }],
+  });
+  expect(facts.bottlesOpened).toBe(0);
+  expect(facts.longestHoldDays).toBe(0);
+  expect(facts.openedInWindow).toBe(0);
 });
