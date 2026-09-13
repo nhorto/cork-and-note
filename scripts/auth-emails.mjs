@@ -138,11 +138,11 @@ export const templates = {
     html: shell({
       preheader: 'Choose a new password for your Cork & Note account.',
       heading: 'Reset your password',
-      body: 'Tap the button below on your iPhone and Cork &amp; Note will open so you can choose a new password. The link is good for one hour and can only be used once.',
+      body: 'Tap the button below on the iPhone or Android phone where Cork &amp; Note is installed to choose a new password. The link is good for one hour and can only be used once.',
       cta: 'Choose a new password',
       url: LINK,
       footnote:
-        'Open this email on the iPhone where Cork &amp; Note is installed — the link hands the reset straight to the app. If you did not ask to reset your password you can ignore this email; your password stays as it is.',
+        'Open this email on the iPhone or Android phone where Cork &amp; Note is installed. The link opens the password reset screen in the app. If you did not ask to reset your password you can ignore this email; your password stays as it is.',
     }),
   },
   confirmation: {

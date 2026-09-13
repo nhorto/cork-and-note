@@ -920,6 +920,20 @@ footer{background:var(--midnight);color:var(--gold-muted);font-size:14px}
 }
 `;
 
+const resetPassword = page({
+  title: 'Reset your password',
+  description: 'Open your Cork & Note password reset on your iPhone or Android phone.',
+  extraHead: '<meta name="referrer" content="no-referrer"><meta name="robots" content="noindex"><script src="/auth-recovery.js" defer></script>',
+  main: `<div class="wrap"><article class="prose">
+    <h1>Reset your password</h1>
+    <p id="reset-message">Open your password-reset email on the iPhone or Android phone where Cork &amp; Note is installed.</p>
+    <p><a class="badge" style="white-space:normal;text-align:center;text-decoration:none" id="open-reset" href="corkandnote://forgot-password">Request a new reset link in the app</a></p>
+    <p>If the app does not open, launch Cork &amp; Note and choose <strong>Forgot password?</strong> on the sign-in screen.</p>
+    <p>Need help? <a href="/support">Contact support</a>. Never share your reset link or password.</p>
+    <noscript><p>To finish a reset, open the original reset email directly on your phone.</p></noscript>
+  </article></div>`,
+});
+
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 cpSync(join(ROOT, 'site', 'assets'), join(OUT, 'assets'), { recursive: true });
@@ -934,6 +948,8 @@ const files = {
   'support.html': support,
   'delete-account.html': deleteAccount,
   'styles.css': css,
+  'reset-password.html': resetPassword,
+  'auth-recovery.js': readFileSync(join(ROOT, 'site', 'auth-recovery.js'), 'utf8'),
 };
 
 for (const [name, contents] of Object.entries(files)) {
