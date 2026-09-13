@@ -96,6 +96,8 @@ export default function TasteScreen() {
       return () => {
         active = false;
       };
+    // The retry button intentionally reruns the load while this screen stays focused.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [retry])
   );
 
