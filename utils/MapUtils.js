@@ -17,7 +17,7 @@ export const CLUSTER_RADIUS_LABELLED = 60;
 export const LABEL_ZOOM_USER = 11.5;
 export const LABEL_ZOOM_DISCOVER = 13.5;
 // Above the index's maxZoom supercluster hands back raw points, so pins that
-// share a coordinate (six tasting rooms in one building) would stack exactly.
+// share a building (or nearby geocoder centroids) need a final display pass.
 export const SPREAD_ZOOM = 16;
 
 /**
@@ -95,6 +95,17 @@ const projector = (zoom, screenWidth = 400) => {
   });
 };
 
+const inverseProjector = (zoom, screenWidth = 400) => {
+  const ptsPerDeg = (screenWidth * Math.pow(2, zoom)) / 360;
+  return ({ x, y }) => {
+    const mercatorDegrees = y / ptsPerDeg;
+    return [
+      x / ptsPerDeg,
+      (Math.atan(Math.exp((mercatorDegrees * Math.PI) / 180)) * 360) / Math.PI - 90,
+    ];
+  };
+};
+
 /**
  * Which leaf features get a name label at this zoom (#276): a greedy pass
  * that skips any pin whose label footprint would sit on a label already
@@ -129,44 +140,94 @@ export function placeLabels(
 }
 
 /**
- * Fan out leaf features that share a coordinate so each one gets its own
- * tappable marker (#276). Only past SPREAD_ZOOM, where supercluster no longer
- * groups them. Pins are laid on a sunflower spiral (golden angle, radius
- * growing with the square root of the index) so six or twenty-six neighbours
- * pack evenly around the true spot without stacking. Clusters and singletons
- * pass through untouched, and features keep their properties object, so
- * marker keys stay stable.
+ * Fan out leaf features whose 32 pt markers would overlap so each one gets its
+ * own tappable target (#276). Only past SPREAD_ZOOM, where supercluster no
+ * longer groups them. Comparing in projected screen space matters for places
+ * such as Woodinville's Warehouse District: its tasting rooms have different
+ * (but building-centroid-close) coordinates, not one byte-identical point.
+ *
+ * Colliding pins take the nearest free point on a sunflower spiral around
+ * their real location. Isolated pins and clusters pass through untouched, and
+ * moved features keep their properties object, so marker keys stay stable.
  */
-export function spreadStackedFeatures(features, zoom, { screenWidth = 400 } = {}) {
+export function spreadStackedFeatures(
+  features,
+  zoom,
+  { screenWidth = 400, minSpacing = 34 } = {}
+) {
   if (zoom < SPREAD_ZOOM) return features;
-  const groups = new Map();
-  for (const f of features) {
-    if (f.properties.cluster) continue;
-    const [lng, lat] = f.geometry.coordinates;
-    const key = `${lat.toFixed(5)},${lng.toFixed(5)}`;
-    const group = groups.get(key);
-    if (group) group.push(f);
-    else groups.set(key, [f]);
+  const project = projector(zoom, screenWidth);
+  const unproject = inverseProjector(zoom, screenWidth);
+  const leaves = features
+    .filter((f) => !f.properties.cluster)
+    .map((feature) => ({ feature, point: project(feature.geometry.coordinates) }));
+  if (leaves.length < 2) return features;
+
+  // Spatial hashes keep the overlap checks linear for a large viewport.
+  const bucketKey = ({ x, y }) => `${Math.floor(x / minSpacing)},${Math.floor(y / minSpacing)}`;
+  const nearby = (grid, point) => {
+    const cellX = Math.floor(point.x / minSpacing);
+    const cellY = Math.floor(point.y / minSpacing);
+    const out = [];
+    for (let x = cellX - 1; x <= cellX + 1; x += 1) {
+      for (let y = cellY - 1; y <= cellY + 1; y += 1) {
+        out.push(...(grid.get(`${x},${y}`) ?? []));
+      }
+    }
+    return out;
+  };
+  const withinMarker = (a, b) => Math.hypot(a.x - b.x, a.y - b.y) < minSpacing;
+  const originalGrid = new Map();
+  const colliding = new Set();
+  for (const entry of leaves) {
+    for (const other of nearby(originalGrid, entry.point)) {
+      if (withinMarker(entry.point, other.point)) {
+        colliding.add(entry.feature);
+        colliding.add(other.feature);
+      }
+    }
+    const key = bucketKey(entry.point);
+    const bucket = originalGrid.get(key);
+    if (bucket) bucket.push(entry);
+    else originalGrid.set(key, [entry]);
   }
-  const stacked = new Map();
-  // ~34 pt between neighbours (a marker is 32 pt), expressed in degrees.
-  const stepDeg = (34 * 360) / (screenWidth * Math.pow(2, zoom));
+  if (!colliding.size) return features;
+
+  const occupied = new Map();
+  const occupy = (point) => {
+    const key = bucketKey(point);
+    const bucket = occupied.get(key);
+    if (bucket) bucket.push(point);
+    else occupied.set(key, [point]);
+  };
+  // Reserve every truthful singleton first. A nearby fan must move around it,
+  // never push an otherwise readable winery away from its real location.
+  leaves.filter(({ feature }) => !colliding.has(feature)).forEach(({ point }) => occupy(point));
+
+  const moved = new Map();
   const GOLDEN = Math.PI * (3 - Math.sqrt(5));
-  for (const group of groups.values()) {
-    if (group.length < 2) continue;
-    const [lng, lat] = group[0].geometry.coordinates;
-    const latScale = Math.max(0.2, Math.cos((lat * Math.PI) / 180));
-    group.forEach((f, i) => {
-      const r = stepDeg * Math.sqrt(i + 1);
-      const angle = i * GOLDEN;
-      stacked.set(f, {
-        ...f,
-        geometry: {
-          ...f.geometry,
-          coordinates: [lng + (r * Math.cos(angle)) / latScale, lat + r * Math.sin(angle)],
-        },
+  const ordered = leaves
+    .filter(({ feature }) => colliding.has(feature))
+    .sort((a, b) => featureKey(a.feature).localeCompare(featureKey(b.feature)));
+  for (const { feature, point: origin } of ordered) {
+    let point = origin;
+    let attempt = 0;
+    while (nearby(occupied, point).some((other) => withinMarker(point, other))) {
+      attempt += 1;
+      const radius = minSpacing * Math.sqrt(attempt);
+      const angle = (attempt - 1) * GOLDEN;
+      point = {
+        x: origin.x + radius * Math.cos(angle),
+        y: origin.y + radius * Math.sin(angle),
+      };
+    }
+    occupy(point);
+    if (point !== origin) {
+      moved.set(feature, {
+        ...feature,
+        geometry: { ...feature.geometry, coordinates: unproject(point) },
       });
-    });
+    }
   }
-  return stacked.size ? features.map((f) => stacked.get(f) ?? f) : features;
+  return moved.size ? features.map((f) => moved.get(f) ?? f) : features;
 }

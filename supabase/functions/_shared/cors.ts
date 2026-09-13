@@ -19,7 +19,7 @@ const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
 export function corsHeaders(req: Request): Record<string, string> {
   const headers: Record<string, string> = {
     "Access-Control-Allow-Headers":
-      "authorization, x-client-info, apikey, content-type",
+      "authorization, x-client-info, apikey, content-type, accept",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     // Responses differ by Origin, so caches must not share them.
     Vary: "Origin",

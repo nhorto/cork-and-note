@@ -144,14 +144,17 @@ export default AutocompleteVarietal;
 
 
 const useScreenTheme = createThemedStyles((theme) => {
-const { colors, typography, spacing, shadows, borderRadius } = theme;
+const { colors, typography, spacing, borderRadius } = theme;
 
 const SERIF = typography.fonts.serif;
 
 const styles = StyleSheet.create({
   container: {
-    position: 'relative',
-    zIndex: 1000,
+    // Suggestions are intentionally in normal layout flow. The old absolute
+    // dropdown painted over the helper copy and the next row; on Android its
+    // transparent-looking overlay also lost touches to those underlying fields.
+    // Expanding the form makes every row readable and tappable on both platforms.
+    alignSelf: 'stretch',
   },
   inputContainer: {
     position: 'relative',
@@ -194,18 +197,12 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -10 }],
   },
   suggestionsContainer: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
     backgroundColor: colors.neutral.bg,
     borderWidth: 1,
     borderTopWidth: 0,
     borderColor: colors.primary.base,
     borderBottomLeftRadius: borderRadius.md,
     borderBottomRightRadius: borderRadius.md,
-    ...shadows.medium,
-    zIndex: 1001,
     maxHeight: 200,
   },
   suggestionsList: {

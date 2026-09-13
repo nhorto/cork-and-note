@@ -11,7 +11,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { createThemedStyles } from '../styles/ThemeProvider';
 
 
-export default function AskSommelierBox({ onAsk, onOpen }) {
+export default function AskSommelierBox({ onAsk, onOpen, onOpenWineList, showActions = false }) {
   const { colors, styles } = useScreenTheme();
 
   const [text, setText] = useState('');
@@ -56,7 +56,35 @@ export default function AskSommelierBox({ onAsk, onOpen }) {
           />
         </TouchableOpacity>
       </View>
-      <Text style={styles.hint}>Pairings, plain-words wine questions, or what to open from your cellar.</Text>
+      <Text style={styles.hint}>
+        Tell it what you like, ask about a pairing, or get help choosing a bottle.
+      </Text>
+      {showActions && (
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.primaryAction}
+            onPress={onOpenWineList}
+            accessibilityRole="button"
+            accessibilityLabel="Photograph a restaurant wine list"
+          >
+            <Ionicons name="camera-outline" size={18} color={colors.onPrimary} />
+            <View style={styles.actionCopy}>
+              <Text style={styles.primaryActionTitle}>Photograph a wine list</Text>
+              <Text style={styles.primaryActionSubtitle}>Get personal picks for dinner</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={colors.onPrimary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.secondaryAction}
+            onPress={onOpen}
+            accessibilityRole="button"
+            accessibilityLabel="Start a new sommelier chat"
+          >
+            <Ionicons name="chatbubble-outline" size={17} color={colors.primary.ink} />
+            <Text style={styles.secondaryActionText}>Start a new chat</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -90,6 +118,43 @@ const styles = StyleSheet.create({
   },
   send: { padding: spacing.xs },
   hint: { ...typography.body.caption, color: colors.neutral.inkTertiary, marginTop: spacing.xs },
+  actions: { gap: spacing.sm, marginTop: spacing.md },
+  primaryAction: {
+    minHeight: 58,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primary.base,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  actionCopy: { flex: 1 },
+  primaryActionTitle: {
+    ...typography.body.regular,
+    color: colors.onPrimary,
+    fontWeight: '700',
+  },
+  primaryActionSubtitle: {
+    ...typography.body.small,
+    color: colors.onPrimary,
+    opacity: 0.82,
+  },
+  secondaryAction: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.primary.base,
+    borderRadius: borderRadius.lg,
+  },
+  secondaryActionText: {
+    ...typography.body.regular,
+    color: colors.primary.ink,
+    fontWeight: '700',
+  },
 });
 return { colors, styles };
 });

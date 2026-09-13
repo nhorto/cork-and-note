@@ -210,6 +210,8 @@ export default function HomeScreen() {
             router.push({ pathname: '/(tabs)/sommelier', params: { ask: question } })
           }
           onOpen={() => router.push('/(tabs)/sommelier')}
+          onOpenWineList={() => router.push('/sommelier/wine-list')}
+          showActions
         />
 
         {/* Ready-to-Drink strip — first-class drink-window surface (R4 / #54).

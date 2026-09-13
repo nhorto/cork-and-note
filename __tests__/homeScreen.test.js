@@ -27,9 +27,17 @@ jest.mock('../hooks/usePro', () => ({ usePro: () => ({ isPro: false, presentPayw
 jest.mock('../components/LogFab', () => () => null);
 jest.mock('../components/NearYouRow', () => () => null);
 jest.mock('../components/UpgradePill', () => () => null);
-jest.mock('../components/AskSommelierBox', () => (props) => {
-  const { TextInput } = require('react-native');
-  return require('react').createElement(TextInput, { accessibilityLabel: 'Ask your sommelier a question', onSubmitEditing: () => props.onAsk?.('What pairs with lamb?'), onChangeText: () => {} });
+jest.mock('../components/AskSommelierBox', () => {
+  function MockAskSommelierBox(props) {
+    const React = require('react');
+    const { TextInput, TouchableOpacity } = require('react-native');
+    return React.createElement(React.Fragment, null,
+      React.createElement(TextInput, { accessibilityLabel: 'Ask your sommelier a question', onSubmitEditing: () => props.onAsk?.('What pairs with lamb?'), onChangeText: () => {} }),
+      React.createElement(TouchableOpacity, { accessibilityLabel: 'Start a new sommelier chat', onPress: props.onOpen }),
+      React.createElement(TouchableOpacity, { accessibilityLabel: 'Photograph a restaurant wine list', onPress: props.onOpenWineList }),
+    );
+  }
+  return MockAskSommelierBox;
 });
 jest.mock('../lib/visits', () => ({
   visitsService: {
@@ -151,4 +159,13 @@ test('a question typed into the ask box opens the sommelier with it', async () =
   const tree = await mount();
   await act(async () => tree.root.findByProps({ accessibilityLabel: 'Ask your sommelier a question' }).props.onSubmitEditing());
   expect(mockRouter.push).toHaveBeenLastCalledWith({ pathname: '/(tabs)/sommelier', params: { ask: 'What pairs with lamb?' } });
+});
+
+test('the beginner actions open a blank chat or the restaurant wine-list guide', async () => {
+  ok();
+  const tree = await mount();
+  await act(async () => tree.root.findByProps({ accessibilityLabel: 'Start a new sommelier chat' }).props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/(tabs)/sommelier');
+  await act(async () => tree.root.findByProps({ accessibilityLabel: 'Photograph a restaurant wine list' }).props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/sommelier/wine-list');
 });

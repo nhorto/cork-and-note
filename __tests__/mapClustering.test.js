@@ -145,12 +145,39 @@ describe('spreadStackedFeatures', () => {
     const pts = out.map((f) => {
       const [lng, lat] = f.geometry.coordinates;
       return {
-        x: (lng + 122.9269361) * ptsPerDeg * Math.cos((38.68 * Math.PI) / 180),
-        y: (lat - 38.6773529) * ptsPerDeg,
+        x: (lng + 122.9269361) * ptsPerDeg,
+        y: (
+          Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360))
+          - Math.log(Math.tan(Math.PI / 4 + (38.6773529 * Math.PI) / 360))
+        ) * (180 / Math.PI) * ptsPerDeg,
       };
     });
     pts.forEach((p) => expect(Math.hypot(p.x, p.y)).toBeLessThan(90));
     pts.forEach((p, i) => pts.slice(i + 1).forEach((q) => expect(Math.hypot(p.x - q.x, p.y - q.y)).toBeGreaterThan(30)));
+  });
+
+  it('fans visually overlapping Woodinville building centroids, not just identical coordinates', () => {
+    const woodinville = [
+      leaf(11, 47.769376, -122.150532),
+      leaf(12, 47.7693777, -122.1505309),
+      leaf(13, 47.76940825, -122.15032084),
+      leaf(14, 47.76932373, -122.15013009),
+    ];
+    const out = spreadStackedFeatures(woodinville, SPREAD_ZOOM);
+    const project = ([lng, lat]) => {
+      const scale = (400 * Math.pow(2, SPREAD_ZOOM)) / 360;
+      return {
+        x: lng * scale,
+        y: (Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) * 180 / Math.PI) * scale,
+      };
+    };
+    const points = out.map((f) => project(f.geometry.coordinates));
+    points.forEach((point, i) =>
+      points.slice(i + 1).forEach((other) =>
+        expect(Math.hypot(point.x - other.x, point.y - other.y)).toBeGreaterThanOrEqual(33.99)
+      )
+    );
+    out.forEach((feature, i) => expect(feature.properties).toBe(woodinville[i].properties));
   });
 
   it('does not move singletons or clusters', () => {

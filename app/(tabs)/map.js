@@ -780,14 +780,11 @@ export default function MapScreen() {
   // bookmark; a dropped pin = purple wine glass; directory = hollow gold
   // ring with an outline glass; permanently closed = grey.
   const pinClosed = (pin) => pin.operatingStatus === 'permanently_closed';
-  const renderPinMarker = (pin, labelled) => {
+  const renderPinMarker = (pin, labelled, displayCoordinate) => {
     return (
       <StableMarker
         key={`${pin.id}-${mode}`}
-        coordinate={{
-          latitude: pin.latitude,
-          longitude: pin.longitude
-        }}
+        coordinate={displayCoordinate}
         pulse={labelPulse}
         onPress={() => handlePinPress(pin)}
       >
@@ -821,13 +818,13 @@ export default function MapScreen() {
     );
   };
 
-  // Discovery pins (all plans): nearby directory wineries in the accent color,
-  // visually apart from visited (sage) and wishlist (slate).
-  const renderDiscoverMarker = (w, labelled) =>
+  // Directory pins use purple with an outline glass, distinct from visited
+  // and wishlist pins. Both platforms retain bounded bitmap tracking.
+  const renderDiscoverMarker = (w, labelled, displayCoordinate) =>
     (
       <StableMarker
         key={`dir-${w.id}-${mode}`}
-        coordinate={{ latitude: w.latitude, longitude: w.longitude }}
+        coordinate={displayCoordinate}
         pulse={labelPulse}
         onPress={() => handleDiscoverPinPress(w)}
       >
@@ -840,7 +837,7 @@ export default function MapScreen() {
             </View>
           )}
           <View style={[styles.wineryMarker, styles.discoverMarker]}>
-            <Ionicons name="wine-outline" size={16} color={colors.accent.strong} />
+            <Ionicons name="wine-outline" size={16} color={colors.onPrimary} />
           </View>
         </View>
       </StableMarker>
@@ -932,13 +929,14 @@ export default function MapScreen() {
 
         {/* User + discovery pins, clustered (#224): overlapping pins collapse
             into count bubbles until you zoom in; tap a bubble to expand. */}
-        {renderedFeatures.map((f) =>
-          f.properties.cluster
-            ? renderClusterMarker(f)
-            : f.properties.kind === 'discover'
-              ? renderDiscoverMarker(f.properties.pin, labelledKeys.has(featureKey(f)))
-              : renderPinMarker(f.properties.pin, labelledKeys.has(featureKey(f)))
-        )}
+        {renderedFeatures.map((f) => {
+          if (f.properties.cluster) return renderClusterMarker(f);
+          const [longitude, latitude] = f.geometry.coordinates;
+          const displayCoordinate = { latitude, longitude };
+          return f.properties.kind === 'discover'
+            ? renderDiscoverMarker(f.properties.pin, labelledKeys.has(featureKey(f)), displayCoordinate)
+            : renderPinMarker(f.properties.pin, labelledKeys.has(featureKey(f)), displayCoordinate);
+        })}
 
         {tempPin && (
           <StableMarker
@@ -1795,11 +1793,11 @@ const styles = StyleSheet.create({
   filterDot: { width: 8, height: 8, borderRadius: 4 },
   layersChip: { marginLeft: 'auto', paddingHorizontal: spacing.sm, width: 34, justifyContent: 'center' },
   zoomHint: { alignSelf: 'center', overflow: 'hidden', ...shadows.soft },
-  // Hollow ring: a place from the directory, not (yet) one of yours (#274).
+  // The outlined glass differentiates a directory place from a user's saved
+  // pin while keeping the purple singleton treatment requested in testing.
   discoverMarker: {
-    backgroundColor: withAlpha(colors.neutral.bg, 0.85),
-    borderColor: colors.accent.base,
-    borderWidth: 2.5,
+    backgroundColor: colors.primary.base,
+    borderColor: colors.neutral.bg,
   },
   // Cluster count bubbles (#224); width/height/radius are set inline since
   // they scale with the count.
