@@ -1,0 +1,131 @@
+{
+  "checkedAt": "2026-09-13T15:58:14.720840+00:00",
+  "releaseCodeCommit": "60d5a51",
+  "mergedPullRequest": 301,
+  "apple": {
+    "version": "1.0",
+    "state": "PREPARE_FOR_SUBMISSION",
+    "releaseType": "MANUAL",
+    "build": "25",
+    "processingState": "VALID"
+  },
+  "iosArtifact": {
+    "CFBundleIdentifier": "com.nicholashorton.corkandnote",
+    "CFBundleShortVersionString": "1.0.0",
+    "CFBundleVersion": "25",
+    "DTXcode": "2660",
+    "DTSDKName": "iphoneos26.5",
+    "MinimumOSVersion": "15.1",
+    "UIDeviceFamily": [
+      1
+    ],
+    "NSMicrophoneUsageDescription": null,
+    "NSCameraUsageDescription": "Cork & Note uses the camera to take photos of wines and wineries.",
+    "NSPhotoLibraryUsageDescription": "Cork & Note accesses your photo library to save and select wine photos.",
+    "privacyManifests": 15
+  },
+  "google": {
+    "tracks": {
+      "kind": "androidpublisher#tracksListResponse",
+      "tracks": [
+        {
+          "track": "production"
+        },
+        {
+          "track": "beta"
+        },
+        {
+          "track": "alpha"
+        },
+        {
+          "track": "internal",
+          "releases": [
+            {
+              "name": "1.0.0 (6) \u2014 launch testing",
+              "versionCodes": [
+                "6"
+              ],
+              "releaseNotes": [
+                {
+                  "language": "en-US",
+                  "text": "Launch testing build: Android marker rendering, accurate winery matching, cellar-origin corrections, current Gemini scans and AI consent, and Android 16 KB native compatibility. Please test sign-in, photos, scans, maps, purchases, restore and account deletion."
+                }
+              ],
+              "status": "completed"
+            }
+          ]
+        }
+      ]
+    },
+    "screenshots": [
+      {
+        "file": "01-journal.png",
+        "width": 1080,
+        "height": 1920,
+        "sha256": "6d2a361d4eca4732241b6f1526cda8f64856aa963d0e6016e8f2a8594b355e7e"
+      },
+      {
+        "file": "02-cellar.png",
+        "width": 1080,
+        "height": 1920,
+        "sha256": "91bbf6c65566c1ab23a66daa94b36dd5f9e65e434cd74068c3f93f5f52c63aad"
+      },
+      {
+        "file": "03-sommelier.png",
+        "width": 1080,
+        "height": 1920,
+        "sha256": "538cfd4c2bdf19f0c1efcd3469ffa6ffe75ca1407357623e6235debfc0c3bc70"
+      },
+      {
+        "file": "04-taste.png",
+        "width": 1080,
+        "height": 1920,
+        "sha256": "ad0ea370f80ebae9e34807c52a97e4697c65f5f54b625025c6a1af025990b595"
+      }
+    ],
+    "screenshotReadbackExactOrderedMatch": true
+  },
+  "android": {
+    "versionCode": 6,
+    "targetSdk": 36,
+    "billingLibrary": "8.3.0",
+    "nativeElf16Kb": "32/32 64-bit libraries pass",
+    "microphonePermission": false,
+    "broadMediaReadPermissions": false,
+    "releaseDerivedApkSmoke": {
+      "coldStart": "pass",
+      "underageBlock": "pass",
+      "mapRenders": "pass",
+      "systemPhotoPickerWithoutBroadPermissionPrompt": "pass",
+      "signingLimitation": "Local install signature; not Google Play app-signing certificate"
+    }
+  },
+  "checks": {
+    "jestTests": 1026,
+    "jestSuites": 74,
+    "denoTests": 82,
+    "lintErrors": 0,
+    "existingLintWarnings": 44,
+    "liveMigrationCount": 37,
+    "liveParity": "pass",
+    "liveRlsAndDeletion": "pass; disposable accounts removed"
+  },
+  "limits": [
+    "No physical-device acceptance",
+    "No real purchase/restore",
+    "No production SMTP delivery",
+    "No policy or financial-account sign-off",
+    "No closed-test rollout",
+    "No public release"
+  ],
+  "artifacts": {
+    "Cork-and-Note-iOS-25.ipa": {
+      "bytes": 30790164,
+      "sha256": "af73b981230583cd305a9a7bba7f692482c4221ed3f4980dc6b866dcb14d4d04"
+    },
+    "Cork-and-Note-Android-6.aab": {
+      "bytes": 52953281,
+      "sha256": "ec66ebe20fa9fd38671d686ee0bae06c2974fc5a79c01105aefe65bf16d21c58"
+    }
+  }
+}

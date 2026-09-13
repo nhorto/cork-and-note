@@ -1458,7 +1458,9 @@
         ctx.rotate(g.rotation);
         const x = -g.w / 2,
           y = -g.h / 2,
-          r = d.frame === "none" ? 0 : g.w * 0.148;
+          // Android captures place status icons closer to the screen corners.
+          // Keep those visible instead of applying the deeper iPhone rounding.
+          r = d.frame === "none" ? 0 : g.w * (format().family === "android" ? 0.065 : 0.148);
         const shadowScale = Math.hypot(
           ctx.getTransform().a,
           ctx.getTransform().b,
