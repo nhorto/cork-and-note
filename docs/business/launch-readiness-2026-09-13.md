@@ -21,8 +21,8 @@
 
 | Item | Current state | Remaining action |
 |---|---|---|
-| Apple marketing images | Six processed images exactly match the final iPhone mockups, in order. Already uploaded; no duplicate upload needed. | Final visual acceptance with the candidate. |
-| Android marketing images | Four new 1080 × 1920 RGB images captured from Android, composed in the studio, uploaded and read back with exact ordered SHA-256 matches. | Review against the redesigned candidate UI. |
+| Apple marketing images | Six processed images match the uploaded iPhone mockups. Visual review now identifies the Home slide as predating the merged prompt shortcuts and section order. | Refresh Home from current iOS source and review the chat slide before final acceptance. |
+| Android marketing images | Four 1080 × 1920 RGB images uploaded and read back with exact ordered SHA-256 matches. Sommelier slide refreshed from the actual Android 7 release-derived APK to show the new shortcuts and four guided tools. | Remaining slides retain their earlier captures; final candidate visual acceptance remains. |
 | Apple candidate | **1.0.0 build 27**, uploaded to TestFlight and processed **VALID**. Selected for the version 1.0 draft, still `PREPARE_FOR_SUBMISSION` with **MANUAL** release. | Test on iPhone and complete purchase/restore acceptance before review. |
 | Google candidate | **1.0.0 versionCode 7**, signed AAB uploaded and committed to **internal** testing; readback shows release `completed`. | Test the Play-installed candidate, including Maps signing and billing. |
 | Store descriptions | Apple description and Google short/full descriptions saved and verified. Google support contacts, icon and feature graphic are saved. | Finish Console policy/account forms. |
