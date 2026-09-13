@@ -1,5 +1,8 @@
 # Cork & Note — App Store Launch & Business Plan
 
+> **Historical planning/audit document.** For current build, email and launch status, use the [September 13 launch checklist](launch-readiness-2026-09-13.md) and [device acceptance worksheet](device-acceptance-2026-09-13.md). Unchecked tasks below may already be complete.
+
+
 > **Current release status:** use the [September 10 readiness checklist](app-store-readiness-2026-09-10.md). Its live account/code audit supersedes the historical build numbers and remaining-work claims in this business plan; pricing and product decisions below remain useful context.
 
 **Prepared:** 2026-09-03
