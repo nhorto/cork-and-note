@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-09-13T18:55:01.483492+00:00",
+  "smtp": {
+    "project": "ixecayqpogkiawempzgc",
+    "domain": "auth.corkandnote.com",
+    "domainVerified": true,
+    "smtp_host": "smtp.resend.com",
+    "smtp_port": "465",
+    "smtp_user": "resend",
+    "smtp_admin_email": "noreply@auth.corkandnote.com",
+    "smtp_sender_name": "Cork & Note",
+    "rate_limit_email_sent": 30,
+    "signupAutoConfirmUnchanged": true,
+    "redirectsUnchanged": true,
+    "checkedAt": "2026-09-13T18:53:07.297Z"
+  },
+  "templateReadback": {
+    "project": "ixecayqpogkiawempzgc",
+    "templates": {
+      "recovery": {
+        "verified": true,
+        "subject": "Reset your Cork & Note password"
+      },
+      "confirmation": {
+        "verified": true,
+        "subject": "Confirm your Cork & Note email"
+      },
+      "email_change": {
+        "verified": true,
+        "subject": "Confirm your new Cork & Note email"
+      }
+    },
+    "smtpSender": "noreply@auth.corkandnote.com",
+    "smtpHost": "smtp.resend.com",
+    "emailLimit": 30,
+    "signupAutoConfirm": true
+  },
+  "dns": [
+    {
+      "name": "resend._domainkey.auth.corkandnote.com",
+      "type": "TXT",
+      "state": "created"
+    },
+    {
+      "name": "send.auth.corkandnote.com",
+      "type": "MX",
+      "state": "created"
+    },
+    {
+      "name": "send.auth.corkandnote.com",
+      "type": "TXT",
+      "state": "created"
+    },
+    {
+      "name": "rsend.auth.corkandnote.com",
+      "type": "CNAME",
+      "state": "created"
+    }
+  ],
+  "dmarc": "v=DMARC1; p=none;",
+  "test": {
+    "project": "ixecayqpogkiawempzgc",
+    "emailSent": true,
+    "osLinkDispatchTested": false,
+    "emailId": "8d403ce6-4eaa-4927-80b0-6b02467469b7",
+    "providerDelivery": "delivered",
+    "inboxPlacementVerified": false,
+    "brandedTemplateVerified": true,
+    "mobileRecoverySession": true,
+    "oldPasswordRejected": true,
+    "newPasswordAccepted": true,
+    "consumedLinkRejected": true,
+    "cleanupVerified": true
+  },
+  "limitations": [
+    "No inbox/spam placement inspection",
+    "No physical-device email link acceptance",
+    "Outbound auth email only; support inbox and new-domain website not configured"
+  ]
+}

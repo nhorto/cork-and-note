@@ -2,7 +2,7 @@
 
 **Updated September 13, 2026, after fresh candidates and password-recovery verification.** Current mobile release code is merged main **`c9d3e78`**, integrating all seven PRs through [#303](https://github.com/nhorto/cork-and-note/pull/303). [#304](https://github.com/nhorto/cork-and-note/pull/304) adds email preparation and a live website reset page; it does not change mobile app source.
 
-**Assessment:** **iOS 27** is valid in TestFlight and selected in the manual-release draft; **Android 7** is committed to internal testing. They replace the earlier 25/6 candidates and include the merged redesign/badge/failure-state fixes. Password-recovery protocol tests pass, but actual email delivery remains blocked on an approved sending domain/provider. Physical-device/purchase acceptance, store account/declaration checks and Android production access remain. No App Review submission or public release has been made.
+**Assessment:** **iOS 27** is valid in TestFlight and selected in the manual-release draft; **Android 7** is committed to internal testing. They replace the earlier 25/6 candidates and include the merged redesign/badge/failure-state fixes. Authentication SMTP and branded templates are live; Gmail delivery and the actual emailed recovery link pass. Physical-device email-link acceptance remains. Physical-device/purchase acceptance, store account/declaration checks and Android production access remain. No App Review submission or public release has been made.
 
 ## PR integration and current candidates
 
@@ -64,14 +64,12 @@ The emulator APK was derived from the exact version 6 AAB but locally signed for
 - [ ] **Engineering/testers: complete the same journey on both store-installed candidates.** Fresh signup/login/reset; age gate; log/edit tasting and photo; relaunch; label/card/list scans; cellar add/open; journal search; winery discovery/directions; AI consent decline/revoke; Free limits and Pro tools; AI reporting; deletion. Exercise denied permissions, offline/recovery, Android back/keyboard, small screens and dark mode. Record device, OS, build and result.
 - [ ] **Engineering + store testers: verify real subscription behavior.** Monthly, annual, eligible trial and returning-customer pricing; purchase cancellation; restore after reinstall; account switching; expiry/refund and loss of Pro. Confirm each RevenueCat event updates the correct Supabase entitlement and permits a real server-backed Pro request. Configured products and webhook TEST pings are insufficient.
 
-## Authentication email: the shared operational blocker
+## Authentication email: live, with device acceptance remaining
 
-- [x] **Recovery protocol verified live with a disposable account.** Correct mobile redirect/session, replacement password accepted, old password rejected, consumed link refused, untrusted redirect rejected, and account/profile cleanup verified. This sends no email and does not certify OS link dispatch.
-- [x] **Reset website fallback and templates prepared.** `https://cork-and-note.vercel.app/reset-password` is live with an explicit app handoff and expired-link guidance; the Android/iPhone recovery template is ready. 1,175 tests / 86 suites and main CI pass. [Setup and remaining sender steps](auth-email-setup.md).
-- [ ] **Publish templates after SMTP is ready.** Supabase rejected the attempted template update with HTTP 400 because the project uses the default sender. No template change was applied. Previews are in `~/Downloads/Cork-and-Note-Auth-Emails/`.
-
-- [ ] **Owner + engineering: configure a verified Cork & Note transactional sender.** Live SMTP host is unset, email hook disabled, default email limit 2/hour and signup auto-confirmation enabled. Auto-confirmation does not solve password recovery. The accessible email-provider account only has an unrelated staging domain; it was not repurposed. The owner has purchased corkandnote.com in their personal Cloudflare account. The dedicated Resend sending domain auth.corkandnote.com is created with tracking disabled; its four DNS verification records are prepared for import. The available Cloudflare login belongs to the other account and browser automation is unavailable. DNS verification and SMTP configuration remain pending.
-- [ ] Install the branded templates, set an appropriate sending limit and deliberately choose whether signup requires email verification. Prove reset delivery to an authorized non-team test mailbox and complete the reset deep link on both candidates. The default Supabase sender is unsuitable for production. [Supabase SMTP documentation](https://supabase.com/docs/guides/auth/auth-smtp)
+- [x] **Dedicated sender configured.** Cloudflare DNS and Resend verification pass for auth.corkandnote.com. Supabase project ixecayqpogkiawempzgc uses Cork & Note <noreply@auth.corkandnote.com>, a restricted SMTP credential, and an initial 30 emails/hour limit. Open/click tracking is disabled; signup auto-confirm remains unchanged.
+- [x] **Three branded templates published and verified.** Recovery, confirmation and email-change bodies/subjects match readback. The live reset website fallback remains available. [Setup and acceptance details](auth-email-setup.md).
+- [x] **Real reset delivery and link verified.** Resend reports delivery to a disposable Gmail alias. The actual email link established the right recovery session, the replacement password worked, the old password failed, and the consumed link was refused. Account/profile cleanup passed. Earlier protocol testing also verified rejection of untrusted redirects. [Live email evidence](../audits/2026-09-13-auth-email-live.json).
+- [ ] **Physical-device email acceptance.** Inspect inbox/spam placement and complete a fresh reset on both iOS 27 and Android 7, including cold-start link dispatch. Provider delivery and protocol checks do not establish this.
 
 ## Store account, policy and review handoff
 
@@ -97,9 +95,9 @@ There is no verified Android launch date until account requirements and actual t
 
 ## Next actions in order
 
-1. Obtain a verified transactional sender and confirm store financial/account actions; organize Android closed testers.
+1. Confirm store financial/account actions and organize Android closed testers; inspect reset-email inbox placement.
 2. Review screenshots against the new UI and finish physical-device, failure-state, badge, dense-map and real billing acceptance on iOS 27 / Android 7. Rebuild only if further mobile code changes are required.
 3. Complete both stores' declarations/reviewer access and submit iPhone when its gates pass; finish Android testing/access independently.
 4. Release, verify public installs and turn on working website/download links.
 
-**Evidence and limits:** initial store observations are preserved in `docs/audits/2026-09-13-store-evidence.json`; final sanitized candidate/store evidence is in `docs/audits/2026-09-13-launch-implementation.json`. Inspection edits were deleted; committed Google listing changes follow Google's normal review flow. No public app release, real purchase, fresh email delivery, physical-device certification, financial-account sign-off or final policy declaration was performed. Credentials and demo sessions remain outside committed documents.
+**Evidence and limits:** initial store observations are preserved in `docs/audits/2026-09-13-store-evidence.json`; final sanitized candidate/store evidence is in `docs/audits/2026-09-13-launch-implementation.json`. Inspection edits were deleted; committed Google listing changes follow Google's normal review flow. No public app release, real purchase, physical-device certification, financial-account sign-off or final policy declaration was performed. Credentials and demo sessions remain outside committed documents.

@@ -2,9 +2,8 @@
 // templates in the Royal Velvet palette.
 //
 // Supabase's stock emails are unstyled black-on-white with a bare link, which is
-// the first thing a new user sees from us. The template BODY costs nothing on any
-// plan — only the SENDER address ("noreply@mail.app.supabase.io") needs custom
-// SMTP, which is tracked separately as a launch blocker.
+// the first thing a new user sees from us. This project uses custom SMTP;
+// Supabase rejected template customization while its default sender was active.
 //
 // Colours mirror the Royal Velvet light palette in styles/theme.js. The markup is
 // deliberately table-based with inline styles: Outlook and Gmail strip <style>
