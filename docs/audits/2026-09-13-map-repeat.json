@@ -1,0 +1,162 @@
+{
+  "durationSeconds": 300.1,
+  "samples": [
+    {
+      "seconds": 4.2,
+      "pssKb": 408812,
+      "rssKb": 562592,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 19.0,
+      "pssKb": 400813,
+      "rssKb": 554660,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 34.1,
+      "pssKb": 422547,
+      "rssKb": 576452,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 49.1,
+      "pssKb": 408823,
+      "rssKb": 562772,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 64.1,
+      "pssKb": 432773,
+      "rssKb": 586840,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 79.0,
+      "pssKb": 418747,
+      "rssKb": 572904,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 94.0,
+      "pssKb": 422627,
+      "rssKb": 577104,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 109.0,
+      "pssKb": 432748,
+      "rssKb": 587220,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 124.1,
+      "pssKb": 436321,
+      "rssKb": 590880,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 139.0,
+      "pssKb": 481718,
+      "rssKb": 636296,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 154.0,
+      "pssKb": 470081,
+      "rssKb": 624524,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 169.1,
+      "pssKb": 487128,
+      "rssKb": 641660,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 184.0,
+      "pssKb": 486712,
+      "rssKb": 641296,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 199.1,
+      "pssKb": 507867,
+      "rssKb": 662084,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 214.1,
+      "pssKb": 504731,
+      "rssKb": 658972,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 229.3,
+      "pssKb": 511276,
+      "rssKb": 665560,
+      "swapPssKb": 85,
+      "sameProcess": true
+    },
+    {
+      "seconds": 244.1,
+      "pssKb": 522651,
+      "rssKb": 674548,
+      "swapPssKb": 2453,
+      "sameProcess": true
+    },
+    {
+      "seconds": 259.3,
+      "pssKb": 545959,
+      "rssKb": 697860,
+      "swapPssKb": 2417,
+      "sameProcess": true
+    },
+    {
+      "seconds": 274.0,
+      "pssKb": 534750,
+      "rssKb": 686688,
+      "swapPssKb": 2417,
+      "sameProcess": true
+    },
+    {
+      "seconds": 289.0,
+      "pssKb": 534777,
+      "rssKb": 686708,
+      "swapPssKb": 2417,
+      "sameProcess": true
+    }
+  ],
+  "panGestures": 40,
+  "layerToggleAttempts": 0,
+  "physicalDevice": false,
+  "playSigningVerified": false,
+  "candidate": "Android 7, c9d3e78; release-derived APK with local QA signing",
+  "emulator": {
+    "name": "Cork_Launch_QA",
+    "api": "36.1",
+    "cores": 4,
+    "ramMb": 3072
+  },
+  "recordedCrashOrAnr": false,
+  "crashBufferEmpty": true,
+  "layerOffVisuallyVerifiedAfterRun": true,
+  "recenterAccepted": false,
+  "issue265Closed": false,
+  "assessment": "Five-minute pan exercise completed; memory grew and recenter remained disabled. Not full map stability acceptance."
+}
