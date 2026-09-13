@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-09-13T20:44:48.689Z",
+  "orderedSha256": [
+    "6d2a361d4eca4732241b6f1526cda8f64856aa963d0e6016e8f2a8594b355e7e",
+    "91bbf6c65566c1ab23a66daa94b36dd5f9e65e434cd74068c3f93f5f52c63aad",
+    "6e5bf9119fba7191d22560f23c61ae619a540664da03819c629685d338baf302",
+    "ad0ea370f80ebae9e34807c52a97e4697c65f5f54b625025c6a1af025990b595"
+  ],
+  "tracksUnchanged": true,
+  "committed": true,
+  "postCommitReadback": {
+    "phoneCount": 4,
+    "exactOrderedMatch": true,
+    "internalVersionCode": "7",
+    "otherTracksEmpty": true
+  },
+  "source": {
+    "sommelier": "Android 7 release-derived APK, locally signed, c9d3e78",
+    "otherSlides": "Earlier development-client captures, 60d5a51"
+  },
+  "appleReview": {
+    "homeRefreshNeeded": true,
+    "chatReviewNeeded": true,
+    "appleImagesChanged": false
+  }
+}
