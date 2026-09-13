@@ -28,13 +28,18 @@ jest.mock('../components/LogFab', () => () => null);
 jest.mock('../components/NearYouRow', () => () => null);
 jest.mock('../components/UpgradePill', () => () => null);
 jest.mock('../components/AskSommelierBox', () => {
+  // Mirrors the real box's contract: the input submits via onAsk, the idle
+  // send button opens the tab via onOpen, and each chip is a button that
+  // either routes (onPress) or half-writes the question (prefill).
   function MockAskSommelierBox(props) {
     const React = require('react');
     const { TextInput, TouchableOpacity } = require('react-native');
     return React.createElement(React.Fragment, null,
       React.createElement(TextInput, { accessibilityLabel: 'Ask your sommelier a question', onSubmitEditing: () => props.onAsk?.('What pairs with lamb?'), onChangeText: () => {} }),
-      React.createElement(TouchableOpacity, { accessibilityLabel: 'Start a new sommelier chat', onPress: props.onOpen }),
-      React.createElement(TouchableOpacity, { accessibilityLabel: 'Photograph a restaurant wine list', onPress: props.onOpenWineList }),
+      React.createElement(TouchableOpacity, { accessibilityLabel: 'Open the sommelier', onPress: props.onOpen }),
+      ...(props.chips || []).map((chip) =>
+        React.createElement(TouchableOpacity, { key: chip.label, accessibilityLabel: chip.accessibilityLabel || chip.label, prefill: chip.prefill, onPress: chip.onPress })
+      ),
     );
   }
   return MockAskSommelierBox;
@@ -161,11 +166,22 @@ test('a question typed into the ask box opens the sommelier with it', async () =
   expect(mockRouter.push).toHaveBeenLastCalledWith({ pathname: '/(tabs)/sommelier', params: { ask: 'What pairs with lamb?' } });
 });
 
-test('the beginner actions open a blank chat or the restaurant wine-list guide', async () => {
+test('the sommelier card opens the tab, routes its tool chips, and half-writes the pairing question', async () => {
   ok();
   const tree = await mount();
-  await act(async () => tree.root.findByProps({ accessibilityLabel: 'Start a new sommelier chat' }).props.onPress());
+  await act(async () => tree.root.findByProps({ accessibilityLabel: 'Open the sommelier' }).props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/(tabs)/sommelier');
+  // The section header's "Open" (the first one on the page; the Cellar card has its own).
+  const openSomm = tree.root.findAll((n) => n.props.onPress && n.findAllByType(Text).some((t) => [].concat(t.props.children).join('') === 'Open'))[0];
+  await act(async () => openSomm.props.onPress());
   expect(mockRouter.push).toHaveBeenLastCalledWith('/(tabs)/sommelier');
   await act(async () => tree.root.findByProps({ accessibilityLabel: 'Photograph a restaurant wine list' }).props.onPress());
   expect(mockRouter.push).toHaveBeenLastCalledWith('/sommelier/wine-list');
+  await act(async () => tree.root.findByProps({ accessibilityLabel: "Tonight's pick from your cellar" }).props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/sommelier/tonight');
+  const pair = tree.root.findByProps({ accessibilityLabel: 'Pair a dish' });
+  expect(pair.props.prefill).toBe('What wine pairs with ');
+  expect(pair.props.onPress).toBeUndefined();
+  // No standalone "start a new chat" button: the input is the new chat.
+  expect(tree.root.findAllByProps({ accessibilityLabel: 'Start a new sommelier chat' })).toHaveLength(0);
 });
