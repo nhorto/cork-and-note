@@ -312,7 +312,7 @@ const PRO_WINS = [
 const FAQ = [
   [
     'When can I get it?',
-    'Cork & Note is in the final stretch of App Store preparation and launches on iPhone soon. This page will link straight to the App Store the day it’s live.',
+    'Cork & Note is in the final stretch of App Store preparation and launches on iPhone and Android soon. This page will link straight to the App Store the day it’s live.',
   ],
   [
     'Will my journal get locked behind Pro?',
@@ -339,7 +339,7 @@ const FAQ = [
 const home = page({
   title: 'Cork & Note: remember what you tasted, discover what you like',
   description:
-    'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere. No expertise needed. Coming soon to the App Store.',
+    'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere. No expertise needed. Coming soon to the App Store and Google Play.',
   active: '/',
   dark: true,
   extraHead: `<script type="application/ld+json">${JSON.stringify({
@@ -496,7 +496,7 @@ const home = page({
     <div class="wins">
       ${PRO_WINS.map(([h, p]) => `<div class="win"><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join('\n      ')}
     </div>
-    <p class="fineprint">Pro arrives with the App Store launch. Annual is six months’ price. Billed through Apple, cancel any time. Prices in USD. Unlimited features are subject to fair-use limits no wine journaler will ever meet.</p>
+    <p class="fineprint">Pro arrives with launch. Annual is six months’ price. Billed through Apple or Google Play, depending on where you subscribe. Cancel in your store settings. Prices in USD. Pro features are subject to the fair-use limits in our Terms of Use.</p>
   </div>
 </section>
 
