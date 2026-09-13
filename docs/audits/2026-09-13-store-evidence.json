@@ -1,0 +1,112 @@
+{
+  "checked_at": "2026-09-13T12:37:13.361Z",
+  "commit": "78d535a0b80f9a4891ddcec371db568afa3cdf9f",
+  "apple": {
+    "version": {
+      "platform": "IOS",
+      "versionString": "1.0",
+      "appStoreState": "PREPARE_FOR_SUBMISSION",
+      "appVersionState": "PREPARE_FOR_SUBMISSION",
+      "copyright": "2026 Nicholas Horton",
+      "reviewType": "APP_STORE",
+      "releaseType": "MANUAL",
+      "earliestReleaseDate": null,
+      "usesIdfa": null,
+      "downloadable": true,
+      "createdDate": "2026-06-15T14:35:31-07:00"
+    },
+    "selected_build": "21",
+    "latest_build": "22",
+    "review_fields_present": {
+      "contactFirstName": true,
+      "contactLastName": true,
+      "contactPhone": true,
+      "contactEmail": true,
+      "demoAccountName": true,
+      "demoAccountPassword": true,
+      "demoAccountRequired": true,
+      "notes": true
+    },
+    "screenshots": [
+      {
+        "filename": "cork-note-iphone69-01-1320x2868.png",
+        "state": "COMPLETE",
+        "store_source_md5": "456dd024179b55f7f5de46bba5135e1e",
+        "local_md5": "456dd024179b55f7f5de46bba5135e1e",
+        "matches": true
+      },
+      {
+        "filename": "cork-note-iphone69-02-1320x2868.png",
+        "state": "COMPLETE",
+        "store_source_md5": "20e05aba16b4b98271b8c7f272eb9a63",
+        "local_md5": "20e05aba16b4b98271b8c7f272eb9a63",
+        "matches": true
+      },
+      {
+        "filename": "cork-note-iphone69-03-1320x2868.png",
+        "state": "COMPLETE",
+        "store_source_md5": "751d76d161e253eb5c531e1dcab710f2",
+        "local_md5": "751d76d161e253eb5c531e1dcab710f2",
+        "matches": true
+      },
+      {
+        "filename": "cork-note-iphone69-04-1320x2868.png",
+        "state": "COMPLETE",
+        "store_source_md5": "c43cffbc33d4fd393981e7dcd367d9c6",
+        "local_md5": "c43cffbc33d4fd393981e7dcd367d9c6",
+        "matches": true
+      },
+      {
+        "filename": "cork-note-iphone69-05-1320x2868.png",
+        "state": "COMPLETE",
+        "store_source_md5": "d351531b81dd5bbb333f4e0bd184e408",
+        "local_md5": "d351531b81dd5bbb333f4e0bd184e408",
+        "matches": true
+      },
+      {
+        "filename": "cork-note-iphone69-06-1320x2868.png",
+        "state": "COMPLETE",
+        "store_source_md5": "0b9a6087b326a2980511c4cca3c781b4",
+        "local_md5": "0b9a6087b326a2980511c4cca3c781b4",
+        "matches": true
+      }
+    ]
+  },
+  "google": {
+    "tracks": [
+      {
+        "track": "production"
+      },
+      {
+        "track": "beta"
+      },
+      {
+        "track": "alpha"
+      },
+      {
+        "track": "internal",
+        "releases": [
+          {
+            "name": "1.0.0",
+            "versionCodes": [
+              "4"
+            ],
+            "status": "completed"
+          }
+        ]
+      }
+    ],
+    "listing": [
+      {
+        "language": "en-US",
+        "title": "Cork & Note"
+      }
+    ],
+    "images": {
+      "en-US/phoneScreenshots": {},
+      "en-US/icon": {},
+      "en-US/featureGraphic": {}
+    },
+    "inspection_edit_deleted": true
+  }
+}

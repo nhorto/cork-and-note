@@ -1,5 +1,7 @@
 # Cork & Note — App Store and Google Play launch checklist
 
+> **Historical snapshot.** Use the [September 13 launch audit](launch-readiness-2026-09-13.md) for current work. Live checks now confirm the final Apple screenshots, ready subscriptions and manual release; Android billing/internal testing also exist. The unchecked items below are not a current backlog.
+
 **Owner update, September 10:** Apple release is **iPhone-only**; iPad support is being removed from the next native build. Google Play is now included as a separate release track below. The support address is **cork_and_note@yahoo.com** (confirmed by the owner; same mailbox as the Apple developer ID). Signup, login and password recovery need a fresh simulator walkthrough. The Pro and authentication screens should use the current brand mark.
 
 **Audited September 10, 2026.** Source: freshly fetched `origin/main` at `a34eb7b`, read-only App Store Connect / RevenueCat / EAS queries, the public website, and current Apple documentation. This is the current release checklist; the September 3–9 planning documents preserve earlier decisions and history.
