@@ -1,0 +1,120 @@
+{
+  "checkedAt": "2026-09-13T16:25:52.011445+00:00",
+  "integrationPullRequest": 303,
+  "validatedSourceCommit": "545623c83c0539fe2fdbffe207cdf0dd812662e3",
+  "originalHeadsPreserved": {
+    "298": "3bc91d57ce56f24005ff8a011a813198ef49b151",
+    "291": "5d5d88cd033ecc07d8ae23f8b9a9392c5a505329",
+    "289": "103232172397e8dca7085e59b72433e86e8a1de6",
+    "290": "7e0664d783c3407d3a3347112ca4906e517cbe94",
+    "292": "30d9796488891aa916d59abc3350078337a74dd2",
+    "299": "dfb429726dddf69c157a66fcee91bf005f878ffa",
+    "300": "54e3ddfc3122acdabd3a321a3d9b8bf443edd086"
+  },
+  "integrationOrder": [
+    298,
+    291,
+    289,
+    290,
+    292,
+    299,
+    300
+  ],
+  "migrations": {
+    "project": "ixecayqpogkiawempzgc",
+    "appliedAt": "2026-09-13T16:19:59.513Z",
+    "applied": [
+      "20260912030000_message_sources.sql",
+      "20260913010000_user_achievements.sql",
+      "20260913020000_delete_user_data_achievements.sql"
+    ],
+    "versions": [
+      "20260220",
+      "20260221",
+      "20260608000000",
+      "20260608010000",
+      "20260609000000",
+      "20260609010000",
+      "20260609020000",
+      "20260610000000",
+      "20260610010000",
+      "20260619000000",
+      "20260619010000",
+      "20260619020000",
+      "20260620000000",
+      "20260622000000",
+      "20260624000000",
+      "20260705000000",
+      "20260705010000",
+      "20260705020000",
+      "20260907000000",
+      "20260907010000",
+      "20260907020000",
+      "20260907030000",
+      "20260908000000",
+      "20260909000000",
+      "20260909230000",
+      "20260910000000",
+      "20260910120000",
+      "20260910130000",
+      "20260911100000",
+      "20260911110000",
+      "20260911120000",
+      "20260911121000",
+      "20260911200000",
+      "20260912000000",
+      "20260912010000",
+      "20260912020000",
+      "20260912030000",
+      "20260913000000",
+      "20260913010000",
+      "20260913020000"
+    ]
+  },
+  "chat": {
+    "project": "ixecayqpogkiawempzgc",
+    "verifiedAt": "2026-09-13T16:23:41.585Z",
+    "results": [
+      {
+        "mode": "legacy JSON",
+        "http": 200,
+        "hasAnswer": true
+      },
+      {
+        "mode": "stream",
+        "http": 200,
+        "deltaCount": 14,
+        "terminalDone": true
+      }
+    ]
+  },
+  "validation": {
+    "jest": {
+      "suites": 85,
+      "passed": 1168
+    },
+    "deno": {
+      "passed": 84
+    },
+    "lint": {
+      "errors": 0,
+      "warnings": 44
+    },
+    "backendParity": "pass",
+    "rlsDeletion": "pass; both disposable accounts and all rows/storage removed"
+  },
+  "priorStoreBuilds": {
+    "ios": 25,
+    "android": 6,
+    "containIntegration": false
+  },
+  "remaining": [
+    "Fresh store candidates from integrated main",
+    "Physical device and dense-map acceptance",
+    "Actual store purchase and restore tests",
+    "Production authentication email",
+    "Store account and policy signoff",
+    "Android closed-testing and production-access eligibility"
+  ],
+  "clientStreamingEnabled": false
+}

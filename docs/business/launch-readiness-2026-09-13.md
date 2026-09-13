@@ -1,8 +1,21 @@
 # Cork & Note: what remains before launch
 
-**Updated September 13, 2026, after implementation and store verification.** This replaces the old launch HTML and September 10 remaining-work lists. The initial audit baseline was `78d535a`; release code is `60d5a51` (subsequent documentation/assets do not change these binaries). Engineering fixes are merged in [PR #301](https://github.com/nhorto/cork-and-note/pull/301), merge commit `179be90f9d6764d848ccffd19d748a3138604f87`.
+**Updated September 13, 2026, after store verification and PR-stack integration.** This replaces the old launch HTML and September 10 remaining-work lists. The initial audit baseline was `78d535a`; release code is `60d5a51` (subsequent documentation/assets do not change these binaries). Engineering fixes are merged in [PR #301](https://github.com/nhorto/cork-and-note/pull/301), merge commit `179be90f9d6764d848ccffd19d748a3138604f87`.
 
-**Assessment:** store artwork, current test builds, backend deployment and substantial release fixes are complete. Public launch still needs working authentication email, final-device/purchase acceptance, store account/declaration checks and Android production-access evidence. No public release or App Review submission has been made.
+**Assessment:** store artwork, earlier test builds, backend deployment and substantial release fixes are complete. The PR integration below changes app code, so builds 25/6 are now prior candidates and must be replaced before launch. Public launch still needs working authentication email, final-device/purchase acceptance, store account/declaration checks and Android production-access evidence. No public release or App Review submission has been made.
+
+## PR integration follow-up: newer source, new candidates required
+
+[Integration PR #303](https://github.com/nhorto/cork-and-note/pull/303) brings together all seven previously open PRs with their original commits and stack ancestry preserved: **#298 → #291 → #289 → #290 → #292 → #299 → #300**. Child PR bases are explicitly retargeted to main for integration; no original branch is force-pushed or squashed. The already integrated cellar/marker fixes are preserved, and the map conflict resolution retains Android StableMarker snapshots while using the new fan-out coordinates.
+
+- Badge review fixes reject failed journal/cellar reads, exclude gifted/sold/spoiled/sample events from opened-bottle awards, and keep optional badge work from delaying Home.
+- Taste data failures now show retry controls and preserve saved reports without false zero counts or missing-evidence claims. Settings names Google Gemini for scans and Anthropic for chat.
+- All **40 migrations** are applied to **`ixecayqpogkiawempzgc`**. The three new migrations add message sources, the badge ledger and its deletion step. All five functions were deployed from the integration source. Backend parity passes, including new schema probes and full merge-history inspection.
+- Live ordinary chat and the backend streaming endpoint return HTTP 200; streaming produced incremental deltas and a terminal completion. **The client still uses non-streaming chat**, as the reviewed PR intends.
+- The live security/deletion probe includes achievements: no cross-account reads/updates/deletes or self-granted Pro; both disposable accounts and all their rows/storage were removed.
+- Combined local validation: **1,168 Jest tests / 85 suites**, **84 Deno tests**, lint **0 errors / 44 warnings**. Focused map validation also covers Android cluster expansion into separate coordinates and bounded redraw pulses. Final GitHub checks are attached to PR #303.
+
+**Required next step:** produce fresh iOS and Android store candidates from the integrated main commit, then perform the acceptance below on those exact builds. Existing iOS 25 / Android 6 contain the earlier release baseline, not the redesigned Home/Sommelier, badges or these follow-up fixes. Recheck marketing screenshots against the updated UI. No new store binary, public release or App Review submission is implied by merging source. [Integration evidence](../audits/2026-09-13-pr-integration.json).
 
 ## Store screenshots and candidates: verified current state
 
@@ -34,7 +47,7 @@ Candidate archives are preserved in `~/Downloads/Cork-and-Note-Launch-Candidates
 - [x] Built the signed iOS 25 archive locally after cloud quota was exhausted: **Xcode 26.6 / iOS SDK 26.5**, iPhone-only, minimum iOS 15.1, **15 privacy manifests**, no microphone usage declaration. Apple processed the upload successfully.
 - [x] Verification: **1,026 Jest tests across 74 suites**, **82 Deno tests**, lint zero errors/44 existing warnings, Expo dependency check, website build and whitespace checks pass. [PR #301 CI passed](https://github.com/nhorto/cork-and-note/actions/runs/34765569712).
 
-**Candidate exclusions:** Android build 5 failed native compatibility checks and was not uploaded. Canceled local iOS build 24 is not a candidate. Optional map/sommelier redesigns and new badges remain outside this release scope.
+**Earlier candidate exclusions:** Android build 5 failed native compatibility checks and was not uploaded. Canceled local iOS build 24 is not a candidate. Builds 25/6 exclude the map/Sommelier redesigns and badges now integrated through PR #303; fresh candidates are required.
 
 **Backend compatibility:** deployed scans require AI sharing consent version 2. Older installed builds may require an update/re-consent. Test current 25/6 candidates against the current backend.
 
@@ -45,7 +58,7 @@ Observed emulator checks include journal/cellar/sommelier navigation, seeded rev
 The emulator APK was derived from the exact version 6 AAB but locally signed for installation. It does **not** establish Google Play app-signing Maps access or real store purchases. Screenshots came from the development client at the same release-code baseline; they are marketing assets, not proof of release-binary QA. No physical iPhone or Android acceptance was completed in this session.
 
 - [ ] **Engineering/testers: close Android map stability [#265](https://github.com/nhorto/cork-and-note/issues/265).** Run cold map open, sustained dense Napa pan/zoom and clustering, AVA toggle and recenter on the release candidate, both emulator and physical device. Record crashes/ANRs/memory and responsiveness. Marker improvements are integrated; the original stability report remains open until acceptance passes.
-- [ ] **Engineering: resolve/verify failure-state observations.** A transient taste-data request timed out and briefly displayed “0 of 5 rated wines” rather than explaining a load failure; later direct reads and retry succeeded with the existing data intact. Also reconcile the settings AI-provider explanation with the current Gemini scan path (the consent dialog already names both providers). These observations are not claimed fixed in builds 25/6; any code change requires refreshed candidates before public release.
+- [x] **Engineering: fix failure-state observations in source.** Taste reads now show retryable failures and preserve saved reports; settings provider copy matches Gemini scans and Anthropic chat. Regression tests pass. These fixes still require refreshed store candidates and device acceptance.
 - [ ] **Engineering/testers: complete the same journey on both store-installed candidates.** Fresh signup/login/reset; age gate; log/edit tasting and photo; relaunch; label/card/list scans; cellar add/open; journal search; winery discovery/directions; AI consent decline/revoke; Free limits and Pro tools; AI reporting; deletion. Exercise denied permissions, offline/recovery, Android back/keyboard, small screens and dark mode. Record device, OS, build and result.
 - [ ] **Engineering + store testers: verify real subscription behavior.** Monthly, annual, eligible trial and returning-customer pricing; purchase cancellation; restore after reinstall; account switching; expiry/refund and loss of Pro. Confirm each RevenueCat event updates the correct Supabase entitlement and permits a real server-backed Pro request. Configured products and webhook TEST pings are insufficient.
 
@@ -79,7 +92,7 @@ There is no verified Android launch date until account requirements and actual t
 ## Next actions in order
 
 1. Obtain a verified transactional sender and confirm store financial/account actions; organize Android closed testers.
-2. Finish physical-device, failure-state, dense-map and real billing acceptance on the exact candidates. Rebuild if code changes.
+2. Build and upload fresh candidates from integrated main, review screenshots against the new UI, then finish physical-device, failure-state, badge, dense-map and real billing acceptance on those exact candidates.
 3. Complete both stores' declarations/reviewer access and submit iPhone when its gates pass; finish Android testing/access independently.
 4. Release, verify public installs and turn on working website/download links.
 
