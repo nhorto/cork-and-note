@@ -103,6 +103,9 @@ const sentinels = [
   ['20260912000000', "select 1 from information_schema.columns where table_schema='public' and table_name='wineries' and column_name='directory_id' and data_type='bigint'"],
   ['20260912010000', "select 1 from information_schema.columns where table_schema='public' and table_name='winery_directory' and column_name='duplicate_of' and data_type='bigint'"],
   ['20260912020000', "select 1 where (select count(*) from information_schema.columns where table_schema='public' and table_name='winery_directory' and column_name in ('validated_at', 'validation_note')) = 2"],
+  ['20260912030000', "select 1 from information_schema.columns where table_schema='public' and table_name='messages' and column_name='sources' and data_type='jsonb'"],
+  ['20260913010000', "select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname='user_achievements' and c.relrowsecurity and exists (select 1 from pg_indexes where schemaname='public' and indexname='user_achievements_unique') and (select count(*) from pg_policies where schemaname='public' and tablename='user_achievements') = 3"],
+  ['20260913020000', "select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='delete_user_data' and pg_get_functiondef(p.oid) like '%delete from public.user_achievements%'"],
   ['20260913000000', "select 1 where not exists (select 1 from public.visits v join public.wines w on w.visit_id=v.id join public.cellar_consumptions c on c.wine_id=w.id where v.place_type='winery')"],
   ['20260911200000', "select 1 from pg_policies where schemaname='storage' and policyname='visit-photos owner read'"],
 ];
@@ -147,11 +150,14 @@ function sharedImports(name, seen = new Set()) {
 }
 
 function lastSourceChange(name) {
+  // Full history is essential for stacked merges: default path simplification
+  // can hide source changes introduced through a second parent. This remains a
+  // conservative timestamp check, not a deployed bundle-content comparison.
   // The newest commit in this checkout touching this function or a _shared file it
   // imports. Deploys bundle the imports, so a change there ships only with
   // a redeploy of every function that uses it.
   const paths = [`supabase/functions/${name}`, ...sharedImports(name)];
-  const out = execFileSync('git', ['log', '-1', '--format=%ct %h %s', 'HEAD', '--', ...paths], { cwd: ROOT, encoding: 'utf8' }).trim();
+  const out = execFileSync('git', ['log', '--full-history', '--date-order', '-1', '--format=%ct %h %s', 'HEAD', '--', ...paths], { cwd: ROOT, encoding: 'utf8' }).trim();
   if (!out) return null;
   const [ts, hash, ...subject] = out.split(' ');
   return { at: Number(ts) * 1000, hash, subject: subject.join(' ') };

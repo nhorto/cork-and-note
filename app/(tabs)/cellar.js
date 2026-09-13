@@ -24,6 +24,7 @@ import Chip from '../../components/Chip';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
 import TonightsPickCard from '../../components/TonightsPickCard';
 import UpgradePill from '../../components/UpgradePill';
+import { useAchievementCelebration } from '../../hooks/useAchievementCelebration';
 import { cellarService, drinkWindowMeta } from '../../lib/cellar';
 import {
   EMPTY_FILTERS,
@@ -47,6 +48,9 @@ export default function CellarScreen() {
 
   const router = useRouter();
   const params = useLocalSearchParams();
+  // Cellar edits (a quantity change, a delete) can move a badge, so the tab
+  // picks them up on focus and celebrates here (#296).
+  const { check, sheet } = useAchievementCelebration();
   const [bottles, setBottles] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -80,11 +84,13 @@ export default function CellarScreen() {
           setLoadError(true);
         }
         setLoaded(true);
+        // Catch anything a cellar edit earned while the user was elsewhere.
+        check();
       })();
       return () => {
         active = false;
       };
-    }, [reloadKey])
+    }, [reloadKey, check])
   );
 
   const retryLoad = () => {
@@ -342,6 +348,7 @@ export default function CellarScreen() {
         }}
         onClose={() => setFilterOpen(false)}
       />
+      {sheet}
     </View>
   );
 }

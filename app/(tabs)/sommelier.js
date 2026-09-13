@@ -23,7 +23,6 @@ import MeterHint from '../../components/MeterHint';
 import ProUpsellCard from '../../components/ProUpsellCard';
 import ScreenHeader from '../../components/ScreenHeader';
 import SommelierToolCard from '../../components/SommelierToolCard';
-import TonightsPickCard from '../../components/TonightsPickCard';
 import TypingDots from '../../components/TypingDots';
 import UpgradePill from '../../components/UpgradePill';
 import { usePro } from '../../hooks/usePro';
@@ -31,6 +30,22 @@ import { aiService } from '../../lib/ai';
 import { isPaywallError, meterHint } from '../../lib/pro';
 import { chatService } from '../../lib/chat';
 import { createThemedStyles } from '../../styles/ThemeProvider';
+
+// Tapped inside a blank chat, these send as-is.
+const STARTER_QUESTIONS = [
+  'What wine goes with dinner tonight?',
+  'Explain a wine I just tried',
+  'Help me choose a bottle from my cellar',
+];
+
+// The hub's chips half-write the question and focus the input instead of
+// sending, so a free user's metered message carries their actual dish, wine
+// or mood rather than a generic prompt.
+const STARTER_CHIPS = [
+  { icon: 'restaurant-outline', label: 'Pair a dish', prefill: 'What wine pairs with ' },
+  { icon: 'wine-outline', label: 'Explain a wine', prefill: 'Can you tell me about ' },
+  { icon: 'help-circle-outline', label: 'Wine basics', prefill: 'In simple terms, what is ' },
+];
 
 
 // Compact relative date for the recent-chats list.
@@ -102,6 +117,7 @@ export default function SommelierScreen() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [receiving, setReceiving] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(null);
   // True only when the active conversation genuinely has no messages (a new
   // chat, or one whose history loaded empty). Gates the auto-title on first
@@ -166,12 +182,26 @@ export default function SommelierScreen() {
     }
   }, []);
 
+  // Leaving a conversation that never got a message discards it, so tapping
+  // the ask box's idle arrow and backing out does not litter Recent chats with
+  // "New Conversation" rows (seen on the sim 2026-09-12). The delete is not
+  // awaited: the list reload below races it, so the row is filtered locally too.
   const goBackToList = useCallback(() => {
+    const abandoned =
+      loadedEmpty && messages.length === 0 && activeConversation?.id ? activeConversation.id : null;
     setView('list');
     setActiveConversation(null);
     setMessages([]);
+    if (abandoned) {
+      chatService.deleteConversation(abandoned).catch(() => {});
+      setConversations((prev) => prev.filter((c) => c.id !== abandoned));
+      loadConversations().then(() => {
+        setConversations((prev) => prev.filter((c) => c.id !== abandoned));
+      });
+      return;
+    }
     loadConversations();
-  }, []);
+  }, [activeConversation, loadedEmpty, messages.length]);
 
   // Home's "Ask the sommelier" box hands its question over via ?ask=… (the
   // Tonight's Pick card left Home for this — owner feedback 2026-09-09).
@@ -221,6 +251,9 @@ export default function SommelierScreen() {
     if (!gate('chat')) return;
 
     setSending(true);
+    setReceiving(false);
+    const streamMessageId = `stream-${Date.now()}`;
+    let streamStarted = false;
     try {
       // Convert photos to base64 for AI (do this first, before upload)
       let base64Images = [];
@@ -270,8 +303,31 @@ export default function SommelierScreen() {
 
       const aiMessages = [...previousMsgs, currentMsg];
 
-      // Call AI
-      const aiResponse = await aiService.sendMessage(aiMessages, systemPrompt);
+      // The shared chat entry point currently returns a complete response.
+      // Keep the delta handler ready for the deferred backend streaming rollout.
+      const aiResponse = await aiService.sendChatMessage(aiMessages, systemPrompt, {
+        onDelta: (textSoFar) => {
+          setReceiving(true);
+          setMessages((previous) => {
+            const streamingMessage = {
+              id: streamMessageId,
+              role: 'assistant',
+              content: textSoFar,
+              displayText: textSoFar,
+              image_urls: [],
+              created_at: new Date().toISOString(),
+              isStreaming: true,
+            };
+            if (!streamStarted) {
+              streamStarted = true;
+              return [...previous, streamingMessage];
+            }
+            return previous.map((message) =>
+              message.id === streamMessageId ? streamingMessage : message
+            );
+          });
+        },
+      });
       const responseText = aiResponse.response;
 
       // Parse suggestions
@@ -284,15 +340,21 @@ export default function SommelierScreen() {
         'assistant',
         responseText,
         [],
-        suggestions
+        suggestions,
+        aiResponse.sources || []
       );
 
-      // `sources` rides along on the in-memory message only — the messages
-      // table has no column for it, so they show for this reply and are gone on
-      // reload. Worth persisting later; not worth a schema change to ship this.
-      setMessages(prev => [...prev, { ...aiMsg, displayText, sources: aiResponse.sources || [] }]);
+      const savedMessage = { ...aiMsg, displayText, sources: aiResponse.sources || [] };
+      setMessages((previous) =>
+        streamStarted
+          ? previous.map((message) => message.id === streamMessageId ? savedMessage : message)
+          : [...previous, savedMessage]
+      );
     } catch (err) {
       console.error('Send error:', err);
+      if (streamStarted) {
+        setMessages((previous) => previous.filter((message) => message.id !== streamMessageId));
+      }
       // The server refused because the free meter is spent: that is a paywall,
       // not an error, and the user's message is already saved to the
       // conversation, so the answer is one tap away once they upgrade.
@@ -310,6 +372,7 @@ export default function SommelierScreen() {
         created_at: new Date().toISOString(),
       }]);
     } finally {
+      setReceiving(false);
       setSending(false);
     }
   }, [activeConversation, messages, systemPrompt, loadedEmpty, gate, presentPaywall]);
@@ -343,34 +406,51 @@ export default function SommelierScreen() {
             <ActivityIndicator size="large" color={colors.primary.ink} />
           </View>
         ) : (
-          // Single scroll surface (owner direction 2026-09-11): the ask box is
-          // the hero because asking is what most people do here; the three
-          // guided tools sit under it; Tonight's Pick shrinks to a compact row;
-          // then past conversations.
+          // One scroll surface (owner direction 2026-09-11, reshaped
+          // 2026-09-12): a serif prompt and the ask box are the hero, with
+          // half-written starter chips; the four guided tools sit under it as
+          // a 2x2 grid (Tonight's Pick is a tile now, not a competing row);
+          // then the standing Pro entry and past conversations. There is no
+          // separate "Start a new chat" button: the ask box is the new chat.
           <ScrollView
             contentContainerStyle={styles.listScroll}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.askWrap}>
-              <AskSommelierBox onAsk={askFromHub} onOpen={startNewChat} />
-            </View>
+            <Text style={styles.heroTitle}>What can I help you with?</Text>
+            <AskSommelierBox
+              onAsk={askFromHub}
+              onOpen={startNewChat}
+              chips={STARTER_CHIPS}
+              style={styles.askBox}
+            />
 
-            <Text style={styles.sectionLabel}>WHAT WOULD YOU LIKE HELP WITH?</Text>
+            <Text style={styles.sectionLabel}>GUIDED TOOLS</Text>
             <View style={styles.toolGrid}>
               <SommelierToolCard
-                icon="list-outline"
-                title="Choose from a list"
-                subtitle="Picks in your budget"
+                icon="camera-outline"
+                title="Photograph a wine list"
+                subtitle="Personal picks for dinner"
                 pro
+                style={styles.toolTile}
                 onPress={() => router.push('/sommelier/wine-list')}
                 testID="tool-wine-list"
+              />
+              <SommelierToolCard
+                icon="sparkles-outline"
+                title="Tonight's pick"
+                subtitle="A bottle from your cellar"
+                pro
+                style={styles.toolTile}
+                onPress={() => router.push('/sommelier/tonight')}
+                testID="tool-tonight"
               />
               <SommelierToolCard
                 icon="analytics-outline"
                 title="My taste"
                 subtitle="What your journal says"
                 pro
+                style={styles.toolTile}
                 onPress={() => router.push('/sommelier/taste')}
                 testID="tool-taste"
               />
@@ -379,15 +459,9 @@ export default function SommelierScreen() {
                 title="Plan a wine day"
                 subtitle="Stops, times, drives"
                 pro
+                style={styles.toolTile}
                 onPress={() => router.push('/trips/new')}
                 testID="tool-trip"
-              />
-            </View>
-
-            <View style={styles.pickWrap}>
-              <TonightsPickCard
-                compact
-                onRequireCellar={() => router.push('/cellar/add')}
               />
             </View>
 
@@ -398,25 +472,26 @@ export default function SommelierScreen() {
               title="Unlimited sommelier with Pro"
               subtitle={
                 meterHint({ isPro, task: 'chat', remaining: remaining('chat') }) ??
-                'Ask anything, any time — photos included'
+                'Ask anything, any time, photos included'
               }
               source="chat"
               style={styles.upsell}
             />
 
             {conversations.length === 0 ? (
-              <View style={styles.listEmptyState}>
-                <Ionicons
-                  name="chatbubbles-outline"
-                  size={40}
-                  color={colors.neutral.border}
-                />
-                <Text style={styles.listEmptyTitle}>No conversations yet</Text>
-                <Text style={styles.listEmptySubtitle}>
-                  Ask your sommelier anything above. Pairings, plain-words wine
-                  questions, or what to open tonight.
-                </Text>
-              </View>
+              <>
+                <Text style={styles.recentLabel}>RECENT CHATS</Text>
+                <View style={styles.listEmptyState}>
+                  <Ionicons
+                    name="chatbubbles-outline"
+                    size={22}
+                    color={colors.neutral.placeholder}
+                  />
+                  <Text style={styles.listEmptySubtitle}>
+                    Your conversations will show up here.
+                  </Text>
+                </View>
+              </>
             ) : (
               <>
                 <Text style={styles.recentLabel}>RECENT CHATS</Text>
@@ -454,6 +529,15 @@ export default function SommelierScreen() {
             {activeConversation?.title || 'New conversation'}
           </Text>
         </View>
+        <TouchableOpacity
+          onPress={startNewChat}
+          style={styles.chatNewButton}
+          accessibilityRole="button"
+          accessibilityLabel="Start another new chat"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons name="create-outline" size={24} color={colors.primary.ink} />
+        </TouchableOpacity>
       </View>
       <View style={styles.divider} />
 
@@ -474,8 +558,35 @@ export default function SommelierScreen() {
             </View>
             <Text style={styles.emptyChatTitle}>Bonjour!</Text>
             <Text style={styles.emptyChatSubtitle}>
-              I&apos;m your personal wine sommelier. Ask me about wines, grape varieties, food pairings, or snap a photo of a wine label for identification.
+              Ask in your own words. I can use what you have rated and what is in
+              your cellar to make the answer personal.
             </Text>
+            <Text style={styles.starterLabel}>TRY ASKING</Text>
+            <View style={styles.starterList}>
+              {STARTER_QUESTIONS.map((question) => (
+                <TouchableOpacity
+                  key={question}
+                  style={styles.starterButton}
+                  onPress={() => handleSend(question)}
+                  accessibilityRole="button"
+                  accessibilityLabel={question}
+                >
+                  <Text style={styles.starterText}>{question}</Text>
+                  <Ionicons name="arrow-forward" size={16} color={colors.primary.ink} />
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity
+              style={styles.photoTip}
+              onPress={() => router.push('/sommelier/wine-list')}
+              accessibilityRole="button"
+              accessibilityLabel="Photograph a restaurant wine list"
+            >
+              <Ionicons name="camera-outline" size={18} color={colors.accent.ink} />
+              <Text style={styles.photoTipText}>
+                At a restaurant? Photograph the wine list and get picks for your dinner.
+              </Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <FlatList
@@ -501,7 +612,7 @@ export default function SommelierScreen() {
         )}
 
         {/* Typing indicator */}
-        {sending && (
+        {sending && !receiving && (
           <View style={styles.typingContainer}>
             <View style={styles.typingBubble}>
               <TypingDots />
@@ -547,11 +658,16 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
   },
-  askWrap: {
-    // AskSommelierBox carries its own top margin for Home; the header already
-    // spaces this tab, so pull it back up.
-    marginTop: -spacing.lg,
-    marginBottom: spacing.md,
+  heroTitle: {
+    fontFamily: typography.fonts.serif,
+    fontSize: 24,
+    lineHeight: 30,
+    color: colors.neutral.ink,
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm + 4,
+  },
+  askBox: {
+    marginBottom: spacing.lg,
   },
   sectionLabel: {
     ...typography.body.caption,
@@ -560,19 +676,23 @@ const styles = StyleSheet.create({
   },
   toolGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
     marginBottom: spacing.md,
   },
-  pickWrap: {
-    marginBottom: spacing.md,
+  toolTile: {
+    // Two per row: basis just under half so the gap fits, grow to fill.
+    flexBasis: '46%',
+    flexGrow: 1,
+    minHeight: 104,
   },
   upsell: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   recentLabel: {
     ...typography.body.caption,
     color: colors.accent.ink,
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
   convItem: {
@@ -610,21 +730,20 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   listEmptyState: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.xl,
-    paddingHorizontal: spacing.lg,
-  },
-  listEmptyTitle: {
-    ...typography.heading.h3,
-    color: colors.neutral.ink,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-    marginTop: spacing.md,
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.neutral.border,
+    borderRadius: borderRadius.lg,
   },
   listEmptySubtitle: {
-    ...typography.body.regular,
+    ...typography.body.small,
     color: colors.neutral.inkTertiary,
-    textAlign: 'center',
-    marginTop: spacing.sm,
+    flex: 1,
   },
 
   centered: {
@@ -655,6 +774,13 @@ const styles = StyleSheet.create({
     ...typography.heading.h3,
     color: colors.neutral.ink,
     fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  },
+  chatNewButton: {
+    // 44pt touch target, mirrors the back chevron on the left.
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   // Chat area
@@ -694,6 +820,45 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.sm,
     lineHeight: 22,
+  },
+  starterLabel: {
+    ...typography.body.caption,
+    color: colors.accent.ink,
+    alignSelf: 'stretch',
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  starterList: { alignSelf: 'stretch', gap: spacing.sm },
+  starterButton: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    backgroundColor: colors.neutral.surface,
+    borderWidth: 1,
+    borderColor: colors.neutral.border,
+    borderRadius: borderRadius.lg,
+    paddingHorizontal: spacing.md,
+  },
+  starterText: {
+    ...typography.body.small,
+    color: colors.neutral.ink,
+    flex: 1,
+  },
+  photoTip: {
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    alignSelf: 'stretch',
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.sm,
+  },
+  photoTipText: {
+    ...typography.body.small,
+    color: colors.accent.ink,
+    flex: 1,
   },
 
   // Typing indicator

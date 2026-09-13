@@ -20,6 +20,8 @@ import AskSommelierBox from '../../components/AskSommelierBox';
 import LogFab from '../../components/LogFab';
 import NearYouRow from '../../components/NearYouRow';
 import UpgradePill from '../../components/UpgradePill';
+import { useAchievementCelebration } from '../../hooks/useAchievementCelebration';
+import { getAchievements } from '../../lib/achievements';
 import { drinkWindowMeta, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
 import { varietalText } from '../../lib/varietals';
@@ -34,12 +36,18 @@ export default function HomeScreen() {
 
   const router = useRouter();
   const { user } = useContext(AuthContext);
+  // Home is where a logged tasting lands (log-session replaces the route), so
+  // this is where the badges it earned are celebrated (#296).
+  const { check, sheet } = useAchievementCelebration();
 
   const [stats, setStats] = useState({ wines: 0, places: 0, wishlist: 0 });
   const [cellar, setCellar] = useState({ totalBottles: 0, readyToDrink: 0, byStatus: null });
   const [insights, setInsights] = useState(null);
   const [recent, setRecent] = useState([]);
   const [highlights, setHighlights] = useState(null);
+  // "2 more wineries to Winery Explorer · Silver", or null when achievements
+  // are unavailable. One line, never a second card.
+  const [nextMilestone, setNextMilestone] = useState(null);
   const [loaded, setLoaded] = useState(false);
   // True when every critical fetch failed — the account isn't empty, the
   // backend is unreachable. Drives the inline error banner below.
@@ -119,6 +127,22 @@ export default function HomeScreen() {
           // Journey highlights: most-recent place, most-visited winery, total
           // places. Derived from the same visits (#95).
           setHighlights(visitsService.summarizeVisits(visits));
+
+          // Badges: award anything the last save earned, then show the nearest
+          // milestone. check() already returns the recomputed journey, so this
+          // only falls back to a read when it could not run. Best effort: any
+          // failure simply leaves the line off.
+          // Keep optional badge requests outside the Home loading lifecycle.
+          // A slow ledger write must not hide the journal we already loaded.
+          void (async () => {
+            const checked = await check();
+            const badges = checked?.result
+              ? checked
+              : await getAchievements().catch(() => null);
+            if (active) setNextMilestone(describeNextMilestone(badges?.result));
+          })().catch(() => {
+            if (active) setNextMilestone(null);
+          });
         } catch {
           // ignore — empty states will render
         } finally {
@@ -128,7 +152,7 @@ export default function HomeScreen() {
       return () => {
         active = false;
       };
-    }, [reloadKey, user?.id])
+    }, [reloadKey, user?.id, check])
   );
 
   const firstName =
@@ -190,6 +214,8 @@ export default function HomeScreen() {
         <JourneyCard
           stats={stats}
           highlights={highlights}
+          nextMilestone={nextMilestone}
+          onPressMilestone={() => router.push('/profile/achievements')}
           onOpenMap={() => router.push('/(tabs)/map')}
           onPressWines={() => router.push('/wines')}
           onPressPlaces={() => router.push('/places')}
@@ -200,16 +226,45 @@ export default function HomeScreen() {
             Hides itself entirely when location is denied or nothing is near. */}
         <NearYouRow />
 
-        {/* Ask the sommelier — a real input, not a card (owner feedback
-            2026-09-09: Tonight's Pick moved to the Somm tab and the Cellar;
-            Home's job is starting a conversation). Submitting hands the
-            question to the Somm tab via ?ask=…, which opens a fresh chat and
-            sends it. */}
+        {/* Sommelier — one card, one input, quick chips (owner feedback
+            2026-09-12: no separate "Start a new chat" button; the input is the
+            new chat). The placeholder stays the component's open invitation
+            ("Ask anything about wine") rather than a tonight-specific prompt,
+            so Home does not read as a what-to-open-tonight box (owner feedback
+            2026-09-12). Typing hands the question to the Somm tab via ?ask=…,
+            which opens a fresh conversation and sends it. The tool chips go
+            straight to the guided screens; "Pair a dish" half-writes the
+            question so the user finishes it. */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionLabel}>SOMMELIER</Text>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/sommelier')}>
+            <Text style={styles.sectionAction}>Open</Text>
+          </TouchableOpacity>
+        </View>
         <AskSommelierBox
           onAsk={(question) =>
             router.push({ pathname: '/(tabs)/sommelier', params: { ask: question } })
           }
           onOpen={() => router.push('/(tabs)/sommelier')}
+          chips={[
+            {
+              icon: 'camera-outline',
+              label: 'Wine list photo',
+              accessibilityLabel: 'Photograph a restaurant wine list',
+              onPress: () => router.push('/sommelier/wine-list'),
+            },
+            {
+              icon: 'sparkles-outline',
+              label: "Tonight's pick",
+              accessibilityLabel: "Tonight's pick from your cellar",
+              onPress: () => router.push('/sommelier/tonight'),
+            },
+            {
+              icon: 'restaurant-outline',
+              label: 'Pair a dish',
+              prefill: 'What wine pairs with ',
+            },
+          ]}
         />
 
         {/* Ready-to-Drink strip — first-class drink-window surface (R4 / #54).
@@ -300,9 +355,31 @@ export default function HomeScreen() {
       </ScrollView>
 
       <LogFab />
+      {sheet}
     </View>
   );
 }
+
+// The closest thing left to earn: the family furthest along without being
+// finished. Returns null when achievements are unavailable or everything that
+// can be shown is already at its top tier.
+function describeNextMilestone(result) {
+  const families = result?.families;
+  if (!Array.isArray(families)) return null;
+
+  const open = families.filter((f) => f.nextThreshold && f.progress < 1);
+  if (open.length === 0) return null;
+
+  const best = open.reduce((a, b) => (b.progress > a.progress ? b : a));
+  const remaining = best.nextThreshold - best.count;
+  if (remaining <= 0) return null;
+
+  const unit = remaining === 1 ? singular(best.unit) : best.unit;
+  const tier = best.nextTier ? best.nextTier[0].toUpperCase() + best.nextTier.slice(1) : '';
+  return `${remaining} more ${unit} to ${best.name}${tier ? ` · ${tier}` : ''}`;
+}
+
+const singular = (unit) => (unit?.endsWith('ies') ? `${unit.slice(0, -3)}y` : unit?.replace(/s$/, ''));
 
 // Compact relative date for the Journey card's last-visit line.
 function timeAgo(dateString) {
@@ -327,7 +404,10 @@ function timeAgo(dateString) {
 // The passport card: headline journey stats, the most recent visit, a map
 // link, and the three stat links that used to be the stat strip. Empty state
 // keeps the same silhouette with an invitation instead of numbers.
-function JourneyCard({ stats, highlights, onOpenMap, onPressWines, onPressPlaces, onPressWishlist }) {
+function JourneyCard({
+  stats, highlights, nextMilestone, onPressMilestone,
+  onOpenMap, onPressWines, onPressPlaces, onPressWishlist,
+}) {
   const { colors, styles } = useScreenTheme();
 
   const hasJourney = stats.places > 0 || stats.wines > 0;
@@ -346,6 +426,19 @@ function JourneyCard({ stats, highlights, onOpenMap, onPressWines, onPressPlaces
           ? `Last visit: ${lastVisit.name} · ${timeAgo(lastVisit.date)}`
           : 'Every winery you visit goes on your map.'}
       </Text>
+      {nextMilestone ? (
+        <TouchableOpacity
+          style={styles.journeyMapLink}
+          activeOpacity={0.85}
+          onPress={onPressMilestone}
+          accessibilityRole="button"
+          accessibilityLabel="Open your achievements"
+        >
+          <Ionicons name="trophy-outline" size={16} color={colors.journey.accent} />
+          <Text style={styles.journeyMapLinkText}>{`${nextMilestone} ›`}</Text>
+        </TouchableOpacity>
+      ) : null}
+
       <TouchableOpacity
         style={styles.journeyMapLink}
         activeOpacity={0.85}

@@ -124,6 +124,10 @@ try {
   if (taste.error) throw new Error(`taste_reports insert: ${taste.error.message}`);
   own.taste_reports = taste.data.id;
 
+  const badge = await a.from('user_achievements').insert({ badge_key: 'cork_popped', points: 10 }).select().single();
+  if (badge.error) throw new Error(`user_achievements insert: ${badge.error.message}`);
+  own.user_achievements = badge.data.id;
+
   const trip = await a.from('trip_plans').insert({ user_id: A.id, stops: [], settings: {} }).select().single();
   if (trip.error) throw new Error(`trip_plans insert: ${trip.error.message}`);
   own.trip_plans = trip.data.id;
@@ -154,7 +158,7 @@ try {
     cellar_bottles: { wine_name: 'HACKED' }, cellar_consumptions: { note: 'HACKED' },
     conversations: { title: 'HACKED' }, messages: { content: 'HACKED' }, wishlist: { created_at: new Date().toISOString() },
     chat_usage: { task: 'label_scan' }, taste_reports: { source_revision: 'HACKED' }, trip_plans: { settings: { hacked: true } },
-    wine_list_sessions: { title: 'HACKED' }, winery_reports: { details: 'HACKED' },
+    user_achievements: { points: 9999 }, wine_list_sessions: { title: 'HACKED' }, winery_reports: { details: 'HACKED' },
   };
   for (const [table, id] of Object.entries(own)) {
     if (id == null) { record(table, 'setup', false, 'no id captured'); continue; }
@@ -222,6 +226,7 @@ try {
   const residue = await sql(`
     select 'auth.users' as t, count(*) from auth.users where id in (${ids})
     union all select 'public.users', count(*) from public.users where id in (${ids})
+    union all select 'user_achievements', count(*) from public.user_achievements where user_id in (${ids})
     union all select 'visits', count(*) from public.visits where user_id in (${ids})
     union all select 'wines', count(*) from public.wines w join public.visits v on v.id=w.visit_id where v.user_id in (${ids})
     union all select 'cellar_bottles', count(*) from public.cellar_bottles where user_id in (${ids})

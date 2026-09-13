@@ -16,7 +16,10 @@ jest.mock('../hooks/useSafeBack', () => ({ useSafeBack: () => mockBack }));
 jest.mock('../hooks/usePro', () => ({ usePro: jest.fn() }));
 jest.mock('../components/ScreenHeader', () => () => null);
 jest.mock('../components/MeterHint', () => (props) => require('react').createElement(require('react-native').Text, { testID: 'meter-hint' }, props.text));
-jest.mock('../lib/haptics', () => ({ notifySuccess: jest.fn() }));
+jest.mock('../lib/haptics', () => ({ notifySuccess: jest.fn(), tapMedium: jest.fn() }));
+// The screen celebrates badges after a save; the engine has its own tests, so
+// here it is a stub that earns nothing.
+jest.mock('../lib/achievements', () => ({ refreshAchievements: jest.fn(async () => ({ success: true, newlyEarned: [] })) }));
 jest.mock('../lib/cellarEntry', () => ({ getEntrySuggestions: jest.fn(async () => ({ producers: [], wines: [] })) }));
 jest.mock('../lib/cellar', () => ({ cellarService: { getCellar: jest.fn(), addBottle: jest.fn() } }));
 // The scanner exposes its callback; the form exposes its initial values and

@@ -13,7 +13,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 const mockPush = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, back: jest.fn(), setParams: jest.fn() }),
-  useFocusEffect: (callback) => require('react').useEffect(callback, []),
+  useFocusEffect: (callback) => require('react').useEffect(callback, [callback]),
 }));
 jest.mock('../hooks/usePro', () => ({ usePro: jest.fn() }));
 jest.mock('../components/ScreenHeader', () => () => null);
@@ -84,6 +84,48 @@ describe('My taste screen', () => {
 
     act(() => tree.root.findByProps({ accessibilityLabel: 'Log a tasting' }).props.onPress());
     expect(mockPush).toHaveBeenCalledWith('/(tabs)/log');
+  });
+
+  it.each(['failure response', 'rejected request'])('shows a retryable error instead of zero wines after a %s', async (failure) => {
+    usePro.mockReturnValue({ isPro: true, isLoading: false, presentPaywall });
+    if (failure === 'rejected request') visitsService.getUserVisits.mockRejectedValueOnce(new Error('Timeout'));
+    else visitsService.getUserVisits.mockResolvedValueOnce({ success: false });
+    visitsService.getUserVisits.mockResolvedValue({ success: true, visits: journal(6) });
+    const tree = await render();
+
+    expect(hasText(tree, 'We couldn’t load your journal')).toBe(true);
+    expect(hasText(tree, '0 of 5')).toBe(false);
+    expect(hasText(tree, 'Create my report')).toBe(false);
+    expect(tasteReportService.generate).not.toHaveBeenCalled();
+    await act(async () => tree.root.findByProps({ accessibilityLabel: 'Retry loading my taste' }).props.onPress());
+    expect(hasText(tree, 'We couldn’t load')).toBe(false);
+    expect(hasText(tree, 'You have rated 6 distinct wines')).toBe(true);
+  });
+
+  it('does not offer to create a report when the saved-report read fails', async () => {
+    usePro.mockReturnValue({ isPro: true, isLoading: false, presentPaywall });
+    visitsService.getUserVisits.mockResolvedValue({ success: true, visits: journal(6) });
+    tasteReportService.loadLatest.mockResolvedValue({ success: false });
+    const tree = await render();
+    expect(hasText(tree, 'We couldn’t load your saved taste report')).toBe(true);
+    expect(hasText(tree, 'Create my report')).toBe(false);
+  });
+
+  it('keeps a saved report readable without claiming new or deleted tastings when the journal fails', async () => {
+    usePro.mockReturnValue({ isPro: true, isLoading: false, presentPaywall });
+    visitsService.getUserVisits.mockResolvedValue({ success: false });
+    tasteReportService.loadLatest.mockResolvedValue({ success: true, report: {
+      id: 'r1', source_revision: 'saved-revision', wine_count: 5,
+      report: { headline: 'Your saved observations', observations: [
+        { title: 'Grip', body: 'Body.', evidence_wine_ids: ['w0'] },
+      ] },
+    } });
+    const tree = await render();
+    expect(hasText(tree, 'Your saved observations')).toBe(true);
+    expect(hasText(tree, 'We couldn’t load your journal')).toBe(true);
+    expect(hasText(tree, 'New tastings since this report')).toBe(false);
+    expect(tree.root.findAllByProps({ accessibilityLabel: 'Refresh report' })).toHaveLength(0);
+    expect(tree.root.findAllByProps({ accessibilityLabel: 'See the supporting tastings' })).toHaveLength(0);
   });
 
   it('shows the free preview with real numbers and a sample at six wines', async () => {

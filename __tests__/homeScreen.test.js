@@ -2,7 +2,7 @@
 // restored, it must distinguish "backend down" from "new account", and its
 // tiles must go where they say.
 import { act, create } from 'react-test-renderer';
-import { Text } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native';
 import { cellarService } from '../lib/cellar';
 import { getCellarInsights } from '../lib/cellarInsights';
 import { visitsService } from '../lib/visits';
@@ -27,9 +27,22 @@ jest.mock('../hooks/usePro', () => ({ usePro: () => ({ isPro: false, presentPayw
 jest.mock('../components/LogFab', () => () => null);
 jest.mock('../components/NearYouRow', () => () => null);
 jest.mock('../components/UpgradePill', () => () => null);
-jest.mock('../components/AskSommelierBox', () => (props) => {
-  const { TextInput } = require('react-native');
-  return require('react').createElement(TextInput, { accessibilityLabel: 'Ask your sommelier a question', onSubmitEditing: () => props.onAsk?.('What pairs with lamb?'), onChangeText: () => {} });
+jest.mock('../components/AskSommelierBox', () => {
+  // Mirrors the real box's contract: the input submits via onAsk, the idle
+  // send button opens the tab via onOpen, and each chip is a button that
+  // either routes (onPress) or half-writes the question (prefill).
+  function MockAskSommelierBox(props) {
+    const React = require('react');
+    const { TextInput, TouchableOpacity } = require('react-native');
+    return React.createElement(React.Fragment, null,
+      React.createElement(TextInput, { accessibilityLabel: 'Ask your sommelier a question', onSubmitEditing: () => props.onAsk?.('What pairs with lamb?'), onChangeText: () => {} }),
+      React.createElement(TouchableOpacity, { accessibilityLabel: 'Open the sommelier', onPress: props.onOpen }),
+      ...(props.chips || []).map((chip) =>
+        React.createElement(TouchableOpacity, { key: chip.label, accessibilityLabel: chip.accessibilityLabel || chip.label, prefill: chip.prefill, onPress: chip.onPress })
+      ),
+    );
+  }
+  return MockAskSommelierBox;
 });
 jest.mock('../lib/visits', () => ({
   visitsService: {
@@ -41,6 +54,29 @@ jest.mock('../lib/wishlist', () => ({ wishlistService: { getUserWishlist: jest.f
 jest.mock('../lib/cellar', () => ({ ...jest.requireActual('../lib/cellar'), cellarService: { getCellarStats: jest.fn() } }));
 jest.mock('../lib/cellarInsights', () => ({ getCellarInsights: jest.fn() }));
 jest.mock('../lib/supabase', () => ({ supabase: require('../test-utils/fakeSupabase').currentFake() }));
+// Badges are a garnish on this screen: the engine has its own tests, so here it
+// is a fixture. refreshAchievements stands in for "the last save earned
+// nothing", which is the normal case on a focus load.
+jest.mock('../lib/achievements', () => ({
+  getAchievements: jest.fn(),
+  refreshAchievements: jest.fn(),
+}));
+const { getAchievements, refreshAchievements } = require('../lib/achievements');
+
+const journey = (over = {}) => ({
+  success: true,
+  newlyEarned: [],
+  result: {
+    points: 30,
+    level: { level: 1, title: 'Split', points: 0, next: { level: 2, title: 'Half Bottle', points: 50 } },
+    families: [
+      { key: 'winery_explorer', name: 'Winery Explorer', unit: 'wineries', count: 3, tier: 'bronze', nextTier: 'silver', nextThreshold: 5, progress: 0.5 },
+      { key: 'journal_keeper', name: 'Journal Keeper', unit: 'tastings', count: 1, tier: 'bronze', nextTier: 'silver', nextThreshold: 10, progress: 0.1 },
+    ],
+    allGrapes: [], oneOffs: [],
+  },
+  ...over,
+});
 
 const { AuthContext } = require('../app/_layout');
 const texts = (tree) => tree.root.findAllByType(Text).map((n) => [].concat(n.props.children).join(''));
@@ -69,12 +105,16 @@ const ok = () => {
   wishlistService.getUserWishlist.mockResolvedValue({ success: true, wishlist: [{ id: 1 }, { id: 2 }] });
   cellarService.getCellarStats.mockResolvedValue({ success: true, stats: { lots: 2, totalBottles: 5, readyToDrink: 3, byStatus: { too_young: 1, ready: 3, drink_up: 0, past_peak: 0, unknown: 0 } } });
   getCellarInsights.mockResolvedValue({ success: false });
+  refreshAchievements.mockResolvedValue(journey());
+  getAchievements.mockResolvedValue(journey());
 };
 const down = () => {
   visitsService.getUserVisits.mockResolvedValue({ success: false, error: 'offline' });
   wishlistService.getUserWishlist.mockRejectedValue(new Error('offline'));
   cellarService.getCellarStats.mockResolvedValue({ success: false });
   getCellarInsights.mockResolvedValue({ success: false });
+  refreshAchievements.mockRejectedValue(new Error('offline'));
+  getAchievements.mockRejectedValue(new Error('offline'));
 };
 
 beforeEach(() => {
@@ -151,4 +191,61 @@ test('a question typed into the ask box opens the sommelier with it', async () =
   const tree = await mount();
   await act(async () => tree.root.findByProps({ accessibilityLabel: 'Ask your sommelier a question' }).props.onSubmitEditing());
   expect(mockRouter.push).toHaveBeenLastCalledWith({ pathname: '/(tabs)/sommelier', params: { ask: 'What pairs with lamb?' } });
+});
+
+test('the sommelier card opens the tab, routes its tool chips, and half-writes the pairing question', async () => {
+  ok();
+  const tree = await mount();
+  await act(async () => tree.root.findByProps({ accessibilityLabel: 'Open the sommelier' }).props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/(tabs)/sommelier');
+  // The section header's "Open" (the first one on the page; the Cellar card has its own).
+  const openSomm = tree.root.findAll((n) => n.props.onPress && n.findAllByType(Text).some((t) => [].concat(t.props.children).join('') === 'Open'))[0];
+  await act(async () => openSomm.props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/(tabs)/sommelier');
+  await act(async () => tree.root.findByProps({ accessibilityLabel: 'Photograph a restaurant wine list' }).props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/sommelier/wine-list');
+  await act(async () => tree.root.findByProps({ accessibilityLabel: "Tonight's pick from your cellar" }).props.onPress());
+  expect(mockRouter.push).toHaveBeenLastCalledWith('/sommelier/tonight');
+  const pair = tree.root.findByProps({ accessibilityLabel: 'Pair a dish' });
+  expect(pair.props.prefill).toBe('What wine pairs with ');
+  expect(pair.props.onPress).toBeUndefined();
+  // No standalone "start a new chat" button: the input is the new chat.
+  expect(tree.root.findAllByProps({ accessibilityLabel: 'Start a new sommelier chat' })).toHaveLength(0);
+});
+
+test('the Journey card nudges toward the nearest badge', async () => {
+  ok();
+  const tree = await mount();
+  // Winery Explorer is furthest along (3 of 5), so it is the one to name.
+  expect(texts(tree)).toContain('2 more wineries to Winery Explorer · Silver ›');
+});
+
+test('one away reads in the singular', async () => {
+  ok();
+  const nearly = journey();
+  nearly.result.families[0].count = 4;
+  refreshAchievements.mockResolvedValue(nearly);
+  const tree = await mount();
+  expect(texts(tree)).toContain('1 more winery to Winery Explorer · Silver ›');
+});
+
+test('no nudge when achievements cannot load, and the rest of Home still renders', async () => {
+  ok();
+  refreshAchievements.mockRejectedValue(new Error('offline'));
+  getAchievements.mockRejectedValue(new Error('offline'));
+  const tree = await mount();
+  expect(texts(tree).some((t) => t.includes('more wineries to'))).toBe(false);
+  expect(texts(tree)).toContain('Octagon');
+});
+
+
+test('Home finishes loading while optional badge refresh is still pending', async () => {
+  ok();
+  refreshAchievements.mockReturnValue(new Promise(() => {}));
+  const tree = await mount();
+  expect(visitsService.getUserVisits).toHaveBeenCalled();
+  expect(refreshAchievements).toHaveBeenCalled();
+  expect(tree.root.findAllByType(ActivityIndicator)).toHaveLength(0);
+  expect(texts(tree).join(' ')).toContain('Octagon');
+  act(() => tree.unmount());
 });

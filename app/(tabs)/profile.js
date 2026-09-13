@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import AchievementsCard from '../../components/AchievementsCard';
 import ProUpsellCard from '../../components/ProUpsellCard';
 import VisitStatsCard from '../../components/VisitStatsCard';
 import { createThemedStyles } from '../../styles/ThemeProvider';
@@ -121,6 +122,9 @@ export default function ProfileScreen() {
         {/* Visit Stats */}
         <View style={styles.statsContainer}>
           <VisitStatsCard />
+          {/* The Wine Journey: level, points and the last few badges (#296).
+              Hides itself when achievements cannot load. */}
+          <AchievementsCard />
         </View>
 
         {/* Your journal — the IA promise from the June doc, restored (#170 item 1):

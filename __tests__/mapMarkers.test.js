@@ -2,6 +2,7 @@ import { act, create } from 'react-test-renderer';
 import { Platform, Text } from 'react-native';
 import StableMarker from '../components/StableMarker';
 import MapScreen from '../app/(tabs)/map';
+import { wineriesService } from '../lib/wineries';
 
 // The map's pins used to be Google's default teardrops on Android (pinColor
 // snaps to a fixed hue wheel, so the theme colors came out neon). These tests
@@ -26,9 +27,9 @@ jest.mock('../components/PinActionModal', () => () => null);
 jest.mock('../components/WineryNameModal', () => () => null);
 jest.mock('../hooks/usePro', () => ({ usePro: () => ({ isPro: false, presentPaywall: jest.fn() }) }));
 jest.mock('../lib/wineries', () => ({ wineriesService: {
-  getUserWineries: async () => ({ success: true, wineries: [
+  getUserWineries: jest.fn(async () => ({ success: true, wineries: [
     { id: 1, name: 'Paradise Springs', latitude: 38.8, longitude: -77.4, hasVisit: true },
-  ] }),
+  ] })),
   findOrCreateWinery: jest.fn(),
 } }));
 jest.mock('../lib/wineryDirectory', () => ({ wineryDirectoryService: {
@@ -87,5 +88,52 @@ test.each(['ios', 'android'])('%s pins are the themed marker view, never a defau
   expect(pin.props.pinColor).toBeUndefined();
   // The visited badge keeps its sage token on both platforms.
   expect(JSON.stringify(tree.toJSON())).toContain('#55745E');
+  await act(async () => tree.unmount());
+});
+
+
+test('Android label updates reopen the snapshot window and then freeze again', async () => {
+  Platform.OS = 'android';
+  const view = (pulse) => (
+    <StableMarker pulse={pulse} coordinate={{ latitude: 1, longitude: 2 }}>
+      <Text>{pulse ? 'Estate label' : 'Estate'}</Text>
+    </StableMarker>
+  );
+  let tree;
+  await act(async () => { tree = create(view(false)); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(1000); });
+  expect(tree.root.findByType('Marker').props.tracksViewChanges).toBe(false);
+  await act(async () => { tree.update(view(true)); });
+  expect(tree.root.findByType('Marker').props.tracksViewChanges).toBe(true);
+  await act(async () => { tree.update(view(false)); });
+  expect(tree.root.findByType('Marker').props.tracksViewChanges).toBe(false);
+  await act(async () => tree.unmount());
+});
+
+test('Android user clusters freeze and expand to distinct stable display coordinates', async () => {
+  Platform.OS = 'android';
+  const latitude = 37.4316;
+  const longitude = -78.6569;
+  wineriesService.getUserWineries.mockResolvedValueOnce({ success: true, wineries: [
+    { id: 1, name: 'Saved One', latitude, longitude, hasVisit: true },
+    { id: 2, name: 'Saved Two', latitude, longitude, hasVisit: true },
+  ] });
+  let tree;
+  await act(async () => { tree = create(<MapScreen />); });
+  await act(async () => { await jest.advanceTimersByTimeAsync(550); });
+  expect(tree.root.findAllByType('Marker')).toHaveLength(1);
+  await act(async () => { await jest.advanceTimersByTimeAsync(1000); });
+  expect(tree.root.findByType('Marker').props.tracksViewChanges).toBe(false);
+
+  await act(async () => tree.root.findByType('MapView').props.onRegionChangeComplete({
+    latitude, longitude, latitudeDelta: 0.005, longitudeDelta: 0.005,
+  }));
+  await act(async () => { await jest.advanceTimersByTimeAsync(50); });
+  const markers = tree.root.findAllByType('Marker');
+  expect(markers).toHaveLength(2);
+  expect(new Set(markers.map((marker) => JSON.stringify(marker.props.coordinate))).size).toBe(2);
+  expect(markers.every((marker) => marker.props.tracksViewChanges)).toBe(true);
+  await act(async () => { await jest.advanceTimersByTimeAsync(1000); });
+  expect(tree.root.findAllByType('Marker').every((marker) => marker.props.tracksViewChanges === false)).toBe(true);
   await act(async () => tree.unmount());
 });

@@ -27,7 +27,7 @@ jest.mock('../components/UpgradePill', () => () => null);
 jest.mock('../lib/ai', () => ({
   aiService: {
     buildSystemPrompt: jest.fn().mockResolvedValue('system'),
-    sendMessage: jest.fn(),
+    sendChatMessage: jest.fn(),
     parseSuggestions: jest.fn().mockReturnValue([]),
     getDisplayText: (t) => t,
     photoToBase64: jest.fn(),
@@ -38,7 +38,9 @@ jest.mock('../lib/chat', () => ({
     getConversations: jest.fn().mockResolvedValue([]),
     createConversation: jest.fn().mockResolvedValue({ id: 'conv-1', title: 'New' }),
     getMessages: jest.fn().mockResolvedValue([]),
-    addMessage: jest.fn().mockResolvedValue({ id: 'm1', role: 'user', content: 'q' }),
+    addMessage: jest.fn().mockImplementation(async (_id, role, content) => ({
+      id: role === 'user' ? 'user-1' : 'assistant-1', role, content,
+    })),
     generateTitle: (t) => t.slice(0, 20),
     updateConversationTitle: jest.fn().mockResolvedValue(undefined),
     uploadChatPhoto: jest.fn(),
@@ -80,7 +82,7 @@ afterEach(() => console.error.mockRestore());
 test('a server paywall refusal opens the paywall instead of impersonating the sommelier', async () => {
   const refusal = new Error('You have used your 5 free sommelier messages this month.');
   refusal.code = 'free_limit_reached';
-  aiService.sendMessage.mockRejectedValueOnce(refusal);
+  aiService.sendChatMessage.mockRejectedValueOnce(refusal);
 
   await askFromHub('What pairs with oysters?');
 
@@ -90,7 +92,7 @@ test('a server paywall refusal opens the paywall instead of impersonating the so
 });
 
 test('a dropped connection shows a retryable error bubble and never opens the paywall', async () => {
-  aiService.sendMessage.mockRejectedValueOnce(new Error('Network request failed'));
+  aiService.sendChatMessage.mockRejectedValueOnce(new Error('Network request failed'));
 
   await askFromHub('What pairs with oysters?');
 
@@ -98,4 +100,27 @@ test('a dropped connection shows a retryable error bubble and never opens the pa
   const bubble = assistantBubbles().find((m) => /encountered an error/i.test(m.content));
   expect(bubble).toBeTruthy();
   expect(bubble.content).toContain('Network request failed');
+});
+
+test('waits for the complete chat response before displaying the assistant reply', async () => {
+  let finish;
+  aiService.sendChatMessage.mockImplementationOnce(async () => {
+    await new Promise((resolve) => { finish = resolve; });
+    return { response: 'A crisp Muscadet works well.', sources: [] };
+  });
+
+  let tree;
+  await act(async () => { tree = create(<SommelierScreen />); });
+  await flush();
+  const input = tree.root.findByProps({ accessibilityLabel: 'Ask your sommelier a question' });
+  await act(async () => { input.props.onChangeText('What pairs with oysters?'); });
+  await act(async () => { input.props.onSubmitEditing(); });
+  await flush();
+
+  expect(assistantBubbles()).toEqual([]);
+  await act(async () => finish());
+  await flush();
+  expect(assistantBubbles().some((message) => message.content === 'A crisp Muscadet works well.')).toBe(true);
+  await act(async () => { await new Promise((resolve) => setTimeout(resolve, 150)); });
+  act(() => tree.unmount());
 });
