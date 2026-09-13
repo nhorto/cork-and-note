@@ -29,6 +29,13 @@
         "CAMERA",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
       ]
     },
     "web": {
@@ -62,23 +69,17 @@
         }
       ],
       [
-        "expo-camera",
+        "expo-image-picker",
         {
-          "microphonePermission": false,
-          "recordAudioAndroid": false
+          "microphonePermission": false
         }
       ],
-      "expo-image-picker",
       "expo-location",
-      [
-        "expo-media-library",
-        {
-          "savePhotosPermission": "Cork & Note saves your wine photos to your photo library."
-        }
-      ],
       "./plugins/withFmtConstevalFix",
       "./plugins/withPredictiveBackOptOut",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-font",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

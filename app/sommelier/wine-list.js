@@ -11,6 +11,7 @@
 // users see a labelled sample plus any lists they saved before Pro expired.
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { requestPhotoSelectionPermission } from '../../lib/photoPermissions';
 import { useRouter } from 'expo-router';
 import { useSafeBack } from '../../hooks/useSafeBack';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -190,7 +191,7 @@ export default function WineListScreen() {
       const ask =
         source === 'camera'
           ? ImagePicker.requestCameraPermissionsAsync
-          : ImagePicker.requestMediaLibraryPermissionsAsync;
+          : requestPhotoSelectionPermission;
       const { status } = await ask();
       if (status !== 'granted') {
         Alert.alert(

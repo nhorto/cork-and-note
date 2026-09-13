@@ -18,6 +18,7 @@
 // the whitelisted, normalized fields. It never executes anything from them.
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { requestPhotoSelectionPermission } from '../lib/photoPermissions';
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -118,7 +119,7 @@ export default function LabelScanner({ onScanned }) {
     // only then telling them they are out of scans is the surprise §4.5 forbids.
     if (!gate('label_scan')) return;
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } = await requestPhotoSelectionPermission();
       if (status !== 'granted') {
         Alert.alert('Permission needed', 'Photo library access is needed to choose a label.');
         return;

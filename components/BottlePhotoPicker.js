@@ -13,6 +13,7 @@
 // Alert and leaves the current value untouched — it never blocks the save.
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { requestPhotoSelectionPermission } from '../lib/photoPermissions';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { visitsService } from '../lib/visits';
@@ -68,7 +69,7 @@ export default function BottlePhotoPicker({ value, onChange, disabled }) {
   // Library — mirrors components/ChatInput.js / LabelScanner.js.
   const pickPhoto = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status } = await requestPhotoSelectionPermission();
       if (status !== 'granted') {
         Alert.alert('Permission needed', 'Photo library access is needed to choose a photo.');
         return;

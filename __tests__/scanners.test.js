@@ -4,13 +4,17 @@
 // told you are out of scans is the surprise the launch plan forbids. Then:
 // what a good scan hands up, and what the user sees on each failure.
 import { act, create } from 'react-test-renderer';
-import { Alert, Text } from 'react-native';
+import { Alert, Platform, Text } from 'react-native';
 import { usePro } from '../hooks/usePro';
 import { aiService } from '../lib/ai';
 import { scanTastingCard, scanWineLabel } from '../lib/cellarScan';
 import LabelScanner from '../components/LabelScanner';
 import TastingMenuScanner from '../components/TastingMenuScanner';
 
+jest.mock('react-native/Libraries/Utilities/Platform', () => ({
+  __esModule: true,
+  default: { OS: 'ios', select: (specifics) => specifics.ios ?? specifics.default },
+}));
 jest.mock('expo-image-picker', () => ({
   MediaTypeOptions: { Images: 'Images' },
   requestCameraPermissionsAsync: jest.fn(),
@@ -58,6 +62,7 @@ const CASES = [
 let gate;
 beforeEach(() => {
   jest.clearAllMocks();
+  Platform.OS = 'ios';
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   gate = jest.fn(() => true);
   usePro.mockReturnValue({ gate, isPro: false, remaining: () => 3, presentPaywall: jest.fn() });
@@ -111,6 +116,18 @@ describe.each(CASES)('$name', ({ Component, scan, cta, result, handedUp, photoAr
     expect(scan).not.toHaveBeenCalled();
     await pressText(tree, 'Choose from library');
     await flush();
+    expect(onScanned).toHaveBeenCalledWith(handedUp);
+  });
+
+  test('Android can select and scan a photo without broad library permission', async () => {
+    Platform.OS = 'android';
+    picker.requestMediaLibraryPermissionsAsync.mockResolvedValue({ status: 'denied' });
+    scan.mockResolvedValue(result);
+    const { tree, onScanned } = await mount();
+    await pressText(tree, 'Choose from library');
+    await flush();
+    expect(picker.requestMediaLibraryPermissionsAsync).not.toHaveBeenCalled();
+    expect(picker.launchImageLibraryAsync).toHaveBeenCalled();
     expect(onScanned).toHaveBeenCalledWith(handedUp);
   });
 
