@@ -13,7 +13,7 @@
 //  - Field masks are pinned server-side per mode. The mask decides the billed
 //    SKU, so the client never influences it:
 //      details → Place Details Enterprise (rating/hours/phone/website)
-//      match   → Text Search IDs-Only (FREE — populates wineries.google_place_id)
+//      match   → Text Search Pro (name + coordinates verify the candidate)
 //      photo   → Place Photos (one size-capped URI lookup)
 //    No editorialSummary (that's Enterprise+Atmosphere, +$5/1K) at launch.
 //  - Nothing from Google is stored except place IDs (policy: IDs are storable
@@ -21,6 +21,7 @@
 //    exception (#225): businessStatus is folded into our own directory's
 //    operating_status flag — a store of the *fact* that a winery closed, kept
 //    to our Overture-seeded rows, not a cache of Google content for display.
+import { haversineKm, namesAgree } from "../_shared/wineryMatch.js";
 import { corsHeaders } from "../_shared/cors.ts";
 import { type HandlerDeps, resolveDeps } from "../_shared/deps.ts";
 import { isEntitlementActive } from "../_shared/entitlements.ts";
@@ -70,7 +71,7 @@ const BUSINESS_STATUS_TO_OPERATING: Record<string, string> = {
   CLOSED_PERMANENTLY: "permanently_closed",
 };
 
-const MATCH_FIELD_MASK = "places.id,places.displayName,places.formattedAddress";
+const MATCH_FIELD_MASK = "places.id,places.displayName,places.formattedAddress,places.location";
 
 const MAX_PHOTO_WIDTH = 1200;
 
@@ -260,8 +261,8 @@ export function createHandler(overrides: Partial<HandlerDeps> = {}) {
           photo_name: place.photos?.[0]?.name ?? null,
         };
       } else if (mode === "match") {
-        // Free IDs-Only text search to attach a google_place_id to one of our
-        // winery records. Biased to the winery's stored coordinates when known.
+        // Auto-attachment must prove both name and proximity. A location bias
+        // can return a different winery or a distant tasting room (#288).
         const name = parsed.name;
         if (typeof name !== "string" || name.trim().length < 2 || name.length > 200) {
           return json({ error: "name is required" }, 400);
@@ -269,15 +270,24 @@ export function createHandler(overrides: Partial<HandlerDeps> = {}) {
         const lat = typeof parsed.lat === "number" ? parsed.lat : null;
         const lng = typeof parsed.lng === "number" ? parsed.lng : null;
 
+        if (lat === null || lng === null || !Number.isFinite(lat) || !Number.isFinite(lng)
+          || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+          // A name alone cannot safely distinguish branches or namesakes.
+          return json({ mode, candidates: [] });
+        }
+        const wrapLng = (value: number) => ((value + 540) % 360) - 180;
+        const latDelta = 5 / 111.32;
+        const lngDelta = Math.min(89.9, latDelta / Math.max(0.0001, Math.cos(lat * Math.PI / 180)));
         const body: Record<string, unknown> = {
           textQuery: `${name.trim()} winery`,
           pageSize: 3,
+          locationRestriction: {
+            rectangle: {
+              low: { latitude: Math.max(-90, lat - latDelta), longitude: wrapLng(lng - lngDelta) },
+              high: { latitude: Math.min(90, lat + latDelta), longitude: wrapLng(lng + lngDelta) },
+            },
+          },
         };
-        if (lat !== null && lng !== null && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
-          body.locationBias = {
-            circle: { center: { latitude: lat, longitude: lng }, radius: 5000 },
-          };
-        }
 
         const res = await deps.fetch("https://places.googleapis.com/v1/places:searchText", {
           method: "POST",
@@ -294,14 +304,23 @@ export function createHandler(overrides: Partial<HandlerDeps> = {}) {
           return json({ error: "Winery lookup is unavailable right now." }, 502);
         }
         const data = await res.json();
+        type Candidate = { id: string; displayName?: { text?: string }; formattedAddress?: string; location?: { latitude?: number; longitude?: number } };
+        const candidates = (Array.isArray(data.places) ? data.places : []) as Candidate[];
         result = {
-          candidates: (data.places ?? []).map(
-            (p: { id: string; displayName?: { text?: string }; formattedAddress?: string }) => ({
-              place_id: p.id,
-              name: p.displayName?.text ?? null,
-              address: p.formattedAddress ?? null,
-            })
-          ),
+          candidates: candidates.filter((p) => {
+            const candidateLat = p?.location?.latitude;
+            const candidateLng = p?.location?.longitude;
+            return typeof p?.id === "string" && /^[A-Za-z0-9_-]{10,200}$/.test(p.id)
+              && typeof p.displayName?.text === "string" && Boolean(p.displayName.text.trim())
+              && typeof candidateLat === "number" && Number.isFinite(candidateLat) && Math.abs(candidateLat) <= 90
+              && typeof candidateLng === "number" && Number.isFinite(candidateLng) && Math.abs(candidateLng) <= 180
+              && namesAgree(name, p.displayName.text, { strict: true })
+              && haversineKm(lat, lng, candidateLat, candidateLng) <= 3;
+          }).map((p) => ({
+            place_id: p.id,
+            name: p.displayName?.text ?? null,
+            address: p.formattedAddress ?? null,
+          })),
         };
       } else {
         // mode === "photo": resolve a photo resource name to a short-lived URI.

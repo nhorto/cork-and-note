@@ -186,38 +186,51 @@ Deno.test("details write-back failure never breaks the details response", async 
   assertEquals((await readJson(res)).name, "Barboursville Vineyards");
 });
 
-Deno.test("match: name length is enforced, the query is biased to the stored pin, and the mask is IDs-only", async () => {
+Deno.test("match: rejects invalid names and restricts search to the winery's area", async () => {
   for (const name of [undefined, "", "a", " a ", "x".repeat(201)]) {
     const { handler, fetch } = setup();
-    assertEquals((await handler(req({ mode: "match", name }))).status, 400, JSON.stringify(name));
+    assertEquals((await handler(req({ mode: "match", name }))).status, 400);
     assertEquals(fetch.calls.length, 0);
   }
   const { handler, fetch } = setup();
-  fetch.reply(200, { places: [{ id: PLACE_ID, displayName: { text: "Barboursville Vineyards" }, formattedAddress: "17655 Winery Rd" }, { id: "x".repeat(20) }] });
+  fetch.reply(200, { places: [{ id: PLACE_ID, displayName: { text: "Barboursville Vineyards" }, formattedAddress: "17655 Winery Rd", location: { latitude: 38.17, longitude: -78.28 } }] });
   const res = await handler(req({ mode: "match", name: "  Barboursville ", lat: 38.17, lng: -78.28 }));
-  assertEquals(await readJson(res), {
-    mode: "match",
-    candidates: [
-      { place_id: PLACE_ID, name: "Barboursville Vineyards", address: "17655 Winery Rd" },
-      { place_id: "x".repeat(20), name: null, address: null },
-    ],
-  });
+  assertEquals(await readJson(res), { mode: "match", candidates: [{ place_id: PLACE_ID, name: "Barboursville Vineyards", address: "17655 Winery Rd" }] });
   const [call] = fetch.calls;
   assertEquals(call.url, "https://places.googleapis.com/v1/places:searchText");
-  assertEquals((call.init?.headers as Record<string, string>)["X-Goog-FieldMask"], "places.id,places.displayName,places.formattedAddress");
-  assertEquals(call.body, {
-    textQuery: "Barboursville winery",
-    pageSize: 3,
-    locationBias: { circle: { center: { latitude: 38.17, longitude: -78.28 }, radius: 5000 } },
-  });
+  assertEquals((call.init?.headers as Record<string, string>)["X-Goog-FieldMask"], "places.id,places.displayName,places.formattedAddress,places.location");
+  const body = call.body as { textQuery: string; locationBias?: unknown; locationRestriction: { rectangle: { low: { latitude: number; longitude: number }; high: { latitude: number; longitude: number } } } };
+  assertEquals(body.textQuery, "Barboursville winery");
+  assertEquals(body.locationBias, undefined);
+  const { low, high } = body.locationRestriction.rectangle;
+  assertEquals(low.latitude < 38.17 && high.latitude > 38.17, true);
+  assertEquals(low.longitude < -78.28 && high.longitude > -78.28, true);
 });
 
-Deno.test("match: out-of-range or missing coordinates simply drop the bias", async () => {
-  for (const coords of [{}, { lat: 95, lng: 0 }, { lat: "38", lng: -78 }]) {
+Deno.test("match: never attaches a neighbour or a distant same-name tasting room", async () => {
+  const { handler, fetch } = setup();
+  const candidate = (text: string, latitude = 38.17, longitude = -78.28) => ({
+    id: PLACE_ID, displayName: { text }, location: { latitude, longitude },
+  });
+  fetch.reply(200, { places: [
+    candidate("Casanel Vineyards"),
+    candidate("Dry Creek Winery"),
+    candidate("The Winery"),
+    candidate("Dry Mill Winery Tasting Room", 38.30),
+    candidate("Dry Mill Winery", 38.171),
+    { id: PLACE_ID, displayName: { text: "Dry Mill Winery" } },
+    { id: PLACE_ID, location: { latitude: 38.17, longitude: -78.28 } },
+    null,
+  ] });
+  const body = await readJson(await handler(req({ mode: "match", name: "Dry Mill Winery", lat: 38.17, lng: -78.28 })));
+  assertEquals(body.candidates, [{ place_id: PLACE_ID, name: "Dry Mill Winery", address: null }]);
+});
+
+Deno.test("match: missing or invalid coordinates produce no attachment and no Google call", async () => {
+  for (const coords of [{}, { lat: 95, lng: 0 }, { lat: "38", lng: -78 }, { lat: 38, lng: 181 }, { lat: null, lng: -78 }]) {
     const { handler, fetch } = setup();
-    fetch.reply(200, { places: [] });
-    await handler(req({ mode: "match", name: "Barboursville", ...coords }));
-    assertEquals("locationBias" in (fetch.calls[0].body as Record<string, unknown>), false, JSON.stringify(coords));
+    assertEquals(await readJson(await handler(req({ mode: "match", name: "Barboursville", ...coords }))), { mode: "match", candidates: [] });
+    assertEquals(fetch.calls.length, 0);
   }
 });
 
@@ -237,7 +250,7 @@ Deno.test("photo: the resource name must be a Places photo path, and the width a
 Deno.test("a Google failure in any mode is a generic 502 with its own copy, and is not metered", async () => {
   const cases = [
     [{ mode: "details", place_id: PLACE_ID }, "Winery details are unavailable right now."],
-    [{ mode: "match", name: "Barboursville" }, "Winery lookup is unavailable right now."],
+    [{ mode: "match", name: "Barboursville", lat: 38.17, lng: -78.28 }, "Winery lookup is unavailable right now."],
     [{ mode: "photo", photo_name: `places/${PLACE_ID}/photos/abc` }, "Photo unavailable right now."],
   ] as const;
   for (const [body, message] of cases) {

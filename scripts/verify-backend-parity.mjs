@@ -100,6 +100,10 @@ const sentinels = [
   ['20260911110000', "select 1 from information_schema.tables where table_name='taste_reports'"],
   ['20260911120000', "select 1 from pg_constraint where conname like 'places_usage_mode%' and pg_get_constraintdef(oid) like '%route%'"],
   ['20260911121000', "select 1 from information_schema.tables where table_name='trip_plans'"],
+  ['20260912000000', "select 1 from information_schema.columns where table_schema='public' and table_name='wineries' and column_name='directory_id' and data_type='bigint'"],
+  ['20260912010000', "select 1 from information_schema.columns where table_schema='public' and table_name='winery_directory' and column_name='duplicate_of' and data_type='bigint'"],
+  ['20260912020000', "select 1 where (select count(*) from information_schema.columns where table_schema='public' and table_name='winery_directory' and column_name in ('validated_at', 'validation_note')) = 2"],
+  ['20260913000000', "select 1 where not exists (select 1 from public.visits v join public.wines w on w.visit_id=v.id join public.cellar_consumptions c on c.wine_id=w.id where v.place_type='winery')"],
   ['20260911200000', "select 1 from pg_policies where schemaname='storage' and policyname='visit-photos owner read'"],
 ];
 for (const [version, probe] of sentinels) {
@@ -110,8 +114,8 @@ for (const [version, probe] of sentinels) {
 
 // Newer migrations without a sentinel above still need one: fail loudly so the
 // list cannot silently go stale.
-const latestSentinel = sentinels.map(([v]) => v).sort().at(-1);
-const newerThanSentinels = repoVersions.filter((v) => v > latestSentinel);
+const sentinelVersions = new Set(sentinels.map(([v]) => v));
+const newerThanSentinels = repoVersions.filter((v) => v > '20260911200000' && !sentinelVersions.has(v));
 note(newerThanSentinels.length === 0, `every migration newer than the last sentinel has a schema probe in this script${newerThanSentinels.length ? ` (add one for: ${newerThanSentinels.join(', ')})` : ''}`);
 
 // ── 2. Edge functions ────────────────────────────────────────────────────
@@ -132,7 +136,7 @@ function sharedImports(name, seen = new Set()) {
   const visit = (file) => {
     if (seen.has(file) || !existsSync(file)) return;
     seen.add(file);
-    for (const m of readFileSync(file, 'utf8').matchAll(/from\s+["'](\.\.?\/[^"']+\.ts)["']/g)) {
+    for (const m of readFileSync(file, 'utf8').matchAll(/from\s+["'](\.\.?\/[^"']+\.[cm]?[jt]s)["']/g)) {
       const target = join(file, '..', m[1]);
       if (target.includes('/_shared/')) out.push(target);
       visit(target);
@@ -143,11 +147,11 @@ function sharedImports(name, seen = new Set()) {
 }
 
 function lastSourceChange(name) {
-  // The newest commit on main touching this function or a _shared file it
+  // The newest commit in this checkout touching this function or a _shared file it
   // imports. Deploys bundle the imports, so a change there ships only with
   // a redeploy of every function that uses it.
   const paths = [`supabase/functions/${name}`, ...sharedImports(name)];
-  const out = execFileSync('git', ['log', '-1', '--format=%ct %h %s', 'origin/main', '--', ...paths], { cwd: ROOT, encoding: 'utf8' }).trim();
+  const out = execFileSync('git', ['log', '-1', '--format=%ct %h %s', 'HEAD', '--', ...paths], { cwd: ROOT, encoding: 'utf8' }).trim();
   if (!out) return null;
   const [ts, hash, ...subject] = out.split(' ');
   return { at: Number(ts) * 1000, hash, subject: subject.join(' ') };
