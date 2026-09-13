@@ -2,30 +2,29 @@
 
 Updated September 13, 2026. Production project: **ixecayqpogkiawempzgc**.
 
-The recovery protocol passes a live disposable-account test: the trusted mobile redirect establishes the right session, the replacement password signs in, the old password fails, untrusted redirects fall back to the site, and a consumed reset link cannot be reused. The app's deletion endpoint removes the fixture and its profile. This test **does not send email or establish OS link dispatch/inbox delivery**.
+## Live sender configured and delivery verified
 
-Run it with the existing Supabase management credential:
+The owner purchased **corkandnote.com** in their personal Cloudflare account. Its active zone is `7b9656677a87622b372d7702994e574f`. The dedicated Resend sending domain **auth.corkandnote.com** (ID `78fdd252-ab71-43be-a461-ccf3c9bfab7b`) is verified: all four provider-required DNS records passed, and the CNAME is DNS-only. An initial `v=DMARC1; p=none;` policy is installed at `_dmarc.auth`. Receiving, open tracking and click tracking are disabled. The unrelated staging domain was left untouched.
 
-```sh
-node scripts/verify-password-recovery.mjs
-```
+Supabase now sends from **Cork & Note <noreply@auth.corkandnote.com>** through `smtp.resend.com:465`, username `resend`, using a dedicated domain-restricted sending credential. The initial limit is **30 messages/hour**. Signup auto-confirm and existing redirect allow-lists remain unchanged. [Supabase SMTP documentation](https://supabase.com/docs/guides/auth/auth-smtp).
 
-The website now provides `/reset-password`, matching the already allow-listed URL. It supports mobile recovery fragments and PKCE codes through an explicit app-opening link, strips unrelated parameters, clears credentials from browser history and sends no recovery credentials over the network. Missing/expired links lead to requesting a new reset inside the app. Direct `corkandnote://reset-password` links used by installed builds remain supported.
+The recovery, confirmation and email-change templates and subjects were published and read back exactly. Preview copies are in `~/Downloads/Cork-and-Note-Auth-Emails/`. The earlier HTTP 400 template restriction was resolved by configuring custom SMTP.
 
-## The remaining sender dependency
+A real password-reset request for a disposable Gmail alias reached provider status **delivered**. The actual email contained the branded Android/iPhone template and expected sender. Its recovery link established the correct mobile recovery session; the new password worked, the old password failed, and the consumed link could not be reused. The fixture's auth account and profile were deleted. No existing customer password was changed. [Sanitized evidence](../audits/2026-09-13-auth-email-live.json).
 
-Live SMTP host, port and sender remain unset. The default service is limited to project team recipients and two emails/hour. Signup auto-confirm remains enabled, as previously chosen; it does not provide password recovery delivery. [Supabase custom SMTP documentation](https://supabase.com/docs/guides/auth/auth-smtp).
+**Limits:** provider delivery means the recipient mail server accepted the message; inbox-versus-spam placement was not inspected. Actual email-to-app dispatch and password entry on the physical iOS 27 / Android 7 candidates still need acceptance. This setup provides outbound authentication mail, not a support inbox or a website on the new domain.
 
-The owner purchased **corkandnote.com** in their personal Cloudflare account. Resend now has the dedicated sending domain **auth.corkandnote.com** (ID `78fdd252-ab71-43be-a461-ccf3c9bfab7b`), with receiving, open tracking and click tracking disabled. Planned sender: **Cork & Note <noreply@auth.corkandnote.com>**. Verification is not started because the four required DNS records have not been installed. The available command-line Cloudflare login still belongs to the other account, and regular-browser automation timed out; no DNS or SMTP change was applied.
+## Recovery flow and repeatable checks
 
-A ready-to-import zone file is in `~/Downloads/Cork-and-Note-Auth-Emails/cloudflare-email-dns.txt`, with `DOMAIN-SETUP.md` instructions. In the domain's Cloudflare DNS Records page, use Import and Export → Import; keep the CNAME DNS-only. These records configure authentication sending only, not an inbox or website. The unrelated staging sender was left untouched.
+The website provides `/reset-password` at `https://cork-and-note.vercel.app`, matching the allow-listed URL. It supports mobile recovery fragments and PKCE codes through an explicit app-opening link, strips unrelated parameters, clears credentials from browser history and sends no recovery credentials over the network. Missing/expired links lead to requesting a new reset inside the app. Direct `corkandnote://reset-password` links remain supported.
 
-Once the sender is available:
+`node scripts/verify-password-recovery.mjs` runs the no-email disposable-account protocol check with the existing management credential. It also checks rejection of untrusted redirects. `node scripts/auth-emails.mjs --push` republishes the prepared templates. Neither command prints credentials or recovery links.
 
-1. Verify the chosen sending domain with the provider and install its required DNS records.
-2. Use a dedicated sending credential and configure the correct Supabase project's SMTP sender. For Resend: `smtp.resend.com`, port `465` or `587`, username `resend`, password from its sending API key. [Resend SMTP documentation](https://resend.com/docs/send-with-smtp).
-3. Start with an appropriate sending limit (Supabase's initial custom-SMTP limit is 30/hour), within the provider account's limits; keep signup auto-confirm unchanged unless separately decided.
-4. Run `node scripts/auth-emails.mjs --push`, then read back all three templates and subjects. The updated recovery template names both Android and iPhone.
-5. Request an actual reset to an authorized external test mailbox, verify receipt, and finish the link/password change on both store candidates. Check expired/reused links and app cold start.
+## Remaining acceptance
 
-The attempted template upload returned HTTP 400: template customization is locked on this free-tier project while the default email provider is in use. No template or SMTP change was applied. Preview templates are generated by `node scripts/auth-emails.mjs` in `.agent/auth-emails/`; no passwords or production action tokens appear in them.
+- Inspect a fresh reset email in the intended mailbox, including spam placement and branding.
+- Complete the email link and password change on both physical store candidates, including app cold start and expired/reused links.
+- Confirm sending limits against expected launch traffic and monitor provider failures/bounces.
+- Keep signup verification as the existing v1 choice unless deliberately changed; publishing its template does not enable it.
+
+The temporary Cloudflare DNS token was supplied through chat. Revoke it after setup; it is not used by the running email service. SMTP uses a separate restricted Resend credential stored outside the repository.
