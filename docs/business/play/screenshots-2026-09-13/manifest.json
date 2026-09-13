@@ -1,0 +1,26 @@
+[
+  {
+    "file": "01-journal.png",
+    "width": 1080,
+    "height": 1920,
+    "sha256": "6d2a361d4eca4732241b6f1526cda8f64856aa963d0e6016e8f2a8594b355e7e"
+  },
+  {
+    "file": "02-cellar.png",
+    "width": 1080,
+    "height": 1920,
+    "sha256": "91bbf6c65566c1ab23a66daa94b36dd5f9e65e434cd74068c3f93f5f52c63aad"
+  },
+  {
+    "file": "03-sommelier.png",
+    "width": 1080,
+    "height": 1920,
+    "sha256": "538cfd4c2bdf19f0c1efcd3469ffa6ffe75ca1407357623e6235debfc0c3bc70"
+  },
+  {
+    "file": "04-taste.png",
+    "width": 1080,
+    "height": 1920,
+    "sha256": "ad0ea370f80ebae9e34807c52a97e4697c65f5f54b625025c6a1af025990b595"
+  }
+]
