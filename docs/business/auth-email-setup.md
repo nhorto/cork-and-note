@@ -16,7 +16,9 @@ The website now provides `/reset-password`, matching the already allow-listed UR
 
 Live SMTP host, port and sender remain unset. The default service is limited to project team recipients and two emails/hour. Signup auto-confirm remains enabled, as previously chosen; it does not provide password recovery delivery. [Supabase custom SMTP documentation](https://supabase.com/docs/guides/auth/auth-smtp).
 
-The locally authenticated Resend profile has one verified domain, `reply-staging.fabispulse.com`, belonging to a different application's staging environment. It has not been repurposed. The owner confirmed no Cork & Note domain is owned yet and prefers Cloudflare for registration. The available Cloudflare session lacks Registrar access (HTTP 403), and automated dashboard access stopped at a security check. A public registry lookup returned HTTP 404 for `corkandnote.com`, but Cloudflare availability and price are not yet confirmed. No domain was purchased. An owner-approved sending domain and DNS control remain required.
+The owner purchased **corkandnote.com** in their personal Cloudflare account. Resend now has the dedicated sending domain **auth.corkandnote.com** (ID `78fdd252-ab71-43be-a461-ccf3c9bfab7b`), with receiving, open tracking and click tracking disabled. Planned sender: **Cork & Note <noreply@auth.corkandnote.com>**. Verification is not started because the four required DNS records have not been installed. The available command-line Cloudflare login still belongs to the other account, and regular-browser automation timed out; no DNS or SMTP change was applied.
+
+A ready-to-import zone file is in `~/Downloads/Cork-and-Note-Auth-Emails/cloudflare-email-dns.txt`, with `DOMAIN-SETUP.md` instructions. In the domain's Cloudflare DNS Records page, use Import and Export → Import; keep the CNAME DNS-only. These records configure authentication sending only, not an inbox or website. The unrelated staging sender was left untouched.
 
 Once the sender is available:
 
