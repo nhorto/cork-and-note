@@ -1,5 +1,7 @@
 # Cork & Note: what remains before launch
 
+**September 14 update:** Nick reports monthly TestFlight purchase success; annual remains untested. The approved early-tester offer is 30 days of complimentary Pro for accepted testers, with no automatic paid conversion. See the [early-tester program](early-tester-program-2026-09-14.md) for recruitment, access and feedback setup. These updates do not establish completed physical-device acceptance or a closed-test start date.
+
 **Updated September 13, 2026, after fresh candidates, live email verification and acceptance follow-through.** Current mobile release code is merged main **`c9d3e78`**, integrating all seven PRs through [#303](https://github.com/nhorto/cork-and-note/pull/303). [#304](https://github.com/nhorto/cork-and-note/pull/304) adds email preparation and a live website reset page; it does not change mobile app source.
 
 **Assessment:** **iOS 27** is valid in TestFlight and selected in the manual-release draft; **Android 7** is committed to internal testing. They replace the earlier 25/6 candidates and include the merged redesign/badge/failure-state fixes. Authentication SMTP and branded templates are live; Gmail delivery and the actual emailed recovery link pass. Physical-device email-link acceptance remains. Physical-device/purchase acceptance, store account/declaration checks and Android production access remain. No App Review submission or public release has been made.

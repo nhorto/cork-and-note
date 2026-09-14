@@ -44,6 +44,7 @@ function page({ title, description, main, active = '', extraHead = '', dark = fa
     ['/#features', 'Features'],
     ['/#sommelier', 'Sommelier'],
     ['/#pricing', 'Pricing'],
+    ['/beta', 'Early access'],
     ['/support', 'Support'],
   ]
     .map(
@@ -90,7 +91,7 @@ ${main}
         <p class="foot-tag">Remember what you tasted.</p>
       </div>
     </div>
-    <p class="foot-links"><a href="/#features">Features</a><a href="/#pricing">Pricing</a><a href="/support">Support</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/delete-account">Delete account</a></p>
+    <p class="foot-links"><a href="/#features">Features</a><a href="/#pricing">Pricing</a><a href="/beta">Early access</a><a href="/support">Support</a><a href="/privacy">Privacy</a><a href="/terms">Terms</a><a href="/delete-account">Delete account</a></p>
   </div>
   <div class="wide foot-legal">
     <p>Cork &amp; Note is for people of legal drinking age. Please drink responsibly.</p>
@@ -332,7 +333,7 @@ const FAQ = [
   ],
   [
     'What about Android?',
-    'Cork & Note launches on iPhone first. Android will follow if enough people ask for it. Tell us on the support page.',
+    'Android is already in testing. We are gathering a small group of early testers for Android and iPhone. Visit Early access to request an invitation; public release dates will be announced separately.',
   ],
 ];
 
@@ -364,10 +365,10 @@ const home = page({
       <h1>Remember what you tasted. Discover what you like.</h1>
       <p class="lede">Your personal wine journal, so you never forget a wine you loved. Your personal sommelier, learning your palate with every tasting you log. And your own map of wine country, keeping every winery you visit. <strong>No wine expertise needed.</strong></p>
       <div class="hero-actions">
-        <span class="badge">Coming soon to the App&nbsp;Store</span>
+        <a class="badge" href="/beta">Join the early testers</a>
         <a class="textlink" href="#features">See how it works <span aria-hidden="true">↓</span></a>
       </div>
-      <p class="subnote">Free to download on iPhone · Pro is optional</p>
+      <p class="subnote">Android and iPhone · Invitation required · US testers, age 21+</p>
     </div>
     <div class="hero-stage">${phone('shot-1-home.png', 'The Cork & Note home screen: wines tasted, places visited, Tonight’s Pick and bottles ready to drink.', { eager: true })}</div>
   </div>
@@ -514,10 +515,64 @@ const home = page({
   <div class="wrap">
     <div class="double-rule" role="presentation"></div>
     <h2>Your next tasting deserves to be remembered.</h2>
-    <span class="badge">Coming soon to the App&nbsp;Store</span>
-    <p class="subnote">Free to download on iPhone.</p>
+    <a class="badge" href="/beta">Join the early testers</a>
+    <p class="subnote">Request early access for Android or iPhone.</p>
   </div>
 </section>`,
+});
+
+const beta = page({
+  title: 'Become an early tester · Cork & Note',
+  description: 'Help shape Cork & Note, a personal wine journal for Android and iPhone. Request an invitation to our small early testing group.',
+  active: '/beta',
+  main: `<section class="beta-intro"><div class="wrap">
+    <p class="eyebrow">A small first pour</p>
+    <h1>Your next favorite wine app.<br>Your feedback in every detail.</h1>
+    <p class="lede">Remember the wines you loved, keep track of your bottles, and explore with a personal AI sommelier. Help us put Cork &amp; Note through its paces before the public launch.</p>
+    <p>We are gathering our first group of Android and iPhone testers in the US, age 21 and over. No wine expertise needed.</p>
+    <a class="badge" href="#request">Request an invitation</a>
+    <p class="subnote">Early access is by invitation. Requesting a place does not enroll you in Google Play testing.</p>
+  </div></section>
+  <div class="wrap"><article class="prose beta-body">
+    <section aria-labelledby="expect"><h2 id="expect">A little time. A useful opinion.</h2>
+      <ul><li>Try the app on several days over two weeks: log a wine, add a bottle, explore the map, or ask the sommelier a question.</li>
+      <li>Tell us what felt easy, what was confusing, and anything that broke. A few sentences are enough.</li>
+      <li>Android testers: stay opted in to the Google Play closed test for at least 14 consecutive days after joining. We will send the correct link when your place is ready.</li></ul>
+      <p>You can use wines you already know or bottles you already own. No purchase or drinking is required to take part.</p>
+    </section>
+    <section id="request" aria-labelledby="request-title"><h2 id="request-title">Request your invitation</h2>
+      <p>Email <a href="mailto:${SUPPORT_EMAIL}?subject=Cork%20%26%20Note%20early%20tester">${SUPPORT_EMAIL}</a> with the details below, or prepare an email here. We review requests and reply with next steps.</p>
+      <form id="beta-request" hidden>
+        <label for="beta-platform">Which phone will you use?</label>
+        <select id="beta-platform" name="platform" required><option value="">Choose your phone</option><option value="Android">Android</option><option value="iPhone">iPhone</option></select>
+        <label for="beta-email">Email for your invitation</label>
+        <input id="beta-email" name="email" type="email" autocomplete="email" maxlength="254" required aria-describedby="email-help">
+        <p class="field-help" id="email-help">For Android, use the Google Account signed in to your Play Store. It does not have to end in gmail.com.</p>
+        <label for="beta-device">Phone model (optional)</label>
+        <input id="beta-device" name="device" type="text" maxlength="100" placeholder="For example, Pixel 8 or iPhone 15">
+        <label class="check"><input name="adult" type="checkbox" required> <span>I am 21 or older and based in the US.</span></label>
+        <label class="check" id="android-commitment" hidden><input name="commitment" type="checkbox"> <span>I can try the app over two weeks and stay opted in to the Android closed test for at least 14 consecutive days.</span></label>
+        <p class="field-help">We use your email and phone details to arrange testing and follow up on your feedback. This request does not subscribe you to a marketing list. To withdraw, email us. See our <a href="/privacy">privacy policy</a>.</p>
+        <button class="badge" type="submit">Prepare invitation email</button>
+      </form>
+      <noscript><p>Include your phone platform, invitation email (your Play Store Google Account for Android), optional phone model, and confirmation that you are 21+ and in the US. For Android, confirm that you can participate for two weeks and remain opted in for 14 consecutive days.</p></noscript>
+      <div id="email-draft" hidden aria-live="polite">
+        <h3>Your draft is ready</h3><p><strong>Your request has not been sent.</strong> Open the draft in your email app and send it, or copy it into a message to ${SUPPORT_EMAIL}.</p>
+        <a id="open-beta-email" class="badge">Open email draft</a>
+        <label for="beta-message">Message to copy</label><textarea id="beta-message" rows="9" readonly></textarea>
+      </div>
+    </section>
+    <section><h2>What about Pro and payments?</h2>
+      <p>Accepted early testers receive 30 days of complimentary Pro from activation. No purchase or payment card is required for this access, and it does not automatically become a paid subscription. We activate it after you create your app account and confirm the expiry date by email. Existing paid subscriptions, if any, are separate and are not canceled by this offer.</p>
+      <p><strong>iPhone:</strong> purchases made in the TestFlight version are sandbox tests and do not charge you. Test subscriptions run on a faster schedule and do not become paid App Store subscriptions.</p>
+      <p><strong>Android:</strong> a testing invitation alone does not make purchases free. Only test billing after we confirm license-tester setup for your Google Account, and only with the store's test payment method. If you see a real payment card instead of a test method, close the purchase sheet and contact us.</p>
+    </section>
+    <section><h2>Feedback, without another account</h2>
+      <p>Open <strong>Profile → Feedback</strong> in Cork &amp; Note to send an idea or report a bug. If you cannot get into the app, email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>
+      <p>For a bug, tell us what you tried, what you expected, what happened, and your phone model and build number. Screenshots help; hide personal information first. Never send passwords, reset links or payment details.</p>
+      <p>We want honest feedback. You do not need to leave a public review.</p>
+    </section>
+  </article></div><script src="/beta-request.js" defer></script>`,
 });
 
 const support = page({
@@ -531,14 +586,14 @@ const support = page({
   <section>
     <h2>Get in touch</h2>
     <p>Email <a href="mailto:${esc(SUPPORT_EMAIL)}">${esc(SUPPORT_EMAIL)}</a> for help, account access or privacy requests. You do not need to sign in to contact us.</p>
-    <p>The fastest way to reach us is from inside the app: open <strong>Profile → Feedback</strong>. That form sends us your message along with your app version, which usually saves a round trip.</p>
+    <p>The fastest way to reach us is from inside the app: open <strong>Profile → Feedback</strong>. Choose feedback, a bug report or a contact message. Bug reports include the app version; please also tell us your build number and phone model.</p>
     <p>You can also report a bug the same way: choose the bug option and describe what you were doing when it happened.</p>
   </section>
 
   <section>
     <h2>Common questions</h2>
     <p><strong>How do I find the wines I have logged?</strong> Open the <strong>Journal</strong> tab. Open the <strong>Map</strong> to browse places.</p>
-    <p><strong>How do I delete my account?</strong> Open <strong>Profile → Account settings → Delete account</strong> to remove your account and its app data. Deleting your account does not cancel an Apple subscription. Cancel it separately in your Apple Account settings. For help accessing your account or a data request, email us above.</p>
+    <p><strong>How do I delete my account?</strong> Open <strong>Profile → Account settings → Delete account</strong> to remove your account and its app data. Deleting your account does not cancel a store subscription. Cancel it separately in your Apple Account or Google Play subscription settings. For help accessing your account or a data request, email us above.</p>
     <p><strong>Is the sommelier always right?</strong> No. It is an AI assistant and it can be wrong about wine facts, pairings and drink windows. Treat it as a knowledgeable friend, not an authority. And please drink responsibly.</p>
   </section>
 
@@ -631,6 +686,27 @@ a{color:var(--royal)}
 a:hover{color:var(--midnight)}
 h1,h2,h3{font-family:var(--serif);color:var(--charcoal);margin:0;font-weight:400}
 section{scroll-margin-top:16px}
+[hidden]{display:none!important}
+.beta-intro{background:var(--royal);color:var(--cream);padding:64px 0 48px}
+.beta-intro h1{color:var(--cream);font-size:clamp(32px,5vw,48px);line-height:1.15;margin:12px 0 24px}
+.beta-intro .lede{font-size:20px}
+.beta-intro .eyebrow,.beta-intro .subnote{color:var(--gold-light)}
+.beta-intro .badge{margin-top:12px}
+.beta-body{padding-top:12px}
+.beta-body li{margin-bottom:12px}
+.beta-body section{scroll-margin-top:24px}
+.beta-body form,.beta-body #email-draft{border:1px solid var(--gold);border-radius:12px;padding:24px;margin:20px 0;background:var(--cream)}
+.beta-body label{display:block;font-weight:600;margin:18px 0 8px}
+.beta-body input:not([type=checkbox]),.beta-body select,.beta-body textarea{display:block;width:100%;padding:12px;border:1px solid var(--royal);border-radius:6px;font:inherit;color:var(--charcoal);background:white}
+.beta-body .check{display:flex;align-items:flex-start;gap:10px;font-weight:400}
+.beta-body .check input{margin-top:6px;flex-shrink:0;width:18px;height:18px;accent-color:var(--royal)}
+.beta-body .field-help{font-size:14px;margin-top:8px}
+.beta-body button{border:0;font:inherit;font-weight:600;cursor:pointer}
+.beta-body textarea{resize:vertical;min-height:180px}
+a.badge{text-decoration:none}
+:focus-visible{outline:3px solid #946600;outline-offset:4px}
+.bar-inner{flex-wrap:wrap}
+.bar nav{flex-wrap:wrap}
 .wrap{max-width:760px;margin:0 auto;padding:0 24px}
 .wide{max-width:1120px;margin:0 auto;padding:0 24px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -946,6 +1022,8 @@ const files = {
   }),
   'terms.html': legalPage(TERMS_OF_USE, '/terms'),
   'support.html': support,
+  'beta.html': beta,
+  'beta-request.js': readFileSync(join(ROOT, 'site', 'beta-request.js'), 'utf8'),
   'delete-account.html': deleteAccount,
   'styles.css': css,
   'reset-password.html': resetPassword,

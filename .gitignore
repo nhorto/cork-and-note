@@ -69,3 +69,4 @@ site/dist/
 # Vision benchmark: private photos, local labels, API outputs, and Python env
 .vision-bench/
 __pycache__/
+.vercel

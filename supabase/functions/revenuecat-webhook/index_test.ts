@@ -3,6 +3,7 @@
 // every way in without the right secret is refused, every event type maps to
 // the right row, and a failed write is a 5xx so RevenueCat retries.
 import { assert, assertEquals } from "jsr:@std/assert";
+import { gateAiRequest, type EntitlementRow } from "../_shared/entitlements.ts";
 import { createHandler } from "./index.ts";
 import { fakeDeps, jsonRequest, readJson } from "../_shared/testing.ts";
 
@@ -160,4 +161,27 @@ Deno.test("the write goes through the service-role client, never the caller's", 
   await handler(event("RENEWAL"));
   assert(admin.queries.length === 1);
   assertEquals(db.queries.length, 0);
+});
+
+Deno.test("a 30-day promotional Pro grant unlocks server tools only until expiry, even without an expiry webhook", async () => {
+  const { handler, admin, now } = setup();
+  const expiry = now + 30 * 24 * 60 * 60 * 1000;
+  const res = await handler(event("NON_RENEWING_PURCHASE", {
+    environment: "PRODUCTION", store: "PROMOTIONAL", period_type: "PROMOTIONAL",
+    product_id: "rc_promo_pro_custom", expiration_at_ms: expiry,
+  }));
+  assertEquals(await readJson(res), { ok: true, updated: 1 });
+  const [row] = admin.queriesTo("entitlements")[0].payload as Record<string, unknown>[];
+  assertEquals(row.user_id, UID);
+  assertEquals(row.expires_at, new Date(expiry).toISOString());
+  const check = (time: number) => gateAiRequest({
+    nowMs: time, task: "taste_report", hasImages: false,
+    entitlement: row as EntitlementRow, counts: { burst: 0, day: 0, window: 0 },
+  });
+  assertEquals(check(expiry - 1).allowed, true);
+  const expired = check(expiry);
+  assertEquals(expired.allowed, false);
+  if (!expired.allowed) assertEquals(expired.status, 402);
+  // The grant touches exactly the authenticated RevenueCat user's entitlement.
+  assertEquals(admin.queries.length, 1);
 });
