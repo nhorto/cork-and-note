@@ -2,6 +2,8 @@
 
 Use **iOS 1.0.0 (27)** from TestFlight and **Android 1.0.0 (7)** installed through Google Play internal testing. Run each row on both platforms. A locally signed Android APK cannot establish Play signing or real store billing behavior.
 
+**Owner update, September 14:** Nick reports a successful monthly purchase in the TestFlight app. Annual has not been tested. Installed build, device/OS, cancellation path and RevenueCat/backend correlation were not provided; this is useful partial evidence, not completion of the full purchase row.
+
 Record device model, OS, build, install source, date and tester initials. Mark PASS / FAIL / NOT RUN, with a short reproduction and screenshot for failures. Never include passwords, recovery URLs, access tokens or full purchase receipts in shared evidence.
 
 | Journey | Expected result | iPhone | Android |
@@ -16,7 +18,7 @@ Record device model, OS, build, install source, date and tester initials. Mark P
 | Dense map | Cold-open map; search Napa; pan/zoom for at least five minutes; expand clusters, toggle wine regions and recenter repeatedly. Tiles/pins render, controls respond, no crash/ANR. | NOT RUN | NOT RUN |
 | Offline and recovery | Disconnect during a read/request, then reconnect. Saved data stays intact; error and retry controls work. | NOT RUN | NOT RUN |
 | Platform layout | Keyboard, small screen and dark mode remain usable; Android Back dismisses screens/keyboard correctly. | NOT RUN | NOT RUN |
-| Monthly purchase | Store shows correct price/period. Cancel purchase once without granting Pro; complete an authorized sandbox/test purchase and verify server-backed Pro access. | NOT RUN | NOT RUN |
+| Monthly purchase | Store shows correct price/period. Cancel purchase once without granting Pro; complete an authorized sandbox/test purchase and verify server-backed Pro access. | PARTIAL: owner reports monthly success; build and backend checks pending | NOT RUN |
 | Annual and trial | Correct annual price and eligible trial; returning/ineligible account is not promised an unavailable trial. | NOT RUN | NOT RUN |
 | Restore and account switching | Restore after reinstall; switch app/store accounts and verify entitlements belong to the correct account. | NOT RUN | NOT RUN |
 | Expiry/refund | Using the store's test controls, expire/refund a test subscription; verify the backend removes Pro and enforces Free limits. | NOT RUN | NOT RUN |
