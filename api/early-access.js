@@ -10,7 +10,7 @@ module.exports = async function handler(req, res) {
     return reply(405, { error: 'Please use the signup form.' });
   }
   const host = req.headers.host;
-  const allowed = new Set(['https://cork-and-note.vercel.app', 'https://cork-and-note-sigma.vercel.app']);
+  const allowed = new Set(['https://corkandnote.com', 'https://www.corkandnote.com', 'https://cork-and-note.vercel.app', 'https://cork-and-note-sigma.vercel.app']);
   if (process.env.VERCEL_URL) allowed.add(`https://${process.env.VERCEL_URL}`);
   if (process.env.NODE_ENV !== 'production' && /^localhost:\d+$/.test(host || '')) allowed.add(`http://${host}`);
   if (!allowed.has(req.headers.origin)) return reply(403, { error: 'Please submit from the Cork & Note website.' });
