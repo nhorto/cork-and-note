@@ -23,6 +23,7 @@ import {
 import { usePro } from '../hooks/usePro';
 import { OCCASIONS, SEASONS, cellarPairing } from '../lib/cellarPairing';
 import { createThemedStyles } from '../styles/ThemeProvider';
+import AiNotice from './AiNotice';
 import Button from './Button';
 
 
@@ -198,9 +199,10 @@ export default function BottlePairing({ bottle }) {
             </View>
           ))}
 
-          <Text style={styles.disclaimer}>
-            Pairing ideas for this bottle — cook what sounds good.
-          </Text>
+          <AiNotice
+            content={pairing}
+            text="AI pairing ideas for this bottle. They can be wrong; cook what sounds good."
+          />
         </View>
       )}
     </View>

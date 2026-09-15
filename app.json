@@ -74,7 +74,14 @@
           "microphonePermission": false
         }
       ],
-      "expo-location",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Cork & Note uses your location to find nearby wineries and log visit locations.",
+          "locationAlwaysPermission": false,
+          "locationAlwaysAndWhenInUsePermission": false
+        }
+      ],
       "./plugins/withFmtConstevalFix",
       "./plugins/withPredictiveBackOptOut",
       "expo-notifications",

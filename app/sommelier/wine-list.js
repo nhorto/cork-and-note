@@ -47,6 +47,7 @@ import {
   wineListService,
 } from '../../lib/wineList';
 import { createThemedStyles } from '../../styles/ThemeProvider';
+import AiNotice from '../../components/AiNotice';
 
 const STEPS = [
   { key: 'capture', label: 'Capture' },
@@ -702,6 +703,9 @@ export default function WineListScreen() {
                 <Text style={styles.notes}>The sommelier did not find anything to recommend from that shortlist.</Text>
               )}
               {pickNote ? <Text style={styles.notes}>{pickNote}</Text> : null}
+              {picks.length ? (
+                <AiNotice content={{ picks, note: pickNote || null }} text="AI picks from your list. They can be wrong; the prices are what the list showed." />
+              ) : null}
 
               <View style={styles.ctaRow}>
                 <Button

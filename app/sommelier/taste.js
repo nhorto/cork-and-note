@@ -36,6 +36,7 @@ import {
 } from '../../lib/tasteProfile';
 import { visitsService } from '../../lib/visits';
 import { createThemedStyles } from '../../styles/ThemeProvider';
+import AiNotice from '../../components/AiNotice';
 
 const ASK_PROMPT = 'Based on my taste report, what should I try next?';
 const STAGES = ['Reading your journal', 'Finding what keeps standing out', 'Writing your report'];
@@ -339,6 +340,7 @@ function ReportBody({ report, wineById, onOpenWine }) {
         </>
       ) : null}
       {report.caveat ? <Text style={styles.caveat}>{report.caveat}</Text> : null}
+      <AiNotice content={report} text="This report is AI-generated from your journal. It can be wrong." />
     </View>
   );
 }
