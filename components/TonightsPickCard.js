@@ -28,6 +28,7 @@ import {
 import { usePro } from '../hooks/usePro';
 import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
+import AiNotice from './AiNotice';
 
 
 // Persist the user's collapse choice so the card stays how they left it.
@@ -433,9 +434,10 @@ export default function TonightsPickCard({
             </View>
           )}
 
-          <Text style={styles.disclaimer}>
-            Advice from your cellar — pick what feels right.
-          </Text>
+          <AiNotice
+            content={recommendation}
+            text="AI advice from your cellar. It can be wrong; pick what feels right."
+          />
         </View>
       )}
         </>
