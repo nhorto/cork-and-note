@@ -19,6 +19,19 @@ describe('password recovery', () => {
     expect(auth.setSession).not.toHaveBeenCalled();
     expect(auth.exchangeCodeForSession).not.toHaveBeenCalled();
   });
+  it('verifies a token_hash link, so the email template can skip the browser hop', async () => {
+    const auth = {
+      verifyOtp: jest.fn().mockResolvedValue({ data: { session: { user: { id: 'recovering-user' } } } }),
+      setSession: jest.fn(),
+    };
+    const link = 'corkandnote://reset-password?token_hash=abc123&type=recovery';
+    await expect(establishPasswordRecovery(link, auth)).resolves.toMatchObject({ user: { id: 'recovering-user' } });
+    expect(auth.verifyOtp).toHaveBeenCalledWith({ token_hash: 'abc123', type: 'recovery' });
+    expect(auth.setSession).not.toHaveBeenCalled();
+    // A token_hash without the recovery type is not a reset authorisation.
+    expect(parseRecoveryParams('corkandnote://reset-password?token_hash=abc123&type=signup')).toBeNull();
+  });
+
   it('exchanges PKCE links and rejects failed or empty exchanges', async () => {
     const auth = { exchangeCodeForSession: jest.fn().mockResolvedValue({ data: { session: null }, error: new Error('Expired') }) };
     await expect(establishPasswordRecovery('corkandnote://reset-password?code=one-time-code', auth)).rejects.toThrow('Expired');
