@@ -6,6 +6,19 @@
 // detectSessionInUrl: false, so this screen exchanges the credentials itself,
 // then lets the user set a new password via supabase.auth.updateUser.
 //
+// Read the link with `useLinkingURL`, NOT `useURL`. `useURL` subscribes to the
+// 'url' event inside its own useEffect and otherwise falls back to
+// `Linking.getInitialURL()`. Both fail for the normal case, which is a warm
+// app: the user asks for the reset inside the app, so the app is still running
+// when the link arrives. iOS then delivers the URL through
+// `application:open:options:` (Android: `onNewIntent`) BEFORE expo-router has
+// mounted this screen, so the hook's listener is registered too late to hear
+// it, and `getInitialURL()` reads `launchOptions`, which is empty unless the
+// link cold-started the app. The result was a null URL and a permanent "Link
+// expired" for every warm reset. `useLinkingURL` reads the URL synchronously
+// from the native registry that those same callbacks write to, so it is
+// correct whether the app was cold-started or foregrounded.
+//
 // The root layout's navigation guard deliberately ignores this route: the user
 // arrives unauthenticated and becomes authenticated mid-screen once the
 // recovery session is set — neither state should navigate them away.
@@ -36,7 +49,7 @@ export default function ResetPasswordScreen() {
   const { colors, styles } = useScreenTheme();
 
   const router = useRouter();
-  const url = Linking.useURL();
+  const url = Linking.useLinkingURL();
 
   // 'checking' → validating the link | 'ready' → show the form
   // 'invalid'  → link expired/bad    | 'done' → password updated

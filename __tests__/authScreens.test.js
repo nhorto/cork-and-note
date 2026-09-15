@@ -4,6 +4,7 @@
 import { act, create } from 'react-test-renderer';
 import { Alert, Text, TextInput, TouchableOpacity } from 'react-native';
 import { supabase } from '../lib/supabase';
+import * as Linking from 'expo-linking';
 import { establishPasswordRecovery } from '../lib/passwordRecovery';
 import { AuthContext } from '../app/_layout';
 import LoginScreen from '../app/login';
@@ -24,8 +25,16 @@ jest.mock('expo-router', () => ({
   Link: ({ children }) => children,
   useFocusEffect: (callback) => require('react').useEffect(callback, []),
 }));
+// Model a WARM app, which is the normal case: the user requests the reset from
+// inside the app, so it is still running when the link arrives. iOS/Android
+// hand the URL to the native linking registry before expo-router mounts the
+// reset screen, so `useURL`'s late listener never fires and `getInitialURL`
+// (which reads launch options) is null. Only `useLinkingURL`, which reads that
+// registry synchronously, sees the link. Mocking `useURL` as if it worked is
+// what let a total password-reset outage ship green.
 jest.mock('expo-linking', () => ({
-  useURL: () => 'corkandnote://reset-password#access_token=a&refresh_token=r&type=recovery',
+  useLinkingURL: () => 'corkandnote://reset-password#access_token=a&refresh_token=r&type=recovery',
+  useURL: () => null,
   getInitialURL: jest.fn().mockResolvedValue(null),
 }));
 // The root layout drags in the whole app; the screens only need the context object.
@@ -245,6 +254,18 @@ describe('ResetPasswordScreen', () => {
     await flush();
     return tree;
   };
+
+  it('reads the link from the native registry, so a warm app still recovers', async () => {
+    // Regression: the screen used to take the URL from `useURL`/`getInitialURL`,
+    // both of which are null when the link foregrounds an already-running app.
+    // Every warm reset then showed "Link expired" even though Supabase had
+    // verified the token and minted a session.
+    establishPasswordRecovery.mockResolvedValue({ user: { id: 'u1' } });
+    const tree = await render();
+    expect(establishPasswordRecovery).toHaveBeenCalledWith(Linking.useLinkingURL(), expect.anything());
+    expect(texts(tree)).not.toContain('Link expired');
+    expect(Linking.getInitialURL).not.toHaveBeenCalled();
+  });
 
   it('shows the expired-link state and routes to a new request when the exchange fails', async () => {
     establishPasswordRecovery.mockRejectedValue(new Error('expired'));
