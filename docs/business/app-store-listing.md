@@ -94,23 +94,29 @@ Apple's 2026 tiers are 4+ / 9+ / 13+ / 16+ / 18+. Everything was answered "None"
 
 Expected result: **18+**. This matches Delectable and Vivino.
 
-## 7. App Privacy questionnaire — ✅ submitted 2026-09-08
+## 7. App Privacy questionnaire — ⚠️ NOT SUBMITTED
 
-Kept as the record of what was submitted. **Revisit it if analytics are ever added** — Usage Data was answered "not collected", and PostHog would change that.
+**Corrected 2026-09-15.** This section previously claimed the questionnaire was submitted on 2026-09-08. It was not. App Store Connect still shows the "Get Started" prompt on the App Privacy page, which only appears when no data-collection answers exist at all. Verified by screenshot and by the API returning zero data-usage rows. The App Privacy section cannot be edited through the App Store Connect API (every `appDataUsages` and `appPrivacyDetails` endpoint returns 404), so it has to be completed by hand in the browser. **It blocks submission.**
 
-For each item: **Linked to the user: Yes**, **Used for tracking: No**, purpose **App Functionality** unless noted.
+The answers below were re-derived from the shipping code on 2026-09-15, not from the earlier note. Every row is **Used for tracking: No**; the app contains no advertising SDK and shares nothing with data brokers.
 
-| Data type | Collected | Why |
-|---|---|---|
-| Contact Info → Email Address | Yes | Account creation and sign-in |
-| User Content → Photos or Videos | Yes | Wine, visit and cellar photos the user attaches |
-| User Content → Other User Content | Yes | Tasting notes, ratings, sommelier chat messages |
-| Location → Precise Location | Yes | Map, nearby wineries, tagging a visit's location. Foreground only |
-| Identifiers → User ID | Yes | Supabase account id (and the RevenueCat app user id once Pro ships) |
-| Diagnostics → Crash Data | No | Not currently collected |
-| Usage Data | No | Not currently collected — **change this if PostHog is added** |
+| Category | Data type | Purposes | Linked to user | Evidence in code |
+|---|---|---|---|---|
+| Contact Info | Name | App Functionality | Yes | `app/register.js` name field → `signUp({ options: { data: { name } } })` in `app/_layout.js` |
+| Contact Info | Email Address | App Functionality | Yes | Account creation and sign-in |
+| Location | Precise Location | App Functionality, Product Personalization | Yes | `lib/mapLocation.js` `Accuracy.Balanced`; visit coordinates are stored |
+| User Content | Photos or Videos | App Functionality | Yes | Wine, visit and cellar photos via `expo-image-picker` |
+| User Content | Customer Support | App Functionality | Yes | `app/profile/feedback.js` writes `bug_reports` and `contact_messages` |
+| User Content | Other User Content | App Functionality, Product Personalization | Yes | Tasting notes, ratings, sommelier messages |
+| Identifiers | User ID | App Functionality, Analytics | Yes | Supabase UUID, reused as the RevenueCat app user id |
+| Identifiers | Device ID | App Functionality | Yes | `react-native-purchases` collects the vendor identifier by default |
+| Purchases | Purchase History | App Functionality, Analytics | Yes | RevenueCat subscription state and history |
+| Usage Data | Product Interaction | App Functionality | Yes | Server-side AI usage counters that enforce the free-tier meters |
+| Diagnostics | Other Diagnostic Data | App Functionality | **No** | `expo-updates` reports update errors; not tied to an account |
 
-**Nothing is used for tracking, and no data is shared with data brokers or advertisers.** Third-party processors (Supabase, Anthropic) act on our behalf and are disclosed in the privacy policy.
+Leave every other data type unchecked. In particular **Financial Info → Payment Info is No**: Apple processes payment and the app never receives card details.
+
+Revisit this if analytics are ever added. PostHog would expand Usage Data and probably add Diagnostics linked to the user.
 
 ## 8. Review notes
 
