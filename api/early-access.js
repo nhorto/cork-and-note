@@ -1,3 +1,4 @@
+/* global Buffer */
 const { createHmac } = require('node:crypto');
 
 // Same-origin website endpoint. Credentials and the private roster stay server-side.
