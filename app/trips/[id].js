@@ -24,6 +24,7 @@ import {
 } from 'react-native';
 import Button from '../../components/Button';
 import CellarOptionSheet from '../../components/CellarOptionSheet';
+import AiNotice from '../../components/AiNotice';
 import Chip from '../../components/Chip';
 import ScreenHeader from '../../components/ScreenHeader';
 import TripTimeline from '../../components/TripTimeline';
@@ -408,6 +409,10 @@ export default function TripDetailScreen() {
                 ))}
               </View>
             ) : null}
+            <AiNotice
+              content={notes}
+              text="AI notes for your day. They can be wrong; check hours and drive times before you go."
+            />
             <Button
               variant="ghost"
               title="Ask again"
