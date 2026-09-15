@@ -49,3 +49,48 @@ test('signup only succeeds after durable acceptance, minimizes attribution and h
     assert.equal((await request()).code, 503);
   } finally { global.fetch = old; }
 });
+test('a new request sends one acknowledgement and one owner alert; duplicates and email failures stay silent 200s', async () => {
+  process.env.EARLY_ACCESS_SUPABASE_URL = 'https://example.supabase.co';
+  process.env.EARLY_ACCESS_SERVICE_KEY = 'unit-test-key';
+  process.env.EARLY_ACCESS_HASH_SECRET = 'unit-test-salt';
+  process.env.EARLY_ACCESS_RESEND_KEY = 'unit-test-resend';
+  process.env.EARLY_ACCESS_FROM = 'Cork & Note <hello@example.com>';
+  process.env.EARLY_ACCESS_OWNER_EMAIL = 'owner@example.com';
+  delete process.env.EARLY_ACCESS_ANDROID_JOIN_URL;
+  const old = global.fetch; let sends = [];
+  const fake = (rpcResult, emailOk = true) => async (url, options) => {
+    if (String(url).includes('resend.com')) { sends.push({ headers: options.headers, body: JSON.parse(options.body) }); if (!emailOk) throw Error('resend down'); return { ok: true, json: async () => ({ id: 'x' }) }; }
+    return { ok: true, json: async () => rpcResult };
+  };
+  try {
+    global.fetch = fake('accepted');
+    assert.equal((await request({ ...valid, attribution: { utm_content: '01_journal_feed' } })).code, 200);
+    assert.equal(sends.length, 2);
+    const ack = sends.find(s => s.body.to[0] === 'tester@example.com');
+    const alert = sends.find(s => s.body.to[0] === 'owner@example.com');
+    assert.match(ack.body.subject, /Android early-access request/);
+    assert.match(ack.body.text, /installation steps as soon as your place is ready/);
+    assert.equal(ack.body.reply_to, 'cork_and_note@yahoo.com');
+    assert.ok(!alert.body.subject.includes('tester@example.com'), 'no address in the alert subject');
+    assert.match(alert.body.text, /tester@example.com/);
+    assert.match(alert.body.text, /01_journal_feed/);
+    assert.notEqual(ack.headers['Idempotency-Key'], alert.headers['Idempotency-Key']);
+    sends = []; global.fetch = fake('duplicate');
+    assert.equal((await request()).code, 200);
+    assert.equal(sends.length, 0, 'duplicates send nothing');
+    sends = []; global.fetch = fake('accepted', false);
+    assert.equal((await request()).code, 200, 'email outage never fails a saved signup');
+    sends = []; global.fetch = fake('accepted');
+    assert.equal((await request({ ...valid, interest: 'launch', commitment: false })).code, 200);
+    assert.match(sends.find(s => s.body.to[0] === 'tester@example.com').body.subject, /launch list/);
+    process.env.EARLY_ACCESS_ANDROID_JOIN_URL = 'https://play.google.com/apps/testing/com.example';
+    sends = [];
+    assert.equal((await request()).code, 200);
+    const ready = sends.find(s => s.body.to[0] === 'tester@example.com');
+    assert.match(ready.body.subject, /early access is ready/);
+    assert.match(ready.body.text, /Become a tester/);
+    sends = []; delete process.env.EARLY_ACCESS_RESEND_KEY;
+    assert.equal((await request()).code, 200);
+    assert.equal(sends.length, 0, 'unconfigured email is a no-op');
+  } finally { global.fetch = old; delete process.env.EARLY_ACCESS_ANDROID_JOIN_URL; }
+});
