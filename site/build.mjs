@@ -27,7 +27,12 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'site', 'dist');
-const SITE_URL = 'https://cork-and-note-sigma.vercel.app';
+const SITE_URL = process.env.SITE_URL || 'https://corkandnote.com';
+// Launch-day switch: set APP_STORE_URL (e.g. https://apps.apple.com/us/app/id6780661381)
+// in the Vercel project and redeploy. Every iPhone "coming soon" surface flips
+// to a real App Store link; nothing else on the site changes.
+const APP_STORE_URL = process.env.APP_STORE_URL || '';
+const IOS_LIVE = Boolean(APP_STORE_URL);
 
 const legalSrc = readFileSync(join(ROOT, 'lib', 'legalContent.js'), 'utf8');
 const { PRIVACY_POLICY, TERMS_OF_USE, SUPPORT_EMAIL } = await import(
@@ -313,7 +318,9 @@ const PRO_WINS = [
 const FAQ = [
   [
     'When can I get it?',
-    'Cork & Note is in the final stretch of App Store preparation and launches on iPhone and Android soon. This page will link straight to the App Store the day it’s live.',
+    IOS_LIVE
+      ? `Cork & Note is available now on the App Store for iPhone. Android is in closed testing; request early access below to join the Android test.`
+      : 'Cork & Note is in the final stretch of App Store preparation and launches on iPhone and Android soon. This page will link straight to the App Store the day it’s live.',
   ],
   [
     'Will my journal get locked behind Pro?',
@@ -340,7 +347,9 @@ const FAQ = [
 const home = page({
   title: 'Cork & Note: remember what you tasted, discover what you like',
   description:
-    'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere. No expertise needed. Coming soon to the App Store and Google Play.',
+    IOS_LIVE
+      ? 'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere. No expertise needed. Available now on the App Store for iPhone.'
+      : 'A wine journal with a personal AI sommelier and a map of every winery you’ve visited. Log any wine, anywhere. No expertise needed. Coming soon to the App Store and Google Play.',
   active: '/',
   dark: true,
   extraHead: `<script type="application/ld+json">${JSON.stringify({
@@ -365,10 +374,13 @@ const home = page({
       <h1>Remember what you tasted. Discover what you like.</h1>
       <p class="lede">Your personal wine journal, so you never forget a wine you loved. Your personal sommelier, learning your palate with every tasting you log. And your own map of wine country, keeping every winery you visit. <strong>No wine expertise needed.</strong></p>
       <div class="hero-actions">
-        <a class="badge" href="/beta">Get early access</a>
-        <a class="textlink" href="#features">See how it works <span aria-hidden="true">↓</span></a>
+        ${IOS_LIVE
+          ? `<a class="badge" href="${APP_STORE_URL}">Download on the App Store</a>
+        <a class="textlink" href="/beta">Android early access <span aria-hidden="true">→</span></a>`
+          : `<a class="badge" href="/beta">Get early access</a>
+        <a class="textlink" href="#features">See how it works <span aria-hidden="true">↓</span></a>`}
       </div>
-      <p class="subnote">Android and iPhone · Invitation required · US testers, age 21+</p>
+      <p class="subnote">${IOS_LIVE ? 'iPhone · Free journal · Optional Pro · US, age 21+' : 'Android and iPhone · Invitation required · US testers, age 21+'}</p>
     </div>
     <div class="hero-stage">${phone('shot-1-home.png', 'The Cork & Note home screen: wines tasted, places visited, Tonight’s Pick and bottles ready to drink.', { eager: true })}</div>
   </div>
@@ -458,12 +470,12 @@ const home = page({
       <article class="plan-card">
         <p class="eyebrow">Free</p><h3>Your everyday wine journal.</h3><p class="card-price">$0</p><p class="plan-description">For keeping track of what you taste, and trying everything once.</p>
         <ul class="plan-features"><li>Unlimited tastings, notes and photos</li><li>Winery visits, your map, wishlist and nearby wineries</li><li>Up to 25 bottles in your cellar</li><li>3 label or tasting-card scans to try</li><li>5 sommelier messages a month</li></ul>
-        <div class="plan-action"><p>Coming soon for iPhone</p><a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
+        <div class="plan-action">${IOS_LIVE ? `<a class="plan-button" href="${APP_STORE_URL}">Get it on the App Store</a>` : '<p>Coming soon for iPhone</p>'}<a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
       </article>
       <article class="plan-card pro-card">
         <p class="eyebrow">Pro</p><h3>More guidance with every tasting.</h3><p class="card-price">$9.99<span>/ month</span></p><p class="annual-price">or $59.99 / year with 3 days free</p><p class="plan-description">Everything in Free, with more room to ask, scan and explore.</p>
         <ul class="plan-features"><li>Unlimited sommelier conversations, photos and web lookups included</li><li>Choose from a wine list: picks in your budget, based on your ratings</li><li>Your taste report, and a plan for a wine day with drive times</li><li>US wine regions on the map, with the wineries inside each one</li><li>Live winery ratings, hours &amp; websites on every winery page</li><li>Unlimited label and tasting-card scans</li><li>Unlimited cellar with drink windows and Tonight’s Pick</li><li>Export your journal to CSV</li></ul>
-        <div class="plan-action"><p>Coming soon for iPhone</p><a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
+        <div class="plan-action">${IOS_LIVE ? `<a class="plan-button" href="${APP_STORE_URL}">Start free on the App Store</a>` : '<p>Coming soon for iPhone</p>'}<a class="plan-button" href="#plan-comparison">Compare all features <span aria-hidden="true">↓</span></a></div>
       </article>
     </div>
     <div id="plan-comparison" class="comparison-section">
@@ -515,8 +527,11 @@ const home = page({
   <div class="wrap">
     <div class="double-rule" role="presentation"></div>
     <h2>Your next tasting deserves to be remembered.</h2>
-    <a class="badge" href="/beta">Get early access</a>
-    <p class="subnote">Request early access for Android or iPhone.</p>
+    ${IOS_LIVE
+      ? `<a class="badge" href="${APP_STORE_URL}">Download on the App Store</a>
+    <p class="subnote">Free on iPhone. Android early access is <a href="/beta">open here</a>.</p>`
+      : `<a class="badge" href="/beta">Get early access</a>
+    <p class="subnote">Request early access for Android or iPhone.</p>`}
   </div>
 </section>`,
 });
@@ -560,13 +575,17 @@ const beta = page({
     </section>
     <section><h2>What happens next?</h2>
       <p><strong>Android:</strong> we’ll email your invitation and Google Play installation instructions when your place is ready. Joining the website list does not enroll you in the closed test. We’ll ask you to stay opted in for at least 14 consecutive days and share feedback.</p>
-      <p><strong>iPhone:</strong> we’ll email an invitation to install through Apple’s TestFlight when your place is ready. You can explore the beta and send feedback before the App Store release.</p>
+      ${IOS_LIVE
+        ? `<p><strong>iPhone:</strong> no invitation needed. Cork &amp; Note is live on the App Store: <a href="${APP_STORE_URL}">download it here</a> and start your journal today.</p>`
+        : `<p><strong>iPhone:</strong> we’ll email an invitation to install through Apple’s TestFlight when your place is ready. You can explore the beta and send feedback before the App Store release.</p>`}
       <p><strong>Prefer to wait?</strong> Choose launch news above. We’ll contact you when the public app is available for your phone.</p>
     </section>
     <section><h2>Your journal is free. Pro is optional.</h2>
       <p>Early access does not require a subscription. The free journal includes limited AI use; Pro adds more tools and guidance.</p>
       <p>On Android, optional Pro purchases may be available through Google Play once billing is ready. Any real purchase shows its price and renewal terms before you confirm.</p>
-      <p>In the iPhone TestFlight beta, purchases are free test transactions. They do not charge you or become paid subscriptions. Paid iPhone subscriptions will be available through the public App Store version after launch.</p>
+      ${IOS_LIVE
+        ? '<p>On iPhone, Pro is available through the App Store. The price, trial eligibility and renewal terms are shown before you confirm.</p>'
+        : '<p>In the iPhone TestFlight beta, purchases are free test transactions. They do not charge you or become paid subscriptions. Paid iPhone subscriptions will be available through the public App Store version after launch.</p>'}
     </section>
     <section><h2>Help shape what comes next.</h2>
       <p>Use <strong>Profile → Feedback</strong> in the app, or email us. Tell us what was useful, what was confusing, and what you’d like to see. No wine expertise or public review required.</p>
