@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-09-14T18:05:20.691Z",
+  "track": "alpha",
+  "release": {
+    "name": "1.0.0 (7) — Cork & Note early access",
+    "versionCodes": [
+      "7"
+    ],
+    "status": "draft",
+    "releaseNotes": [
+      {
+        "language": "en-US",
+        "text": "Welcome to Cork & Note early access. Save and rate wines, explore the winery map, and try the personal sommelier. Please share what worked or felt confusing through Profile → Feedback. The journal is free; Pro is optional. Thank you for helping shape the app."
+      }
+    ]
+  },
+  "committed": true,
+  "published": false,
+  "testersInvited": false
+}

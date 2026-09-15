@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-09-14T20:17:44.996011+00:00",
+  "accountId": "33903429639272752",
+  "campaignId": "120254021223890120",
+  "campaignName": "CN | Android early access | US 21+ | $75 pilot",
+  "campaignEnabledInDraft": true,
+  "published": false,
+  "publicationAttempted": true,
+  "publicationBlocker": "Meta Verify Payment Method: payment method is disabled until verification. Owner must complete bank/provider verification or the card-transaction code step.",
+  "lifetimeBudgetUSD": 75,
+  "monthlyReserveUSD": 225,
+  "start": "2026-09-14T17:00:00-04:00",
+  "end": "2026-09-19T17:00:00-04:00",
+  "datesVerifiedInReview": true,
+  "minimumAge": 21,
+  "country": "US",
+  "deviceOS": "Android",
+  "placements": [
+    "Facebook Feed",
+    "Instagram feed",
+    "Facebook Stories",
+    "Instagram Stories"
+  ],
+  "adIds": [
+    "120254021223900120",
+    "120254021557820120"
+  ],
+  "offer": "Request a place on the Android early-access list. Installation instructions arrive when access is ready.",
+  "destination": "https://cork-and-note-sigma.vercel.app/beta?platform=Android",
+  "signupWordingDeployed": true,
+  "mobileSignupCheckPassed": true,
+  "actualAppScreenshots": true,
+  "updatedCopyVerifiedInBothPreviews": true,
+  "creativeEnhancementsEnabled": [],
+  "googleTestingBlocksSignupAds": false,
+  "googleTestingBlocksInstallationInvitations": true,
+  "next": "Owner completes payment verification in the open Chrome dialog. Recheck publication status and move the five-day schedule if its start has passed."
+}

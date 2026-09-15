@@ -1,17 +1,17 @@
 # Cork & Note early-tester program
 
-Prepared September 14, 2026. Nick approved 30 days of complimentary Pro for accepted testers, with no automatic charge afterward. Target 15–20 Android participants, with iPhone testing continuing independently. The initial recruitment copy focuses on US adults 21+; this is our cohort choice, not a Google requirement.
+Updated September 14, 2026 after Nick clarified that the earlier offer was a draft. The current offer is free journal access with optional Pro; there is no blanket complimentary-Pro promise. Target 15–20 Android participants, with iPhone testing continuing independently. The initial recruitment copy focuses on US adults 21+; this is our cohort choice, not a Google requirement.
 
 ## What we are offering
 
-An invitation to help improve an unreleased wine journal, plus 30 days of complimentary Pro from activation. No purchase, card or public review is required. The gift expires to Free; existing journal data stays available. It does not cancel a pre-existing store subscription. Fair-use limits and the project's real AI/API costs still apply.
+An invitation to help improve an unreleased wine journal. No purchase, card or public review is required to join. The free tier retains its normal limits; optional Pro is available only through eligible, verified billing. TestFlight transactions generate no revenue. Complimentary Pro may be offered separately to a selected feature-testing cohort, but is not the general signup offer.
 
-Use RevenueCat's promotional `pro` entitlement for everyday testers. Keep purchase/restore/expiry tests on separate dedicated accounts: test subscriptions renew much faster than real subscriptions and are inconvenient for a two-week usability test. Our webhook stores one Pro row per user; overlapping promotional and store events need reconciliation, so do not add a gift to an account already running billing tests. Do not promise permanent free access or an automatic annual trial after beta participation.
+Only use RevenueCat's promotional `pro` entitlement for a separately selected complimentary-access cohort. Keep purchase/restore/expiry tests on separate dedicated accounts: test subscriptions renew much faster than real subscriptions and are inconvenient for a two-week usability test. Our webhook stores one Pro row per user; overlapping promotional and store events need reconciliation, so do not add a gift to an account already running billing tests. Do not promise permanent free access or an automatic annual trial after beta participation.
 
 ## Recruitment and joining
 
-1. Publish the prepared `/beta` page and verify its email draft on a phone. It uses the existing support mailbox, with an explicit send step; it is not a hosted signup database. No request is received until the person sends the email. Confirm the mailbox is monitored before advertising.
-2. Use the draft in [recruitment copy](../marketing/early-tester-copy-2026-09-14.md). Start with owned channels and relevant communities where invitations are allowed. Paid ads require a chosen budget and audience; none have been placed. Market early access, not a public launch.
+1. The website `/beta` page submits to `/api/early-access` and saves requests in the private Supabase `early_access_requests` table. It separates early testing from launch notifications and records campaign labels. Success appears only after storage accepts the request. The support inbox remains `cork_and_note@yahoo.com`. No automatic invitation or notification emails are configured; review the roster and arrange follow-up before spending.
+2. Use the draft in [recruitment copy](../marketing/early-tester-copy-2026-09-14.md). Start with owned channels and relevant communities where invitations are allowed. The accepted starting allocation is a $75 total Android recruitment pilot, with $225 reserved within the $300 monthly budget. Audience: US adults 21+. Campaigns remain inactive until the destination, store enrollment and exact Meta settings are verified. Market early access, not a public launch.
 3. Keep a private roster using `early-tester-roster-template.csv` outside git. Record contact email, phone platform/model, Google Account used for Play, app account UUID after registration, invitation/opt-in/install dates, Pro activation/expiry and feedback follow-up. Collect no passwords or payment details. The Android Google Account can use a non-Gmail email address.
 4. In Play Console, confirm the account's production-access gate. Configure the **closed** test with the approved build and countries, the tester email list, and feedback email `cork_and_note@yahoo.com`. Finish required app-content/reviewer fields and release review. A current internal tester must opt out of internal testing before joining the closed test; confirm they are actually on the closed track.
 5. Send the actual closed-test opt-in link to eligible participants after availability. They must accept with the allowed Google Account and install from Google Play. Being on our email list or internal track does not start their closed-test clock. Do not fabricate a public or opt-in URL.
@@ -20,7 +20,7 @@ Use RevenueCat's promotional `pro` entitlement for everyday testers. Keep purcha
 
 A signup is not an opt-in. For a fixed cohort of 12, the earliest possible eligibility is 14 days after the last of those 12 joins, if all remain opted in. If someone leaves, recalculate with qualifying participants. Confirm the Console dashboard before applying; 14 elapsed days does not automatically approve production access. New app updates can be tested during the closed test.
 
-## Activating complimentary Pro
+## Optional complimentary Pro — only for a separately selected cohort
 
 1. Wait until the accepted tester has installed, registered and signed in. Confirm their app identity against their invitation; use the Supabase UUID that the app passes to RevenueCat, never an email address or an anonymous device ID as a guessed substitute.
 2. In RevenueCat, open that Customer profile. Check for an existing paid/test subscription or grant. If one exists, resolve it separately instead of layering a new gift on top. A gift does not stop existing subscription charges.
@@ -51,7 +51,7 @@ The existing app route is **Profile → Feedback**: ideas/rating go to `feedback
 
 In-app bug reports currently contain version but not native build number; request build/device in the report text. For screenshots, use support email or native TestFlight feedback. Google closed testers can also submit private Play feedback; it does not affect public ratings. No new forum, Discord or social account is necessary for this cohort.
 
-Owner handles participant communication and account declarations. Engineering can triage reports, reproduce/fix bugs, maintain builds, verify entitlements and prepare store submissions. No invitations, reminder emails, ads, store release or final declarations were sent/submitted during this work.
+Owner handles participant communication. App-content declarations were saved in Console on September 14; see [the declaration record](play/app-content-declarations-2026-09-14.md). Engineering can triage reports, reproduce/fix bugs, maintain builds, verify entitlements and prepare store submissions. No invitations, reminder emails, ads or store release were sent/published during this work. Saved declarations are awaiting Google review.
 
 ## Remaining launch gates
 

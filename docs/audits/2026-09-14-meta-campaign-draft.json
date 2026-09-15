@@ -1,0 +1,45 @@
+{
+  "checkedAt": "2026-09-14T18:33:47.482933+00:00",
+  "accountId": "33903429639272752",
+  "campaignId": "120254021223890120",
+  "campaignName": "CN | Android early access | US 21+ | $75 pilot",
+  "campaignEnabled": false,
+  "published": false,
+  "lifetimeBudgetUSD": 75,
+  "adSetId": "120254021223910120",
+  "provisionalStart": "2026-09-16T14:04:00-04:00",
+  "provisionalEnd": "2026-09-21T14:04:00-04:00",
+  "datesVerifiedAfterReload": true,
+  "minimumAge": 21,
+  "country": "US",
+  "deviceOS": "Android",
+  "placements": [
+    "Facebook Feed",
+    "Instagram feed",
+    "Facebook Stories",
+    "Instagram Stories"
+  ],
+  "allowExcludedPlacementSpending": false,
+  "adIds": [
+    "120254021223900120",
+    "120254021557820120"
+  ],
+  "creativeEnhancementsEnabled": [],
+  "actualAppScreenshots": true,
+  "feedDimensions": [
+    1080,
+    1350
+  ],
+  "storyDimensions": [
+    1080,
+    1920
+  ],
+  "placementPreviewsVisuallyReviewed": true,
+  "signupDestination": "https://cork-and-note-sigma.vercel.app/beta?platform=Android",
+  "remaining": [
+    "Google initial app setup (draft-app rollout validation blocked), tester list, account requirements and enrollment link",
+    "Verify installation before paid recruitment",
+    "Owner confirmation of Meta billing/phone completion",
+    "Final creative acceptance and launch timing"
+  ]
+}

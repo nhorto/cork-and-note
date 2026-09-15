@@ -1,0 +1,50 @@
+{
+  "checkedAt": "2026-09-14T22:46:15.667828+00:00",
+  "accountId": "33903429639272752",
+  "campaignId": "120254021223890120",
+  "campaignName": "CN | Android early access | US 21+ | $75 pilot",
+  "adSetId": "120254021223910120",
+  "campaignPublished": true,
+  "adSetPublished": true,
+  "adsPublished": true,
+  "adsEnabled": [
+    true,
+    true
+  ],
+  "adIds": [
+    "120254021223900120",
+    "120254021557820120"
+  ],
+  "adDeliveryStatuses": [
+    "Processing",
+    "Processing"
+  ],
+  "adAccountPhoneVerified": true,
+  "phoneVerificationMethod": "Existing verified Facebook profile number added to ad account; no number or code recorded.",
+  "paymentVerifiedByOwner": true,
+  "publicationBlocker": null,
+  "lifetimeBudgetUSD": 75,
+  "monthlyReserveUSD": 225,
+  "start": "2026-09-14T18:41:00-04:00",
+  "end": "2026-09-19T19:00:00-04:00",
+  "scheduleVerifiedInReview": true,
+  "country": "US",
+  "minimumAge": 21,
+  "deviceOS": "Android",
+  "placements": [
+    "Facebook Feed",
+    "Instagram feed",
+    "Facebook Stories",
+    "Instagram Stories"
+  ],
+  "offer": "Request Android early access; installation instructions follow when access is ready.",
+  "destination": "https://cork-and-note-sigma.vercel.app/beta?platform=Android",
+  "actualAppScreenshots": true,
+  "creativeEnhancementsEnabled": [],
+  "reportingDateRange": "Today: Sep 14, 2026",
+  "observedSpendUSD": 0,
+  "observedImpressions": "\u2014",
+  "eligiblePilotSignupRequests": 0,
+  "backupAd07Uploaded": false,
+  "next": "Check Meta processing/review and actual delivery. Compare actual spend with eligible signup requests before changing budget or creative. No unattended monitoring configured."
+}

@@ -1,0 +1,163 @@
+2 | AXStaticText |  | Loading Google Play Console
+4 | AXLink |  | 
+5 | AXButton | Google Play Console logo | 
+7 | AXButton | Unread notifications Open notification center | 
+9 | AXButton | Cork & Note | 
+11 | AXButton | Switch developer accounts | 
+13 | AXLink | All apps | 
+14 | AXStaticText |  | All apps
+17 | AXButton | Dashboard | 
+19 | AXButton | Statistics | 
+21 | AXButton | Publishing overview | 
+23 | AXButton | Protected with Play | 
+25 | AXButton | Test and release | 
+27 | AXButton | Monitor and improve | 
+30 | AXButton | Reach and devices | 
+32 | AXButton | Ratings and reviews | 
+34 | AXButton | Android vitals | 
+36 | AXButton | Policy and programs | 
+39 | AXButton | Policy status | 
+41 | AXButton | App content | 
+43 | AXButton | Programs | 
+45 | AXButton | Grow users | 
+47 | AXButton | Monetize with Play | 
+48 | AXLink | Go back to App content | 
+50 | AXStaticText |  | App content
+53 | AXStaticText |  | Data safety
+54 | AXButton | Export to CSV | 
+55 | AXButton | Import from CSV | 
+57 | AXStaticText |  | Help users understand how your app collects and shares their data
+59 | AXStaticText |  | To help users better understand your app's privacy, security, and data handling practices before they download it, provide information about your app's safety. The information you provide is shown on your store listing so that users can learn how you collect and share their data.
+60 | AXButton | Hide detailed description about Data safety | 
+62 | AXRadioButton | Step 1 of 5, Overview | 0
+63 | AXRadioButton | Step 2 of 5, Data collection and security | 0
+64 | AXRadioButton | Step 3 of 5, Data types | 0
+65 | AXRadioButton | Step 4 of 5, Data usage and handling | 0
+66 | AXRadioButton | Step 5 of 5, Preview | 1
+69 | AXStaticText |  | Store listing preview
+70 | AXButton | Collapse all | 
+72 | AXStaticText |  | Based on what you've told us, the following information will be shown to users on Google Play
+74 | AXStaticText |  | Data shared
+76 | AXStaticText |  | Data that may be shared with other companies or organizations
+77 | AXStaticText |  | Location
+78 | AXStaticText |  | Approximate location, Precise location
+79 | AXButton | Hide details | 
+81 | AXStaticText |  | Data shared, and for what purpose
+82 | AXStaticText |  | Approximate location
+84 | AXStaticText |  | App functionality, Analytics
+85 | AXStaticText |  | Precise location
+87 | AXStaticText |  | App functionality, Analytics
+88 | AXStaticText |  | App info and performance
+89 | AXStaticText |  | Crash logs, Diagnostics
+90 | AXButton | Hide details | 
+92 | AXStaticText |  | Data shared, and for what purpose
+93 | AXStaticText |  | Crash logs
+95 | AXStaticText |  | Analytics
+96 | AXStaticText |  | Diagnostics
+98 | AXStaticText |  | Analytics
+99 | AXStaticText |  | App activity
+100 | AXStaticText |  | App interactions
+101 | AXButton | Hide details | 
+103 | AXStaticText |  | Data shared, and for what purpose
+104 | AXStaticText |  | App interactions
+106 | AXStaticText |  | Analytics
+107 | AXStaticText |  | Device or other IDs
+108 | AXStaticText |  | Device or other IDs
+109 | AXButton | Hide details | 
+111 | AXStaticText |  | Data shared, and for what purpose
+112 | AXStaticText |  | Device or other IDs
+114 | AXStaticText |  | Analytics
+116 | AXStaticText |  | Data collected
+118 | AXStaticText |  | Data this app may collect
+119 | AXStaticText |  | Personal info
+120 | AXStaticText |  | Name, Email address, User IDs
+121 | AXButton | Hide details | 
+123 | AXStaticText |  | Data collected, and for what purpose
+124 | AXStaticText |  | Name
+126 | AXStaticText |  | App functionality, Account management
+127 | AXStaticText |  | Email address
+129 | AXStaticText |  | App functionality, Fraud prevention, security, and compliance, Account management
+130 | AXStaticText |  | User IDs
+132 | AXStaticText |  | App functionality, Analytics, Fraud prevention, security, and compliance, Account management
+133 | AXStaticText |  | Financial info
+134 | AXStaticText |  | Purchase history
+135 | AXButton | Hide details | 
+137 | AXStaticText |  | Data collected, and for what purpose
+138 | AXStaticText |  | Purchase history
+140 | AXStaticText |  | App functionality, Analytics
+141 | AXStaticText |  | Location
+142 | AXStaticText |  | Approximate location, Precise location
+143 | AXButton | Hide details | 
+145 | AXStaticText |  | Data collected, and for what purpose
+146 | AXStaticText |  | Approximate location
+148 | AXStaticText |  | App functionality, Analytics, Personalization
+149 | AXStaticText |  | Precise location
+150 | AXStaticText |  | Optional
+152 | AXStaticText |  | App functionality, Personalization
+153 | AXStaticText |  | Messages
+154 | AXStaticText |  | Other in-app messages
+155 | AXButton | Hide details | 
+157 | AXStaticText |  | Data collected, and for what purpose
+158 | AXStaticText |  | Other in-app messages
+159 | AXStaticText |  | Optional
+161 | AXStaticText |  | App functionality, Personalization
+162 | AXStaticText |  | Photos and videos
+163 | AXStaticText |  | Photos
+164 | AXButton | Hide details | 
+166 | AXStaticText |  | Data collected, and for what purpose
+167 | AXStaticText |  | Photos
+168 | AXStaticText |  | Optional
+170 | AXStaticText |  | App functionality
+171 | AXStaticText |  | App info and performance
+172 | AXStaticText |  | Crash logs, Diagnostics
+173 | AXButton | Hide details | 
+175 | AXStaticText |  | Data collected, and for what purpose
+176 | AXStaticText |  | Crash logs
+178 | AXStaticText |  | Analytics
+179 | AXStaticText |  | Diagnostics
+181 | AXStaticText |  | Analytics
+182 | AXStaticText |  | App activity
+183 | AXStaticText |  | App interactions, Other user-generated content
+184 | AXButton | Hide details | 
+186 | AXStaticText |  | Data collected, and for what purpose
+187 | AXStaticText |  | App interactions
+189 | AXStaticText |  | App functionality, Analytics, Fraud prevention, security, and compliance
+190 | AXStaticText |  | Other user-generated content
+191 | AXStaticText |  | Optional
+193 | AXStaticText |  | App functionality, Personalization
+194 | AXStaticText |  | Device or other IDs
+195 | AXStaticText |  | Device or other IDs
+196 | AXButton | Hide details | 
+198 | AXStaticText |  | Data collected, and for what purpose
+199 | AXStaticText |  | Device or other IDs
+201 | AXStaticText |  | App functionality, Analytics
+203 | AXStaticText |  | Data deletion
+205 | AXStaticText |  | Data that can be deleted by users.
+206 | AXStaticText |  | Delete app account
+208 | AXStaticText |  | You can submit a request to delete your account and associated data for this app
+209 | AXLink | https://cork-and-note-sigma.vercel.app/delete-account | 
+210 | AXStaticText |  | https://cork-and-note-sigma.vercel.app/delete-account
+212 | AXStaticText |  | Security practices
+214 | AXStaticText |  | Data is encrypted in transit
+216 | AXStaticText |  | Your data is transferred over a secure connection
+218 | AXStaticText |  | Privacy policy
+220 | AXStaticText |  | https://cork-and-note.vercel.app/privacy
+222 | AXStaticText |  | Step 5 of 5, Preview
+225 | AXStaticText |  | Change saved. Send for review in Publishing overview.
+226 | AXButton | Discard | 
+227 | AXButton | Back | 
+228 | AXButton | Save as draft | 
+229 | AXButton | Save | 
+230 | AXLink | Product updates | 
+231 | AXStaticText |  | Product updates
+232 | AXLink | Status dashboard | 
+233 | AXStaticText |  | Status dashboard
+234 | AXLink | Help | 
+235 | AXStaticText |  | Help
+236 | AXStaticText |  | © 2026 Google
+237 | AXLink | Privacy | 
+238 | AXStaticText |  | Privacy
+239 | AXLink | Developer Distribution Agreement | 
+240 | AXStaticText |  | Developer Distribution Agreement
+241 | AXLink | Terms of Service | 
+242 | AXStaticText |  | Terms of Service

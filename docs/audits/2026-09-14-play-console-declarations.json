@@ -1,0 +1,99 @@
+{
+  "date": "2026-09-14",
+  "package": "com.nicholashorton.corkandnote",
+  "access": "Safari accessibility controls; JavaScript from Apple Events remains disabled",
+  "saved": {
+    "ads": false,
+    "advertisingId": false,
+    "governmentApp": false,
+    "appAccess": {
+      "restricted": true,
+      "reviewAccount": "review@corkandnote.com",
+      "loginVerified": true,
+      "proVerified": true,
+      "proExpiresAt": null,
+      "passwordStoredInRepository": false,
+      "optionalPartnerDeviceTesting": false
+    },
+    "targetAudience": {
+      "ageGroups": [
+        "18 and over"
+      ],
+      "restrictGoogleDeterminedMinors": true
+    },
+    "contentRating": {
+      "category": "All Other App Types",
+      "alcoholReference": "Often",
+      "onlineContent": true,
+      "alcoholPromotionFocus": true,
+      "digitalPurchases": true,
+      "randomPurchases": false,
+      "userToUserSharing": false,
+      "ESRB": "Mature 17+",
+      "PEGI": "18"
+    },
+    "privacyPolicy": "https://cork-and-note-sigma.vercel.app/privacy",
+    "category": "Food & Drink",
+    "storeContactWebsite": "https://cork-and-note-sigma.vercel.app",
+    "storeContactWebsitePublished": true
+  },
+  "dataSafety": {
+    "status": "Saved; App content actioned",
+    "collectedDataTypes": 13,
+    "nonEphemeral": true,
+    "encryptedInTransit": true,
+    "accountCreation": [
+      "Username and password"
+    ],
+    "deletionUrl": "https://cork-and-note-sigma.vercel.app/delete-account"
+  },
+  "dashboard": {
+    "requiredClosedTesters": 12,
+    "requiredContinuousDays": 14,
+    "currentlyOptedIn": 0,
+    "closedTestSetupTasksComplete": 4,
+    "closedTestSetupTasksTotal": 5
+  },
+  "revenuecat": {
+    "projectId": "proj3888109e",
+    "projectName": "me",
+    "androidPackageConfirmed": true,
+    "activeIntegrations": 1,
+    "activeIntegration": "Webhook to own Supabase revenuecat-webhook endpoint",
+    "thirdPartyAdvertisingOrAnalyticsIntegrationsActive": false
+  },
+  "reviewSubmitted": false,
+  "closedTestPublished": false,
+  "metaAdsPublished": false,
+  "appContentActionedCount": 10,
+  "releasePreparation": {
+    "alphaVersionCode": 7,
+    "previewConfirmed": true,
+    "blockingValidationErrors": 0,
+    "warnings": [
+      "No deobfuscation file associated with App Bundle"
+    ],
+    "changesReadyForReview": 14,
+    "managedPublishing": "off",
+    "reviewSubmitted": false
+  },
+  "mapsKey": {
+    "android7KeyMatchesInspectedGoogleCloudKey": true,
+    "apiRestrictedTo": "maps-android-backend.googleapis.com",
+    "androidApplicationRestrictionsPresent": false,
+    "restrictionsChanged": false,
+    "physicalPlayInstalledMapsTest": "Not completed"
+  },
+  "metaBilling": {
+    "paymentMethodPresent": false,
+    "observedMessage": "You haven't added any payment methods.",
+    "checkedAt": "2026-09-14T19:39:00Z"
+  },
+  "signupRosterCount": 0,
+  "privacyDeployment": {
+    "id": "dpl_UTDLG5RNsRRbZcjhPeVjaBdirsTS",
+    "alias": "https://cork-and-note-sigma.vercel.app",
+    "status": "READY",
+    "newLocationTextVerifiedLive": true
+  }
+}
