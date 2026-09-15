@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-09-14T19:54:59.041Z",
+  "submittedForms": false,
+  "results": [
+    {
+      "id": "01_journal_feed",
+      "httpStatus": 200,
+      "formVisible": true,
+      "platform": "Android",
+      "interest": "testing",
+      "commitmentRequired": true,
+      "overflow": false
+    },
+    {
+      "id": "01_journal_story",
+      "httpStatus": 200,
+      "formVisible": true,
+      "platform": "Android",
+      "interest": "testing",
+      "commitmentRequired": true,
+      "overflow": false
+    },
+    {
+      "id": "02_sommelier_feed",
+      "httpStatus": 200,
+      "formVisible": true,
+      "platform": "Android",
+      "interest": "testing",
+      "commitmentRequired": true,
+      "overflow": false
+    },
+    {
+      "id": "02_sommelier_story",
+      "httpStatus": 200,
+      "formVisible": true,
+      "platform": "Android",
+      "interest": "testing",
+      "commitmentRequired": true,
+      "overflow": false
+    }
+  ]
+}

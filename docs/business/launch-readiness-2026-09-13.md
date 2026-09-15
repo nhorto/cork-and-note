@@ -1,10 +1,12 @@
 # Cork & Note: what remains before launch
 
-**September 14 update:** Nick reports monthly TestFlight purchase success; annual remains untested. The approved early-tester offer is 30 days of complimentary Pro for accepted testers, with no automatic paid conversion. See the [early-tester program](early-tester-program-2026-09-14.md) for recruitment, access and feedback setup. These updates do not establish completed physical-device acceptance or a closed-test start date.
+**September 14 update:** Nick reports monthly TestFlight purchase success; annual remains untested. Nick clarified the earlier complimentary-Pro offer was a draft. The selected early-access offer is now the free journal with optional Pro; no blanket 30-day gift is promised. See the [early-tester program](early-tester-program-2026-09-14.md) for recruitment, access and feedback setup. These updates do not establish completed physical-device acceptance or a closed-test start date.
 
 **Updated September 13, 2026, after fresh candidates, live email verification and acceptance follow-through.** Current mobile release code is merged main **`c9d3e78`**, integrating all seven PRs through [#303](https://github.com/nhorto/cork-and-note/pull/303). [#304](https://github.com/nhorto/cork-and-note/pull/304) adds email preparation and a live website reset page; it does not change mobile app source.
 
 **Assessment:** **iOS 27** is valid in TestFlight and selected in the manual-release draft; **Android 7** is committed to internal testing. They replace the earlier 25/6 candidates and include the merged redesign/badge/failure-state fixes. Authentication SMTP and branded templates are live; Gmail delivery and the actual emailed recovery link pass. Physical-device email-link acceptance remains. Physical-device/purchase acceptance, store account/declaration checks and Android production access remain. No App Review submission or public release has been made.
+
+**Later September 14 Console update:** all ten Google app-content declarations are now actioned, including verified reviewer Pro access and Data safety. Food & Drink category and the live sigma-host privacy/contact URLs are saved. Android 7's Alpha preview was confirmed with no blocking validation errors; Publishing overview holds 14 changes ready for review. No review submission or closed-test rollout has been made. This account requires 12 closed testers for 14 continuous days and currently has 0 opted in. See [the saved declarations](play/app-content-declarations-2026-09-14.md) and [campaign game plan](../marketing/early-access-launch-game-plan-2026-09-14.md). The current campaign/signup website is `https://cork-and-note-sigma.vercel.app`; older host references below describe September 13 history.
 
 ## PR integration and current candidates
 
@@ -30,7 +32,7 @@
 | Store descriptions | Apple description and Google short/full descriptions saved and verified. Google support contacts, icon and feature graphic are saved. | Finish Console policy/account forms. |
 | Website | Homepage, privacy, terms, support, account deletion, reset page and recovery script all returned HTTP 200 in the latest check; site build passes. Current host: `https://cork-and-note.vercel.app`. | Attach corkandnote.com once Vercel access is available; add working public store links as each release becomes available. |
 
-Google `alpha`, `beta` and `production` tracks contain no releases. Internal testing is not a public launch or proof of closed-test eligibility. Apple draft selection is not App Review approval.
+September 13 history: Google `alpha`, `beta` and `production` tracks contained no releases. Alpha now has the September 14 prepared version 7 closed release described above. Internal testing is not a public launch or proof of closed-test eligibility. Apple draft selection is not App Review approval.
 
 Artwork and editable project: [Android screenshot folder](play/screenshots-2026-09-13/README.md), [checksum manifest](play/screenshots-2026-09-13/manifest.json). Download copies: `~/Downloads/Cork-and-Note-Google-Play-Final-Slides/` and its ZIP. The iPhone set remains in `~/Downloads/Cork-and-Note-AppStore-Final-Slides/`.
 

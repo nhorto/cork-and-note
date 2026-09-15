@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-09-14T22:57:55.291322+00:00",
+  "campaignId": "120254021223890120",
+  "budgetUSD": 75,
+  "minimumAge": 21,
+  "country": "US",
+  "objective": "Traffic",
+  "performanceGoal": "Maximize number of landing page views",
+  "adsStatusBeforeCorrection": [
+    "Active",
+    "Active"
+  ],
+  "observedSpendBeforeCorrectionUSD": 0,
+  "pilotSignups": 0,
+  "finding": "Minimum Android version was 1.0, but release 7 requires minSdkVersion 24 (Android 7.0).",
+  "correction": "Changed minimum OS to 7.0 Nougat; Meta confirmed 1 ad set updated.",
+  "statusAfterCorrection": "Processing",
+  "completedSignupEventsSentToMeta": false,
+  "optimizationAssessment": "Corrected basic eligibility issue. Signup acquisition performance is unproven. Prioritize completed-signup tracking and a Leads-objective evaluation before allocating the reserve.",
+  "budgetChanged": false
+}

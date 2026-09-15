@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'site', 'dist');
-const SITE_URL = 'https://cork-and-note.vercel.app';
+const SITE_URL = 'https://cork-and-note-sigma.vercel.app';
 
 const legalSrc = readFileSync(join(ROOT, 'lib', 'legalContent.js'), 'utf8');
 const { PRIVACY_POLICY, TERMS_OF_USE, SUPPORT_EMAIL } = await import(
@@ -365,7 +365,7 @@ const home = page({
       <h1>Remember what you tasted. Discover what you like.</h1>
       <p class="lede">Your personal wine journal, so you never forget a wine you loved. Your personal sommelier, learning your palate with every tasting you log. And your own map of wine country, keeping every winery you visit. <strong>No wine expertise needed.</strong></p>
       <div class="hero-actions">
-        <a class="badge" href="/beta">Join the early testers</a>
+        <a class="badge" href="/beta">Get early access</a>
         <a class="textlink" href="#features">See how it works <span aria-hidden="true">↓</span></a>
       </div>
       <p class="subnote">Android and iPhone · Invitation required · US testers, age 21+</p>
@@ -515,62 +515,61 @@ const home = page({
   <div class="wrap">
     <div class="double-rule" role="presentation"></div>
     <h2>Your next tasting deserves to be remembered.</h2>
-    <a class="badge" href="/beta">Join the early testers</a>
+    <a class="badge" href="/beta">Get early access</a>
     <p class="subnote">Request early access for Android or iPhone.</p>
   </div>
 </section>`,
 });
 
 const beta = page({
-  title: 'Become an early tester · Cork & Note',
-  description: 'Help shape Cork & Note, a personal wine journal for Android and iPhone. Request an invitation to our small early testing group.',
+  title: 'Get early access · Cork & Note',
+  description: 'Remember the wines you love. Join early access for Cork & Note on Android and iPhone, or hear when we launch.',
   active: '/beta',
   main: `<section class="beta-intro"><div class="wrap">
-    <p class="eyebrow">A small first pour</p>
-    <h1>Your next favorite wine app.<br>Your feedback in every detail.</h1>
-    <p class="lede">Remember the wines you loved, keep track of your bottles, and explore with a personal AI sommelier. Help us put Cork &amp; Note through its paces before the public launch.</p>
-    <p>We are gathering our first group of Android and iPhone testers in the US, age 21 and over. No wine expertise needed.</p>
-    <a class="badge" href="#request">Request an invitation</a>
-    <p class="subnote">Early access is by invitation. Requesting a place does not enroll you in Google Play testing.</p>
+    <p class="eyebrow">Cork &amp; Note · Early access</p>
+    <h1>Loved the wine?<br>Keep the memory.</h1>
+    <p class="lede">Your wines, your notes, your kind of discovery. Be among the first to try your personal wine journal and AI sommelier.</p>
+    <a class="badge" href="#request">Get early access</a>
+    <p class="subnote">Android &amp; iPhone · US adults 21+ · Free journal</p>
   </div></section>
   <div class="wrap"><article class="prose beta-body">
-    <section aria-labelledby="expect"><h2 id="expect">A little time. A useful opinion.</h2>
-      <ul><li>Try the app on several days over two weeks: log a wine, add a bottle, explore the map, or ask the sommelier a question.</li>
-      <li>Tell us what felt easy, what was confusing, and anything that broke. A few sentences are enough.</li>
-      <li>Android testers: stay opted in to the Google Play closed test for at least 14 consecutive days after joining. We will send the correct link when your place is ready.</li></ul>
-      <p>You can use wines you already know or bottles you already own. No purchase or drinking is required to take part.</p>
+    <section><h2>A place for the wines you love.</h2>
+      <p>Save the name, your rating, and a few words about what you liked. Explore nearby wineries and bring your questions to an AI sommelier that uses your tasting notes.</p>
+      <p>We’re inviting a small group to try Cork &amp; Note before public launch. Use it on several days, tell us what helped, and share anything that felt confusing.</p>
     </section>
-    <section id="request" aria-labelledby="request-title"><h2 id="request-title">Request your invitation</h2>
-      <p>Email <a href="mailto:${SUPPORT_EMAIL}?subject=Cork%20%26%20Note%20early%20tester">${SUPPORT_EMAIL}</a> with the details below, or prepare an email here. We review requests and reply with next steps.</p>
+    <section id="request" aria-labelledby="request-title"><h2 id="request-title">Be part of the first pour.</h2>
+      <p>Request a place on the early-access list, or choose launch news for your phone. Installation is by invitation; we’ll email the steps when access is ready. There is no download at signup.</p>
       <form id="beta-request" hidden>
-        <label for="beta-platform">Which phone will you use?</label>
+        <label for="beta-interest">I’d like to…</label>
+        <select id="beta-interest" name="interest" required><option value="testing">Try early access</option><option value="launch">Hear when it launches</option></select>
+        <label for="beta-platform">My phone</label>
         <select id="beta-platform" name="platform" required><option value="">Choose your phone</option><option value="Android">Android</option><option value="iPhone">iPhone</option></select>
-        <label for="beta-email">Email for your invitation</label>
+        <label for="beta-email">Email address</label>
         <input id="beta-email" name="email" type="email" autocomplete="email" maxlength="254" required aria-describedby="email-help">
-        <p class="field-help" id="email-help">For Android, use the Google Account signed in to your Play Store. It does not have to end in gmail.com.</p>
-        <label for="beta-device">Phone model (optional)</label>
-        <input id="beta-device" name="device" type="text" maxlength="100" placeholder="For example, Pixel 8 or iPhone 15">
+        <p class="field-help" id="email-help" hidden>For Android early access, use the Google Account signed in to your Play Store.</p>
+        <div class="signup-honeypot" aria-hidden="true"><label for="beta-website">Leave this empty</label><input id="beta-website" name="website" tabindex="-1" autocomplete="off"></div>
         <label class="check"><input name="adult" type="checkbox" required> <span>I am 21 or older and based in the US.</span></label>
-        <label class="check" id="android-commitment" hidden><input name="commitment" type="checkbox"> <span>I can try the app over two weeks and stay opted in to the Android closed test for at least 14 consecutive days.</span></label>
-        <p class="field-help">We use your email and phone details to arrange testing and follow up on your feedback. This request does not subscribe you to a marketing list. To withdraw, email us. See our <a href="/privacy">privacy policy</a>.</p>
-        <button class="badge" type="submit">Prepare invitation email</button>
+        <label class="check" id="android-commitment" hidden><input name="commitment" type="checkbox"> <span>I can try the Android app over two weeks and stay opted in to the closed test for at least 14 consecutive days.</span></label>
+        <label class="check"><input name="consent" type="checkbox" required> <span>Email me about my selected early-access request or launch notification.</span></label>
+        <p class="field-help">We save your email, phone platform, selection and campaign source to arrange access and understand how people find us. No payment details or app account are needed. Withdraw any time by emailing us. <a href="/privacy">Privacy policy</a>.</p>
+        <button class="badge" type="submit">Request early access</button>
       </form>
-      <noscript><p>Include your phone platform, invitation email (your Play Store Google Account for Android), optional phone model, and confirmation that you are 21+ and in the US. For Android, confirm that you can participate for two weeks and remain opted in for 14 consecutive days.</p></noscript>
-      <div id="email-draft" hidden aria-live="polite">
-        <h3>Your draft is ready</h3><p><strong>Your request has not been sent.</strong> Open the draft in your email app and send it, or copy it into a message to ${SUPPORT_EMAIL}.</p>
-        <a id="open-beta-email" class="badge">Open email draft</a>
-        <label for="beta-message">Message to copy</label><textarea id="beta-message" rows="9" readonly></textarea>
-      </div>
+      <p id="signup-status" role="status" aria-live="polite" tabindex="-1"></p>
+      <noscript><p>Enable JavaScript to save your request, or email us with your phone platform and whether you want early access or launch news.</p></noscript>
+      <p class="field-help">Need a hand? <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>
     </section>
-    <section><h2>What about Pro and payments?</h2>
-      <p>Accepted early testers receive 30 days of complimentary Pro from activation. No purchase or payment card is required for this access, and it does not automatically become a paid subscription. We activate it after you create your app account and confirm the expiry date by email. Existing paid subscriptions, if any, are separate and are not canceled by this offer.</p>
-      <p><strong>iPhone:</strong> purchases made in the TestFlight version are sandbox tests and do not charge you. Test subscriptions run on a faster schedule and do not become paid App Store subscriptions.</p>
-      <p><strong>Android:</strong> a testing invitation alone does not make purchases free. Only test billing after we confirm license-tester setup for your Google Account, and only with the store's test payment method. If you see a real payment card instead of a test method, close the purchase sheet and contact us.</p>
+    <section><h2>What happens next?</h2>
+      <p><strong>Android:</strong> we’ll email your invitation and Google Play installation instructions when your place is ready. Joining the website list does not enroll you in the closed test. We’ll ask you to stay opted in for at least 14 consecutive days and share feedback.</p>
+      <p><strong>iPhone:</strong> we’ll email an invitation to install through Apple’s TestFlight when your place is ready. You can explore the beta and send feedback before the App Store release.</p>
+      <p><strong>Prefer to wait?</strong> Choose launch news above. We’ll contact you when the public app is available for your phone.</p>
     </section>
-    <section><h2>Feedback, without another account</h2>
-      <p>Open <strong>Profile → Feedback</strong> in Cork &amp; Note to send an idea or report a bug. If you cannot get into the app, email <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.</p>
-      <p>For a bug, tell us what you tried, what you expected, what happened, and your phone model and build number. Screenshots help; hide personal information first. Never send passwords, reset links or payment details.</p>
-      <p>We want honest feedback. You do not need to leave a public review.</p>
+    <section><h2>Your journal is free. Pro is optional.</h2>
+      <p>Early access does not require a subscription. The free journal includes limited AI use; Pro adds more tools and guidance.</p>
+      <p>On Android, optional Pro purchases may be available through Google Play once billing is ready. Any real purchase shows its price and renewal terms before you confirm.</p>
+      <p>In the iPhone TestFlight beta, purchases are free test transactions. They do not charge you or become paid subscriptions. Paid iPhone subscriptions will be available through the public App Store version after launch.</p>
+    </section>
+    <section><h2>Help shape what comes next.</h2>
+      <p>Use <strong>Profile → Feedback</strong> in the app, or email us. Tell us what was useful, what was confusing, and what you’d like to see. No wine expertise or public review required.</p>
     </section>
   </article></div><script src="/beta-request.js" defer></script>`,
 });
@@ -695,14 +694,16 @@ section{scroll-margin-top:16px}
 .beta-body{padding-top:12px}
 .beta-body li{margin-bottom:12px}
 .beta-body section{scroll-margin-top:24px}
-.beta-body form,.beta-body #email-draft{border:1px solid var(--gold);border-radius:12px;padding:24px;margin:20px 0;background:var(--cream)}
+.beta-body form{border:1px solid var(--gold);border-radius:12px;padding:24px;margin:20px 0;background:var(--cream)}
 .beta-body label{display:block;font-weight:600;margin:18px 0 8px}
 .beta-body input:not([type=checkbox]),.beta-body select,.beta-body textarea{display:block;width:100%;padding:12px;border:1px solid var(--royal);border-radius:6px;font:inherit;color:var(--charcoal);background:white}
 .beta-body .check{display:flex;align-items:flex-start;gap:10px;font-weight:400}
 .beta-body .check input{margin-top:6px;flex-shrink:0;width:18px;height:18px;accent-color:var(--royal)}
 .beta-body .field-help{font-size:14px;margin-top:8px}
 .beta-body button{border:0;font:inherit;font-weight:600;cursor:pointer}
-.beta-body textarea{resize:vertical;min-height:180px}
+.beta-body button:disabled{opacity:.65;cursor:wait}
+.signup-honeypot{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+#signup-status:not(:empty){padding:20px;border-left:4px solid var(--royal);background:var(--lavender);line-height:1.6}
 a.badge{text-decoration:none}
 :focus-visible{outline:3px solid #946600;outline-offset:4px}
 .bar-inner{flex-wrap:wrap}

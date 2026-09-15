@@ -1,0 +1,47 @@
+{
+  "checkedAt": "2026-09-14T18:25:40.234Z",
+  "tracks": [
+    {
+      "track": "production"
+    },
+    {
+      "track": "beta"
+    },
+    {
+      "track": "alpha",
+      "releases": [
+        {
+          "name": "1.0.0 (7) — Cork & Note early access",
+          "versionCodes": [
+            "7"
+          ],
+          "releaseNotes": [
+            {
+              "language": "en-US",
+              "text": "Welcome to Cork & Note early access. Save and rate wines, explore the winery map, and try the personal sommelier. Please share what worked or felt confusing through Profile → Feedback. The journal is free; Pro is optional. Thank you for helping shape the app."
+            }
+          ],
+          "status": "draft"
+        }
+      ]
+    },
+    {
+      "track": "internal",
+      "releases": [
+        {
+          "name": "1.0.0 (7) — merged launch testing",
+          "versionCodes": [
+            "7"
+          ],
+          "releaseNotes": [
+            {
+              "language": "en-US",
+              "text": "Updated launch testing build with merged fixes for Android map markers and nearby pins, Wine Journey achievements, wine entry, drink windows, and updated Sommelier conversations. Please check sign-in, photos, scans, maps, purchases, restore, and account deletion."
+            }
+          ],
+          "status": "completed"
+        }
+      ]
+    }
+  ]
+}
