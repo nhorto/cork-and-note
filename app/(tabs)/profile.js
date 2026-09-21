@@ -15,6 +15,7 @@ import {
 import AchievementsCard from '../../components/AchievementsCard';
 import ProUpsellCard from '../../components/ProUpsellCard';
 import VisitStatsCard from '../../components/VisitStatsCard';
+import { isGuestUser } from '../../lib/guest';
 import { createThemedStyles } from '../../styles/ThemeProvider';
 import { AuthContext } from '../_layout';
 
@@ -24,6 +25,9 @@ export default function ProfileScreen() {
 
   const { signOut, user } = useContext(AuthContext);
   const router = useRouter();
+  // Guest mode (epic #316): no identity yet, so the header offers Create
+  // account / Log in and the account-only rows (sign out) are not shown.
+  const isGuest = isGuestUser(user);
 
   const handleLogout = async () => {
     Alert.alert(
@@ -37,6 +41,9 @@ export default function ProfileScreen() {
           onPress: async () => {
             try {
               await signOut();
+              // Sign-out drops into a fresh guest session; Home is where a
+              // guest starts, not the profile they just left.
+              router.replace('/(tabs)/home');
             } catch (error) {
               Alert.alert('Error', 'Failed to sign out. Please try again.');
             }
@@ -48,6 +55,7 @@ export default function ProfileScreen() {
 
   // Get user's initials for avatar
   const getInitials = () => {
+    if (isGuest) return 'G';
     const name = user?.user_metadata?.name || user?.email?.split('@')[0] || 'U';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
@@ -97,9 +105,9 @@ export default function ProfileScreen() {
           </View>
 
           <Text style={styles.name}>
-            {user?.user_metadata?.name || user?.email?.split('@')[0] || 'Wine Enthusiast'}
+            {isGuest ? 'Guest' : (user?.user_metadata?.name || user?.email?.split('@')[0] || 'Wine Enthusiast')}
           </Text>
-          <Text style={styles.email}>{user?.email || 'user@example.com'}</Text>
+          <Text style={styles.email}>{isGuest ? 'Browsing without an account' : (user?.email || '')}</Text>
 
           {/* Decorative divider */}
           <View style={styles.headerDivider}>
@@ -108,6 +116,32 @@ export default function ProfileScreen() {
             <View style={styles.dividerLine} />
           </View>
         </View>
+
+        {/* Guest mode (epic #316): the account is what makes the journal
+            portable. Two plain buttons, no wall. */}
+        {isGuest && (
+          <View style={styles.guestCta}>
+            <Text style={styles.guestCtaText}>
+              Your tastings are saved on this phone only. Create a free account to keep them on any phone.
+            </Text>
+            <TouchableOpacity
+              style={styles.guestPrimary}
+              onPress={() => router.push('/register')}
+              accessibilityRole="button"
+              activeOpacity={0.8}
+            >
+              <Text style={styles.guestPrimaryText}>Create account</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.guestSecondary}
+              onPress={() => router.push('/login')}
+              accessibilityRole="button"
+              activeOpacity={0.8}
+            >
+              <Text style={styles.guestSecondaryText}>Log in</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Standing upgrade entry (owner ask 2026-09-10) — Pro used to be
             findable here only inside Account Settings. Renders nothing for
@@ -320,21 +354,23 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Account Actions */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>ACCOUNT</Text>
-          </View>
+        {/* Account Actions (a guest has nothing to sign out of) */}
+        {!isGuest && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionLabel}>ACCOUNT</Text>
+            </View>
 
-          <TouchableOpacity
-            style={styles.signOutButton}
-            onPress={handleLogout}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="log-out-outline" size={20} color={colors.status.error} />
-            <Text style={styles.signOutText}>Sign out</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              style={styles.signOutButton}
+              onPress={handleLogout}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="log-out-outline" size={20} color={colors.status.error} />
+              <Text style={styles.signOutText}>Sign out</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Footer */}
         <View style={styles.footer}>
@@ -543,6 +579,42 @@ const styles = StyleSheet.create({
     ...typography.body.small,
     color: colors.neutral.inkTertiary,
   },
+
+  // Guest call to action (epic #316)
+  guestCta: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: colors.accent.surface,
+    borderWidth: 1,
+    borderColor: colors.accent.border,
+    borderRadius: borderRadius.md,
+  },
+  guestCtaText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.neutral.ink,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  guestPrimary: {
+    backgroundColor: colors.primary.base,
+    borderRadius: borderRadius.md,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  guestPrimaryText: { color: colors.onPrimary, fontSize: 15, fontWeight: '600' },
+  guestSecondary: {
+    borderRadius: borderRadius.md,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.accent.border,
+  },
+  guestSecondaryText: { color: colors.primary.ink, fontSize: 15, fontWeight: '600' },
 
   // Sign Out Button
   signOutButton: {

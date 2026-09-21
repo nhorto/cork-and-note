@@ -85,6 +85,9 @@ export default function RegisterScreen() {
         } else {
           Alert.alert('Error', error.message);
         }
+      } else if (data?.linked) {
+        // A guest just linked this email onto their existing user (epic #316):
+        // same id, nothing to confirm. The navigation guard routes on.
       } else if (data?.user && (data.user.identities?.length ?? 0) === 0) {
         // When email confirmation is enabled, Supabase returns NO error for an
         // address that is already registered — the giveaway is an empty

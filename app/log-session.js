@@ -15,10 +15,12 @@
 // covers the tab bar). Saving goes through visitsService.createVisit on the
 // create path, or visitsService.updateSession on the edit path.
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import LogSessionForm from '../components/LogSessionForm';
+import { isGuestUser, noteGuestFirstLog } from '../lib/guest';
 import { notifySuccess } from '../lib/haptics';
+import { AuthContext } from './_layout';
 import { visitsService } from '../lib/visits';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
@@ -44,6 +46,7 @@ export default function LogSessionScreen() {
   const { colors, styles } = useScreenTheme();
 
   const router = useRouter();
+  const { user } = useContext(AuthContext);
   const { mode, wineryId, directoryId, wineryName, lat, lng, editVisitId, prefill } = useLocalSearchParams();
   const [submitting, setSubmitting] = useState(false);
 
@@ -163,6 +166,9 @@ export default function LogSessionScreen() {
         return;
       }
       notifySuccess();
+      // Guest mode (epic #316): a guest's FIRST saved tasting arms the
+      // one-time "create an account" sheet, which Home shows on landing.
+      if (isGuestUser(user)) await noteGuestFirstLog();
       const count = visitData.wines?.length || 0;
       router.replace('/(tabs)/home');
       const savedMsg = count > 1 ? `Your session of ${count} wines was saved.` : 'Your wine was saved.';

@@ -16,7 +16,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import AccountNudgeSheet from '../../components/AccountNudgeSheet';
 import AskSommelierBox from '../../components/AskSommelierBox';
+import GuestAccountCard from '../../components/GuestAccountCard';
 import LogFab from '../../components/LogFab';
 import NearYouRow from '../../components/NearYouRow';
 import UpgradePill from '../../components/UpgradePill';
@@ -24,6 +26,7 @@ import { useAchievementCelebration } from '../../hooks/useAchievementCelebration
 import { getAchievements } from '../../lib/achievements';
 import { drinkWindowMeta, cellarService } from '../../lib/cellar';
 import { getCellarInsights } from '../../lib/cellarInsights';
+import { isGuestUser, takeGuestFirstLogNudge } from '../../lib/guest';
 import { varietalText } from '../../lib/varietals';
 import { visitsService } from '../../lib/visits';
 import { wishlistService } from '../../lib/wishlist';
@@ -39,6 +42,11 @@ export default function HomeScreen() {
   // Home is where a logged tasting lands (log-session replaces the route), so
   // this is where the badges it earned are celebrated (#296).
   const { check, sheet } = useAchievementCelebration();
+  // Guest mode (epic #316): guests see a Sign in pill instead of the avatar,
+  // a dismissible card, and, once ever, the account sheet after their first
+  // saved tasting (log-session marks it pending; Home is where the save lands).
+  const isGuest = isGuestUser(user);
+  const [accountNudge, setAccountNudge] = useState(false);
 
   const [stats, setStats] = useState({ wines: 0, places: 0, wishlist: 0 });
   const [cellar, setCellar] = useState({ totalBottles: 0, readyToDrink: 0, byStatus: null });
@@ -155,6 +163,17 @@ export default function HomeScreen() {
     }, [reloadKey, user?.id, check])
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      if (!isGuest) return undefined;
+      let active = true;
+      takeGuestFirstLogNudge()
+        .then((show) => { if (active && show) setAccountNudge(true); })
+        .catch(() => {});
+      return () => { active = false; };
+    }, [isGuest])
+  );
+
   const firstName =
     user?.user_metadata?.name?.split(' ')[0] ||
     user?.email?.split('@')[0] ||
@@ -171,21 +190,34 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.welcome}>WELCOME BACK</Text>
-            <Text style={styles.name}>{firstName}</Text>
+            <Text style={styles.welcome}>{isGuest ? 'WELCOME TO' : 'WELCOME BACK'}</Text>
+            <Text style={styles.name}>{isGuest ? 'Cork & Note' : firstName}</Text>
           </View>
           <View style={styles.headerActions}>
             {/* Standing paywall route for free users (owner ask 2026-09-10);
                 renders nothing for Pro. */}
             <UpgradePill />
-            <TouchableOpacity
-              style={styles.avatar}
-              onPress={() => router.push('/(tabs)/profile')}
-              accessibilityRole="button"
-              accessibilityLabel="Profile & settings"
-            >
-              <Text style={styles.avatarText}>{initials}</Text>
-            </TouchableOpacity>
+            {isGuest ? (
+              <TouchableOpacity
+                style={styles.signInPill}
+                onPress={() => router.push('/(tabs)/profile')}
+                accessibilityRole="button"
+                accessibilityLabel="Sign in or create an account"
+                activeOpacity={0.8}
+              >
+                <Ionicons name="person-circle-outline" size={16} color={colors.primary.ink} />
+                <Text style={styles.signInPillText}>Sign in</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={styles.avatar}
+                onPress={() => router.push('/(tabs)/profile')}
+                accessibilityRole="button"
+                accessibilityLabel="Profile & settings"
+              >
+                <Text style={styles.avatarText}>{initials}</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
         <View style={styles.headerBorder} />
@@ -221,6 +253,10 @@ export default function HomeScreen() {
           onPressPlaces={() => router.push('/places')}
           onPressWishlist={() => router.push('/wishlist')}
         />
+
+        {/* Guest mode (epic #316): the quiet, dismissible reminder that a
+            guest's journal lives on this phone only. */}
+        {isGuest && <GuestAccountCard tastings={stats.wines} />}
 
         {/* Near You — free winery discovery from our own directory (#203 P2).
             Hides itself entirely when location is denied or nothing is near. */}
@@ -356,6 +392,7 @@ export default function HomeScreen() {
 
       <LogFab />
       {sheet}
+      <AccountNudgeSheet visible={accountNudge} onClose={() => setAccountNudge(false)} />
     </View>
   );
 }
@@ -608,6 +645,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: colors.primary.ink,
   },
+  signInPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 34,
+    paddingHorizontal: spacing.md,
+    borderRadius: 17,
+    backgroundColor: colors.accent.surface,
+    borderWidth: 1,
+    borderColor: colors.accent.border,
+  },
+  signInPillText: { fontSize: 14, fontWeight: '600', color: colors.primary.ink },
   headerBorder: {
     height: 1,
     backgroundColor: colors.accent.border,

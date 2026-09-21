@@ -1,6 +1,6 @@
 // app/login.js
 import { Ionicons } from '@expo/vector-icons';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { useContext, useState } from 'react';
 import {
   ActivityIndicator,
@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createThemedStyles } from '../styles/ThemeProvider';
 import { AuthContext } from './_layout';
 
@@ -22,11 +23,30 @@ import { AuthContext } from './_layout';
 export default function LoginScreen() {
   const { colors, styles } = useScreenTheme();
 
-  const { signIn } = useContext(AuthContext);
+  const { signIn, isGuest, isAuthenticated, continueAsGuest } = useContext(AuthContext);
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // Guest mode (epic #316): a guest reaches this screen from the Sign in pill
+  // or Profile and can simply go back. With NO session at all (the guest
+  // sign-in failed, e.g. an offline first launch) there is nothing to go back
+  // to, so the screen offers a retry instead.
+  const [guestBusy, setGuestBusy] = useState(false);
+  const handleContinueAsGuest = async () => {
+    setGuestBusy(true);
+    try {
+      const { error } = await continueAsGuest();
+      if (error) {
+        Alert.alert('Still offline', 'Cork & Note needs a connection the first time it opens. Please try again in a moment.');
+      }
+    } finally {
+      setGuestBusy(false);
+    }
+  };
 
   const handleLogin = async () => {
     // Basic validation
@@ -62,6 +82,17 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        {isGuest && (
+          <TouchableOpacity
+            style={[styles.backButton, { top: insets.top + 4 }]}
+            onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)/home'))}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons name="arrow-back" size={24} color={colors.neutral.ink} />
+          </TouchableOpacity>
+        )}
         <View style={styles.logoContainer}>
           <View style={styles.logoImageWrapper}>
             <Image
@@ -147,6 +178,19 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </Link>
         </View>
+
+        {!isAuthenticated && (
+          <TouchableOpacity
+            style={styles.guestButton}
+            onPress={handleContinueAsGuest}
+            disabled={guestBusy}
+            accessibilityRole="button"
+          >
+            <Text style={styles.guestButtonText}>
+              {guestBusy ? 'One moment…' : 'Continue without an account'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -169,6 +213,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: 60,
     paddingBottom: spacing.xl,
+    justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    left: spacing.md,
+    zIndex: 10,
+    width: 44,
+    height: 44,
+    alignItems: 'center',
     justifyContent: 'center',
   },
   logoContainer: {
@@ -260,6 +313,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.primary.ink,
     fontWeight: '700',
+  },
+  guestButton: {
+    alignSelf: 'center',
+    marginTop: spacing.lg,
+    paddingVertical: 12,
+    paddingHorizontal: spacing.md,
+  },
+  guestButtonText: {
+    fontSize: 14,
+    color: colors.neutral.inkSecondary,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });
 return { colors, styles };

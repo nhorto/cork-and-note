@@ -12,7 +12,7 @@
 // is itself a rejection risk.
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -26,6 +26,8 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { usePro } from '../hooks/usePro';
+import { isGuestUser } from '../lib/guest';
+import { AuthContext } from './_layout';
 import {
   FREE_CELLAR_BOTTLE_LIMIT,
   FREE_TIER_LIMITS,
@@ -62,6 +64,12 @@ export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
   const { source } = useLocalSearchParams();
   const { isPro, purchasesAvailable, restore, onPurchased } = usePro();
+  // Guest mode (epic #316, owner decision 2026-09-21): a guest CAN buy (no
+  // wall on the buy button), and is nudged to protect the subscription with
+  // an account right after. The purchase is bound to the guest id, which the
+  // account keeps when they link, so nothing is lost either way.
+  const { user } = useContext(AuthContext);
+  const isGuest = isGuestUser(user);
 
   const [packages, setPackages] = useState(null);
   const [selected, setSelected] = useState(null);
@@ -118,8 +126,18 @@ export default function PaywallScreen() {
       // someone stare at the paywall they just paid on would be a terrible thanks.
       onPurchased();
       router.back();
+      if (isGuest) {
+        Alert.alert(
+          'Protect your subscription',
+          'Cork & Note Pro is yours. Create a free account so it follows you if you change phones or reinstall the app.',
+          [
+            { text: 'Later', style: 'cancel' },
+            { text: 'Create account', onPress: () => router.push('/register') },
+          ]
+        );
+      }
     }
-  }, [selected, busy, onPurchased, router]);
+  }, [selected, busy, onPurchased, router, isGuest]);
 
   // 3.1.2: Restore Purchases must be reachable from the paywall itself, not only
   // from Settings — a reinstalling subscriber must never be asked to pay twice.
