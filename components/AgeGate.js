@@ -7,7 +7,8 @@
 // alike, without touching the auth/navigation guards.
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { PRIVACY_URL, TERMS_URL } from '../lib/pro';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
 export default function AgeGate({ onConfirm }) {
@@ -57,6 +58,27 @@ export default function AgeGate({ onConfirm }) {
             >
               <Text style={styles.secondaryButtonText}>No, not yet</Text>
             </TouchableOpacity>
+            {/* Guests (epic #316) never see the register clickwrap, so the
+                Terms are acknowledged here, at the door. */}
+            <Text style={styles.legal}>
+              By continuing you agree to the{' '}
+              <Text
+                style={styles.legalLink}
+                accessibilityRole="link"
+                onPress={() => Linking.openURL(TERMS_URL).catch(() => {})}
+              >
+                Terms of Use
+              </Text>
+              {' '}and{' '}
+              <Text
+                style={styles.legalLink}
+                accessibilityRole="link"
+                onPress={() => Linking.openURL(PRIVACY_URL).catch(() => {})}
+              >
+                Privacy Policy
+              </Text>
+              .
+            </Text>
           </>
         )}
       </View>
@@ -131,6 +153,17 @@ const useScreenTheme = createThemedStyles((theme) => {
       ...typography.body.regular,
       color: colors.neutral.inkSecondary,
       fontWeight: '600',
+    },
+    legal: {
+      ...typography.body.caption,
+      color: colors.neutral.inkTertiary,
+      textAlign: 'center',
+      marginTop: spacing.lg,
+      lineHeight: 18,
+    },
+    legalLink: {
+      color: colors.primary.ink,
+      textDecorationLine: 'underline',
     },
   });
   return { colors, styles };

@@ -20,6 +20,7 @@ import AppearanceSettings from '../../components/AppearanceSettings';
 import AiSharingSettings from '../../components/AiSharingSettings';
 import { usePro } from '../../hooks/usePro';
 import { accountService } from '../../lib/account';
+import { isGuestUser } from '../../lib/guest';
 import { MANAGE_SUBSCRIPTIONS_URL, STORE_ACCOUNT_NAME } from '../../lib/pro';
 import { shareTastingsCsv } from '../../lib/exportTastings';
 import { createThemedStyles } from '../../styles/ThemeProvider';
@@ -31,6 +32,8 @@ export default function AccountSettingsScreen() {
 
   const router = useRouter();
   const { user, signOut } = useContext(AuthContext);
+  // Guest mode (epic #316): no password to change and no account to delete.
+  const isGuest = isGuestUser(user);
   const { isPro, purchasesAvailable, restore, presentPaywall } = usePro();
 
   // Local state for settings
@@ -267,7 +270,8 @@ export default function AccountSettingsScreen() {
           </Text>
         </View>
 
-        {/* Account Actions Section */}
+        {/* Account Actions Section (account holders only) */}
+        {!isGuest && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account actions</Text>
           
@@ -306,6 +310,7 @@ export default function AccountSettingsScreen() {
             <Ionicons name="chevron-forward" size={20} color={colors.accent.strong} />
           </TouchableOpacity>
         </View>
+        )}
 
         {/* Info Section */}
         <View style={styles.section}>

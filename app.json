@@ -83,6 +83,7 @@
         }
       ],
       "./plugins/withFmtConstevalFix",
+      "./plugins/withPodsDeploymentTarget",
       "./plugins/withPredictiveBackOptOut",
       "expo-notifications",
       "expo-font",

@@ -70,3 +70,7 @@ site/dist/
 .vision-bench/
 __pycache__/
 .vercel
+
+# Pulled EAS env for local builds (eas env:pull) and local build artifacts
+.env.eas-*
+*.ipa

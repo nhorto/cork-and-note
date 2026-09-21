@@ -16,6 +16,7 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import OfflineBanner from '../components/OfflineBanner';
 import { ProProvider } from '../components/ProProvider';
 import { checkAndReschedule, setNotificationHandler } from '../lib/notifications';
+import { isGuestUser, linkGuestAccount, signInFromGuest, startGuestSession } from '../lib/guest';
 import { supabase } from '../lib/supabase';
 import { startUpdateWatcher } from '../lib/updates';
 import { AppThemeProvider, useAppearance } from '../styles/ThemeProvider';
@@ -39,6 +40,9 @@ export const AuthContext = createContext({
   isLoading: true,
   session: null,
   isAuthenticated: false,
+  // Guest mode (epic #316): true for an anonymous Supabase user.
+  isGuest: false,
+  continueAsGuest: () => {},
 });
 
 export default function RootLayout() {
@@ -101,6 +105,9 @@ function AppRoot() {
 
   // Derived state for cleaner checks
   const isAuthenticated = !!(user && session);
+  // A guest is authenticated (every RLS policy is `to authenticated`, and an
+  // anonymous user is), just without an identity of their own yet.
+  const isGuest = isAuthenticated && isGuestUser(user);
 
   useEffect(() => {
     let mounted = true;
@@ -115,9 +122,24 @@ function AppRoot() {
             console.error('Session check error:', error.message);
             setSession(null);
             setUser(null);
-          } else {
+          } else if (session) {
             setSession(session);
-            setUser(session?.user ?? null);
+            setUser(session.user);
+          } else {
+            // No session: a fresh install or a signed-out device. Guest mode
+            // (epic #316, App Review 5.1.1): mint an anonymous Supabase user
+            // so the app opens straight onto Home. Offline, this fails and
+            // the guard shows the login screen, which offers a retry.
+            const guest = await startGuestSession(supabase);
+            if (!mounted) return;
+            if (guest.error) {
+              console.warn('Guest session failed:', guest.error.message);
+              setSession(null);
+              setUser(null);
+            } else {
+              setSession(guest.session);
+              setUser(guest.user);
+            }
           }
 
           setIsInitialized(true);
@@ -169,17 +191,23 @@ function AppRoot() {
     const inAuthFlow = ['login', 'register', 'forgot-password'].includes(segments[0]);
     const onIndexPage = segments.length === 0;
 
-    if (isAuthenticated && (inAuthFlow || onIndexPage)) {
-      // Authenticated but on an auth screen or the index page → main app.
-      // A session that appears while still on the register screen is a fresh
-      // sign-up: those get the Free/Pro choice first (owner ask 2026-09-10),
-      // everyone else lands on Home.
+    if (isAuthenticated && !isGuest && (inAuthFlow || onIndexPage)) {
+      // A real account on an auth screen or the index page → main app.
+      // Landing here from the register screen means a fresh sign-up (or a
+      // guest who just linked their account, whose is_anonymous flipped
+      // while still on that screen): those get the Free/Pro choice first
+      // (owner ask 2026-09-10), everyone else lands on Home.
       router.replace(segments[0] === 'register' ? '/choose-plan' : '/(tabs)/home');
+    } else if (isGuest && onIndexPage) {
+      // Guests go straight to Home too. They are NOT bounced off the auth
+      // screens: that is how a guest creates or signs in to an account.
+      router.replace('/(tabs)/home');
     } else if (!isAuthenticated && !inAuthFlow) {
-      // Not authenticated and outside the auth flow (incl. index) → login.
+      // No session at all (the guest sign-in failed, e.g. offline) → login,
+      // which offers "Continue without an account" to retry.
       router.replace('/login');
     }
-  }, [isAuthenticated, isInitialized, isLoading, segments, loaded, themeReady, router]);
+  }, [isAuthenticated, isGuest, isInitialized, isLoading, segments, loaded, themeReady, router]);
 
   // SCREENSHOT AUTOMATION — App Store listing capture.
   //
@@ -250,10 +278,10 @@ function AppRoot() {
   const signIn = async (email, password) => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // From a guest session, the guest's rows follow them into the account
+      // they sign in to (lib/guest.js: claim token first, merge after).
+      const guestId = isGuest ? user.id : null;
+      const { data, error } = await signInFromGuest(supabase, { guestId, email, password });
       
       if (error) {
         setIsLoading(false); // Only set to false on error
@@ -278,6 +306,24 @@ function AppRoot() {
   const signUp = async (email, password, name) => {
     try {
       setIsLoading(true);
+
+      if (isGuest) {
+        // Guest mode: "Create account" fills the email in on the anonymous
+        // user instead of creating a second one, so the id (and every row
+        // under it) is preserved. The project auto-confirms email, so the
+        // link lands immediately (verified live 2026-09-21).
+        const linked = await linkGuestAccount(supabase, { email, password, name });
+        if (linked.error) {
+          setIsLoading(false);
+          throw linked.error;
+        }
+        // Flip locally as well as via USER_UPDATED: the guard then routes
+        // register → choose-plan exactly like a fresh sign-up.
+        if (linked.data?.user) setUser(linked.data.user);
+        setIsLoading(false);
+        return { error: null, data: { ...linked.data, session, linked: true } };
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -316,6 +362,15 @@ function AppRoot() {
       if (error) {
         console.error('Sign out error:', error);
       }
+
+      // Guest mode: signing out lands on Home as a new guest, not on a wall.
+      // isLoading stays true until that session exists so the guard never
+      // flashes the login screen in between.
+      const guest = await startGuestSession(supabase);
+      if (!guest.error) {
+        setSession(guest.session);
+        setUser(guest.user);
+      }
       
       setIsLoading(false);
       return { error: null };
@@ -324,6 +379,20 @@ function AppRoot() {
       setIsLoading(false);
       throw error;
     }
+  };
+
+  // Retry the guest session from the login screen after an offline launch.
+  const continueAsGuest = async () => {
+    setIsLoading(true);
+    const guest = await startGuestSession(supabase);
+    if (guest.error) {
+      setIsLoading(false);
+      return { error: guest.error };
+    }
+    setSession(guest.session);
+    setUser(guest.user);
+    setIsLoading(false);
+    return { error: null };
   };
 
   const resetPassword = async (email) => {
@@ -375,6 +444,8 @@ function AppRoot() {
     session,
     isAuthenticated,
     isInitialized,
+    isGuest,
+    continueAsGuest,
   };
 
   // Show splash screen until everything is loaded — including the age-gate

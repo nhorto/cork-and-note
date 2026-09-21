@@ -19,6 +19,9 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn(), back: mockBack, replace: jest.fn(), setParams: jest.fn() }),
   useLocalSearchParams: () => mockParams,
 }));
+// The paywall reads AuthContext (guest nudge, epic #316); the root layout
+// drags in the whole app, so only the context object is provided.
+jest.mock('../app/_layout', () => ({ AuthContext: require('react').createContext({ user: null }) }));
 jest.mock('../hooks/usePro', () => ({ usePro: jest.fn() }));
 jest.mock('../lib/purchases', () => ({
   fetchOffering: jest.fn(),
