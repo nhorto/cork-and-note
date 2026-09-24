@@ -17,6 +17,7 @@ import OfflineBanner from '../components/OfflineBanner';
 import { ProProvider } from '../components/ProProvider';
 import { checkAndReschedule, setNotificationHandler } from '../lib/notifications';
 import { isGuestUser, linkGuestAccount, signInFromGuest, startGuestSession } from '../lib/guest';
+import { initializeMetaAppEvents } from '../lib/metaAppEvents';
 import { supabase } from '../lib/supabase';
 import { startUpdateWatcher } from '../lib/updates';
 import { AppThemeProvider, useAppearance } from '../styles/ThemeProvider';
@@ -99,6 +100,15 @@ function AppRoot() {
     // Best-effort persist: a write failure just re-asks on the next launch.
     AsyncStorage.setItem('cn_age_attested', 'yes').catch(() => {});
   };
+
+  // App-install attribution is configured only in builds that contain both
+  // Meta SDK values. Wait until the age gate is out of the way so iOS never
+  // stacks its tracking-permission sheet on top of Cork & Note's first-run
+  // screen. The initializer is idempotent across re-renders.
+  useEffect(() => {
+    if (ageStatus !== 'ok') return;
+    initializeMetaAppEvents();
+  }, [ageStatus]);
 
   const router = useRouter();
   const segments = useSegments();
