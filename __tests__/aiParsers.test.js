@@ -84,6 +84,19 @@ describe('parseFencedJson (guided Pro tools)', () => {
   });
 });
 
+describe('getStreamingDisplayText', () => {
+  test('hides a structured block that has opened but not closed yet', () => {
+    const partial = 'Sounds like a Cabernet.\n```wine_suggestions\n{"name":"Opus';
+    expect(aiService.getStreamingDisplayText(partial)).toBe('Sounds like a Cabernet.');
+  });
+
+  test('matches getDisplayText once every fence has closed', () => {
+    const done = 'Sounds like a Cabernet.\n```wine_suggestions\n{"name":"Opus One"}\n```';
+    expect(aiService.getStreamingDisplayText(done)).toBe(aiService.getDisplayText(done));
+    expect(aiService.getStreamingDisplayText('Plain prose so far')).toBe('Plain prose so far');
+  });
+});
+
 describe('getDisplayText', () => {
   test('strips every known structured block and keeps the prose', () => {
     const reply = 'A great match.\n```food_pairing\n{"dish":"lamb"}\n```\nAnd a backup:\n```tonights_pick\n{"bottleId":1}\n```';

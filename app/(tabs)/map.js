@@ -241,11 +241,47 @@ export default function MapScreen() {
     mapRef.current?.animateToRegion(nextRegion, 1000);
   }, []);
 
+  // "Show on the map" from a winery page (owner feedback 2026-09-27): centre
+  // on that winery and draw a highlighted, labelled pin that stays visible
+  // whatever the filter or clustering says. Leaving the tab clears it.
+  const [focusTarget, setFocusTarget] = useState(null);
+  const focusedRef = useRef(false);
+  useEffect(() => {
+    if (!params.focusKey) return;
+    const latitude = Number(params.focusLat);
+    const longitude = Number(params.focusLng);
+    router.setParams({
+      focusLat: undefined,
+      focusLng: undefined,
+      focusName: undefined,
+      focusId: undefined,
+      focusKey: undefined,
+    });
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+    focusedRef.current = true;
+    setFocusTarget({
+      latitude,
+      longitude,
+      name: typeof params.focusName === 'string' ? params.focusName : '',
+      id: typeof params.focusId === 'string' ? params.focusId : '',
+    });
+    setShowPlacesList(false);
+    setShowPinActions(false);
+    centerMapOn({ latitude, longitude }, 0.02);
+  }, [params.focusKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  useFocusEffect(
+    useCallback(() => () => {
+      setFocusTarget(null);
+      focusedRef.current = false;
+    }, [])
+  );
+
   useEffect(() => {
     let active = true;
     (async () => {
       const coordinate = await getCurrentLocation();
-      if (active && coordinate) centerMapOn(coordinate, 0.1);
+      // A winery focus that landed while GPS was resolving wins.
+      if (active && coordinate && !focusedRef.current) centerMapOn(coordinate, 0.1);
     })();
     return () => {
       active = false;
@@ -932,6 +968,14 @@ export default function MapScreen() {
         {renderedFeatures.map((f) => {
           if (f.properties.cluster) return renderClusterMarker(f);
           const [longitude, latitude] = f.geometry.coordinates;
+          // The focus pin below stands in for this winery's own pin.
+          if (
+            focusTarget &&
+            Math.abs(latitude - focusTarget.latitude) < 0.0001 &&
+            Math.abs(longitude - focusTarget.longitude) < 0.0001
+          ) {
+            return null;
+          }
           const displayCoordinate = { latitude, longitude };
           return f.properties.kind === 'discover'
             ? renderDiscoverMarker(f.properties.pin, labelledKeys.has(featureKey(f)), displayCoordinate)
@@ -943,6 +987,30 @@ export default function MapScreen() {
             coordinate={tempPin}
             pinColor={colors.primary.base}
           />
+        )}
+
+        {focusTarget && (
+          <StableMarker
+            key={`focus-${focusTarget.id}-${focusTarget.latitude}-${focusTarget.longitude}-${mode}`}
+            coordinate={{ latitude: focusTarget.latitude, longitude: focusTarget.longitude }}
+            zIndex={20}
+            onPress={() => focusTarget.id && router.push(`/winery/${focusTarget.id}`)}
+          >
+            <View style={styles.markerContainer} testID="map-focus-marker">
+              {!!focusTarget.name && (
+                <View style={[styles.markerLabelContainer, styles.focusLabelContainer]}>
+                  <Text style={styles.markerLabel} numberOfLines={1}>
+                    {focusTarget.name}
+                  </Text>
+                </View>
+              )}
+              <View style={styles.focusRing}>
+                <View style={styles.wineryMarker}>
+                  <Ionicons name="wine" size={16} color={colors.onPrimary} />
+                </View>
+              </View>
+            </View>
+          </StableMarker>
         )}
       </MapView>
 
@@ -1554,6 +1622,18 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     textAlign: 'center',
     color: mode === 'dark' ? colors.accent.base : colors.primary.base,
+  },
+  // "Show on the map" focus pin: the usual pin inside a gold ring.
+  focusRing: {
+    padding: 4,
+    borderRadius: 24,
+    backgroundColor: withAlpha(colors.accent.base, 0.35),
+    borderWidth: 2,
+    borderColor: colors.accent.base,
+  },
+  focusLabelContainer: {
+    borderColor: colors.accent.base,
+    maxWidth: 180,
   },
   wineryMarker: {
     backgroundColor: colors.primary.base,

@@ -62,7 +62,20 @@ test('a picked photo shows in the strip, rides along on send, and clears once th
   expect(tree.root.findByType(TextInput).props.value).toBe('');
 });
 
-test('a failed send keeps the typed text and photos so the user can retry', async () => {
+test('the box empties the moment a question is sent, not when the answer lands', async () => {
+  let finish;
+  const onSend = jest.fn(() => new Promise((resolve) => { finish = resolve; }));
+  const tree = await mount({ onSend });
+  await act(async () => tree.root.findByType(TextInput).props.onChangeText('a long question'));
+  await act(async () => { byLabel(tree, 'Send').props.onPress(); });
+  // The answer is still on its way; the question already left the box.
+  expect(onSend).toHaveBeenCalledWith('a long question', []);
+  expect(tree.root.findByType(TextInput).props.value).toBe('');
+  await act(async () => finish());
+  expect(tree.root.findByType(TextInput).props.value).toBe('');
+});
+
+test('a failed send puts the typed text back so the user can retry', async () => {
   const onSend = jest.fn().mockRejectedValue(new Error('offline'));
   const tree = await mount({ onSend });
   await act(async () => tree.root.findByType(TextInput).props.onChangeText('keep me'));

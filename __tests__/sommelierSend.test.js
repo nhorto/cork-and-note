@@ -30,6 +30,7 @@ jest.mock('../lib/ai', () => ({
     sendChatMessage: jest.fn(),
     parseSuggestions: jest.fn().mockReturnValue([]),
     getDisplayText: (t) => t,
+    getStreamingDisplayText: (t) => t,
     photoToBase64: jest.fn(),
   },
 }));
@@ -102,9 +103,11 @@ test('a dropped connection shows a retryable error bubble and never opens the pa
   expect(bubble.content).toContain('Network request failed');
 });
 
-test('waits for the complete chat response before displaying the assistant reply', async () => {
+test('the question shows at once and the reply streams in before the answer completes', async () => {
   let finish;
-  aiService.sendChatMessage.mockImplementationOnce(async () => {
+  let streamDelta;
+  aiService.sendChatMessage.mockImplementationOnce(async (_messages, _system, { onDelta }) => {
+    streamDelta = onDelta;
     await new Promise((resolve) => { finish = resolve; });
     return { response: 'A crisp Muscadet works well.', sources: [] };
   });
@@ -117,10 +120,18 @@ test('waits for the complete chat response before displaying the assistant reply
   await act(async () => { input.props.onSubmitEditing(); });
   await flush();
 
+  const userBubbles = mockBubble.mock.calls.map(([p]) => p.message).filter((m) => m?.role === 'user');
+  expect(userBubbles.some((m) => m.content === 'What pairs with oysters?')).toBe(true);
   expect(assistantBubbles()).toEqual([]);
+
+  await act(async () => streamDelta('A crisp', 'A crisp'));
+  expect(assistantBubbles().at(-1)).toMatchObject({ content: 'A crisp', isStreaming: true });
+
   await act(async () => finish());
   await flush();
-  expect(assistantBubbles().some((message) => message.content === 'A crisp Muscadet works well.')).toBe(true);
+  const last = assistantBubbles().at(-1);
+  expect(last.content).toBe('A crisp Muscadet works well.');
+  expect(last.isStreaming).toBeUndefined();
   await act(async () => { await new Promise((resolve) => setTimeout(resolve, 150)); });
   act(() => tree.unmount());
 });
