@@ -7,7 +7,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { requestPhotoSelectionPermission } from '../lib/photoPermissions';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -22,6 +22,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TIER, findPriorTastings, flattenTastedWines } from '../lib/cellarMatch';
 import { parseVarietals, varietalText } from '../lib/varietals';
+import { useRevealAboveKeyboard } from '../hooks/useRevealAboveKeyboard';
 import { visitsService } from '../lib/visits';
 import { createThemedStyles } from '../styles/ThemeProvider';
 import Button from './Button';
@@ -138,6 +139,8 @@ export default function LogSessionForm({
     initialSession?.visit_date ? initialSession.visit_date.slice(0, 10) : todayISO
   );
   const [notes, setNotes] = useState(initialSession?.notes || '');
+  const notesRef = useRef(null);
+  const { scrollProps, reveal } = useRevealAboveKeyboard();
   // Visit-level photos for the whole visit (#137) — e.g. the tasting card or a
   // shot at the winery. Stored on the visit (photo_url) and shown in winery
   // history. On edit, hydrate the existing photo URLs.
@@ -540,7 +543,16 @@ export default function LogSessionForm({
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
+      {/* The NOTES box sits near the bottom: let iOS inset the scroll view by
+          the keyboard and scroll the focused field into view. */}
+      <ScrollView
+        {...scrollProps}
+        style={styles.body}
+        contentContainerStyle={styles.bodyContent}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets
+      >
         {/* Scan a tasting card → add one draft wine per listing (#139). */}
         <TastingMenuScanner onScanned={applyMenuScan} />
 
@@ -588,9 +600,11 @@ export default function LogSessionForm({
         {/* Notes */}
         <Text style={styles.sectionLabel}>NOTES</Text>
         <TextInput
+          ref={notesRef}
           style={[styles.input, styles.textArea]}
           value={notes}
           onChangeText={setNotes}
+          onFocus={() => reveal(notesRef)}
           placeholder="Anything about the occasion (optional)…"
           placeholderTextColor={colors.neutral.placeholder}
           multiline

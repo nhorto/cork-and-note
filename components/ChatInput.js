@@ -34,15 +34,18 @@ export default function ChatInput({ onSend, disabled, photosLocked, onLockedPhot
     if (!trimmed && photos.length === 0) return;
     if (sending) return;
 
+    // Clear the box the moment the question is sent: it lands in the chat as a
+    // bubble, and leaving it parked in the input for the whole answer looked
+    // stuck (owner feedback 2026-09-27). A send that throws puts it back.
+    const sentPhotos = photos;
     setSending(true);
+    setText('');
+    setPhotos([]);
     try {
-      await onSend(trimmed, photos);
-      // Only clear once the send succeeded — a failure keeps the user's typed
-      // message and photos so they can retry.
-      setText('');
-      setPhotos([]);
+      await onSend(trimmed, sentPhotos);
     } catch {
-      // Send failed: keep the contents.
+      setText((current) => current || trimmed);
+      setPhotos((current) => (current.length ? current : sentPhotos));
     } finally {
       setSending(false);
     }

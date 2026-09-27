@@ -18,6 +18,7 @@ import ReportWineryModal from '../../components/ReportWineryModal';
 import ScreenHeader from '../../components/ScreenHeader';
 import WineryActionButtons from '../../components/WineryActionButtons';
 import WineryGoogleCard from '../../components/WineryGoogleCard';
+import WineryMiniMap from '../../components/WineryMiniMap';
 import WineryStatusBadges from '../../components/WineryStatusBadges';
 import { hasDirections, openDirections } from '../../lib/directions';
 import { wineriesService } from '../../lib/wineries';
@@ -207,6 +208,23 @@ export default function WineryDetail() {
   // hand-added winery saved without a pin used to open Apple Maps at null,null.
   const canNavigate = hasDirections(winery);
 
+  // "Show on the map": back to the Map tab (popping this page and anything
+  // above the tabs), centred on this winery with a highlighted pin. The key
+  // makes a second tap on the same winery re-centre after a pan.
+  const showOnMap = () => {
+    router.dismissTo({
+      pathname: '/(tabs)/map',
+      params: {
+        focusLat: String(winery.latitude),
+        focusLng: String(winery.longitude),
+        focusName: winery.name || '',
+        focusId:
+          winery.id != null ? String(winery.id) : directoryId != null ? `dir-${directoryId}` : '',
+        focusKey: String(Date.now()),
+      },
+    });
+  };
+
   // Loading state
   if (wineryLoading) {
     return (
@@ -340,6 +358,15 @@ export default function WineryDetail() {
               </TouchableOpacity>
             )}
           </View>
+
+          {canNavigate && (
+            <WineryMiniMap
+              latitude={winery.latitude}
+              longitude={winery.longitude}
+              name={winery.name}
+              onPress={showOnMap}
+            />
+          )}
 
           {/* Divider */}
           <View style={styles.sectionDivider}>

@@ -254,6 +254,17 @@ export default function SommelierScreen() {
     setReceiving(false);
     const streamMessageId = `stream-${Date.now()}`;
     let streamStarted = false;
+    // Show the question as a bubble straight away; the saved row replaces it
+    // once photo uploads and the insert finish.
+    const localUserId = `local-user-${Date.now()}`;
+    setMessages(prev => [...prev, {
+      id: localUserId,
+      role: 'user',
+      content: text,
+      displayText: text,
+      image_urls: photos,
+      created_at: new Date().toISOString(),
+    }]);
     try {
       // Convert photos to base64 for AI (do this first, before upload)
       let base64Images = [];
@@ -277,7 +288,7 @@ export default function SommelierScreen() {
         imageUrls
       );
       const displayUserMsg = { ...userMsg, displayText: text };
-      setMessages(prev => [...prev, displayUserMsg]);
+      setMessages(prev => prev.map(m => (m.id === localUserId ? displayUserMsg : m)));
 
       // Auto-title on first message — only when the conversation genuinely
       // started empty, not when its history simply failed to load.
@@ -303,8 +314,7 @@ export default function SommelierScreen() {
 
       const aiMessages = [...previousMsgs, currentMsg];
 
-      // The shared chat entry point currently returns a complete response.
-      // Keep the delta handler ready for the deferred backend streaming rollout.
+      // Streams: the reply bubble fills in as the text arrives.
       const aiResponse = await aiService.sendChatMessage(aiMessages, systemPrompt, {
         onDelta: (textSoFar) => {
           setReceiving(true);
@@ -313,7 +323,7 @@ export default function SommelierScreen() {
               id: streamMessageId,
               role: 'assistant',
               content: textSoFar,
-              displayText: textSoFar,
+              displayText: aiService.getStreamingDisplayText(textSoFar),
               image_urls: [],
               created_at: new Date().toISOString(),
               isStreaming: true,

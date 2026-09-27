@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { useRevealAboveKeyboard } from '../hooks/useRevealAboveKeyboard';
 import { createThemedStyles } from '../styles/ThemeProvider';
 
 import { findPriorTastings } from '../lib/cellarMatch';
@@ -104,6 +105,8 @@ export default function WineEntryForm({
   // (the wine-form modal unmounts its children when hidden) or when new
   // initialData loads.
   const submittedRef = useRef(false);
+  const notesRef = useRef(null);
+  const { scrollProps, reveal } = useRevealAboveKeyboard();
 
   // Load initial data if editing an existing wine
   useEffect(() => {
@@ -640,18 +643,25 @@ export default function WineEntryForm({
     ? `${photos.length} photo${photos.length === 1 ? '' : 's'}`
     : 'Label, glass, the view…';
 
+  // iOS: the ScrollView insets itself by the keyboard and scrolls the focused
+  // field into view (automaticallyAdjustKeyboardInsets). A padding
+  // KeyboardAvoidingView only shrank the view, never scrolled, so the Notes
+  // box stayed under the keyboard (owner feedback 2026-09-27, again after #129).
+  // Stacking both would double the gap, so the KAV only acts on Android.
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      enabled={Platform.OS !== 'ios'}
     >
     <ScrollView
+      {...scrollProps}
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
       nestedScrollEnabled
-      keyboardDismissMode="on-drag"
+      keyboardDismissMode="interactive"
+      automaticallyAdjustKeyboardInsets
     >
       {/* Scan a bottle label to prefill the fields below (#138) */}
       <LabelScanner onScanned={applyScan} />
@@ -794,9 +804,11 @@ export default function WineEntryForm({
         <StarRatingInput value={overallRating} onChange={setOverallRating} />
         <Text style={[styles.label, styles.notesLabel]}>Notes</Text>
         <TextInput
+          ref={notesRef}
           style={[styles.input, styles.textArea]}
           value={additionalNotes}
           onChangeText={setAdditionalNotes}
+          onFocus={() => reveal(notesRef)}
           placeholder="Any additional thoughts about this wine..."
           placeholderTextColor={colors.neutral.placeholder}
           multiline
